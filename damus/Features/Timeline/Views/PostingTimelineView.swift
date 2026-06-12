@@ -121,6 +121,7 @@ struct PostingTimelineView: View {
                     .tipViewStyle(TrustedNetworkButtonTipViewStyle())
                     .padding(.horizontal)
             }
+            StoryTrayContainerView(damus_state: damus_state)
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
                     (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),

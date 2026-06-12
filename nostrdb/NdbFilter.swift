@@ -286,6 +286,24 @@ class NdbFilter {
             ndb_filter_end_field(filterPointer)
         }
 
+        // Handle `tag_T` (uppercase single-letter `T` tag; case-distinct from `t`)
+        if let tag_T = nostrFilter.tag_T {
+            guard ndb_filter_start_tag_field(filterPointer, CChar(UnicodeScalar("T").value)) == 1 else {
+                ndb_filter_destroy(filterPointer)
+                filterPointer.deallocate()
+                throw NdbFilterConversionError.failedToStartField
+            }
+
+            for value in tag_T {
+                if ndb_filter_add_str_element(filterPointer, value.cString(using: .utf8)) != 1 {
+                    ndb_filter_destroy(filterPointer)
+                    filterPointer.deallocate()
+                    throw NdbFilterConversionError.failedToAddElement
+                }
+            }
+            ndb_filter_end_field(filterPointer)
+        }
+
         // Handle `quotes`
         if let quotes = nostrFilter.quotes {
             guard ndb_filter_start_tag_field(filterPointer, CChar(UnicodeScalar("q").value)) == 1 else {
