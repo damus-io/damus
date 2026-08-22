@@ -23,8 +23,17 @@ class CoinosDeterministicAccountClient {
     // MARK: - Computed properties for a deterministic wallet
     
     /// A deterministic keypair for the NWC connection derived from the user's private key
+    ///
+    /// The derivation is versioned via a salt so the credential can be rotated. The NWC secret is a
+    /// long-lived bearer credential held by Coinos, so if it is ever compromised on the server side
+    /// the only remedy is to mint a different secret — and an unversioned derivation can only ever
+    /// produce the same one. Coinos retired all pre-incident NWC keys in August 2026 and now refuses
+    /// to re-authorize a retired key, which is why v1 (unsalted sha256 of the private key) can no
+    /// longer be used. If another rotation is ever needed, bump the version in the salt below.
     private var nwcKeypair: FullKeypair? {
-        let nwcPrivateKey: Privkey = Privkey(sha256(self.userKeypair.privkey.id))   // SHA256 is an irreversible operation, user's nsec should not be deriveable from this new private key
+        // Add a versioned prefix so that we can ensure this will NOT match the username, the password, nor a previously derived NWC key
+        guard let saltedInput = ("coinos_nwc_v2:" + self.userKeypair.privkey.hex()).data(using: .utf8) else { return nil }
+        let nwcPrivateKey: Privkey = Privkey(sha256(saltedInput))   // SHA256 is an irreversible operation, user's nsec should not be deriveable from this new private key
         return FullKeypair(privkey: nwcPrivateKey)
     }
     
