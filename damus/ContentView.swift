@@ -241,7 +241,7 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                NavigationStack(path: $navigationCoordinator.path) {
+                NavigationStack(path: navigationCoordinator.binding(for: selected_timeline)) {
                     TabView { // Prevents navbar appearance change on scroll
                         MainContent(damus: damus)
                             .toolbar() {
@@ -310,7 +310,15 @@ struct ContentView: View {
         }
         .ignoresSafeArea(.keyboard)
         .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
+        .onChange(of: selected_timeline) { (timeline: Timeline) in
+            // Keep the tab-agnostic `nav.push` / `popToRoot` pointed at the
+            // stack the user is actually looking at.
+            navigationCoordinator.activeTab = timeline
+        }
         .onAppear() {
+            // `selected_timeline` is restored from @SceneStorage, so sync once
+            // on appear as well as on change.
+            navigationCoordinator.activeTab = selected_timeline
             Task {
                 await self.connect()
                 try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)

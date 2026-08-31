@@ -282,21 +282,66 @@ enum Route: Hashable {
     }
 }
 
+/// Owns the navigation stack for each timeline tab.
+///
+/// Each tab keeps its own independent stack, which is what a native tab bar
+/// expects: switching tabs preserves where you were in the tab you left.
+///
+/// Most callers don't know (or care) which tab they are in, so `push`,
+/// `popToRoot` and `isAtRoot` operate on ``activeTab`` by default. Views that
+/// own a specific stack — the tab roots — should use ``binding(for:)``.
 class NavigationCoordinator: ObservableObject {
-    @Published var path = [Route]()
+    /// The tab that the tab-agnostic methods operate on.
+    ///
+    /// `ContentView` keeps this in sync with the selected timeline. Contexts
+    /// with no tabs at all (onboarding, see `SetupView`) just leave it at the
+    /// default and get a single stack.
+    var activeTab: Timeline = .home
+
+    @Published private var paths: [Timeline: [Route]] = [:]
+
+    /// The active tab's stack.
+    ///
+    /// Note this is computed, so it cannot be `$`-bound. Use
+    /// ``binding(for:)`` or ``activeBinding`` where a `Binding` is needed.
+    var path: [Route] {
+        get { paths[activeTab] ?? [] }
+        set { paths[activeTab] = newValue }
+    }
 
     func push(route: Route) {
-        guard route != path.last else {
-            return
-        }
-        path.append(route)
-    }
-    
-    func isAtRoot() -> Bool {
-        return path.count == 0
+        self.push(route: route, on: activeTab)
     }
 
-    func popToRoot() {
-        path = []
+    /// Pushes onto a specific tab's stack, regardless of which tab is active.
+    ///
+    /// Used for deep links and push notifications, which know the tab they
+    /// belong to.
+    func push(route: Route, on tab: Timeline) {
+        guard route != paths[tab]?.last else {
+            return
+        }
+        paths[tab, default: []].append(route)
+    }
+
+    func isAtRoot(_ tab: Timeline? = nil) -> Bool {
+        return (paths[tab ?? activeTab] ?? []).isEmpty
+    }
+
+    func popToRoot(_ tab: Timeline? = nil) {
+        paths[tab ?? activeTab] = []
+    }
+
+    /// A binding to one tab's stack, for that tab's `NavigationStack`.
+    func binding(for tab: Timeline) -> Binding<[Route]> {
+        Binding(
+            get: { [weak self] in self?.paths[tab] ?? [] },
+            set: { [weak self] newValue in self?.paths[tab] = newValue }
+        )
+    }
+
+    /// A binding to the active tab's stack, for contexts that have only one.
+    var activeBinding: Binding<[Route]> {
+        self.binding(for: activeTab)
     }
 }
