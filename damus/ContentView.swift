@@ -124,7 +124,6 @@ struct ContentView: View {
     }
     @State var muting: MuteItem? = nil
     @State var confirm_mute: Bool = false
-    @State var hide_bar: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
     @State private var isSideBarOpened = false
@@ -249,7 +248,6 @@ struct ContentView: View {
             }
         }
         .ignoresSafeArea(.keyboard)
-        .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
         .onChange(of: selected_timeline) { (timeline: Timeline) in
             // Keep the tab-agnostic `nav.push` / `popToRoot` pointed at the
             // stack the user is actually looking at.
@@ -328,10 +326,6 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.compose)) { action in
             self.active_sheet = .post(action)
-        }
-        .onReceive(handle_notify(.display_tabbar)) { display in
-            let show = display
-            self.hide_bar = !show
         }
         .onReceive(timer) { n in
             Task{ await self.damus_state?.nostrNetwork.postbox.try_flushing_events() }
@@ -909,9 +903,6 @@ struct TimelineTabRootModifier: ViewModifier {
                 .hideToolbarBackground()
             }
             .staticNavigationBarAppearance()
-            .onAppear {
-                notify(.display_tabbar(true))
-            }
     }
 }
 

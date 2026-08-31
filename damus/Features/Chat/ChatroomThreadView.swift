@@ -80,7 +80,6 @@ struct ChatroomThreadView: View {
             withAnimation(.easeInOut(duration: 0.25)) {
                 chromeHidden = true
             }
-            notify(.display_tabbar(false))
         }
 
         // Always update lastScrollY to prevent stale delta accumulation
@@ -93,7 +92,6 @@ struct ChatroomThreadView: View {
         withAnimation(.easeInOut(duration: 0.25)) {
             chromeHidden = false
         }
-        notify(.display_tabbar(true))
     }
 
     func go_to_event(scroller: ScrollViewProxy, note_id: NoteId) {
@@ -387,7 +385,6 @@ struct ChatroomThreadView: View {
                 // Ensure chrome is visible when view appears (handles interrupted transitions)
                 if isLongformEvent {
                     chromeHidden = false
-                    notify(.display_tabbar(true))
                 }
             }
             .onChange(of: thread.selected_event.id) { _ in
@@ -402,6 +399,7 @@ struct ChatroomThreadView: View {
                 showChrome()  // Restore chrome when leaving view
             }
             .navigationBarHidden(chromeHidden && isLongformEvent)
+            .toolbar(chromeHidden ? .hidden : .visible, for: .tabBar)
             // Tap anywhere to show chrome when hidden (doesn't block other gestures)
             .simultaneousGesture(
                 TapGesture()

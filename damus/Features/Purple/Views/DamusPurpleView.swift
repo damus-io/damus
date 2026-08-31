@@ -58,8 +58,8 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            notify(.display_tabbar(false))
             Task {
                 await self.load_account()
                 // Assign this view as the delegate for the storekit manager to receive purchase updates
