@@ -430,7 +430,6 @@
 		4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEF727F7A08200C66700 /* damusTests.swift */; };
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
-		D72A1A022F73B9F800B0010B /* RelayPoolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A1A012F73B9F800B0010B /* RelayPoolTests.swift */; };
 		4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794729941DA700F758CC /* RelayFilters.swift */; };
 		4CE8794E2996B16A00F758CC /* RelayToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794D2996B16A00F758CC /* RelayToggle.swift */; };
 		4CE879502996B2BD00F758CC /* RelayStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794F2996B2BD00F758CC /* RelayStatusView.swift */; };
@@ -1264,6 +1263,7 @@
 		D72734282F08914C00F90677 /* DatabaseSnapshotManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72734272F08912F00F90677 /* DatabaseSnapshotManagerTests.swift */; };
 		D727342A2F089EEE00F90677 /* NdbMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72734292F089EE600F90677 /* NdbMigrationTests.swift */; };
 		D72927AD2BAB515C00F93E90 /* RelayURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72927AC2BAB515C00F93E90 /* RelayURLTests.swift */; };
+		D72A1A022F73B9F800B0010B /* RelayPoolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A1A012F73B9F800B0010B /* RelayPoolTests.swift */; };
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
 		D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */; };
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
@@ -8181,7 +8181,8 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to scan QR codes and upload photos from it";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera in order to upload photos and scan QR codes.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Granting Damus access to your photos allows you to save images.";
@@ -8236,7 +8237,8 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to scan QR codes and upload photos from it";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera in order to upload photos and scan QR codes.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone to allow you to create video recordings that you can choose to post publicly on the network";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Granting Damus access to your photos allows you to save images.";
