@@ -37,17 +37,17 @@ struct SideMenuView: View {
 
     func SidemenuItems(profile_model: ProfileModel, followers: FollowersModel) -> some View {
         return VStack(spacing: verticalSpacing) {
-            NavigationLink(value: Route.Profile(profile: profile_model, followers: followers)) {
+            Button(action: { damus_state.nav.push(route: Route.Profile(profile: profile_model, followers: followers)) }) {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
             .accessibilityIdentifier(AppAccessibilityIdentifiers.side_menu_profile_button.rawValue)
 
-            NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
+            Button(action: { damus_state.nav.push(route: Route.Wallet(wallet: damus_state.wallet)) }) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
             }
 
             if damus_state.purple.enable_purple {
-                NavigationLink(destination: DamusPurpleView(damus_state: damus_state)) {
+                Button(action: { damus_state.nav.push(route: Route.DamusPurple) }) {
                     HStack(spacing: 16) {
                         Image("damus-dark-logo")
                             .resizable()
@@ -76,7 +76,7 @@ struct SideMenuView: View {
                 }
             }
             
-            NavigationLink(destination: DamusLabsView(damus_state: damus_state)) {
+            Button(action: { damus_state.nav.push(route: Route.DamusLabs) }) {
                 HStack(spacing: 23) {
                     Image(systemName: "flask")
                         .fontWeight(.bold)
@@ -93,20 +93,20 @@ struct SideMenuView: View {
             }
             
             if damus_state.settings.live {
-                NavigationLink(value: Route.LiveEvents(model: LiveEventModel(damus_state: damus_state))) {
+                Button(action: { damus_state.nav.push(route: Route.LiveEvents(model: LiveEventModel(damus_state: damus_state))) }) {
                     navLabel(title: NSLocalizedString("Live", comment: "Sidebar menu label for live events view."), img: "record")
                 }
             }
 
-            NavigationLink(value: Route.MuteList) {
+            Button(action: { damus_state.nav.push(route: Route.MuteList) }) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
 
-            NavigationLink(value: Route.RelayConfig) {
+            Button(action: { damus_state.nav.push(route: Route.RelayConfig) }) {
                 navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), img: "world-relays")
             }
 
-            NavigationLink(value: Route.Bookmarks) {
+            Button(action: { damus_state.nav.push(route: Route.Bookmarks) }) {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
 
@@ -114,7 +114,7 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "shop")
             }
 
-            NavigationLink(value: Route.Config) {
+            Button(action: { damus_state.nav.push(route: Route.Config) }) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
             
@@ -214,7 +214,7 @@ struct SideMenuView: View {
             let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
             let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
-            NavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
+            Button(action: { damus_state.nav.push(route: Route.Profile(profile: profile_model, followers: followers)) }, label: {
                 TopProfile
                     .padding(.bottom, verticalSpacing)
             })

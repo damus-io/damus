@@ -55,6 +55,8 @@ enum Route: Hashable {
     case FollowPack(followPack: NostrEvent, model: FollowPackModel, blur_imgs: Bool)
     case LiveEvents(model: LiveEventModel)
     case LiveEvent(LiveEvent: NostrEvent, model: LiveEventModel)
+    case DamusPurple
+    case DamusLabs
 
     @ViewBuilder
     func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -152,6 +154,10 @@ enum Route: Hashable {
             LiveStreamHomeView(damus_state: damusState, model: model)
         case .LiveEvent(let liveEvent, let liveEventModel):
             LiveStreamView(state: damusState, ev: liveEvent, model: liveEventModel)
+        case .DamusPurple:
+            DamusPurpleView(damus_state: damusState)
+        case .DamusLabs:
+            DamusLabsView(damus_state: damusState)
         }
         
     }
@@ -278,6 +284,10 @@ enum Route: Hashable {
         case .LiveEvent(let liveEvent, let liveEventModel):
             hasher.combine("liveEvent")
             hasher.combine(liveEvent.id)
+        case .DamusPurple:
+            hasher.combine("damusPurple")
+        case .DamusLabs:
+            hasher.combine("damusLabs")
         }
     }
 }
