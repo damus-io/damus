@@ -65,7 +65,13 @@ enum NdbNoteLender: Sendable {
                 }
             })
         case .owned(let note):
-            return try lendingFunction(UnownedNdbNote(note))
+            // NOTE: Bind the wrapper to an owned local before lending it out. Passing
+            // `UnownedNdbNote(note)` directly as a borrowed argument makes the SIL generic
+            // specializer try to forward the struct init into a guaranteed value, which
+            // crashes the Swift 6.3 optimizer ("Cannot initialize a nonCopyable type with a
+            // guaranteed value").
+            let unownedNote = UnownedNdbNote(note)
+            return try lendingFunction(unownedNote)
         }
     }
     
