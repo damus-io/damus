@@ -157,10 +157,7 @@ struct ConfigView: View {
                 }
                 // Version info
                 if showSettingsButton(title: versionTitle) {
-                    Section(
-                        header: Text(versionTitle),
-                        footer: Text("").padding(.bottom, tabHeight + getSafeAreaBottom())
-                    ) {
+                    Section(header: Text(versionTitle)) {
                         Text(verbatim: VersionInfo.version)
                             .contextMenu {
                                 Button {

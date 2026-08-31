@@ -99,8 +99,6 @@ func present_sheet(_ sheet: Sheets) {
     notify(.present_sheet(sheet))
 }
 
-var tabHeight: CGFloat = 0.0
-
 struct ContentView: View {
     let keypair: Keypair
     let appDelegate: AppDelegate?

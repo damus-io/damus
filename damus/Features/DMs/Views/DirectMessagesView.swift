@@ -44,7 +44,6 @@ struct DirectMessagesView: View {
             // been missed due to the optimized network filter.
             await home.fetchFullDMHistory()
         }
-        .padding(.bottom, tabHeight)
     }
     
     func filter_dms(dms: [DirectMessageModel]) -> [DirectMessageModel] {

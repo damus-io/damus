@@ -17,8 +17,6 @@ struct MutelistView: View {
     @State var words: [MuteItem] = []
     
     @State var new_text: String = ""
-    
-    @State var paddingBottom: CGFloat = 30
 
     func RemoveAction(item: MuteItem) -> some View {
         Button {
@@ -91,10 +89,7 @@ struct MutelistView: View {
                     }
                 }
             }
-            Section(
-                header: Text("Users", comment: "Section header title for a list of muted users."),
-                footer: VStack { EmptyView() }.padding(.bottom, paddingBottom)
-            ) {
+            Section(header: Text("Users", comment: "Section header title for a list of muted users.")) {
                 ForEach(users, id: \.self) { user in
                     if case let MuteItem.user(pubkey, _) = user {
                         UserViewRow(damus_state: damus_state, pubkey: pubkey)
@@ -112,9 +107,6 @@ struct MutelistView: View {
         .navigationTitle(NSLocalizedString("Muted", comment: "Navigation title of view to see list of muted users & phrases."))
         .onAppear {
             updateMuteItems()
-            // Note: Do not place this calculation on the view body, otherwise AttributeGraph cycles may occur, freezing the entire app
-            // FUTURE FIXME: The way the floating tab bar layout was setup feels a bit hacky. Can't we make that work without introspecting sizes of objects and manually computing layout numbers?
-            paddingBottom = 10 + tabHeight + getSafeAreaBottom()
         }
         .onReceive(handle_notify(.new_mutes)) { new_mutes in
             updateMuteItems()

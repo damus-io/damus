@@ -322,9 +322,6 @@ struct ChatroomThreadView: View {
                     .frame(height: 1)
 
                     EndBlock()
-
-                    HStack {}
-                        .frame(height: tabHeight + getSafeAreaBottom())
                     } // End VStack wrapper
                 }
                 .background(

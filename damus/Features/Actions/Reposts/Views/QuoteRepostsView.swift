@@ -23,8 +23,7 @@ struct QuoteRepostsView: View {
                     .padding(.top, 30)
             }
         }
-        .ignoresSafeArea()
-        .padding(.bottom, tabHeight)
+        .ignoresSafeArea(edges: .top)
         .onAppear {
             model.subscribe()
         }

@@ -155,7 +155,6 @@ struct PostingTimelineView: View {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                         self.active_sheet = .post(.posting(.none))
                     }
-                    .padding(.bottom, tabHeight + getSafeAreaBottom())
                     .opacity(0.35 + abs(1.25 - (abs(headerOffset/100.0))))
                 }
             }

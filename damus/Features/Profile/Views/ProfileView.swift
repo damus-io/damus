@@ -481,8 +481,7 @@ struct ProfileView: View {
                     .zIndex(-yOffset > navbarHeight ? 0 : 1)
                 }
             }
-            .padding(.bottom, tabHeight + getSafeAreaBottom())
-            .ignoresSafeArea()
+            .ignoresSafeArea(edges: .top)
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
@@ -551,7 +550,6 @@ struct ProfileView: View {
                 PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                     notify(.compose(.posting(.user(profile.pubkey))))
                 }
-                .padding(.bottom, tabHeight)
             }
         }
     }
