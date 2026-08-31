@@ -25,64 +25,67 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
     return (current.rawValue & indicator_setting) == timeline_to_notification_bits(timeline, ev: nil).rawValue
 }
     
-struct TabButton: View {
-    let timeline: Timeline
-    let img: String
-    @Binding var selected: Timeline
-    @ObservedObject var nstatus: NotificationStatusModel
-    
-    let settings: UserSettingsStore
-    let action: (Timeline) -> ()
-    
-    var body: some View {
-        ZStack(alignment: .center) {
-            Tab
-            
-            if show_indicator(timeline: timeline, current: nstatus.new_events, indicator_setting: settings.notification_indicators) {
-                Circle()
-                    .size(CGSize(width: 8, height: 8))
-                    .frame(width: 10, height: 10, alignment: .topTrailing)
-                    .alignmentGuide(VerticalAlignment.center) { a in a.height + 2.0 }
-                    .alignmentGuide(HorizontalAlignment.center) { a in a.width - 12.0 }
-                    .foregroundColor(.accentColor)
-            }
+extension Timeline {
+    /// The tabs in the order they appear in the tab bar, left to right.
+    static let tab_order: [Timeline] = [.home, .dms, .search, .notifications]
+
+    /// The template image asset used for this tab's tab bar item.
+    var tab_image: String {
+        switch self {
+        case .home: return "home"
+        case .dms: return "messages"
+        case .search: return "search"
+        case .notifications: return "notification-bell"
         }
     }
-    
-    var Tab: some View {
-        Button(action: {
-            action(timeline)
-            let bits = timeline_to_notification_bits(timeline, ev: nil)
-            nstatus.new_events = NewEventsBits(rawValue: nstatus.new_events.rawValue & ~bits.rawValue)
-        }) {
-            Image(selected != timeline ? img : "\(img).fill")
-                .contentShape(Rectangle())
-                .frame(maxWidth: .infinity, minHeight: 30.0)
+
+    /// The keyboard shortcut that selects this tab.
+    ///
+    /// These used to live on the custom tab bar's buttons. A system tab bar
+    /// gives us nowhere to hang them, so `ContentView` puts them on hidden
+    /// buttons instead.
+    var keyboard_shortcut: KeyEquivalent {
+        switch self {
+        case .home: return "1"
+        case .dms: return "2"
+        case .search: return "3"
+        case .notifications: return "4"
         }
-        .foregroundColor(.primary)
+    }
+
+    /// A VoiceOver label for this tab's tab bar item.
+    ///
+    /// The tab items are icon-only, so they carry no title for VoiceOver to read.
+    var tab_accessibility_label: String {
+        switch self {
+        case .home:
+            return NSLocalizedString("Home", comment: "Accessibility label for the home tab in the tab bar.")
+        case .dms:
+            return NSLocalizedString("Direct messages", comment: "Accessibility label for the direct messages tab in the tab bar.")
+        case .search:
+            return NSLocalizedString("Search", comment: "Accessibility label for the search tab in the tab bar.")
+        case .notifications:
+            return NSLocalizedString("Notifications", comment: "Accessibility label for the notifications tab in the tab bar.")
+        }
     }
 }
-    
 
-struct TabBar: View {
-    var nstatus: NotificationStatusModel
-    var navIsAtRoot: Bool
-    @Binding var selected: Timeline
-    @Binding var headerOffset: CGFloat
-    
-    let settings: UserSettingsStore
-    let action: (Timeline) -> ()
-    
-    var body: some View {
-        VStack {
-            Divider()
-            HStack {
-                TabButton(timeline: .home, img: "home", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "messages", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
-                TabButton(timeline: .search, img: "search", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")
-                TabButton(timeline: .notifications, img: "notification-bell", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
-            }
+extension LocalNotificationType {
+    /// The timeline tab a notification of this type belongs to.
+    ///
+    /// Each tab owns its own navigation stack, so opening a push notification
+    /// has to pick the tab it semantically belongs to instead of pushing into
+    /// whichever tab happens to be selected.
+    ///
+    /// This lives here rather than beside `LocalNotificationType` because
+    /// `LocalNotification.swift` is also compiled into the notification service
+    /// extension, which has no `Timeline`.
+    var timeline: Timeline {
+        switch self {
+        case .dm:
+            return .dms
+        case .like, .mention, .reply, .tagged, .repost, .zap, .profile_zap:
+            return .notifications
         }
-        .opacity(selected != .home || (selected == .home && !navIsAtRoot) ? 1.0 : 0.35 + abs(1.25 - (abs(headerOffset/100.0))))
     }
 }

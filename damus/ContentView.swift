@@ -146,67 +146,49 @@ struct ContentView: View {
         self.appDelegate = appDelegate
     }
     
-    func navIsAtRoot() -> Bool {
-        return navigationCoordinator.isAtRoot()
+    /// The tab bar's selection binding.
+    ///
+    /// Writes are routed through ``switch_timeline(_:)`` so that re-tapping the
+    /// already-selected tab pops it to root (the native convention), the side
+    /// menu closes, and the `willSet` on `selected_timeline` still gets a
+    /// chance to clear the subtitle.
+    var tab_selection: Binding<Timeline> {
+        Binding(
+            get: { self.selected_timeline },
+            set: { self.switch_timeline($0) }
+        )
     }
-    
-    func popToRoot() {
-        navigationCoordinator.popToRoot()
-        isSideBarOpened = false
-    }
-    
-    var timelineNavItem: some View {
-        VStack {
-            Text(timeline_name(selected_timeline))
-                .bold()
-            if let menu_subtitle {
-                Text(menu_subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+
+    /// The tab keyboard shortcuts, which used to live on the custom tab bar's buttons.
+    ///
+    /// A system tab bar gives us nowhere to hang them, so they live on hidden
+    /// buttons behind the tab view instead. `.opacity(0)` rather than
+    /// `.hidden()`, because a hidden view stops responding to its shortcut.
+    var tabKeyboardShortcuts: some View {
+        ForEach(Timeline.tab_order, id: \.self) { timeline in
+            Button("") { self.switch_timeline(timeline) }
+                .keyboardShortcut(timeline.keyboard_shortcut)
         }
+        .opacity(0)
+        .accessibilityHidden(true)
     }
-    
-    func MainContent(damus: DamusState) -> some View {
-        VStack {
-            switch selected_timeline {
-            case .search:
-                if #available(iOS 16.0, *) {
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                        .scrollDismissesKeyboard(.immediately)
-                } else {
-                    // Fallback on earlier versions
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+
+    /// One timeline tab: its own navigation stack, destinations and tab bar item.
+    func timelineTab<Content: View>(_ timeline: Timeline, damus: DamusState, @ViewBuilder content: () -> Content) -> some View {
+        NavigationStack(path: navigationCoordinator.binding(for: timeline)) {
+            content()
+                .modifier(TimelineTabRootModifier(timeline: timeline, damus_state: damus, isSideBarOpened: $isSideBarOpened, menu_subtitle: menu_subtitle))
+                .navigationDestination(for: Route.self) { route in
+                    route.view(navigationCoordinator: navigationCoordinator, damusState: damus)
                 }
-                
-            case .home:
-                PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, timeline_source: $postingTimelineSource)
-                
-            case .notifications:
-                NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
-                
-            case .dms:
-                DirectMessagesView(damus_state: damus_state!, home: home, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
-            }
         }
-        .background(DamusColors.adaptableWhite)
-        .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
-        .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
-        .toolbar(selected_timeline != .home ? .visible : .hidden)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack {
-                    timelineNavItem
-                        .opacity(isSideBarOpened ? 0 : 1)
-                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                }
-            }
+        .tabItem {
+            Image(timeline.tab_image)
+                .accessibilityLabel(timeline.tab_accessibility_label)
         }
-        .onAppear {
-            notify(.display_tabbar(true))
-        }
+        .tag(timeline)
     }
-    
+
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
             if let keypair = damus_state.keypair.to_full() {
@@ -241,71 +223,31 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                NavigationStack(path: navigationCoordinator.binding(for: selected_timeline)) {
-                    TabView { // Prevents navbar appearance change on scroll
-                        MainContent(damus: damus)
-                            .toolbar() {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
-                                }
-                                .hideToolbarBackground()
-                                
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: damus_state!.nostrNetwork.signal)
-                                        
-                                        // maybe expand this to other timelines in the future
-                                        if selected_timeline == .search {
-                                            
-                                            Button(action: {
-                                                present_sheet(.filter)
-                                            }, label: {
-                                                Image("filter")
-                                                    .foregroundColor(.gray)
-                                            })
-                                        }
-                                    }
-                                }
-                                .hideToolbarBackground()
-                            }
+                TabView(selection: tab_selection) {
+                    timelineTab(.home, damus: damus) {
+                        PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, timeline_source: $postingTimelineSource)
                     }
-                    .background(DamusColors.adaptableWhite)
-                    .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .overlay(
-                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
-                    )
-                    .navigationDestination(for: Route.self) { route in
-                        route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
+
+                    timelineTab(.dms, damus: damus) {
+                        DirectMessagesView(damus_state: damus, home: home, model: damus.dms, settings: damus.settings, subtitle: $menu_subtitle)
                     }
-                    .onReceive(handle_notify(.switched_timeline)) { _ in
-                        navigationCoordinator.popToRoot()
+
+                    timelineTab(.search, damus: damus) {
+                        SearchHomeView(damus_state: damus, model: SearchHomeModel(damus_state: damus))
+                            .scrollDismissesKeyboard(.immediately)
+                    }
+
+                    timelineTab(.notifications, damus: damus) {
+                        NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                     }
                 }
-                .navigationViewStyle(.stack)
+                .background(tabKeyboardShortcuts)
+                .overlay(
+                    SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
+                )
                 .damus_full_screen_cover($active_full_screen_item, damus_state: damus, content: { item in
                     return item.view(damus_state: damus)
                 })
-                .overlay(alignment: .bottom) {
-                    if !hide_bar {
-                        if !isSideBarOpened {
-                            TabBar(nstatus: home.notification_status, navIsAtRoot: navIsAtRoot(), selected: $selected_timeline, headerOffset: $headerOffset, settings: damus.settings, action: switch_timeline)
-                                .padding([.bottom], 8)
-                                .background(selected_timeline != .home || (selected_timeline == .home && !self.navIsAtRoot()) ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
-                                .anchorPreference(key: HeaderBoundsKey.self, value: .bounds){$0}
-                                .overlayPreferenceValue(HeaderBoundsKey.self) { value in
-                                    GeometryReader{ proxy in
-                                        if let anchor = value{
-                                            Color.clear
-                                                .onAppear {
-                                                    tabHeight = proxy[anchor].height
-                                                }
-                                        }
-                                    }
-                                }
-                        }
-                    }
-                }
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -673,19 +615,29 @@ struct ContentView: View {
         })
     }
     
+    /// Selects a timeline tab, or acts on the already-selected one.
+    ///
+    /// Native tab bar semantics: switching tabs leaves each tab's navigation
+    /// stack where the user left it, and re-tapping the selected tab pops it to
+    /// root (or scrolls to top if it is already there).
     func switch_timeline(_ timeline: Timeline) {
         self.isSideBarOpened = false
-        let navWasAtRoot = self.navIsAtRoot()
-        self.popToRoot()
 
-        notify(.switched_timeline(timeline))
+        // The custom tab bar's buttons used to clear the tab's new-event bits.
+        let bits = timeline_to_notification_bits(timeline, ev: nil)
+        home.notification_status.new_events = NewEventsBits(rawValue: home.notification_status.new_events.rawValue & ~bits.rawValue)
 
-        if timeline == self.selected_timeline && navWasAtRoot {
-            notify(.scroll_to_top)
+        if timeline == self.selected_timeline {
+            if self.navigationCoordinator.isAtRoot(timeline) {
+                notify(.scroll_to_top)
+            } else {
+                self.navigationCoordinator.popToRoot(timeline)
+            }
             return
         }
-        
+
         self.selected_timeline = timeline
+        notify(.switched_timeline(timeline))
     }
 
     /// Listens to requests to open a push/local user notification
@@ -707,7 +659,7 @@ struct ContentView: View {
         }
         let local = notification
         let openAction = local.toViewOpenAction()
-        self.execute_open_action(openAction)
+        self.execute_open_action(openAction, on: local.type.timeline)
     }
 
     func connect() async {
@@ -849,11 +801,24 @@ struct ContentView: View {
     
     /// Executes an action to open something in the app view
     ///
-    /// - Parameter open_action: The action to perform
-    func execute_open_action(_ open_action: ViewOpenAction) {
+    /// - Parameters:
+    ///   - open_action: The action to perform
+    ///   - tab: The timeline tab the action belongs to, if it has one. Each tab
+    ///     owns its own navigation stack now, so a push notification or deep
+    ///     link that semantically belongs to a tab (a DM, a reply) should select
+    ///     that tab and push there, rather than landing in whichever tab the
+    ///     user happens to be looking at. `nil` means "wherever we are".
+    func execute_open_action(_ open_action: ViewOpenAction, on tab: Timeline? = nil) {
         switch open_action {
         case .route(let route):
-            navigationCoordinator.push(route: route)
+            if let tab {
+                self.isSideBarOpened = false
+                self.selected_timeline = tab
+                navigationCoordinator.activeTab = tab
+                navigationCoordinator.push(route: route, on: tab)
+            } else {
+                navigationCoordinator.push(route: route)
+            }
         case .sheet(let sheet):
             self.active_sheet = sheet
         case .external_url(let url):
@@ -880,6 +845,75 @@ struct TopbarSideMenuButton: View {
         .accessibilityIdentifier(AppAccessibilityIdentifiers.main_side_menu_button.rawValue)
         .accessibilityLabel(NSLocalizedString("Side menu", comment: "Accessibility label for the side menu button at the topbar"))
         .disabled(isSideBarOpened)
+    }
+}
+
+/// The chrome shared by every timeline tab root.
+///
+/// The navigation bar (side menu button, title and subtitle, connection signal,
+/// search filter) and the navigation bar appearance suppression that the old
+/// single-child `TabView(.page)` wrapper used to provide.
+struct TimelineTabRootModifier: ViewModifier {
+    let timeline: Timeline
+    let damus_state: DamusState
+    @Binding var isSideBarOpened: Bool
+    let menu_subtitle: String?
+
+    var timelineNavItem: some View {
+        VStack {
+            Text(timeline_name(timeline))
+                .bold()
+            if let menu_subtitle {
+                Text(menu_subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .background(DamusColors.adaptableWhite)
+            // The home timeline draws its own header behind the status bar. The
+            // bottom inset belongs to the tab bar now, so it is never ignored.
+            .edgesIgnoringSafeArea(timeline == .home ? [.top] : [])
+            .navigationBarTitle(timeline_name(timeline), displayMode: .inline)
+            // `for: .navigationBar` matters: an unqualified `.toolbar(.hidden)`
+            // would take the tab bar down with it.
+            .toolbar(timeline == .home ? .hidden : .visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    timelineNavItem
+                        .opacity(isSideBarOpened ? 0 : 1)
+                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                }
+
+                ToolbarItem(placement: .navigationBarLeading) {
+                    TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
+                }
+                .hideToolbarBackground()
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(alignment: .center) {
+                        SignalView(state: damus_state, signal: damus_state.nostrNetwork.signal)
+
+                        // maybe expand this to other timelines in the future
+                        if timeline == .search {
+                            Button(action: {
+                                present_sheet(.filter)
+                            }, label: {
+                                Image("filter")
+                                    .foregroundColor(.gray)
+                            })
+                        }
+                    }
+                }
+                .hideToolbarBackground()
+            }
+            .staticNavigationBarAppearance()
+            .onAppear {
+                notify(.display_tabbar(true))
+            }
     }
 }
 
