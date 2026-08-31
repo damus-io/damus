@@ -629,7 +629,6 @@ struct ContentView: View {
         }
 
         self.selected_timeline = timeline
-        notify(.switched_timeline(timeline))
     }
 
     /// Listens to requests to open a push/local user notification

@@ -34,9 +34,6 @@ struct DamusLabsView: View {
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: BackNav())
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
         .toolbar(.hidden, for: .tabBar)
         .task {
             if damus_state.purple.enable_purple {

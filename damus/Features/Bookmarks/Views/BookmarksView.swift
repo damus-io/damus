@@ -42,9 +42,6 @@ struct BookmarksView: View {
                 .padding(.bottom, 10)
             }
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(bookmarksTitle)
         .toolbar {

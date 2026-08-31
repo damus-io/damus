@@ -29,9 +29,6 @@ struct ReactionsView: View {
         .onDisappear {
             model.unsubscribe()
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
 }
 

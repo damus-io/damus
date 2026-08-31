@@ -525,9 +525,6 @@ struct ProfileView: View {
                 }
             }
             .toolbarBackground(.hidden)
-            .onReceive(handle_notify(.switched_timeline)) { _ in
-                dismiss()
-            }
             .onAppear() {
                 check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
                 profile.subscribe()

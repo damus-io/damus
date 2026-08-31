@@ -161,9 +161,6 @@ struct RelayDetailView: View {
                 }
             }
         }
-        .onReceive(handle_notify(.switched_timeline)) { notif in
-            dismiss()
-        }
         .navigationTitle(nip11?.name ?? relay.absoluteString)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

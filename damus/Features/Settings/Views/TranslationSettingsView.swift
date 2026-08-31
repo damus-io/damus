@@ -101,9 +101,6 @@ struct TranslationSettingsView: View {
             }
         }
         .navigationTitle(NSLocalizedString("Translation", comment: "Navigation title for translation settings."))
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
 }
 

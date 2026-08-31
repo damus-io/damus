@@ -55,9 +55,6 @@ struct DamusPurpleView: View, DamusPurpleStoreKitManagerDelegate {
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: BackNav())
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             Task {

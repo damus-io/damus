@@ -221,9 +221,6 @@ struct NotificationSettingsView: View {
             }
         }
         .navigationTitle("Notifications")
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
         .onAppear(perform: {
             Task {
                 if self.settings.notification_mode == .push {
