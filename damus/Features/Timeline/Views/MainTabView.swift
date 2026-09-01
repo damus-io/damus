@@ -24,6 +24,56 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
     }
     return (current.rawValue & indicator_setting) == timeline_to_notification_bits(timeline, ev: nil).rawValue
 }
+
+/// The unread-events badge on a timeline's tab bar item.
+///
+/// The system tab bar owns its items, so the dot the custom `TabButton` used to
+/// overlay with `alignmentGuide` offsets is gone. `View.badge(_:)` is the native
+/// equivalent: it is `@available(iOS 15.0, ...)` and applies to a `TabView`
+/// child that carries a `.tabItem`, so it needs neither the iOS 18+ `Tab` struct
+/// nor an availability guard.
+///
+/// This is a `ViewModifier` rather than a plain `View` extension because it has
+/// to observe ``NotificationStatusModel``. `ContentView` holds its `HomeModel`
+/// as a plain property, so without an `@ObservedObject` somewhere in the view
+/// graph the badge would never update — the custom `TabButton` observed the same
+/// model for the same reason.
+///
+/// ``NotificationStatusModel/new_events`` is a `NewEventsBits` bitfield rather
+/// than a count, and there is no native plain-dot badge — `.badge` takes an
+/// `Int`, `Text` or string. A blank `Text` gets us the dot anyway: the badge
+/// sizes itself to its empty label and the system draws it as a bare round dot,
+/// which is what the old overlay drew. Surfacing real counts instead would mean
+/// new per-timeline counters in the model, and the bit-set sites dedupe on
+/// last-seen-event timestamps, so any count derived from them would undercount.
+///
+/// One deliberate visual difference from the old overlay: the system badge is
+/// the standard notification red rather than the accent purple the hand-drawn
+/// `Circle` used. Recolouring it means reaching into `UITabBarAppearance`, which
+/// is the same global appearance state Liquid Glass styles, so we take the
+/// native colour.
+struct TimelineTabBadge: ViewModifier {
+    let timeline: Timeline
+    @ObservedObject var notification_status: NotificationStatusModel
+    let settings: UserSettingsStore
+
+    func body(content: Content) -> some View {
+        content.badge(self.badge_label)
+    }
+
+    /// A blank label when this tab has unread events, `nil` (no badge) otherwise.
+    private var badge_label: Text? {
+        guard show_indicator(
+            timeline: self.timeline,
+            current: self.notification_status.new_events,
+            indicator_setting: self.settings.notification_indicators
+        ) else {
+            return nil
+        }
+
+        return Text(verbatim: " ")
+    }
+}
     
 extension Timeline {
     /// The tabs in the order they appear in the tab bar, left to right.
