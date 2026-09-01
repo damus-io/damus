@@ -26,13 +26,39 @@ extension View {
     /// Lets the tab bar shrink into its minimized form as content scrolls down.
     ///
     /// This is the iOS 26 tab bar behaviour: the bar collapses to a compact pill
-    /// when the user scrolls down into content and expands again on scroll up,
-    /// so the timeline gets the full height while reading.
+    /// when the user scrolls down into content, so the timeline gets the full
+    /// height while reading.
     ///
     /// `tabBarMinimizeBehavior(_:)` is iOS 26.0+, and `.onScrollDown` is
     /// additionally unavailable on macOS, tvOS, watchOS and visionOS — so the
     /// `#available` check is doing double duty here and also keeps the Catalyst
     /// target compiling. Apply it to the `TabView`, not to a tab's content.
+    ///
+    /// ## Known limitation: it restores at the top, not on scrolling up
+    ///
+    /// The name `.onScrollDown` implies the bar comes back when you scroll up
+    /// again. It does not. On iOS 26.5 the bar restores only once the scroll
+    /// view reaches the very top; scrolling upward mid-timeline leaves it
+    /// minimized, so the way back to a full bar is to scroll to the top or tap a
+    /// tab button.
+    ///
+    /// This was confirmed on a real device, and it is not something damus is
+    /// doing: it reproduces with a bare `ScrollView { LazyVStack { ... } }` in a
+    /// plain `TabView`, with none of this file's modifiers applied and no
+    /// `tabViewBottomAccessory` present. It is not affected by
+    /// ``softBottomScrollEdgeEffect()``, by
+    /// ``SwiftUI/View/staticNavigationBarAppearance()``, by the timeline's own
+    /// scroll-offset machinery, or by using the iOS 18 `Tab {}` API instead of
+    /// `.tabItem`. Accepted as-is rather than worked around — see
+    /// headway:damus-ios/spread-faith-month for the full investigation.
+    ///
+    /// One trap if you go measuring this yourself: the tab bar's accessibility
+    /// frame is identical whether expanded or minimized, so it is not a probe.
+    /// `app.tabBars.firstMatch.buttons.count` is — 4 expanded, 1 minimized. And
+    /// drive the scroll with `swipeUp(velocity: .fast)`, not
+    /// `press(forDuration:thenDragTo:)`, which ends at zero velocity and fails
+    /// to restore the bar in *every* configuration, manufacturing false
+    /// negatives that look like clean refutations.
     @ViewBuilder
     func minimizeTabBarOnScroll() -> some View {
         if #available(iOS 26.0, *) {
