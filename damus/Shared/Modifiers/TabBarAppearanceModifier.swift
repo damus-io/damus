@@ -47,10 +47,18 @@ extension View {
     /// plain `TabView`, with none of this file's modifiers applied and no
     /// `tabViewBottomAccessory` present. It is not affected by
     /// ``softBottomScrollEdgeEffect()``, by
-    /// ``SwiftUI/View/staticNavigationBarAppearance()``, by the timeline's own
-    /// scroll-offset machinery, or by using the iOS 18 `Tab {}` API instead of
-    /// `.tabItem`. Accepted as-is rather than worked around — see
+    /// ``SwiftUI/View/staticNavigationBarAppearance()``, or by the timeline's own
+    /// scroll-offset machinery. Accepted as-is rather than worked around — see
     /// headway:damus-ios/spread-faith-month for the full investigation.
+    ///
+    /// Whether the iOS 18 `Tab {}` API behaves differently from `.tabItem` here
+    /// is **not** established: the bare-`ScrollView` reproduction used
+    /// `.tabItem`, so it says nothing either way, and the one `Tab {}` arm that
+    /// was tried was measured with the invalid zero-velocity gesture described
+    /// below. Note the floor makes this academic for now — `Tab {}` is iOS 18+
+    /// against a 16 floor, and gating it by availability would give the
+    /// `TabView` two identities, which discards every tab's navigation stack on
+    /// each tab change.
     ///
     /// One trap if you go measuring this yourself: the tab bar's accessibility
     /// frame is identical whether expanded or minimized, so it is not a probe.
