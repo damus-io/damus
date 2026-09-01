@@ -48,17 +48,16 @@ extension View {
     /// `tabViewBottomAccessory` present. It is not affected by
     /// ``softBottomScrollEdgeEffect()``, by
     /// ``SwiftUI/View/staticNavigationBarAppearance()``, or by the timeline's own
-    /// scroll-offset machinery. Accepted as-is rather than worked around — see
-    /// headway:damus-ios/spread-faith-month for the full investigation.
+    /// scroll-offset machinery. It also reproduces under the iOS 18 `Tab {}` API
+    /// rather than `.tabItem` — measured, 0 of 3 first up-flicks restoring the
+    /// bar — so the tab-construction API is not the cause either, and the iOS 16
+    /// floor costs us nothing here. Accepted as-is rather than worked around —
+    /// see headway:damus-ios/spread-faith-month for the full investigation.
     ///
-    /// Whether the iOS 18 `Tab {}` API behaves differently from `.tabItem` here
-    /// is **not** established: the bare-`ScrollView` reproduction used
-    /// `.tabItem`, so it says nothing either way, and the one `Tab {}` arm that
-    /// was tried was measured with the invalid zero-velocity gesture described
-    /// below. Note the floor makes this academic for now — `Tab {}` is iOS 18+
-    /// against a 16 floor, and gating it by availability would give the
+    /// (Worth recording that `Tab {}` would be a poor trade even if it had
+    /// helped: gating it by availability against the 16 floor would give the
     /// `TabView` two identities, which discards every tab's navigation stack on
-    /// each tab change.
+    /// each tab change.)
     ///
     /// One trap if you go measuring this yourself: the tab bar's accessibility
     /// frame is identical whether expanded or minimized, so it is not a probe.
@@ -67,6 +66,12 @@ extension View {
     /// `press(forDuration:thenDragTo:)`, which ends at zero velocity and fails
     /// to restore the bar in *every* configuration, manufacturing false
     /// negatives that look like clean refutations.
+    ///
+    /// And score on whether the **first** up-flick restored the bar, not on how
+    /// many up-flicks it took. The count is just travel distance back to a
+    /// content offset of zero: it varies run to run within one configuration, so
+    /// comparing counts between two configurations invites reading a difference
+    /// into noise.
     @ViewBuilder
     func minimizeTabBarOnScroll() -> some View {
         if #available(iOS 26.0, *) {
