@@ -27,7 +27,12 @@ struct PostingTimelineView: View {
     @State private var indicatorPosition: CGFloat = 0
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
-    @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
+    /// Which of the home timeline's two filters to show.
+    ///
+    /// Owned by ``ContentView`` rather than by this view, because on iOS 26 the
+    /// selector for it is the tab view's bottom accessory, which attaches to the
+    /// `TabView` and so cannot reach state that lives in here.
+    @Binding var filter_state: FilterState
     @Binding var timeline_source: TimelineSource
     
     @State private var damusTips: Any? = {
@@ -121,15 +126,13 @@ struct PostingTimelineView: View {
                     .tipViewStyle(TrustedNetworkButtonTipViewStyle())
                     .padding(.horizontal)
             }
-            VStack(spacing: 0) {
-                CustomPicker(tabs: [
-                    (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                ],
-                             selection: $filter_state)
-                
-                Divider()
-                    .frame(height: 1)
+            if !timelineFilterLivesInTabViewAccessory {
+                VStack(spacing: 0) {
+                    CustomPicker(tabs: FilterState.timeline_filter_options, selection: $filter_state)
+
+                    Divider()
+                        .frame(height: 1)
+                }
             }
         }
         .background {
@@ -141,16 +144,17 @@ struct PostingTimelineView: View {
     var body: some View {
         VStack {
             ZStack {
-                // Driven by the `CustomPicker` in `HeaderView`. This used to be
-                // a paged `TabView`, which the iOS 26 tab bar cannot see
-                // through: a paged `TabView` neither reports its scrolling to
-                // the enclosing tab bar (so the bar never minimized on the home
-                // timeline) nor lets content run under the floating bar
-                // (leaving an opaque `adaptableWhite` slab where notes should
-                // show through the glass). Rendering the selected timeline
-                // directly hands the real `ScrollView` to the tab bar. The cost
-                // is the swipe-between-filters gesture, which the picker
-                // already duplicates.
+                // Driven by the filter selector: the `CustomPicker` in
+                // `HeaderView` pre-26, the tab view's bottom glass accessory
+                // from iOS 26 on. This used to be a paged `TabView`, which the
+                // iOS 26 tab bar cannot see through: a paged `TabView` neither
+                // reports its scrolling to the enclosing tab bar (so the bar
+                // never minimized on the home timeline) nor lets content run
+                // under the floating bar (leaving an opaque `adaptableWhite`
+                // slab where notes should show through the glass). Rendering
+                // the selected timeline directly hands the real `ScrollView` to
+                // the tab bar. The cost is the swipe-between-filters gesture,
+                // which the selector already duplicates.
                 contentTimelineView(filter: content_filter(filter_state))
                     .id(filter_state)
                 
@@ -190,6 +194,7 @@ struct PostingTimelineView_Previews: PreviewProvider {
             isSideBarOpened: .constant(false),
             active_sheet: .constant(nil),
             headerOffset: .constant(0),
+            filter_state: .constant(.posts_and_replies),
             timeline_source: .constant(.follows)
         )
     }

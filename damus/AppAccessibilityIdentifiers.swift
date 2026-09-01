@@ -82,6 +82,13 @@ enum AppAccessibilityIdentifiers: String {
     
     /// Profile picture item on the top toolbar, used to open the side menu
     case main_side_menu_button
+
+    /// The timeline filter selector in the tab view's bottom glass accessory (iOS 26+).
+    ///
+    /// Needed to tell it apart from the other filter selectors on screen — the
+    /// pre-26 `CustomPicker` and `ProfileView`'s own — which carry the same
+    /// option labels.
+    case main_timeline_filter_accessory
     
     
     // MARK: Side menu

@@ -129,6 +129,19 @@ struct ContentView: View {
     @State private var isSideBarOpened = false
     @State var headerOffset: CGFloat = 0.0
     @State private var postingTimelineSource: TimelineSource = .follows
+
+    // The three tabs' filter states live here rather than in the tab roots that
+    // read them, because from iOS 26 on the control that drives them is the tab
+    // view's bottom glass accessory — and that attaches to the `TabView`, which
+    // is right here, with no way to reach into a tab root's own state. The tab
+    // roots take them as bindings. Pre-26 nothing about them moved: each keeps
+    // the `@SceneStorage` key it had inside its view, so a scene restored from
+    // before this change still comes back on the filter the user left it on.
+    @SceneStorage("PostingTimelineView.filter_state") var home_filter_state: FilterState = .posts_and_replies
+    @SceneStorage("NotificationsView.filter_state") var notifications_filter_state: NotificationFilterState = .all
+    /// `DirectMessagesView` held this as plain `@State`, so unlike the other two
+    /// there is no storage key to preserve.
+    @State private var dm_type: DMType = .friend
     var home: HomeModel = HomeModel()
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
@@ -168,6 +181,31 @@ struct ContentView: View {
         }
         .opacity(0)
         .accessibilityHidden(true)
+    }
+
+    /// The filter selector the tab view's bottom accessory should show, for
+    /// whichever tab is currently selected.
+    ///
+    /// `nil` when there is nothing to filter — see
+    /// ``SwiftUI/View/timelineFilterAccessory(_:)`` for what an absent filter
+    /// does and why the modifier is applied unconditionally anyway. Two cases
+    /// give that:
+    ///
+    /// - The search tab, which has no filter of its own.
+    /// - Any tab that has something pushed on it. A thread or a profile is not a
+    ///   filtered timeline, and the accessory belongs to the `TabView`, so
+    ///   without this it would hover over the pushed view still offering a filter
+    ///   that does nothing there. `paths` is `@Published` and the coordinator is
+    ///   a `@StateObject`, so pushing and popping re-evaluates this.
+    var selected_timeline_filter: TimelineFilterSelection? {
+        guard self.navigationCoordinator.isAtRoot(self.selected_timeline) else { return nil }
+
+        switch self.selected_timeline {
+        case .home:          return .notes($home_filter_state)
+        case .dms:           return .dms($dm_type)
+        case .notifications: return .notifications($notifications_filter_state)
+        case .search:        return nil
+        }
     }
 
     /// One timeline tab: its own navigation stack, destinations and tab bar item.
@@ -223,11 +261,11 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 TabView(selection: tab_selection) {
                     timelineTab(.home, damus: damus) {
-                        PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, timeline_source: $postingTimelineSource)
+                        PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, filter_state: $home_filter_state, timeline_source: $postingTimelineSource)
                     }
 
                     timelineTab(.dms, damus: damus) {
-                        DirectMessagesView(damus_state: damus, home: home, model: damus.dms, settings: damus.settings, subtitle: $menu_subtitle)
+                        DirectMessagesView(damus_state: damus, home: home, dm_type: $dm_type, model: damus.dms, settings: damus.settings, subtitle: $menu_subtitle)
                     }
 
                     timelineTab(.search, damus: damus) {
@@ -236,10 +274,11 @@ struct ContentView: View {
                     }
 
                     timelineTab(.notifications, damus: damus) {
-                        NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
+                        NotificationsView(state: damus, notifications: home.notifications, filter_state: $notifications_filter_state, subtitle: $menu_subtitle)
                     }
                 }
                 .minimizeTabBarOnScroll()
+                .timelineFilterAccessory(self.selected_timeline_filter)
                 .background(tabKeyboardShortcuts)
                 .overlay(
                     SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)

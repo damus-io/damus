@@ -522,6 +522,7 @@
 		5C4FA8042DCAF80E00CE658C /* FollowPackTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4FA8022DCAF80400CE658C /* FollowPackTimeline.swift */; };
 		5C4FA8052DCAF80E00CE658C /* FollowPackTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4FA8022DCAF80400CE658C /* FollowPackTimeline.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
+		D7A11C222F700022002CAEB5 /* TimelineFilterAccessory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C212F700021002CAEB5 /* TimelineFilterAccessory.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
 		5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAE2A194075008FC15A /* PinkGradient.swift */; };
@@ -739,6 +740,7 @@
 		82D6FB1A2CD99F7900C925F4 /* WebsiteLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBCA92F297DB57F00EC6B2F /* WebsiteLink.swift */; };
 		82D6FB1B2CD99F7900C925F4 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEC297F0B9E00430951 /* Highlight.swift */; };
 		82D6FB1C2CD99F7900C925F4 /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
+		D7A11C232F700023002CAEB5 /* TimelineFilterAccessory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C212F700021002CAEB5 /* TimelineFilterAccessory.swift */; };
 		82D6FB1D2CD99F7900C925F4 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE22981BC7D00D66079 /* UserView.swift */; };
 		82D6FB1E2CD99F7900C925F4 /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
 		82D6FB1F2CD99F7900C925F4 /* NoteZapButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883AF297705DD00DC99E7 /* NoteZapButton.swift */; };
@@ -1356,6 +1358,7 @@
 		D73E5E4F2C6A97F4007EB227 /* WebsiteLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBCA92F297DB57F00EC6B2F /* WebsiteLink.swift */; };
 		D73E5E502C6A97F4007EB227 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEC297F0B9E00430951 /* Highlight.swift */; };
 		D73E5E512C6A97F4007EB227 /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
+		D7A11C242F700024002CAEB5 /* TimelineFilterAccessory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C212F700021002CAEB5 /* TimelineFilterAccessory.swift */; };
 		D73E5E522C6A97F4007EB227 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE22981BC7D00D66079 /* UserView.swift */; };
 		D73E5E532C6A97F4007EB227 /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
 		D73E5E542C6A97F4007EB227 /* NoteZapButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883AF297705DD00DC99E7 /* NoteZapButton.swift */; };
@@ -2717,6 +2720,7 @@
 		5C4FA7FE2DC5119300CE658C /* FollowPackPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowPackPreview.swift; sourceTree = "<group>"; };
 		5C4FA8022DCAF80400CE658C /* FollowPackTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowPackTimeline.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
+		D7A11C212F700021002CAEB5 /* TimelineFilterAccessory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineFilterAccessory.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
 		5C6E1DAE2A194075008FC15A /* PinkGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinkGradient.swift; sourceTree = "<group>"; };
@@ -3869,6 +3873,7 @@
 				4CBCA92F297DB57F00EC6B2F /* WebsiteLink.swift */,
 				4CC7AAEC297F0B9E00430951 /* Highlight.swift */,
 				5C513FB9297F72980072348F /* CustomPicker.swift */,
+				D7A11C212F700021002CAEB5 /* TimelineFilterAccessory.swift */,
 				4CF0ABE22981BC7D00D66079 /* UserView.swift */,
 				4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */,
 				4CE4F0F729DB7399005914DB /* ThiccDivider.swift */,
@@ -6396,6 +6401,7 @@
 				D74AAFCC2B155D07006CF0F4 /* MakeZapRequest.swift in Sources */,
 				4CF480382B631C0100F2B2C0 /* nostrdb.c in Sources */,
 				5C513FBA297F72980072348F /* CustomPicker.swift in Sources */,
+				D7A11C222F700022002CAEB5 /* TimelineFilterAccessory.swift in Sources */,
 				4C1253622A76D00B0004F4B8 /* PostNotify.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				5CB017232D2D985E00A9ED05 /* CoinosButton.swift in Sources */,
@@ -6695,6 +6701,7 @@
 				82D6FB1A2CD99F7900C925F4 /* WebsiteLink.swift in Sources */,
 				82D6FB1B2CD99F7900C925F4 /* Highlight.swift in Sources */,
 				82D6FB1C2CD99F7900C925F4 /* CustomPicker.swift in Sources */,
+				D7A11C232F700023002CAEB5 /* TimelineFilterAccessory.swift in Sources */,
 				82D6FB1D2CD99F7900C925F4 /* UserView.swift in Sources */,
 				82D6FB1E2CD99F7900C925F4 /* ZoomableScrollView.swift in Sources */,
 				82D6FB1F2CD99F7900C925F4 /* NoteZapButton.swift in Sources */,
@@ -7191,6 +7198,7 @@
 				D73E5E4F2C6A97F4007EB227 /* WebsiteLink.swift in Sources */,
 				D73E5E502C6A97F4007EB227 /* Highlight.swift in Sources */,
 				D73E5E512C6A97F4007EB227 /* CustomPicker.swift in Sources */,
+				D7A11C242F700024002CAEB5 /* TimelineFilterAccessory.swift in Sources */,
 				D77135D32E7B766B00E7639F /* DataExtensions.swift in Sources */,
 				D73E5E522C6A97F4007EB227 /* UserView.swift in Sources */,
 				D73E5E532C6A97F4007EB227 /* ZoomableScrollView.swift in Sources */,
