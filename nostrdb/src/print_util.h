@@ -1,5 +1,7 @@
 #include "hex.h"
 #include "lmdb.h"
+#include "nostrdb.h"
+#include <stdio.h>
 
 static void print_hex(unsigned char* data, size_t size) {
 	size_t i;
@@ -21,15 +23,17 @@ static void ndb_print_text_search_key(int bytes_size, struct ndb_text_search_key
 
 static void print_tag_kv(struct ndb_txn *txn, MDB_val *k, MDB_val *v)
 {
-	char hex_id[65];
+	char hex_id[65], c;
 	struct ndb_note *note;
 	uint64_t ts;
 
 	ts = *(uint64_t*)((uint8_t*)k->mv_data+(k->mv_size-8));
 
+	c = ((const char*)k->mv_data)[0];
+
 	// TODO: p tags, etc
-	if (((const char*)k->mv_data)[0] == 'e' && k->mv_size == (1 + 32 + 8)) {
-		printf("note_tags 'e");
+	if ((c == 'e' || c == 'p' || c == 'q') && k->mv_size == (1 + 32 + 8)) {
+		printf("note_tags '%c", c);
 		print_hex((uint8_t*)k->mv_data+1, 32);
 		printf("' %" PRIu64, ts);
 	} else {

@@ -7,6 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DB500000000000000000002 /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000001 /* base64.c */; };
+		0DB500000000000000000003 /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000001 /* base64.c */; };
+		0DB500000000000000000004 /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000001 /* base64.c */; };
+		0DB500000000000000000005 /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000001 /* base64.c */; };
+		0DB500000000000000000008 /* binmoji.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000007 /* binmoji.c */; };
+		0DB500000000000000000009 /* binmoji.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000007 /* binmoji.c */; };
+		0DB50000000000000000000A /* binmoji.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000007 /* binmoji.c */; };
+		0DB50000000000000000000B /* binmoji.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000007 /* binmoji.c */; };
+		0DB50000000000000000000F /* hkdf_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000000E /* hkdf_sha256.c */; };
+		0DB500000000000000000010 /* hkdf_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000000E /* hkdf_sha256.c */; };
+		0DB500000000000000000011 /* hkdf_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000000E /* hkdf_sha256.c */; };
+		0DB500000000000000000012 /* hkdf_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000000E /* hkdf_sha256.c */; };
+		0DB500000000000000000015 /* hmac_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000014 /* hmac_sha256.c */; };
+		0DB500000000000000000016 /* hmac_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000014 /* hmac_sha256.c */; };
+		0DB500000000000000000017 /* hmac_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000014 /* hmac_sha256.c */; };
+		0DB500000000000000000018 /* hmac_sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000014 /* hmac_sha256.c */; };
+		0DB50000000000000000001B /* metadata.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000001A /* metadata.c */; };
+		0DB50000000000000000001C /* metadata.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000001A /* metadata.c */; };
+		0DB50000000000000000001D /* metadata.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000001A /* metadata.c */; };
+		0DB50000000000000000001E /* metadata.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB50000000000000000001A /* metadata.c */; };
+		0DB500000000000000000021 /* nip44.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000020 /* nip44.c */; };
+		0DB500000000000000000022 /* nip44.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000020 /* nip44.c */; };
+		0DB500000000000000000023 /* nip44.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000020 /* nip44.c */; };
+		0DB500000000000000000024 /* nip44.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000020 /* nip44.c */; };
+		0DB500000000000000000027 /* crypto_stream_chacha20.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000026 /* crypto_stream_chacha20.c */; };
+		0DB500000000000000000028 /* crypto_stream_chacha20.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000026 /* crypto_stream_chacha20.c */; };
+		0DB500000000000000000029 /* crypto_stream_chacha20.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000026 /* crypto_stream_chacha20.c */; };
+		0DB50000000000000000002A /* crypto_stream_chacha20.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB500000000000000000026 /* crypto_stream_chacha20.c */; };
 		0E8A4BB72AE4359200065E81 /* NostrFilter+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */; };
 		2710433D2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
 		2710433E2E6BFE340005C3B0 /* PostingTimelineSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */; };
@@ -2072,6 +2100,21 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DB500000000000000000001 /* base64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = base64.c; sourceTree = "<group>"; };
+		0DB500000000000000000006 /* base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
+		0DB500000000000000000007 /* binmoji.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = binmoji.c; sourceTree = "<group>"; };
+		0DB50000000000000000000C /* binmoji.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binmoji.h; sourceTree = "<group>"; };
+		0DB50000000000000000000D /* binmoji_table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binmoji_table.h; sourceTree = "<group>"; };
+		0DB50000000000000000000E /* hkdf_sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hkdf_sha256.c; sourceTree = "<group>"; };
+		0DB500000000000000000013 /* hkdf_sha256.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hkdf_sha256.h; sourceTree = "<group>"; };
+		0DB500000000000000000014 /* hmac_sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmac_sha256.c; sourceTree = "<group>"; };
+		0DB500000000000000000019 /* hmac_sha256.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmac_sha256.h; sourceTree = "<group>"; };
+		0DB50000000000000000001A /* metadata.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metadata.c; sourceTree = "<group>"; };
+		0DB50000000000000000001F /* metadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metadata.h; sourceTree = "<group>"; };
+		0DB500000000000000000020 /* nip44.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nip44.c; sourceTree = "<group>"; };
+		0DB500000000000000000025 /* nip44.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nip44.h; sourceTree = "<group>"; };
+		0DB500000000000000000026 /* crypto_stream_chacha20.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crypto_stream_chacha20.c; sourceTree = "<group>"; };
+		0DB50000000000000000002B /* crypto_stream_chacha20.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypto_stream_chacha20.h; sourceTree = "<group>"; };
 		0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrFilter+Hashable.swift"; sourceTree = "<group>"; };
 		2710433C2E6BFE2A0005C3B0 /* PostingTimelineSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostingTimelineSwitcherView.swift; sourceTree = "<group>"; };
 		3165648A295B70D500C64604 /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
@@ -4105,6 +4148,15 @@
 			path = "damus-c";
 			sourceTree = "<group>";
 		};
+		0DB50000000000000000002C /* sodium */ = {
+			isa = PBXGroup;
+			children = (
+				0DB500000000000000000026 /* crypto_stream_chacha20.c */,
+				0DB50000000000000000002B /* crypto_stream_chacha20.h */,
+			);
+			path = sodium;
+			sourceTree = "<group>";
+		};
 		4CF47FDC2B631C0100F2B2C0 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -4134,6 +4186,20 @@
 				4CF480352B631C0100F2B2C0 /* protected_queue.h */,
 				4CF480362B631C0100F2B2C0 /* random.h */,
 				4CF480372B631C0100F2B2C0 /* invoice.c */,
+				0DB500000000000000000001 /* base64.c */,
+				0DB500000000000000000006 /* base64.h */,
+				0DB500000000000000000007 /* binmoji.c */,
+				0DB50000000000000000000C /* binmoji.h */,
+				0DB50000000000000000000D /* binmoji_table.h */,
+				0DB50000000000000000000E /* hkdf_sha256.c */,
+				0DB500000000000000000013 /* hkdf_sha256.h */,
+				0DB500000000000000000014 /* hmac_sha256.c */,
+				0DB500000000000000000019 /* hmac_sha256.h */,
+				0DB50000000000000000001A /* metadata.c */,
+				0DB50000000000000000001F /* metadata.h */,
+				0DB500000000000000000020 /* nip44.c */,
+				0DB500000000000000000025 /* nip44.h */,
+				0DB50000000000000000002C /* sodium */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -6461,6 +6527,13 @@
 				4C9B0DF32A65C46800CBDA21 /* ProfileEditButton.swift in Sources */,
 				4C32B95F2A9AD44700DC3548 /* Enum.swift in Sources */,
 				4C2859622A12A7F0004746F7 /* GoldSupportGradient.swift in Sources */,
+				0DB500000000000000000002 /* base64.c in Sources */,
+				0DB500000000000000000008 /* binmoji.c in Sources */,
+				0DB50000000000000000000F /* hkdf_sha256.c in Sources */,
+				0DB500000000000000000015 /* hmac_sha256.c in Sources */,
+				0DB50000000000000000001B /* metadata.c in Sources */,
+				0DB500000000000000000021 /* nip44.c in Sources */,
+				0DB500000000000000000027 /* crypto_stream_chacha20.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7116,6 +7189,13 @@
 				82D6FC7B2CD99F7900C925F4 /* TestData.swift in Sources */,
 				82D6FC7C2CD99F7900C925F4 /* ContentParsing.swift in Sources */,
 				82D6FC7D2CD99F7900C925F4 /* NotificationFormatter.swift in Sources */,
+				0DB500000000000000000003 /* base64.c in Sources */,
+				0DB500000000000000000009 /* binmoji.c in Sources */,
+				0DB500000000000000000010 /* hkdf_sha256.c in Sources */,
+				0DB500000000000000000016 /* hmac_sha256.c in Sources */,
+				0DB50000000000000000001C /* metadata.c in Sources */,
+				0DB500000000000000000022 /* nip44.c in Sources */,
+				0DB500000000000000000028 /* crypto_stream_chacha20.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7694,6 +7774,13 @@
 				D703D75B2C670A7F00A400EA /* Contacts.swift in Sources */,
 				D703D7812C670C2B00A400EA /* Bech32.swift in Sources */,
 				D73E5E1E2C6A9694007EB227 /* RelayFilters.swift in Sources */,
+				0DB500000000000000000004 /* base64.c in Sources */,
+				0DB50000000000000000000A /* binmoji.c in Sources */,
+				0DB500000000000000000011 /* hkdf_sha256.c in Sources */,
+				0DB500000000000000000017 /* hmac_sha256.c in Sources */,
+				0DB50000000000000000001D /* metadata.c in Sources */,
+				0DB500000000000000000023 /* nip44.c in Sources */,
+				0DB500000000000000000029 /* crypto_stream_chacha20.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7855,6 +7942,13 @@
 				D7CE1B1E2B0BE190002EDAD4 /* midl.c in Sources */,
 				D7CB5D3C2B1130C600AD4105 /* LocalNotification.swift in Sources */,
 				B59CAD4D2B688D1000677E8B /* MutelistManager.swift in Sources */,
+				0DB500000000000000000005 /* base64.c in Sources */,
+				0DB50000000000000000000B /* binmoji.c in Sources */,
+				0DB500000000000000000012 /* hkdf_sha256.c in Sources */,
+				0DB500000000000000000018 /* hmac_sha256.c in Sources */,
+				0DB50000000000000000001E /* metadata.c in Sources */,
+				0DB500000000000000000024 /* nip44.c in Sources */,
+				0DB50000000000000000002A /* crypto_stream_chacha20.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

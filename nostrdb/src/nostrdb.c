@@ -8,6 +8,9 @@
 #include "bolt11/bolt11.h"
 #include "bolt11/amount.h"
 #include "lmdb.h"
+#include "metadata.h"
+#include "nip44.h"
+#include "hmac_sha256.h"
 #include "util.h"
 #include "cpu.h"
 #include "block.h"
@@ -16,6 +19,7 @@
 #include "protected_queue.h"
 #include "memchr.h"
 #include "print_util.h"
+#include "secp256k1.h"
 #include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
@@ -46,6 +50,50 @@
 #define MAX_SUBSCRIPTIONS 256
 #define MAX_SCAN_CURSORS 12
 #define MAX_FILTERS    16
+#define MAX_INGESTER_KEYS 128
+
+/* Cap on the author*kind scanners NDB_PLAN_AUTHOR_KINDS will open for a
+ * multi-author filter. The alternative for those filters is NDB_PLAN_KINDS,
+ * which opens one cursor per kind and post-filters by author. So the two plans
+ * trade a fixed per-group seek cost against an unbounded scan:
+ *
+ *   author_kinds  O(authors*kinds) seeks, then O(limit)
+ *   kinds         O(kinds) seeks, then scan until `limit` authors match
+ *
+ * Which wins depends on how dense the filter's authors are in the recent tail
+ * of those kinds, which the planner can't know without probing. Measured on an
+ * 863k note db (kind 1, limit 20, warm):
+ *
+ *   authors  authors dense+recent    authors sparse+old
+ *            kinds   author_kinds    kinds   author_kinds
+ *   2        0.20ms  0.058ms         69ms    0.028ms
+ *   8        0.16ms  0.077ms         70ms    0.063ms
+ *   16       0.073ms 0.090ms         68ms    0.086ms
+ *   32       0.049ms 0.126ms         67ms    0.151ms
+ *   500      0.050ms 1.08ms          72ms    6.7ms
+ *
+ * So author_kinds wins hugely when the authors are sparse and loses by a small
+ * absolute margin when they're dense. At the cap the worst measured regression
+ * is ~0.15ms (64 dense authors: 0.046ms -> 0.195ms), against ~67ms saved when
+ * those same 64 authors are sparse.
+ *
+ * The cap matters most at the other end of the scale. A contact list is
+ * thousands of authors, and its members are dense by construction -- you follow
+ * people who post -- so the scan finds `limit` matches almost immediately while
+ * author_kinds would pay a seek per author*kind pair. Uncapped, at the 6144
+ * author ceiling a single filter can hold (data_buf/32) across kinds
+ * 1,6,7,30023, that is 24576 scanners:
+ *
+ *   6144 authors x 4 kinds   kinds 0.005ms   author_kinds 4.44ms
+ *
+ * ~900x worse, on the most common query a client makes. Hence a cap rather than
+ * an unconditional lift: below it we take the plan that can't blow up, above it
+ * we keep the one that can't fan out.
+ *
+ * The gap this leaves is a *large* author set that has gone quiet -- 1000-2000
+ * sparse authors still cost 16-61ms on the kinds plan. Closing that needs a
+ * planner that probes the scan before committing to it, not a constant. */
+#define NDB_MAX_AUTHOR_KIND_SCANNERS 64
 
 // the maximum size of inbox queues
 static const int DEFAULT_QUEUE_SIZE = 32768;
@@ -67,9 +115,71 @@ static const int DEFAULT_WRITER_SCRATCH_SIZE = 2097152;
 #define NDB_PARSED_TAGS         (1 << 6)
 #define NDB_PARSED_ALL          (NDB_PARSED_ID|NDB_PARSED_PUBKEY|NDB_PARSED_SIG|NDB_PARSED_CREATED_AT|NDB_PARSED_KIND|NDB_PARSED_CONTENT|NDB_PARSED_TAGS)
 
+/* we have ndb_keypair for official stuff, but this is just used internally
+ * in the ingester thread for unwrapping giftwraps
+ */
+struct keypair {
+	unsigned char seckey[32];
+	unsigned char pubkey[32];
+};
+
+/* PNS (NIP-1080) key used for decrypting private notification events.
+ * Unlike giftwrap keys, PNS uses a pre-derived symmetric conversation key
+ * instead of ECDH.
+ */
+struct pns_key {
+	unsigned char pubkey[32];        /* pns_pubkey: for matching kind-1080 events */
+	unsigned char nip44_key[32];     /* pns_nip44_key: NIP-44 conversation key */
+	unsigned char device_pubkey[32]; /* the real device pubkey (receiver) */
+};
+
+struct ndb_ingester *ingester;
+int ndb_process_giftwrap(secp256k1_context *secp,
+			 struct ndb_ingester *ingester,
+			 struct ndb_note *note,
+			 struct keypair *keys, int nkeys,
+			 const char *relay,
+			 unsigned char *scratch, size_t scratch_size);
+
+static int ndb_process_pns_event(struct ndb_ingester *ingester,
+				 struct ndb_note *note,
+				 struct pns_key *pns_keys, int npns_keys,
+				 const char *relay,
+				 unsigned char *scratch, size_t scratch_size,
+				 struct keypair *keys, int nkeys,
+				 secp256k1_context *secp);
+
+/* SNS (NIP-1081) key: a shared team channel derived from a 32-byte team_root.
+ * Any member publishes kind-1081 envelopes signed by the shared team keypair
+ * and symmetrically encrypted with team_nip44_key; each envelope wraps a
+ * kind-13 seal (ECDH-encrypted to the team keypair) carrying the member's real
+ * rumor. Unlike pns_key we keep the secret key: peeling the inner seal needs
+ * the team keypair as the ECDH recipient.
+ */
+struct sns_key {
+	unsigned char pubkey[32];    /* team_pubkey: matches kind-1081 authors */
+	unsigned char nip44_key[32]; /* team_nip44_key: outer envelope key */
+	unsigned char seckey[32];    /* team_root: seal ECDH recipient secret */
+};
+
+static int ndb_process_sns_event(secp256k1_context *secp,
+				 struct ndb_ingester *ingester,
+				 struct ndb_note *note,
+				 struct sns_key *sns_keys, int nsns_keys,
+				 const char *relay,
+				 unsigned char *scratch, size_t scratch_size,
+				 struct keypair *keys, int nkeys);
+
 typedef int (*ndb_migrate_fn)(struct ndb_txn *);
 typedef int (*ndb_word_parser_fn)(void *, const char *word, int word_len,
 				  int word_index);
+
+/* parsed nip10 reply data */
+struct ndb_note_reply {
+	unsigned char *root;
+	unsigned char *reply;
+	unsigned char *mention;
+};
 
 #ifdef DEBUG
 #define NDB_DEBUG_QUERY_TIMEOUT_SECONDS 3
@@ -248,7 +358,13 @@ struct ndb_tags {
 // v1
 struct ndb_note {
 	unsigned char version;    // v=1
-	unsigned char padding[3]; // keep things aligned
+	union {
+		unsigned char padding[3]; // keep things aligned
+		struct {
+			unsigned char padding;
+			uint16_t flags;
+		} aux;
+	};
 	unsigned char id[32];
 	unsigned char pubkey[32];
 	unsigned char sig[64];
@@ -298,6 +414,7 @@ enum ndb_writer_msgtype {
 	NDB_WRITER_BLOCKS, // write parsed note blocks
 	NDB_WRITER_MIGRATE, // migrate the database
 	NDB_WRITER_NOTE_RELAY, // we already have the note, but we have more relays to write
+	NDB_WRITER_NOTE_META, // write note metadata to the db
 };
 
 // keys used for storing data in the NDB metadata database (NDB_DB_NDB_META)
@@ -392,6 +509,7 @@ struct ndb_monitor {
 	// subscriptions efficiently without going through a message queue, so
 	// we use a simple mutex here.
 	pthread_mutex_t mutex;
+	pthread_cond_t cond;
 };
 
 struct ndb {
@@ -424,6 +542,14 @@ enum ndb_query_plan {
 	NDB_PLAN_SEARCH,
 	NDB_PLAN_RELAY_KINDS,
 	NDB_PLAN_PROFILE_SEARCH,
+
+	/* The all notes scan is a special case where we have basically an
+	 * empty filter
+	 * This is useful for folds over the entire DB. We can skip the
+	 * expensive (N+1 query) index + lookup note scans. Instead opting to
+	 * simply walk over the notes table.
+	 */
+	NDB_PLAN_ALL_NOTES,
 };
 
 // A id + u64 + timestamp
@@ -793,29 +919,32 @@ int ndb_filter_end(struct ndb_filter *filter)
 	filter->elem_buf.end = filter->elem_buf.p;
 
 	// move the data buffer to the end of the element buffer
-	memmove(filter->elem_buf.p, filter->data_buf.start, data_len);
+	if (data_len > 0)
+		memmove(filter->elem_buf.p, filter->data_buf.start, data_len);
 
-	// realloc the whole thing
-	size_t new_size = elem_len + data_len;
-	if (new_size == 0) {
-		// Avoid calling realloc with size 0 (implementation-defined behavior)
-		// Explicitly free and set to NULL
+	if (elem_len + data_len == 0) {
+		// if we don't require data storage, just free the
+		// buffer
 		free(filter->elem_buf.start);
-		filter->elem_buf.start = NULL;
-	} else {
-		rel = realloc(filter->elem_buf.start, new_size);
-		if (rel) {
-			filter->elem_buf.start = rel;
-		}
-		// Assert allocation succeeded for non-zero size
-		assert(filter->elem_buf.start);
-	}
-	filter->elem_buf.end = filter->elem_buf.start + elem_len;
-	filter->elem_buf.p = filter->elem_buf.end;
 
-	filter->data_buf.start = filter->elem_buf.end;
-	filter->data_buf.end = filter->data_buf.start + data_len;
-	filter->data_buf.p = filter->data_buf.end;
+		filter->elem_buf.start = 0;
+		filter->elem_buf.end = 0;
+		filter->elem_buf.p = 0;
+
+		filter->data_buf.start = 0;
+		filter->data_buf.end = 0;
+		filter->data_buf.p = 0;
+	} else if ((rel = realloc(filter->elem_buf.start, elem_len + data_len))) {
+		filter->elem_buf.start = rel;
+
+		assert(filter->elem_buf.start);
+		filter->elem_buf.end = filter->elem_buf.start + elem_len;
+		filter->elem_buf.p = filter->elem_buf.end;
+
+		filter->data_buf.start = filter->elem_buf.end;
+		filter->data_buf.end = filter->data_buf.start + data_len;
+		filter->data_buf.p = filter->data_buf.end;
+	}
 
 	filter->finalized = 1;
 
@@ -974,7 +1103,7 @@ static int ndb_filter_start_field_impl(struct ndb_filter *filter, enum ndb_filte
 	struct ndb_filter_elements *els, *el;
 
 	if (ndb_filter_current_element(filter)) {
-		fprintf(stderr, "ndb_filter_start_field: filter field already in progress, did you forget to call ndb_filter_end_field?\n");
+		ndb_debug("ndb_filter_start_field: filter field already in progress, did you forget to call ndb_filter_end_field?\n");
 		return 0;
 	}
 
@@ -1441,7 +1570,7 @@ static int ndb_filter_matches_with(struct ndb_filter *filter,
 			}
 			break;
 		case NDB_FILTER_RELAYS:
-			// for each relay the note was seen on, see if any match 
+			// for each relay the note was seen on, see if any match
 			if (!relay_iter) {
 				assert(!"expected relay iterator...");
 				break;
@@ -1666,8 +1795,7 @@ static int ndb_filter_group_add(struct ndb_filter_group *group,
 	return ndb_filter_clone(&group->filters[group->num_filters++], filter);
 }
 
-static int ndb_filter_group_matches(struct ndb_filter_group *group,
-				    struct ndb_note *note)
+static int ndb_filter_group_matches(struct ndb_filter_group *group, struct ndb_note *note)
 {
 	int i;
 	struct ndb_filter *filter;
@@ -1955,7 +2083,9 @@ static int ndb_relay_kind_key_init_high(
 		uint64_t kind,
 		uint64_t until)
 {
-	return ndb_relay_kind_key_init(key, UINT64_MAX, kind, UINT64_MAX, relay);
+	// note_key is the last field in the key, so UINT64_MAX puts us just
+	// past every entry at created_at == until
+	return ndb_relay_kind_key_init(key, UINT64_MAX, kind, until, relay);
 }
 
 static void ndb_parse_relay_kind_key(struct ndb_relay_kind_key *key, unsigned char *buf)
@@ -2003,7 +2133,7 @@ static int ndb_write_note_relay_kind_index(
 		struct ndb_txn *txn,
 		struct ndb_relay_kind_key *key)
 {
-	// The relay kind key has a layout like so 
+	// The relay kind key has a layout like so
 	//
 	// - note_key:       00 + 8 bytes
 	// - kind:           08 + 8 bytes
@@ -2114,7 +2244,7 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 	// ensure they are all index dbs
 	for (i = 0; i < num_indices; i++) {
 		if (!ndb_db_is_index(indices[i])) {
-			fprintf(stderr, "ndb_rebuild_note_index: %s is not an index db\n", ndb_db_name(indices[i]));
+			fprintf(stderr, "ndb_rebuild_note_indices: %s is not an index db\n", ndb_db_name(indices[i]));
 			return -1;
 		}
 	}
@@ -2123,13 +2253,13 @@ static int ndb_rebuild_note_indices(struct ndb_txn *txn, enum ndb_dbs *indices, 
 	for (i = 0; i < num_indices; i++) {
 		index = indices[i];
 		if (mdb_drop(txn->mdb_txn, index, drop_dbi)) {
-			fprintf(stderr, "ndb_rebuild_pubkey_index: mdb_drop failed for %s\n", ndb_db_name(index));
+			fprintf(stderr, "ndb_rebuild_note_indices: mdb_drop failed for %s\n", ndb_db_name(index));
 			return -1;
 		}
 	}
 
 	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE], &cur))) {
-		fprintf(stderr, "ndb_migrate_user_search_indices: mdb_cursor_open failed, error %d\n", rc);
+		fprintf(stderr, "ndb_rebuild_note_indices: mdb_cursor_open failed, error %d\n", rc);
 		return -1;
 	}
 
@@ -2191,9 +2321,475 @@ cleanup:
 	return count;
 }
 
+int ndb_cursor_start(MDB_cursor *cur, MDB_val *k, MDB_val *v);
+
+// find the last id tag in a note (e, p, etc)
+static unsigned char *ndb_note_last_id_tag(struct ndb_note *note, char type)
+{
+	unsigned char *last = NULL;
+	struct ndb_iterator iter;
+	struct ndb_str str;
+
+	// get the liked event id (last id)
+	ndb_tags_iterate_start(note, &iter);
+
+	while (ndb_tags_iterate_next(&iter)) {
+		if (iter.tag->count < 2)
+			continue;
+
+		str = ndb_tag_str(note, iter.tag, 0);
+
+		// assign liked to the last e tag
+		if (str.flag == NDB_PACKED_STR && str.str[0] == type) {
+			str = ndb_tag_str(note, iter.tag, 1);
+			if (str.flag == NDB_PACKED_ID)
+				last = str.id;
+		}
+	}
+
+	return last;
+}
+
+/* get reply information from a note */
+static void ndb_parse_reply(struct ndb_note *note, struct ndb_note_reply *note_reply)
+{
+	unsigned char *root, *reply, *mention, *id;
+	const char *marker;
+	struct ndb_iterator iter;
+	struct ndb_str str;
+	uint16_t count;
+	int any_marker, first;
+
+	any_marker = 0;
+	first = 1;
+	root = NULL;
+	reply = NULL;
+	mention = NULL;
+
+	// get the liked event id (last id)
+	ndb_tags_iterate_start(note, &iter);
+	while (ndb_tags_iterate_next(&iter)) {
+		if (root && reply && mention)
+			break;
+
+		marker = NULL;
+		count = ndb_tag_count(iter.tag);
+
+		if (count < 2)
+			continue;
+
+		str = ndb_tag_str(note, iter.tag, 0);
+		if (!(str.flag == NDB_PACKED_STR && str.str[0] == 'e'))
+			continue;
+
+		str = ndb_tag_str(note, iter.tag, 1);
+		if (str.flag != NDB_PACKED_ID)
+			continue;
+		id = str.id;
+
+		/* if we have the marker, assign it */
+		if (count >= 4) {
+			str = ndb_tag_str(note, iter.tag, 3);
+			if (str.flag == NDB_PACKED_STR)
+				marker = str.str;
+		}
+
+		if (marker) {
+			any_marker = true;
+			if (!strcmp(marker, "root"))
+				root = id;
+			else if (!strcmp(marker, "reply"))
+				reply = id;
+			else if (!strcmp(marker, "mention"))
+				mention = id;
+		} else if (!any_marker && first) {
+			root = id;
+			first = 0;
+		} else if (!any_marker && !reply) {
+			reply = id;
+		}
+	}
+
+	note_reply->reply = reply;
+	note_reply->root = root;
+	note_reply->mention = mention;
+}
+
+static int ndb_is_reply_to_root(struct ndb_note_reply *reply)
+{
+	if (reply->root && !reply->reply)
+		return 1;
+	else if (reply->root && reply->reply)
+		return !memcmp(reply->root, reply->reply, 32);
+	else
+		return 0;
+}
+
+
+int ndb_count_replies(struct ndb_txn *txn, const unsigned char *note_id, uint16_t *direct_replies, uint32_t *thread_replies)
+{
+	MDB_val k, v;
+	MDB_cursor *cur;
+	MDB_dbi db;
+
+	int rc;
+	uint64_t note_key;
+	size_t size;
+	struct ndb_note *note;
+	unsigned char *keybuf, *reply_id;
+	struct ndb_note_reply reply;
+	char buffer[41]; /* 1 + 32 + 8 */
+
+	*direct_replies = 0;
+	*thread_replies = 0;
+
+	db = txn->lmdb->dbs[NDB_DB_NOTE_TAGS];
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur))) {
+		fprintf(stderr, "ndb_count_reactions: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	buffer[0] = 'e';
+	memcpy(&buffer[1], note_id, 32);
+	memset(&buffer[33], 0x00, 8);
+
+	k.mv_data = buffer;
+	k.mv_size = sizeof(buffer);
+	v.mv_data = NULL;
+	v.mv_size = 0;
+
+	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+		goto cleanup;
+
+	do {
+		keybuf = (unsigned char *)k.mv_data;
+		note_key = *((uint64_t*)v.mv_data);
+		if (k.mv_size < sizeof(buffer))
+			break;
+		if (keybuf[0] != 'e')
+			break;
+		if (memcmp(&keybuf[1], note_id, 32))
+			break;
+		if (!(note = ndb_get_note_by_key(txn, note_key, &size)))
+			continue;
+		if (ndb_note_kind(note) != 1)
+			continue;
+
+		ndb_parse_reply(note, &reply);
+
+		if (ndb_is_reply_to_root(&reply)) {
+			reply_id = reply.root;
+		} else {
+			reply_id = reply.reply;
+		}
+
+		if (reply_id && !memcmp(reply_id, note_id, 32)) {
+			(*direct_replies)++;
+		}
+
+		if (reply.root && !memcmp(reply.root, note_id, 32)) {
+			(*thread_replies)++;
+		}
+
+	} while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0);
+
+cleanup:
+	mdb_cursor_close(cur);
+	return 1;
+}
+
+/* count all of the reactions for a note */
+int ndb_rebuild_reaction_metadata(struct ndb_txn *txn, const unsigned char *note_id, struct ndb_note_meta_builder *builder, uint32_t *count)
+{
+	MDB_val k, v;
+	MDB_cursor *cur;
+	MDB_dbi db;
+
+	int rc;
+	uint64_t note_key;
+	size_t size;
+	struct ndb_note *note;
+	unsigned char *keybuf, *last_id;
+	struct ndb_note_meta_entry *entry;
+	union ndb_reaction_str reaction_str;
+	char buffer[41]; /* 1 + 32 + 8 */
+	*count = 0;
+
+	db = txn->lmdb->dbs[NDB_DB_NOTE_TAGS];
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur))) {
+		fprintf(stderr, "ndb_count_reactions: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	buffer[0] = 'e';
+	memcpy(&buffer[1], note_id, 32);
+	memset(&buffer[33], 0x00, 8);
+
+	k.mv_data = buffer;
+	k.mv_size = sizeof(buffer);
+	v.mv_data = NULL;
+	v.mv_size = 0;
+
+	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+		goto cleanup;
+
+	do {
+		keybuf = (unsigned char *)k.mv_data;
+		note_key = *((uint64_t*)v.mv_data);
+		if (k.mv_size < sizeof(buffer))
+			break;
+		if (keybuf[0] != 'e')
+			break;
+		if (memcmp(&keybuf[1], note_id, 32))
+			break;
+		if (!(note = ndb_get_note_by_key(txn, note_key, &size)))
+			continue;
+		if (ndb_note_kind(note) != 7)
+			continue;
+		if (!(last_id = ndb_note_last_id_tag(note, 'e')))
+			continue;
+		if (memcmp(last_id, note_id, 32))
+			continue;
+
+		if (builder) {
+			if (!ndb_reaction_set(&reaction_str, ndb_note_content(note)))
+				ndb_reaction_set(&reaction_str, "+");
+
+			if ((entry = ndb_note_meta_builder_find_entry(builder, NDB_NOTE_META_REACTION, &reaction_str.binmoji))) {
+				(*ndb_note_meta_reaction_count(entry))++;
+			} else if ((entry = ndb_note_meta_add_entry(builder))) {
+				ndb_note_meta_reaction_set(entry, 1, reaction_str);
+			} else {
+				/* couldn't add reaction entry ? */
+				ndb_debug("ndb_rebuild_note_indices: couldn't add reaction count entry to metadata builder\n");
+			}
+		}
+
+		(*count)++;
+	} while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0);
+
+cleanup:
+	mdb_cursor_close(cur);
+	return 1;
+}
+
+static int ndb_count_reposts(struct ndb_txn *txn, const unsigned char *note_id, uint16_t *count)
+{
+	MDB_val k, v;
+	MDB_cursor *cur;
+	MDB_dbi db;
+	int rc;
+	unsigned char *keybuf;
+	struct ndb_note *note;
+	uint64_t note_key, kind;
+	char buffer[41]; /* 1 + 32 + 8 */
+
+	*count = 0;
+	db = txn->lmdb->dbs[NDB_DB_NOTE_TAGS];
+
+	/* we will iterate q tags for this particular id */
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur))) {
+		fprintf(stderr, "ndb_count_quotes: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	buffer[0] = 'e';
+	memcpy(&buffer[1], note_id, 32);
+	memset(&buffer[33], 0x00, 8);
+
+	k.mv_data = buffer;
+	k.mv_size = sizeof(buffer);
+	v.mv_data = NULL;
+	v.mv_size = 0;
+
+	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+		goto cleanup;
+
+	do {
+		keybuf = (unsigned char *)k.mv_data;
+		note_key = *((uint64_t*)v.mv_data);
+
+		if (k.mv_size < sizeof(buffer))
+			break;
+		if (keybuf[0] != 'e')
+			break;
+		if (memcmp(&keybuf[1], note_id, 32) != 0)
+			break;
+		if (!(note = ndb_get_note_by_key(txn, note_key, NULL)))
+			continue;
+		kind = ndb_note_kind(note);
+		if (!(kind == 6 || kind == 16))
+			continue;
+		(*count)++;
+	} while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0);
+
+cleanup:
+	mdb_cursor_close(cur);
+	return 1;
+}
+
+/* count all of the quote reposts for a note id */
+static int ndb_count_quotes(struct ndb_txn *txn, const unsigned char *note_id, uint16_t *count)
+{
+	MDB_val k, v;
+	MDB_cursor *cur;
+	MDB_dbi db;
+	int rc;
+	unsigned char *keybuf;
+	char buffer[41]; /* 1 + 32 + 8 */
+
+	*count = 0;
+	db = txn->lmdb->dbs[NDB_DB_NOTE_TAGS];
+
+	/* we will iterate q tags for this particular id */
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur))) {
+		fprintf(stderr, "ndb_count_quotes: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	buffer[0] = 'q';
+	memcpy(&buffer[1], note_id, 32);
+	memset(&buffer[33], 0x00, 8);
+
+	k.mv_data = buffer;
+	k.mv_size = sizeof(buffer);
+	v.mv_data = NULL;
+	v.mv_size = 0;
+
+	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+		goto cleanup;
+
+	for (;;) {
+		keybuf = (unsigned char *)k.mv_data;
+		if (k.mv_size < sizeof(buffer))
+			break;
+		if (keybuf[0] != 'q')
+			break;
+		if (memcmp(&keybuf[1], note_id, 32) != 0)
+			break;
+		/* TODO(jb55): technically we should check to see if this is a kind 1.
+		 * there could be other kinds with q tags that reference this note
+		 *
+		 * Starting to think we should have tag-kind index
+		 */
+		(*count)++;
+
+		if (mdb_cursor_get(cur, &k, &v, MDB_NEXT))
+			break;
+	}
+
+cleanup:
+	mdb_cursor_close(cur);
+	return 1;
+}
+
+/* count quotes and add them to a metadata builder.
+ * we assume there is no existing quotes entry */
+static int ndb_note_meta_builder_counts(struct ndb_txn *txn,
+					unsigned char *note_id,
+					struct ndb_note_meta_builder *builder)
+{
+	uint32_t thread_replies, total_reactions;
+	uint16_t direct_replies, quotes, reposts;
+	struct ndb_note_meta_entry *entry;
+	int rcs[4];
+
+	quotes = 0;
+	direct_replies = 0;
+	thread_replies = 0;
+	total_reactions = 0;
+
+	rcs[0] = ndb_rebuild_reaction_metadata(txn, note_id, builder, &total_reactions);
+	rcs[1] = ndb_count_quotes(txn, note_id, &quotes);
+	rcs[2] = ndb_count_replies(txn, note_id, &direct_replies, &thread_replies);
+	rcs[3] = ndb_count_reposts(txn, note_id, &reposts);
+
+	if (!rcs[0] && !rcs[1] && !rcs[2] && !rcs[3]) {
+		return 0;
+	}
+
+	/* no entry needed */
+	if (quotes == 0 && direct_replies == 0 && thread_replies == 0 && quotes == 0 && reposts == 0) {
+		return 0;
+	}
+
+	if (!(entry = ndb_note_meta_add_entry(builder))) {
+		return 0;
+	}
+
+	ndb_note_meta_counts_set(entry, total_reactions, quotes, direct_replies, thread_replies, reposts);
+
+	return 1;
+}
 
 // Migrations
 //
+
+/* switch from flatbuffer stats to custom v2 */
+static int ndb_migrate_metadata(struct ndb_txn *txn)
+{
+	MDB_val k, k2, v, v2;
+	MDB_cursor *cur;
+	MDB_dbi note_db, meta_db;
+	unsigned char *id;
+	size_t scratch_size = 1024 * 1024;
+	unsigned char *buffer = malloc(scratch_size);
+	int rc, count;
+	struct ndb_note_meta_builder builder;
+	struct ndb_note *note;
+	struct ndb_note_meta *meta;
+
+	meta_db = txn->lmdb->dbs[NDB_DB_META];
+	note_db = txn->lmdb->dbs[NDB_DB_NOTE];
+
+	/* drop metadata table to avoid issues */
+	if (mdb_drop(txn->mdb_txn, meta_db, 0)) {
+		fprintf(stderr, "ndb_migrate_metadata: mdb_drop failed\n");
+		return -1;
+	}
+
+	if ((rc = mdb_cursor_open(txn->mdb_txn, note_db, &cur))) {
+		fprintf(stderr, "ndb_migrate_metadata: mdb_cursor_open failed, error %d\n", rc);
+		return -1;
+	}
+
+	count = 0;
+
+	/* loop through every metadata entry */
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		ndb_note_meta_builder_init(&builder, buffer, scratch_size);
+
+		note = (struct ndb_note *)v.mv_data;
+		id = ndb_note_id(note);
+		k2.mv_data = (unsigned char *)id;
+		k2.mv_size = 32;
+
+		rc = ndb_note_meta_builder_counts(txn, id, &builder);
+		if (!rc) {
+			mdb_del(txn->mdb_txn, meta_db, &k2, NULL);
+			continue;
+		}
+
+		ndb_note_meta_build(&builder, &meta);
+		assert(ndb_note_meta_entries(meta)->type != 0);
+
+		v2.mv_data = meta;
+		v2.mv_size = ndb_note_meta_total_size(meta);
+
+		/* set entry */
+		if ((rc = mdb_put(txn->mdb_txn, meta_db, &k2, &v2, 0))) {
+			ndb_debug("migrate metadata entry failed on write: %s\n", mdb_strerror(rc));
+		}
+
+		count++;
+	}
+
+	fprintf(stderr, "nostrdb: migrated %d metadata entries\n", count);
+
+	free(buffer);
+	mdb_cursor_close(cur);
+	return 1;
+}
 
 // This was before we had note_profile_pubkey{,_kind} indices. Let's create them.
 static int ndb_migrate_profile_indices(struct ndb_txn *txn)
@@ -2367,6 +2963,11 @@ static int ndb_tsid_compare(const MDB_val *a, const MDB_val *b)
 enum ndb_ingester_msgtype {
 	NDB_INGEST_EVENT, // write json to the ingester queue for processing
 	NDB_INGEST_QUIT,  // kill ingester thread immediately
+	NDB_INGEST_ADD_KEY, // add a key for monitoring encrypted data
+	NDB_INGEST_PROCESS_GIFTWRAP, // reprocess unwrapped giftwraps
+	NDB_INGEST_PROCESS_PNS, // reprocess kind-1080 events
+	NDB_INGEST_ADD_TEAM_ROOT, // add a shared SNS team_root for monitoring
+	NDB_INGEST_PROCESS_SNS, // reprocess kind-1081 events
 };
 
 struct ndb_ingester_event {
@@ -2374,6 +2975,26 @@ struct ndb_ingester_event {
 	char *json;
 	unsigned client : 1; // ["EVENT", {...}] messages
 	unsigned len : 31;
+};
+
+struct ndb_ingester_add_key {
+	unsigned char key[32];
+};
+
+struct ndb_ingester_add_team_root {
+	unsigned char root[32];
+};
+
+struct ndb_ingester_process_giftwrap {
+	uint64_t giftwrap_key;
+};
+
+struct ndb_ingester_process_pns {
+	uint64_t note_key;
+};
+
+struct ndb_ingester_process_sns {
+	uint64_t note_key;
 };
 
 struct ndb_writer_note_relay {
@@ -2387,13 +3008,17 @@ struct ndb_writer_note {
 	struct ndb_note *note;
 	size_t note_len;
 	const char *relay;
+	uint64_t overwrite_note_id;
 };
 
-static void ndb_writer_note_init(struct ndb_writer_note *writer_note, struct ndb_note *note, size_t note_len, const char *relay)
+static void ndb_writer_note_init(struct ndb_writer_note *writer_note,
+				 struct ndb_note *note, size_t note_len,
+				 const char *relay, uint64_t overwrite_note_id)
 {
 	writer_note->note = note;
 	writer_note->note_len = note_len;
 	writer_note->relay = relay;
+	writer_note->overwrite_note_id = overwrite_note_id;
 }
 
 struct ndb_writer_profile {
@@ -2405,12 +3030,22 @@ struct ndb_ingester_msg {
 	enum ndb_ingester_msgtype type;
 	union {
 		struct ndb_ingester_event event;
+		struct ndb_ingester_add_key add_key;
+		struct ndb_ingester_add_team_root add_team_root;
+		struct ndb_ingester_process_giftwrap process_giftwrap;
+		struct ndb_ingester_process_pns process_pns;
+		struct ndb_ingester_process_sns process_sns;
 	};
 };
 
 struct ndb_writer_ndb_meta {
 	// these are 64 bit because I'm paranoid of db-wide alignment issues
 	uint64_t version;
+};
+
+struct ndb_writer_note_meta {
+	unsigned char note_id[32];
+	struct ndb_note_meta *metadata;
 };
 
 // Used in the writer thread when writing ndb_profile_fetch_record's
@@ -2437,16 +3072,22 @@ struct ndb_writer_msg {
 		struct ndb_writer_ndb_meta ndb_meta;
 		struct ndb_writer_last_fetch last_fetch;
 		struct ndb_writer_blocks blocks;
+		struct ndb_writer_note_meta note_meta;
 	};
 };
 
-static inline int ndb_writer_queue_msg(struct ndb_writer *writer,
+static inline int ndb_writer_queue_msg(struct prot_queue *writer_inbox,
 				       struct ndb_writer_msg *msg)
 {
-	return prot_queue_push(&writer->inbox, msg);
+	return prot_queue_push(writer_inbox, msg);
 }
 
-static uint64_t ndb_write_note_and_profile(struct ndb_txn *txn, struct ndb_writer_profile *profile, unsigned char *scratch, size_t scratch_size, uint32_t ndb_flags);
+static uint64_t ndb_write_note_and_profile(
+	secp256k1_context *secp, struct ndb_txn *txn,
+	struct ndb_writer_profile *profile,
+	unsigned char *scratch, size_t scratch_size, uint32_t ndb_flags,
+	struct prot_queue *writer_inbox);
+
 static int ndb_migrate_utf8_profile_names(struct ndb_txn *txn)
 {
 	int rc;
@@ -2459,6 +3100,9 @@ static int ndb_migrate_utf8_profile_names(struct ndb_txn *txn)
 	size_t len;
 	int count, failed, ret;
 	struct ndb_writer_profile profile;
+	secp256k1_context *secp;
+
+	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 
 	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_PROFILE], &cur))) {
 		fprintf(stderr, "ndb_migrate_utf8_profile_names: mdb_cursor_open failed, error %d\n", rc);
@@ -2496,11 +3140,13 @@ static int ndb_migrate_utf8_profile_names(struct ndb_txn *txn)
 		copied_note = malloc(len);
 		memcpy(copied_note, note, len);
 
-		ndb_writer_note_init(&profile.note, copied_note, len, NULL);
+		ndb_writer_note_init(&profile.note, copied_note, len, NULL, 0);
 
 		// we don't pass in flags when migrating... a bit sketchy but
 		// whatever. noone is using this to customize nostrdb atm
-		if (ndb_write_note_and_profile(txn, &profile, scratch, scratch_size, 0)) {
+		if (ndb_write_note_and_profile(secp, txn, &profile,
+					       scratch, scratch_size,
+					       0, NULL)) {
 			count++;
 		}
 	}
@@ -2511,6 +3157,7 @@ static int ndb_migrate_utf8_profile_names(struct ndb_txn *txn)
 		fprintf(stderr, "failed to migrate %d profiles to fix utf8 profile names\n", failed);
 	}
 
+	secp256k1_context_destroy(secp);
 	free(scratch);
 	mdb_cursor_close(cur);
 
@@ -2522,6 +3169,7 @@ static struct ndb_migration MIGRATIONS[] = {
 	{ .fn = ndb_migrate_lower_user_search_indices },
 	{ .fn = ndb_migrate_utf8_profile_names },
 	{ .fn = ndb_migrate_profile_indices },
+	{ .fn = ndb_migrate_metadata },
 };
 
 
@@ -2544,17 +3192,16 @@ int ndb_note_verify(void *ctx, unsigned char *scratch, size_t scratch_size,
 	// first, we ensure the id is valid by calculating the id independently
 	// from what is given to us
 	if (!ndb_calculate_id(note, scratch, scratch_size, id)) {
-		ndb_debug("ndb_note_verify: scratch buffer size too small");
+		ndb_debug("ndb_note_verify: scratch buffer size too small\n");
 		return 0;
 	}
 
 	if (memcmp(id, note->id, 32)) {
-		ndb_debug("ndb_note_verify: note id does not match!");
+		ndb_debug("ndb_note_verify: note id does not match!\n");
 		return 0;
 	}
 
         // id is ok, let's check signature
-
 	ok = secp256k1_xonly_pubkey_parse((secp256k1_context*)ctx,
 					  &xonly_pubkey,
 					  ndb_note_pubkey(note)) != 0;
@@ -2639,14 +3286,14 @@ int ndb_write_last_profile_fetch(struct ndb *ndb, const unsigned char *pubkey,
 	memcpy(&msg.last_fetch.pubkey[0], pubkey, 32);
 	msg.last_fetch.fetched_at = fetched_at;
 
-	return ndb_writer_queue_msg(&ndb->writer, &msg);
+	return ndb_writer_queue_msg(&ndb->writer.inbox, &msg);
 }
 
 
 // When doing cursor scans from greatest to lowest, this function positions the
 // cursor at the first element before descending. MDB_SET_RANGE puts us right
 // after the first element, so we have to go back one.
-static int ndb_cursor_start(MDB_cursor *cur, MDB_val *k, MDB_val *v)
+int ndb_cursor_start(MDB_cursor *cur, MDB_val *k, MDB_val *v)
 {
 	int rc;
 	// Position cursor at the next key greater than or equal to the
@@ -2945,6 +3592,28 @@ static int ndb_ingester_queue_event(struct ndb_ingester *ingester,
 	return threadpool_dispatch(&ingester->tp, &msg);
 }
 
+int ndb_add_key(struct ndb *ndb, unsigned char *key)
+{
+	struct ndb_ingester_msg msg;
+	msg.type = NDB_INGEST_ADD_KEY;
+
+	memcpy(msg.add_key.key, key, 32);
+
+	/* add the key to all ingester threads */
+	return threadpool_dispatch_all_threads(&ndb->ingester.tp, &msg);
+}
+
+int ndb_add_team_root(struct ndb *ndb, unsigned char *team_root)
+{
+	struct ndb_ingester_msg msg;
+	msg.type = NDB_INGEST_ADD_TEAM_ROOT;
+
+	memcpy(msg.add_team_root.root, team_root, 32);
+
+	/* register the team_root on all ingester threads */
+	return threadpool_dispatch_all_threads(&ndb->ingester.tp, &msg);
+}
+
 void ndb_ingest_meta_init(struct ndb_ingest_meta *meta, unsigned client, const char *relay)
 {
 	meta->client = client;
@@ -2982,16 +3651,21 @@ static int ndb_ingest_event(struct ndb_ingester *ingester, const char *json,
 }
 
 
-static int ndb_ingester_process_note(secp256k1_context *ctx,
+static int ndb_ingester_process_note(secp256k1_context *secp,
 				     struct ndb_note *note,
 				     size_t note_size,
-				     struct ndb_writer_msg *out,
 				     struct ndb_ingester *ingester,
 				     unsigned char *scratch,
-				     const char *relay)
+				     size_t scratch_size,
+				     const char *relay,
+				     struct keypair *keys, int nkeys,
+				     struct pns_key *pns_keys, int npns_keys,
+				     struct sns_key *sns_keys, int nsns_keys)
 {
 	enum ndb_ingest_filter_action action;
 	struct ndb_ingest_meta meta;
+	struct ndb_writer_msg msg;
+	int is_rumor;
 
 	action = NDB_INGEST_ACCEPT;
 
@@ -3001,14 +3675,17 @@ static int ndb_ingester_process_note(secp256k1_context *ctx,
 	if (action == NDB_INGEST_REJECT)
 		return 0;
 
+	is_rumor = (*ndb_note_flags(note)) & NDB_NOTE_FLAG_RUMOR;
+
 	// some special situations we might want to skip sig validation,
 	// like during large imports
-	if (action == NDB_INGEST_SKIP_VALIDATION || (ingester->flags & NDB_FLAG_SKIP_NOTE_VERIFY)) {
+	if (is_rumor || action == NDB_INGEST_SKIP_VALIDATION ||
+	    (ingester->flags & NDB_FLAG_SKIP_NOTE_VERIFY)) {
 		// if we're skipping validation we don't need to verify
 	} else {
 		// verify! If it's an invalid note we don't need to
 		// bother writing it to the database
-		if (!ndb_note_verify(ctx, scratch, ingester->scratch_size, note)) {
+		if (!ndb_note_verify(secp, scratch, scratch_size, note)) {
 			ndb_debug("note verification failed\n");
 			return 0;
 		}
@@ -3020,26 +3697,43 @@ static int ndb_ingester_process_note(secp256k1_context *ctx,
 	assert(((uint64_t)note % 4) == 0);
 
 	if (note->kind == 0) {
-		struct ndb_profile_record_builder *b =
-			&out->profile.record;
+		struct ndb_profile_record_builder *b = &msg.profile.record;
 
 		ndb_process_profile_note(note, b);
 
-		out->type = NDB_WRITER_PROFILE;
-		ndb_writer_note_init(&out->profile.note, note, note_size, relay);
+		msg.type = NDB_WRITER_PROFILE;
+		ndb_writer_note_init(&msg.profile.note, note, note_size, relay, 0);
+
+		prot_queue_push(ingester->writer_inbox, &msg);
+
 		return 1;
 	} else if (note->kind == 6) {
 		// process the repost if we have a repost event
-		ndb_debug("processing kind 6 repost\n");
+		//ndb_debug("processing kind 6 repost\n");
 		// dup the relay string
 		ndb_ingest_meta_init(&meta, 0, relay);
 		ndb_ingest_event(ingester, ndb_note_content(note),
 					   ndb_note_content_length(note),
 					   &meta);
+	} else if (note->kind == 1059) {
+		ndb_debug("processing giftwrap\n");
+		ndb_process_giftwrap(secp, ingester, note, keys, nkeys, relay,
+				     scratch, scratch_size);
+	} else if (note->kind == 1080) {
+		ndb_debug("processing pns\n");
+		ndb_process_pns_event(ingester, note, pns_keys, npns_keys,
+				      relay, scratch, scratch_size,
+				      keys, nkeys, secp);
+	} else if (note->kind == 1081) {
+		ndb_debug("processing sns\n");
+		ndb_process_sns_event(secp, ingester, note, sns_keys, nsns_keys,
+				      relay, scratch, scratch_size, keys, nkeys);
 	}
 
-	out->type = NDB_WRITER_NOTE;
-	ndb_writer_note_init(&out->note, note, note_size, relay);
+	msg.type = NDB_WRITER_NOTE;
+	ndb_writer_note_init(&msg.note, note, note_size, relay, 0);
+
+	prot_queue_push(ingester->writer_inbox, &msg);
 
 	return 1;
 }
@@ -3080,23 +3774,27 @@ int ndb_note_seen_on_relay(struct ndb_txn *txn, uint64_t note_key, const char *r
 // process the relay for the note. this is called when we already have the
 // note in the database but still need to check if the relay needs to be
 // written to the relay indexes for corresponding note
-static int ndb_process_note_relay(struct ndb_txn *txn, struct ndb_writer_msg *out,
+static int ndb_process_note_relay(struct ndb_txn *txn,
+				  struct prot_queue *writer,
 				  uint64_t note_key, struct ndb_note *note,
 				  const char *relay)
 {
+	struct ndb_writer_msg msg;
 	// query to see if we already have the relay on this note
 	if (ndb_note_seen_on_relay(txn, note_key, relay)) {
 		return 0;
 	}
 
 	// if not, tell the writer thread to emit a NOTE_RELAY event
-	out->type = NDB_WRITER_NOTE_RELAY;
+	msg.type = NDB_WRITER_NOTE_RELAY;
 
 	ndb_debug("pushing NDB_WRITER_NOTE_RELAY with note_key %" PRIu64 "\n", note_key);
-	out->note_relay.relay = relay;
-	out->note_relay.note_key = note_key;
-	out->note_relay.kind = ndb_note_kind(note);
-	out->note_relay.created_at = ndb_note_created_at(note);
+	msg.note_relay.relay = relay;
+	msg.note_relay.note_key = note_key;
+	msg.note_relay.kind = ndb_note_kind(note);
+	msg.note_relay.created_at = ndb_note_created_at(note);
+
+	prot_queue_push(writer, &msg);
 
 	return 1;
 }
@@ -3104,8 +3802,10 @@ static int ndb_process_note_relay(struct ndb_txn *txn, struct ndb_writer_msg *ou
 static int ndb_ingester_process_event(secp256k1_context *ctx,
 				      struct ndb_ingester *ingester,
 				      struct ndb_ingester_event *ev,
-				      struct ndb_writer_msg *out,
 				      unsigned char *scratch,
+				      struct keypair *keys, int nkeys,
+				      struct pns_key *pns_keys, int npns_keys,
+				      struct sns_key *sns_keys, int nsns_keys,
 				      MDB_txn *read_txn)
 {
 	struct ndb_tce tce;
@@ -3150,7 +3850,8 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 
 		// we still need to process the relays on the note even
 		// if we already have it
-	 	if (ev->relay && ndb_process_note_relay(&txn, out,
+	 	if (ev->relay && ndb_process_note_relay(&txn,
+							ingester->writer_inbox,
 							controller.note_key,
 							controller.note,
 							ev->relay))
@@ -3180,8 +3881,12 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 			}
 
 			if (!ndb_ingester_process_note(ctx, note, note_size,
-						       out, ingester, scratch,
-						       ev->relay)) {
+						       ingester,
+						       scratch,
+						       ingester->scratch_size,
+						       ev->relay, keys, nkeys,
+						       pns_keys, npns_keys,
+						       sns_keys, nsns_keys)) {
 				ndb_debug("failed to process note\n");
 				goto cleanup;
 			} else {
@@ -3202,8 +3907,12 @@ static int ndb_ingester_process_event(secp256k1_context *ctx,
 			}
 
 			if (!ndb_ingester_process_note(ctx, note, note_size,
-						       out, ingester, scratch,
-						       ev->relay)) {
+						       ingester, scratch,
+						       ingester->scratch_size,
+						       ev->relay,
+						       keys, nkeys,
+						       pns_keys, npns_keys,
+						       sns_keys, nsns_keys)) {
 				ndb_debug("failed to process note\n");
 				goto cleanup;
 			} else {
@@ -3510,34 +4219,43 @@ static int ndb_write_profile(struct ndb_txn *txn,
 	return 1;
 }
 
-// find the last id tag in a note (e, p, etc)
-static unsigned char *ndb_note_last_id_tag(struct ndb_note *note, char type)
+int ndb_set_note_meta(struct ndb *ndb, const unsigned char *id, struct ndb_note_meta *meta)
 {
-	unsigned char *last = NULL;
-	struct ndb_iterator iter;
-	struct ndb_str str;
+	struct ndb_writer_msg msg;
+	struct ndb_writer_note_meta *meta_msg = &msg.note_meta;
 
-	// get the liked event id (last id)
-	ndb_tags_iterate_start(note, &iter);
+	msg.type = NDB_WRITER_NOTE_META;
 
-	while (ndb_tags_iterate_next(&iter)) {
-		if (iter.tag->count < 2)
-			continue;
+	memcpy(meta_msg->note_id, id, 32);
+	meta_msg->metadata = meta;
 
-		str = ndb_tag_str(note, iter.tag, 0);
-
-		// assign liked to the last e tag
-		if (str.flag == NDB_PACKED_STR && str.str[0] == type) {
-			str = ndb_tag_str(note, iter.tag, 1);
-			if (str.flag == NDB_PACKED_ID)
-				last = str.id;
-		}
-	}
-
-	return last;
+	return ndb_writer_queue_msg(&ndb->writer.inbox, &msg);
 }
 
-void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *len)
+int ndb_writer_set_note_meta(struct ndb_txn *txn, const unsigned char *id, struct ndb_note_meta *meta)
+{
+	int rc;
+	MDB_val k, v;
+	MDB_dbi note_meta_db;
+
+	// get dbs
+	note_meta_db = txn->lmdb->dbs[NDB_DB_META];
+
+	k.mv_data = (unsigned char *)id;
+	k.mv_size = 32;
+
+	v.mv_data = (unsigned char *)meta;
+	v.mv_size = ndb_note_meta_total_size(meta);
+
+	if ((rc = mdb_put(txn->mdb_txn, note_meta_db, &k, &v, 0))) {
+		ndb_debug("ndb_set_note_meta: write note metadata to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+struct ndb_note_meta *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id)
 {
 	MDB_val k, v;
 
@@ -3549,82 +4267,244 @@ void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *le
 		return NULL;
 	}
 
-	if (len)
-		*len = v.mv_size;
-
 	return v.mv_data;
 }
 
-// When receiving a reaction note, look for the liked id and increase the
-// reaction counter in the note metadata database
-static int ndb_write_reaction_stats(struct ndb_txn *txn, struct ndb_note *note)
+/* write reaction stats if its a valid reaction */
+static int ndb_process_reaction(
+		struct ndb_txn *txn,
+		struct ndb_note *note,
+		unsigned char **liked,
+		unsigned char *scratch,
+		size_t scratch_size)
 {
-	size_t len;
-	void *root;
-	int reactions, rc;
+	const char *content;
+	int rc;
+	uint32_t *count;
 	MDB_val key, val;
-	NdbEventMeta_table_t meta;
-	unsigned char *liked = ndb_note_last_id_tag(note, 'e');
+	union ndb_reaction_str reaction_str;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	enum ndb_meta_clone_result cres;
+	char strbuf[128];
 
-	if (liked == NULL)
+	*liked = ndb_note_last_id_tag(note, 'e');
+
+	if (*liked == NULL)
 		return 0;
 
-	root = ndb_get_note_meta(txn, liked, &len);
+	meta = ndb_get_note_meta(txn, *liked);
 
-	flatcc_builder_t builder;
-	flatcc_builder_init(&builder);
-	NdbEventMeta_start_as_root(&builder);
-
-	// no meta record, let's make one
-	if (root == NULL) {
-		NdbEventMeta_reactions_add(&builder, 1);
-	} else {
-		// clone existing and add to it
-		meta = NdbEventMeta_as_root(root);
-
-		reactions = NdbEventMeta_reactions_get(meta);
-		NdbEventMeta_clone(&builder, meta);
-		NdbEventMeta_reactions_add(&builder, reactions + 1);
+	/* initial builder setup, build reaction string from reaction contents */
+	content = ndb_note_content(note);
+	if (!ndb_reaction_set(&reaction_str, content)) {
+		ndb_debug("reaction string '%s' was too big\n", content);
+		/* string was too big, let's just record a `+` for now */
+		rc = ndb_reaction_set(&reaction_str, "+");
+		assert(rc);
 	}
 
-	NdbProfileRecord_end_as_root(&builder);
-	root = flatcc_builder_finalize_aligned_buffer(&builder, &len);
-	assert(((uint64_t)root % 8) == 0);
+	cres = ndb_note_meta_clone_with_entry(&meta,
+			&entry,
+			NDB_NOTE_META_REACTION,
+			&reaction_str.binmoji,
+			scratch,
+			scratch_size);
 
-	if (root == NULL) {
-		ndb_debug("failed to create note metadata record\n");
-		goto fail;
+	switch (cres) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_reaction_to_str(&reaction_str, strbuf);
+		/* printf("initializing reaction stats for %s\n", strbuf); */
+		ndb_note_meta_reaction_set(entry, 1, reaction_str);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		count = ndb_note_meta_reaction_count(entry);
+		/* printf("increasing count from %d to %d\n", (int)*count, (int)*count+1); */
+		(*count)++;
+		break;
 	}
 
-	// metadata is keyed on id because we want to collect stats regardless
-	// if we have the note yet or not
-	key.mv_data = liked;
+	key.mv_data = *liked;
 	key.mv_size = 32;
 
-	val.mv_data = root;
-	val.mv_size = len;
-
-	// write the new meta record
-	//ndb_debug("writing stats record for ");
-	//print_hex(liked, 32);
-	//ndb_debug("\n");
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
 
 	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
 		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
-		goto fail;
+		return 0;
 	}
 
-	free(root);
-	flatcc_builder_clear(&builder);
-
 	return 1;
-
-fail:
-	free(root);
-	flatcc_builder_clear(&builder);
-	return 0;
 }
 
+static int ndb_increment_total_reactions(
+		struct ndb_txn *txn,
+		unsigned char *liked,
+		unsigned char *scratch,
+		size_t scratch_size)
+{
+	MDB_val key, val;
+	uint32_t *total_reactions;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	int rc;
+
+	meta = ndb_get_note_meta(txn, liked);
+	rc = ndb_note_meta_clone_with_entry(&meta, &entry,
+		NDB_NOTE_META_COUNTS,
+		NULL, /* payload to match. only relevant for reactions */
+		scratch,
+		scratch_size);
+
+	switch (rc) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_note_meta_counts_set(entry, 1, 0, 0, 0, 0);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		total_reactions = ndb_note_meta_counts_total_reactions(entry);
+		(*total_reactions)++;
+		break;
+	}
+
+	key.mv_data = liked;
+	key.mv_size = 32;
+
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
+		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+
+// When receiving a reaction note, look for the liked id and increase the
+// reaction counter in the note metadata database
+static int ndb_write_reaction_stats(struct ndb_txn *txn, struct ndb_note *note,
+				    unsigned char *scratch,
+				    size_t scratch_size)
+{
+	unsigned char *liked;
+	/* we short circuit here since we only want to increment total reaction count
+	 * if its a valid reaction */
+	return ndb_process_reaction(txn, note, &liked, scratch, scratch_size) &&
+	       ndb_increment_total_reactions(txn, liked, scratch, scratch_size);
+}
+
+static struct ndb_str ndb_note_find_tag_str(struct ndb_note *note,
+					    const char *tag_name);
+
+// Parse bolt11 tag from a kind-9735 zap receipt and extract msats.
+// Returns 1 on success, 0 on failure. Sets *msats to 0 if amount unspecified.
+static int ndb_parse_zap_bolt11(struct ndb_note *note, uint64_t *msats)
+{
+	struct ndb_str bolt11_str;
+	struct bolt11 *inv;
+	char *fail;
+
+	bolt11_str = ndb_note_find_tag_str(note, "bolt11");
+	if (bolt11_str.str == NULL || bolt11_str.flag == NDB_PACKED_ID)
+		return 0;
+
+	inv = bolt11_decode_minimal(NULL, bolt11_str.str, &fail);
+	if (inv == NULL)
+		return 0;
+
+	*msats = (inv->msat != NULL) ? inv->msat->millisatoshis : 0;
+	tal_free(inv);
+	return 1;
+}
+
+// When receiving a kind-9735 zap receipt, parse the bolt11 tag and update
+// unverified zap counters on the zapped note's metadata
+static int ndb_write_unverified_zap_stats(struct ndb_txn *txn,
+					  struct ndb_note *note,
+					  unsigned char *scratch,
+					  size_t scratch_size)
+{
+	int rc;
+	uint32_t *count;
+	uint64_t *total;
+	uint64_t msats;
+	MDB_val key, val;
+	unsigned char *zapped_id;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	enum ndb_meta_clone_result cres;
+
+	zapped_id = ndb_note_last_id_tag(note, 'e');
+	if (zapped_id == NULL)
+		return 0;
+
+	if (!ndb_parse_zap_bolt11(note, &msats))
+		return 0;
+
+	meta = ndb_get_note_meta(txn, zapped_id);
+
+	cres = ndb_note_meta_clone_with_entry(&meta, &entry,
+		NDB_NOTE_META_ZAP_UNVERIFIED, NULL, scratch, scratch_size);
+
+	switch (cres) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_note_meta_zap_unverified_set(entry, 1, msats);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		count = ndb_note_meta_zap_unverified_count(entry);
+		total = ndb_note_meta_zap_unverified_msats(entry);
+		(*count)++;
+		*total += msats;
+		break;
+	}
+
+	key.mv_data = zapped_id;
+	key.mv_size = 32;
+
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
+		ndb_debug("write unverified zap stats to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+// Find the first tag matching a multi-char name (e.g. "bolt11") and return
+// its value (element at index 1) as an ndb_str
+static struct ndb_str ndb_note_find_tag_str(struct ndb_note *note,
+					    const char *tag_name)
+{
+	struct ndb_iterator iter;
+	struct ndb_str str;
+	struct ndb_str empty = {0};
+
+	ndb_tags_iterate_start(note, &iter);
+
+	while (ndb_tags_iterate_next(&iter)) {
+		if (iter.tag->count < 2)
+			continue;
+
+		str = ndb_tag_str(note, iter.tag, 0);
+		if (str.flag != NDB_PACKED_ID && !strcmp(str.str, tag_name))
+			return ndb_tag_str(note, iter.tag, 1);
+	}
+
+	return empty;
+}
 
 static int ndb_write_note_id_index(struct ndb_txn *txn, struct ndb_note *note,
 				   uint64_t note_key)
@@ -3781,10 +4661,27 @@ static uint64_t *ndb_filter_get_int(struct ndb_filter *filter,
 	return el;
 }
 
-static inline int push_query_result(struct ndb_query_results *results,
+static inline int push_query_result(struct ndb_query_state *state,
 				    struct ndb_query_result *result)
 {
-	return cursor_push(&results->cur, (unsigned char*)result, sizeof(*result));
+	enum ndb_visitor_action action;
+
+	switch (state->type) {
+	case NDB_QUERY_TYPE_STANDARD:
+		return cursor_push(&state->query.results.cur,
+				   (unsigned char*)result, sizeof(*result));
+	case NDB_QUERY_TYPE_VISITOR:
+		action = state->visitor.visitor(state->visitor.ctx, result);
+		state->visitor.visited++;
+		if (action == NDB_VISITOR_STOP) {
+			state->visitor.done = 1;
+			return 0;
+		}
+		return 1;
+	}
+
+	assert(!"corrupt query state");
+	return 0;
 }
 
 static int compare_query_results(const void *pa, const void *pb)
@@ -3815,18 +4712,35 @@ static void ndb_query_result_init(struct ndb_query_result *res,
 	};
 }
 
-static int query_is_full(struct ndb_query_results *results, int limit)
+static int query_is_full(struct ndb_query_state *state)
 {
-	if (results->cur.p >= results->cur.end)
-		return 1;
+	size_t count;
 
-	return cursor_count(&results->cur, sizeof(struct ndb_query_result)) >= limit;
+	switch (state->type) {
+	case NDB_QUERY_TYPE_STANDARD:
+		if (state->query.results.cur.p >= state->query.results.cur.end)
+			return 1;
+		/* limit 0 means no limit */
+		if (state->limit == 0)
+			return 0;
+		count = cursor_count(&state->query.results.cur,
+				     sizeof(struct ndb_query_result));
+		return count >= state->limit;
+	case NDB_QUERY_TYPE_VISITOR:
+		if (state->visitor.done)
+			return 1;
+		if (state->limit == 0)
+			return 0;
+		return state->visitor.visited >= state->limit;
+	}
+
+	assert(!"corrupt query state");
+	return 0;
 }
 
 static int ndb_query_plan_execute_search(struct ndb_txn *txn,
 					 struct ndb_filter *filter,
-					 struct ndb_query_results *results,
-					 int limit)
+					 struct ndb_query_state *results)
 {
 	const char *search;
 	int i;
@@ -3844,7 +4758,7 @@ static int ndb_query_plan_execute_search(struct ndb_txn *txn,
 		return 0;
 
 	for (i = 0; i < text_results.num_results; i++) {
-		if (query_is_full(results, limit))
+		if (query_is_full(results))
 			break;
 
 		text_result = &text_results.results[i];
@@ -3860,10 +4774,42 @@ static int ndb_query_plan_execute_search(struct ndb_txn *txn,
 	return 1;
 }
 
+static int ndb_query_plan_all_notes(struct ndb_txn *txn, struct ndb_query_state *results)
+{
+	MDB_cursor *cur;
+	MDB_dbi db;
+	MDB_val k, v;
+	int rc;
+	struct ndb_query_result res;
+	uint64_t note_id;
+	struct ndb_note *note;
+	size_t note_size;
+
+	db = txn->lmdb->dbs[NDB_DB_NOTE];
+	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+		return 0;
+
+	rc = mdb_cursor_get(cur, &k, &v, MDB_FIRST);
+	while (rc == MDB_SUCCESS) {
+		memcpy(&note_id, k.mv_data, sizeof(note_id));
+		note = (struct ndb_note *)v.mv_data;
+		note_size = v.mv_size;
+
+		ndb_query_result_init(&res, note, note_size, note_id);
+		if (!push_query_result(results, &res))
+			break;
+
+		rc = mdb_cursor_get(cur, &k, &v, MDB_NEXT);
+	}
+
+	mdb_cursor_close(cur);
+
+	return 1;
+}
+
 static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 				      struct ndb_filter *filter,
-				      struct ndb_query_results *results,
-				      int limit)
+				      struct ndb_query_state *results)
 {
 	MDB_cursor *cur;
 	MDB_dbi db;
@@ -3896,7 +4842,7 @@ static int ndb_query_plan_execute_ids(struct ndb_txn *txn,
 
 	// for each id in our ids filter, find in the db
 	for (i = 0; i < ids->count; i++) {
-		if (query_is_full(results, limit))
+		if (query_is_full(results))
 			break;
 
 		id = ndb_filter_get_id_element(filter, ids, i);
@@ -3981,8 +4927,7 @@ static int ndb_encode_tag_key(unsigned char *buf, int buf_size,
 
 static int ndb_query_plan_execute_authors(struct ndb_txn *txn,
 					  struct ndb_filter *filter,
-					  struct ndb_query_results *results,
-					  int limit)
+					  struct ndb_query_state *results)
 {
 	MDB_val k, v;
 	MDB_cursor *cur;
@@ -4028,7 +4973,7 @@ static int ndb_query_plan_execute_authors(struct ndb_txn *txn,
 			continue;
 
 		// for each id in our ids filter, find in the db
-		while (!query_is_full(results, limit)) {
+		while (!query_is_full(results)) {
 			ptsid = (struct ndb_tsid *)k.mv_data;
 			note_key = *(uint64_t*)v.mv_data;
 
@@ -4069,24 +5014,385 @@ next:
 	return 1;
 }
 
+/* The largest index key we know how to scan over. relay+kind keys are the
+ * biggest: 24 bytes of ints, a length byte, up to 248 bytes of relay url, a
+ * nul terminator and 8-byte alignment padding. */
+#define NDB_SCAN_KEY_MAX 288
+
+/* The index key layouts we know how to walk backwards over.
+ *
+ * Each of these indexes clusters its entries by some group (a kind, a
+ * pubkey+kind, a relay+kind) and orders them by created_at within that group,
+ * so a reverse cursor walk inside a single group is descending by created_at.
+ * Across groups it is not ordered at all. */
+enum ndb_scan_key_type {
+	NDB_SCAN_KEY_U64_TS,     // note_kind:        {kind, created_at}
+	NDB_SCAN_KEY_ID_U64_TS,  // note_pubkey_kind: {pubkey, kind, created_at}
+	NDB_SCAN_KEY_RELAY_KIND, // relay_kind:       {note_key, kind, created_at, relay}
+};
+
+/* A reverse cursor over a single group of an index. */
+struct ndb_index_scanner {
+	/* the key we seeked with, kept so we can tell when we've walked out
+	 * of our group. first member so that it inherits the struct's 8 byte
+	 * alignment, which the relay+kind key parser requires */
+	unsigned char group[NDB_SCAN_KEY_MAX];
+	MDB_cursor *cur;
+	uint64_t created_at;
+	uint64_t note_key;
+};
+
+/* Merges any number of reverse index scans into one created_at-descending
+ * stream.
+ *
+ * Anything that spans more than one group (every kind, several kinds, several
+ * authors) has to merge rather than concatenate. Draining group by group
+ * lets the first group eat the whole limit and starve the rest, which looks
+ * like results arriving out of order. */
+struct ndb_index_merger {
+	struct ndb_index_scanner *scanners;
+	int *heap; // indices into scanners, max-heap on created_at
+	int num_scanners;
+	int capacity;
+	int heap_len;
+	uint64_t since;
+	enum ndb_scan_key_type key_type;
+	MDB_dbi db;
+};
+
+/* is the entry the cursor is sitting on still in this scanner's group? */
+static int ndb_scanner_in_group(struct ndb_index_scanner *s,
+				enum ndb_scan_key_type type, MDB_val *k)
+{
+	struct ndb_u64_ts *kts, *gts;
+	struct ndb_id_u64_ts *kits, *gits;
+	struct ndb_relay_kind_key krk, grk;
+
+	switch (type) {
+	case NDB_SCAN_KEY_U64_TS:
+		if (k->mv_size != sizeof(*kts))
+			return 0;
+		kts = (struct ndb_u64_ts *)k->mv_data;
+		gts = (struct ndb_u64_ts *)s->group;
+		return kts->u64 == gts->u64;
+	case NDB_SCAN_KEY_ID_U64_TS:
+		if (k->mv_size != sizeof(*kits))
+			return 0;
+		kits = (struct ndb_id_u64_ts *)k->mv_data;
+		gits = (struct ndb_id_u64_ts *)s->group;
+		return kits->u64 == gits->u64 && !memcmp(kits->id, gits->id, 32);
+	case NDB_SCAN_KEY_RELAY_KIND:
+		ndb_parse_relay_kind_key(&krk, (unsigned char *)k->mv_data);
+		ndb_parse_relay_kind_key(&grk, s->group);
+		return krk.kind == grk.kind && !strcmp(krk.relay, grk.relay);
+	}
+
+	return 0;
+}
+
+static void ndb_scanner_read(struct ndb_index_scanner *s,
+			     enum ndb_scan_key_type type,
+			     MDB_val *k, MDB_val *v)
+{
+	struct ndb_relay_kind_key rk;
+
+	switch (type) {
+	case NDB_SCAN_KEY_U64_TS:
+		s->created_at = ((struct ndb_u64_ts *)k->mv_data)->timestamp;
+		s->note_key = *(uint64_t *)v->mv_data;
+		return;
+	case NDB_SCAN_KEY_ID_U64_TS:
+		s->created_at = ((struct ndb_id_u64_ts *)k->mv_data)->timestamp;
+		s->note_key = *(uint64_t *)v->mv_data;
+		return;
+	case NDB_SCAN_KEY_RELAY_KIND:
+		// the relay+kind index stores everything in the key
+		ndb_parse_relay_kind_key(&rk, (unsigned char *)k->mv_data);
+		s->created_at = rk.created_at;
+		s->note_key = rk.note_key;
+		return;
+	}
+}
+
+/* Load the entry under the cursor. Returns 0 when this scanner is finished:
+ * off the end of the db, out of its group, or below `since`. Stopping at
+ * `since` is sound here because created_at descends within a group. */
+static int ndb_scanner_load(struct ndb_index_merger *m,
+			    struct ndb_index_scanner *s)
+{
+	MDB_val k, v;
+
+	if (mdb_cursor_get(s->cur, &k, &v, MDB_GET_CURRENT))
+		return 0;
+
+	if (!ndb_scanner_in_group(s, m->key_type, &k))
+		return 0;
+
+	ndb_scanner_read(s, m->key_type, &k, &v);
+
+	return s->created_at >= m->since;
+}
+
+static int ndb_merger_gt(struct ndb_index_merger *m, int a, int b)
+{
+	struct ndb_index_scanner *sa, *sb;
+
+	sa = &m->scanners[a];
+	sb = &m->scanners[b];
+
+	if (sa->created_at != sb->created_at)
+		return sa->created_at > sb->created_at;
+
+	// deterministic tiebreak for notes sharing a created_at
+	return sa->note_key > sb->note_key;
+}
+
+static void ndb_merger_swap(struct ndb_index_merger *m, int a, int b)
+{
+	int tmp;
+
+	tmp = m->heap[a];
+	m->heap[a] = m->heap[b];
+	m->heap[b] = tmp;
+}
+
+static void ndb_merger_push(struct ndb_index_merger *m, int scanner)
+{
+	int i, parent;
+
+	i = m->heap_len++;
+	m->heap[i] = scanner;
+
+	while (i > 0) {
+		parent = (i - 1) / 2;
+		if (!ndb_merger_gt(m, m->heap[i], m->heap[parent]))
+			break;
+		ndb_merger_swap(m, i, parent);
+		i = parent;
+	}
+}
+
+static void ndb_merger_sift(struct ndb_index_merger *m)
+{
+	int i, l, r, big;
+
+	for (i = 0;;) {
+		l = i * 2 + 1;
+		r = l + 1;
+		big = i;
+
+		if (l < m->heap_len && ndb_merger_gt(m, m->heap[l], m->heap[big]))
+			big = l;
+		if (r < m->heap_len && ndb_merger_gt(m, m->heap[r], m->heap[big]))
+			big = r;
+		if (big == i)
+			break;
+
+		ndb_merger_swap(m, i, big);
+		i = big;
+	}
+}
+
+static int ndb_index_merger_init(struct ndb_index_merger *m, MDB_dbi db,
+				 enum ndb_scan_key_type key_type,
+				 uint64_t since, int capacity)
+{
+	if (capacity <= 0)
+		capacity = 1;
+
+	m->scanners = calloc(capacity, sizeof(*m->scanners));
+	m->heap = malloc(capacity * sizeof(*m->heap));
+
+	if (!m->scanners || !m->heap) {
+		free(m->scanners);
+		free(m->heap);
+		return 0;
+	}
+
+	m->db = db;
+	m->key_type = key_type;
+	m->since = since;
+	m->capacity = capacity;
+	m->num_scanners = 0;
+	m->heap_len = 0;
+
+	return 1;
+}
+
+static void ndb_index_merger_destroy(struct ndb_index_merger *m)
+{
+	int i;
+
+	for (i = 0; i < m->num_scanners; i++)
+		mdb_cursor_close(m->scanners[i].cur);
+
+	free(m->scanners);
+	free(m->heap);
+}
+
+/* Add a group to the merge, seeked to the newest entry at or before the
+ * `until` baked into `key`. Groups with nothing in range are dropped. */
+static int ndb_index_merger_add(struct ndb_index_merger *m,
+				struct ndb_txn *txn,
+				const void *key, size_t key_size)
+{
+	struct ndb_index_scanner *s;
+	MDB_val k, v;
+
+	if (m->num_scanners == m->capacity || key_size > NDB_SCAN_KEY_MAX)
+		return 0;
+
+	s = &m->scanners[m->num_scanners];
+
+	if (mdb_cursor_open(txn->mdb_txn, m->db, &s->cur))
+		return 0;
+
+	memcpy(s->group, key, key_size);
+	m->num_scanners++;
+
+	// ndb_cursor_start repoints k at the entry it found, leaving
+	// s->group intact
+	k.mv_data = s->group;
+	k.mv_size = key_size;
+
+	if (!ndb_cursor_start(s->cur, &k, &v))
+		return 1;
+
+	if (ndb_scanner_load(m, s))
+		ndb_merger_push(m, m->num_scanners - 1);
+
+	return 1;
+}
+
+/* Pop the newest note across every group, then advance the group it came
+ * from. */
+static int ndb_index_merger_next(struct ndb_index_merger *m, uint64_t *note_key)
+{
+	struct ndb_index_scanner *s;
+	MDB_val k, v;
+
+	if (m->heap_len == 0)
+		return 0;
+
+	s = &m->scanners[m->heap[0]];
+	*note_key = s->note_key;
+
+	if (mdb_cursor_get(s->cur, &k, &v, MDB_PREV) || !ndb_scanner_load(m, s)) {
+		// this group is done, drop it out of the heap
+		m->heap[0] = m->heap[--m->heap_len];
+	}
+
+	ndb_merger_sift(m);
+
+	return 1;
+}
+
+/* Collect every kind present in the kind index. The index is clustered by
+ * kind, so we can hop from one kind to the next instead of walking every
+ * entry. */
+static int ndb_all_kinds(struct ndb_txn *txn, uint64_t **out, int *out_count)
+{
+	MDB_cursor *cur;
+	MDB_val k, v;
+	struct ndb_u64_ts key;
+	uint64_t *kinds, *tmp, kind;
+	int count, capacity;
+
+	*out = NULL;
+	*out_count = 0;
+
+	capacity = 16;
+	count = 0;
+
+	if (!(kinds = malloc(capacity * sizeof(*kinds))))
+		return 0;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_KIND], &cur)) {
+		free(kinds);
+		return 0;
+	}
+
+	ndb_u64_ts_init(&key, 0, 0);
+	k.mv_data = &key;
+	k.mv_size = sizeof(key);
+
+	while (!mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)) {
+		kind = ((struct ndb_u64_ts *)k.mv_data)->u64;
+
+		if (count == capacity) {
+			capacity *= 2;
+			if (!(tmp = realloc(kinds, capacity * sizeof(*kinds)))) {
+				mdb_cursor_close(cur);
+				free(kinds);
+				return 0;
+			}
+			kinds = tmp;
+		}
+
+		kinds[count++] = kind;
+
+		if (kind == UINT64_MAX)
+			break;
+
+		// jump past every entry for this kind
+		ndb_u64_ts_init(&key, kind + 1, 0);
+		k.mv_data = &key;
+		k.mv_size = sizeof(key);
+	}
+
+	mdb_cursor_close(cur);
+
+	*out = kinds;
+	*out_count = count;
+
+	return 1;
+}
+
+/* Drain a merged scan into the query results, filtering as we go. */
+static void ndb_query_drain_merger(struct ndb_txn *txn,
+				   struct ndb_filter *filter,
+				   struct ndb_query_state *results,
+				   struct ndb_index_merger *merger,
+				   int already_matched,
+				   int need_relays)
+{
+	struct ndb_query_result res;
+	struct ndb_note *note;
+	struct ndb_note_relay_iterator note_relay_iter;
+	uint64_t note_key;
+	size_t note_size;
+
+	while (!query_is_full(results) &&
+	       ndb_index_merger_next(merger, &note_key)) {
+		if (!(note = ndb_get_note_by_key(txn, note_key, &note_size)))
+			continue;
+
+		if (need_relays)
+			ndb_note_relay_iterate_start(txn, &note_relay_iter, note_key);
+
+		if (!ndb_filter_matches_with(filter, note, already_matched,
+					     need_relays ? &note_relay_iter : NULL))
+			continue;
+
+		ndb_query_result_init(&res, note, (uint64_t)note_size, note_key);
+		if (!push_query_result(results, &res))
+			break;
+	}
+}
+
+/* Newest-first with nothing to index on.
+ *
+ * No index orders every note by created_at, so we merge the per-kind scans of
+ * the kind index instead. The note id index is clustered by id, not
+ * created_at, so scanning it backwards hands back an arbitrary sample. */
 static int ndb_query_plan_execute_created_at(struct ndb_txn *txn,
 					     struct ndb_filter *filter,
-					     struct ndb_query_results *results,
-					     int limit)
+					     struct ndb_query_state *results)
 {
-	MDB_dbi db;
-	MDB_val k, v;
-	MDB_cursor *cur;
-	int rc, need_relays = 0;
-	struct ndb_note *note;
-	struct ndb_tsid key, *pkey;
-	uint64_t *pint, until, since, note_id;
-	size_t note_size;
-	struct ndb_query_result res;
-	struct ndb_note_relay_iterator note_relay_iter;
-	unsigned char high_key[32] = {0xFF};
-
-	db = txn->lmdb->dbs[NDB_DB_NOTE_ID];
+	struct ndb_index_merger merger;
+	struct ndb_u64_ts key;
+	uint64_t *kinds, *pint, until, since;
+	int i, num_kinds, need_relays = 0, ok;
 
 	until = UINT64_MAX;
 	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_UNTIL)))
@@ -4099,52 +5405,37 @@ static int ndb_query_plan_execute_created_at(struct ndb_txn *txn,
 	if (ndb_filter_find_elements(filter, NDB_FILTER_RELAYS))
 		need_relays = 1;
 
-	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+	if (!ndb_all_kinds(txn, &kinds, &num_kinds))
 		return 0;
 
-	// if we have until, start there, otherwise just use max
-	ndb_tsid_init(&key, high_key, until);
-	k.mv_data = &key;
-	k.mv_size = sizeof(key);
-
-	if (!ndb_cursor_start(cur, &k, &v))
-		return 1;
-
-	while (!query_is_full(results, limit)) {
-		pkey = (struct ndb_tsid *)k.mv_data;
-		note_id = *(uint64_t*)v.mv_data;
-		assert(v.mv_size == 8);
-
-		// don't continue the scan if we're below `since`
-		if (pkey->timestamp < since)
-			break;
-
-		if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
-			goto next;
-
-		if (need_relays)
-			ndb_note_relay_iterate_start(txn, &note_relay_iter, note_id);
-
-		// does this entry match our filter?
-		if (!ndb_filter_matches_with(filter, note, 0, need_relays ? &note_relay_iter : NULL))
-			goto next;
-
-		ndb_query_result_init(&res, note, (uint64_t)note_size, note_id);
-		if (!push_query_result(results, &res))
-			break;
-next:
-		if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
-			break;
+	if (!ndb_index_merger_init(&merger, txn->lmdb->dbs[NDB_DB_NOTE_KIND],
+				   NDB_SCAN_KEY_U64_TS, since, num_kinds)) {
+		free(kinds);
+		return 0;
 	}
 
-	mdb_cursor_close(cur);
-	return 1;
+	ok = 1;
+	for (i = 0; i < num_kinds; i++) {
+		ndb_u64_ts_init(&key, kinds[i], until);
+		if (!ndb_index_merger_add(&merger, txn, &key, sizeof(key))) {
+			ok = 0;
+			break;
+		}
+	}
+
+	if (ok)
+		ndb_query_drain_merger(txn, filter, results, &merger, 0,
+				       need_relays);
+
+	ndb_index_merger_destroy(&merger);
+	free(kinds);
+
+	return ok;
 }
 
 static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 				       struct ndb_filter *filter,
-				       struct ndb_query_results *results,
-				       int limit)
+				       struct ndb_query_state *results)
 {
 	MDB_cursor *cur;
 	MDB_dbi db;
@@ -4193,7 +5484,7 @@ static int ndb_query_plan_execute_tags(struct ndb_txn *txn,
 			continue;
 
 		// for each id in our ids filter, find in the db
-		while (!query_is_full(results, limit)) {
+		while (!query_is_full(results)) {
 			// check if tag value matches, bail if not
 			if (((unsigned char *)k.mv_data)[0] != tags->field.tag)
 				break;
@@ -4238,21 +5529,14 @@ fail:
 static int ndb_query_plan_execute_author_kinds(
 		struct ndb_txn *txn,
 		struct ndb_filter *filter,
-		struct ndb_query_results *results,
-		int limit)
+		struct ndb_query_state *results)
 {
-	MDB_cursor *cur;
-	MDB_dbi db;
-	MDB_val k, v;
-	struct ndb_note *note;
+	struct ndb_index_merger merger;
 	struct ndb_filter_elements *kinds, *relays, *authors;
-	struct ndb_query_result res;
-	uint64_t kind, note_id, until, since, *pint;
-	size_t note_size;
+	uint64_t kind, until, since, *pint;
 	unsigned char *author;
-	int i, j, rc;
-	struct ndb_id_u64_ts key, *pkey;
-	struct ndb_note_relay_iterator note_relay_iter;
+	int i, j, ok;
+	struct ndb_id_u64_ts key;
 
 	// we should have kinds in a kinds filter!
 	if (!(kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS)))
@@ -4272,84 +5556,46 @@ static int ndb_query_plan_execute_author_kinds(
 	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
 		since = *pint;
 
-	db = txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND];
-
-	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+	// every author+kind pair is its own created_at ordered run, so merge
+	// them instead of draining one pair at a time
+	if (!ndb_index_merger_init(&merger,
+				   txn->lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND],
+				   NDB_SCAN_KEY_ID_U64_TS, since,
+				   authors->count * kinds->count))
 		return 0;
 
-	for (j = 0; j < authors->count; j++) {
-		if (query_is_full(results, limit))
-			break;
-
+	ok = 1;
+	for (j = 0; ok && j < authors->count; j++) {
 		if (!(author = ndb_filter_get_id_element(filter, authors, j)))
 			continue;
 
-	for (i = 0; i < kinds->count; i++) {
-		if (query_is_full(results, limit))
-			break;
+		for (i = 0; i < kinds->count; i++) {
+			kind = kinds->elements[i];
 
-		kind = kinds->elements[i];
+			ndb_debug("finding kind %"PRIu64"\n", kind);
 
-		ndb_debug("finding kind %"PRIu64"\n", kind);
-
-		ndb_id_u64_ts_init(&key, author, kind, until);
-		
-		k.mv_data = &key;
-		k.mv_size = sizeof(key);
-
-		if (!ndb_cursor_start(cur, &k, &v))
-			continue;
-
-		// scan the kind subindex
-		while (!query_is_full(results, limit)) {
-			pkey = (struct ndb_id_u64_ts*)k.mv_data;
-
-			ndb_debug("scanning subindex kind:%"PRIu64" created_at:%"PRIu64" pubkey:",
-					pkey->u64,
-					pkey->timestamp);
-
-			if (pkey->u64 != kind)
+			ndb_id_u64_ts_init(&key, author, kind, until);
+			if (!ndb_index_merger_add(&merger, txn, &key, sizeof(key))) {
+				ok = 0;
 				break;
-
-			// don't continue the scan if we're below `since`
-			if (pkey->timestamp < since)
-				break;
-
-			if (memcmp(pkey->id, author, 32))
-				break;
-
-			note_id = *(uint64_t*)v.mv_data;
-			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
-				goto next;
-
-			if (relays)
-				ndb_note_relay_iterate_start(txn, &note_relay_iter, note_id);
-
-			if (!ndb_filter_matches_with(filter, note,
-						     (1 << NDB_FILTER_KINDS) | (1 << NDB_FILTER_AUTHORS),
-						     relays? &note_relay_iter : NULL))
-				goto next;
-
-			ndb_query_result_init(&res, note, note_size, note_id);
-			if (!push_query_result(results, &res))
-				break;
-
-next:
-			if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
-				break;
+			}
 		}
 	}
-	}
 
-	mdb_cursor_close(cur);
-	return 1;
+	if (ok)
+		ndb_query_drain_merger(txn, filter, results, &merger,
+				       (1 << NDB_FILTER_KINDS) | (1 << NDB_FILTER_AUTHORS),
+				       relays != NULL);
+
+	ndb_index_merger_destroy(&merger);
+
+	return ok;
 }
 
 static int ndb_query_plan_execute_profile_search(
 		struct ndb_txn *txn,
 		struct ndb_filter *filter,
-		struct ndb_query_results *results,
-		int limit)
+		struct ndb_query_state *results)
 {
 	const char *search;
 	int i;
@@ -4386,7 +5632,7 @@ static int ndb_query_plan_execute_profile_search(
 	if (!(filter_pubkey = ndb_filter_get_id_element(f, els, 0)))
 		goto fail;
 
-	for (i = 0; !query_is_full(results, limit); i++) {
+	for (i = 0; !query_is_full(results); i++) {
 		if (i == 0) {
 			if (!ndb_search_profile(txn, &profile_search, search))
 				break;
@@ -4399,7 +5645,7 @@ static int ndb_query_plan_execute_profile_search(
 		memcpy(filter_pubkey, profile_search.key->id, 32);
 
 		// Look up the corresponding note associated with that pubkey
-		if (!ndb_query_plan_execute_author_kinds(txn, f, results, limit))
+		if (!ndb_query_plan_execute_author_kinds(txn, f, results))
 			goto fail;
 	}
 
@@ -4415,21 +5661,17 @@ fail:
 static int ndb_query_plan_execute_relay_kinds(
 		struct ndb_txn *txn,
 		struct ndb_filter *filter,
-		struct ndb_query_results *results,
-		int limit)
+		struct ndb_query_state *results)
 {
-	MDB_cursor *cur;
-	MDB_dbi db;
-	MDB_val k, v;
-	struct ndb_note *note;
+	struct ndb_index_merger merger;
 	struct ndb_filter_elements *kinds, *relays;
-	struct ndb_query_result res;
-	uint64_t kind, note_id, until, since, *pint;
-	size_t note_size;
+	uint64_t kind, until, since, *pint;
 	const char *relay;
-	int i, j, rc, len;
+	int i, j, len, ok;
 	struct ndb_relay_kind_key relay_key;
-	unsigned char keybuf[256];
+	// the relay+kind comparator requires 8 byte aligned keys
+	uint64_t keybuf_aligned[NDB_SCAN_KEY_MAX / 8];
+	unsigned char *keybuf = (unsigned char *)keybuf_aligned;
 
 	// we should have kinds in a kinds filter!
 	if (!(kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS)))
@@ -4446,102 +5688,62 @@ static int ndb_query_plan_execute_relay_kinds(
 	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
 		since = *pint;
 
-	db = txn->lmdb->dbs[NDB_DB_NOTE_RELAY_KIND];
-
-	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+	// every relay+kind pair is its own created_at ordered run, so merge
+	// them instead of draining one pair at a time
+	if (!ndb_index_merger_init(&merger,
+				   txn->lmdb->dbs[NDB_DB_NOTE_RELAY_KIND],
+				   NDB_SCAN_KEY_RELAY_KIND, since,
+				   relays->count * kinds->count))
 		return 0;
 
-	for (j = 0; j < relays->count; j++) {
-		if (query_is_full(results, limit))
-			break;
-
+	ok = 1;
+	for (j = 0; ok && j < relays->count; j++) {
 		if (!(relay = ndb_filter_get_string_element(filter, relays, j)))
 			continue;
 
-	for (i = 0; i < kinds->count; i++) {
-		if (query_is_full(results, limit))
-			break;
+		for (i = 0; i < kinds->count; i++) {
+			kind = kinds->elements[i];
+			ndb_debug("kind %" PRIu64 "\n", kind);
 
-		kind = kinds->elements[i];
-		ndb_debug("kind %" PRIu64 "\n", kind);
-		
-		if (!ndb_relay_kind_key_init_high(&relay_key, relay, kind, until)) {
-			ndb_debug("ndb_relay_kind_key_init_high failed in relay query\n");
-			continue;
-		}
+			if (!ndb_relay_kind_key_init_high(&relay_key, relay, kind, until)) {
+				ndb_debug("ndb_relay_kind_key_init_high failed in relay query\n");
+				continue;
+			}
 
-		if (!(len = ndb_build_relay_kind_key(keybuf, sizeof(keybuf), &relay_key))) {
-			ndb_debug("ndb_build_relay_kind_key failed in relay query\n");
-			ndb_debug_relay_kind_key(&relay_key);
-			continue;
-		}
+			if (!(len = ndb_build_relay_kind_key(keybuf, NDB_SCAN_KEY_MAX, &relay_key))) {
+				ndb_debug("ndb_build_relay_kind_key failed in relay query\n");
+				ndb_debug_relay_kind_key(&relay_key);
+				continue;
+			}
 
-		k.mv_data = keybuf;
-		k.mv_size = len;
-
-		ndb_debug("starting with key ");
-		ndb_debug_relay_kind_key(&relay_key);
-
-		if (!ndb_cursor_start(cur, &k, &v))
-			continue;
-
-		// scan the kind subindex
-		while (!query_is_full(results, limit)) {
-			ndb_parse_relay_kind_key(&relay_key, k.mv_data);
-
-			ndb_debug("inside kind subindex ");
+			ndb_debug("starting with key ");
 			ndb_debug_relay_kind_key(&relay_key);
 
-			if (relay_key.kind != kind)
+			if (!ndb_index_merger_add(&merger, txn, keybuf, len)) {
+				ok = 0;
 				break;
-
-			if (strcmp(relay_key.relay, relay))
-				break;
-
-			// don't continue the scan if we're below `since`
-			if (relay_key.created_at < since)
-				break;
-
-			note_id = relay_key.note_key;
-			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
-				goto next;
-
-			if (!ndb_filter_matches_with(filter, note,
-						     (1 << NDB_FILTER_KINDS) | (1 << NDB_FILTER_RELAYS),
-						     NULL))
-				goto next;
-
-			ndb_query_result_init(&res, note, note_size, note_id);
-			if (!push_query_result(results, &res))
-				break;
-
-next:
-			if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
-				break;
+			}
 		}
 	}
-	}
 
-	mdb_cursor_close(cur);
-	return 1;
+	if (ok)
+		ndb_query_drain_merger(txn, filter, results, &merger,
+				       (1 << NDB_FILTER_KINDS) | (1 << NDB_FILTER_RELAYS), 0);
+
+	ndb_index_merger_destroy(&merger);
+
+	return ok;
 }
 
 static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 					struct ndb_filter *filter,
-					struct ndb_query_results *results,
-					int limit)
+					struct ndb_query_state *results)
 {
-	MDB_cursor *cur;
-	MDB_dbi db;
-	MDB_val k, v;
-	struct ndb_note *note;
-	struct ndb_u64_ts tsid, *ptsid;
+	struct ndb_index_merger merger;
+	struct ndb_u64_ts tsid;
 	struct ndb_filter_elements *kinds;
-	struct ndb_query_result res;
-	uint64_t kind, note_id, until, since, *pint;
-	size_t note_size;
-	int i, rc, need_relays = 0;
-	struct ndb_note_relay_iterator note_relay_iter;
+	uint64_t kind, until, since, *pint;
+	int i, need_relays = 0, ok;
 
 	// we should have kinds in a kinds filter!
 	if (!(kinds = ndb_filter_find_elements(filter, NDB_FILTER_KINDS)))
@@ -4558,59 +5760,35 @@ static int ndb_query_plan_execute_kinds(struct ndb_txn *txn,
 	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_SINCE)))
 		since = *pint;
 
-	db = txn->lmdb->dbs[NDB_DB_NOTE_KIND];
-
-	if ((rc = mdb_cursor_open(txn->mdb_txn, db, &cur)))
+	// the kind index is only created_at ordered within a single kind, so
+	// merge the kinds rather than draining them one at a time
+	if (!ndb_index_merger_init(&merger, txn->lmdb->dbs[NDB_DB_NOTE_KIND],
+				   NDB_SCAN_KEY_U64_TS, since, kinds->count))
 		return 0;
 
+	ok = 1;
 	for (i = 0; i < kinds->count; i++) {
-		if (query_is_full(results, limit))
-			break;
-
 		kind = kinds->elements[i];
 		ndb_debug("kind %" PRIu64 "\n", kind);
+
 		ndb_u64_ts_init(&tsid, kind, until);
-
-		k.mv_data = &tsid;
-		k.mv_size = sizeof(tsid);
-
-		if (!ndb_cursor_start(cur, &k, &v))
-			continue;
-
-		// for each id in our ids filter, find in the db
-		while (!query_is_full(results, limit)) {
-			ptsid = (struct ndb_u64_ts *)k.mv_data;
-			if (ptsid->u64 != kind)
-				break;
-
-			// don't continue the scan if we're below `since`
-			if (ptsid->timestamp < since)
-				break;
-
-			note_id = *(uint64_t*)v.mv_data;
-			if (!(note = ndb_get_note_by_key(txn, note_id, &note_size)))
-				goto next;
-
-			if (need_relays)
-				ndb_note_relay_iterate_start(txn, &note_relay_iter, note_id);
-
-			if (!ndb_filter_matches_with(filter, note,
-						     1 << NDB_FILTER_KINDS,
-						     need_relays ? &note_relay_iter : NULL))
-				goto next;
-
-			ndb_query_result_init(&res, note, note_size, note_id);
-			if (!push_query_result(results, &res))
-				break;
-
-next:
-			if (mdb_cursor_get(cur, &k, &v, MDB_PREV))
-				break;
+		if (!ndb_index_merger_add(&merger, txn, &tsid, sizeof(tsid))) {
+			ok = 0;
+			break;
 		}
 	}
 
-	mdb_cursor_close(cur);
-	return 1;
+	if (ok)
+		ndb_query_drain_merger(txn, filter, results, &merger,
+				       1 << NDB_FILTER_KINDS, need_relays);
+
+	ndb_index_merger_destroy(&merger);
+
+	return ok;
+}
+
+static int filter_is_empty(struct ndb_filter *filter) {
+	return filter->elem_buf.start == NULL;
 }
 
 static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
@@ -4624,6 +5802,9 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 	tags = ndb_filter_find_elements(filter, NDB_FILTER_TAGS);
 	relays = ndb_filter_find_elements(filter, NDB_FILTER_RELAYS);
 
+	if (filter_is_empty(filter))
+		return NDB_PLAN_ALL_NOTES;
+
 	// profile search
 	if (kinds && kinds->count == 1 && kinds->elements[0] == 0 && search) {
 		return NDB_PLAN_PROFILE_SEARCH;
@@ -4636,7 +5817,11 @@ static enum ndb_query_plan ndb_filter_plan(struct ndb_filter *filter)
 		return NDB_PLAN_IDS;
 	} else if (relays && kinds && !authors) {
 		return NDB_PLAN_RELAY_KINDS;
-	} else if (kinds && authors && authors->count == 1) {
+	} else if (kinds && authors &&
+		   (authors->count == 1 ||
+		    authors->count * kinds->count <= NDB_MAX_AUTHOR_KIND_SCANNERS)) {
+		// the plan itself has always been multi-author (it merges every
+		// author*kind run); only the scanner count needs bounding
 		return NDB_PLAN_AUTHOR_KINDS;
 	} else if (authors && authors->count == 1) {
 		return NDB_PLAN_AUTHORS;
@@ -4661,101 +5846,230 @@ static const char *ndb_query_plan_name(enum ndb_query_plan plan_id)
 		case NDB_PLAN_RELAY_KINDS: return "relay_kinds";
 		case NDB_PLAN_AUTHOR_KINDS: return "author_kinds";
 		case NDB_PLAN_PROFILE_SEARCH: return "profile_search";
+		case NDB_PLAN_ALL_NOTES: return "all_notes";
 	}
 
 	return "unknown";
 }
 
-static int ndb_query_filter(struct ndb_txn *txn, struct ndb_filter *filter,
-			    struct ndb_query_result *res, int capacity,
-			    int *results_out)
+/* Fill an ndb_query_state with the correct limit depending on the 
+ * result capacity and filter limit.
+ *
+ * The behavior is slightly different depending on whether its a standard
+ * query or visitor query.
+ *
+ * Standard queries have a capacity, so we modify the limit based on this if
+ * needed.
+ *
+ * For visitor queries, no capacity is needed, so it will be NULL. In this
+ * case, we only use the filter limit to limit visitor queries. If there is
+ * no limit, the visitor will scan over everything matching the query.
+ */
+static void ndb_query_state_fill_limit(
+		struct ndb_query_state *state,
+		struct ndb_filter *filter,
+		int *result_capacity)
 {
-	struct ndb_query_results results;
-	uint64_t limit, *pint;
+	uint64_t *pint;
+
+	pint = ndb_filter_get_int(filter, NDB_FILTER_LIMIT);
+
+	/* default: visitor = unbounded (0), standard = bounded by capacity */
+	state->limit = result_capacity ? (uint64_t)(*result_capacity) : 0;
+
+	/* filter limit: 0 means "no limit" (don't clamp) */
+	if (pint && *pint != 0) {
+		state->limit = result_capacity
+			     ? (uint64_t)min(*result_capacity, (int)*pint)
+			     : *pint;
+ 	}
+}
+
+static int ndb_query_filter(struct ndb_txn *txn, struct ndb_filter *filter,
+			    struct ndb_query_state *state)
+{
 	enum ndb_query_plan plan;
-	limit = capacity;
-
-	if ((pint = ndb_filter_get_int(filter, NDB_FILTER_LIMIT)))
-		limit = *pint;
-
-	limit = min(capacity, limit);
-	make_cursor((unsigned char *)res,
-		    ((unsigned char *)res) + limit * sizeof(*res),
-		    &results.cur);
 
 	plan = ndb_filter_plan(filter);
 	ndb_debug("using query plan '%s'\n", ndb_query_plan_name(plan));
 	switch (plan) {
 	// We have a list of ids, just open a cursor and jump to each once
+	case NDB_PLAN_ALL_NOTES:
+		if (!ndb_query_plan_all_notes(txn, state))
+			return 0;
+		break;
 	case NDB_PLAN_IDS:
-		if (!ndb_query_plan_execute_ids(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_ids(txn, filter, state))
 			return 0;
 		break;
 	case NDB_PLAN_RELAY_KINDS:
-		if (!ndb_query_plan_execute_relay_kinds(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_relay_kinds(txn, filter, state))
 			return 0;
 		break;
 	case NDB_PLAN_SEARCH:
-		if (!ndb_query_plan_execute_search(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_search(txn, filter, state))
 			return 0;
 		break;
 
 	case NDB_PLAN_PROFILE_SEARCH:
-		if (!ndb_query_plan_execute_profile_search(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_profile_search(txn, filter, state))
 			return 0;
 		break;
 
 	// We have just kinds, just scan the kind index
 	case NDB_PLAN_KINDS:
-		if (!ndb_query_plan_execute_kinds(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_kinds(txn, filter, state))
 			return 0;
 		break;
 	case NDB_PLAN_TAGS:
-		if (!ndb_query_plan_execute_tags(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_tags(txn, filter, state))
 			return 0;
 		break;
 	case NDB_PLAN_CREATED:
-		if (!ndb_query_plan_execute_created_at(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_created_at(txn, filter, state))
 			return 0;
 		break;
 	case NDB_PLAN_AUTHORS:
-		if (!ndb_query_plan_execute_authors(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_authors(txn, filter, state))
 			return 0;
 		break;
 	case NDB_PLAN_AUTHOR_KINDS:
-		if (!ndb_query_plan_execute_author_kinds(txn, filter, &results, limit))
+		if (!ndb_query_plan_execute_author_kinds(txn, filter, state))
 			return 0;
 		break;
 	}
 
-	*results_out = cursor_count(&results.cur, sizeof(*res));
+	return 1;
+}
+
+int ndb_query_visit(struct ndb_txn *txn,
+		    struct ndb_filter *filters, int num_filters,
+		    ndb_visitor_fn visitor,
+		    void *ctx)
+{
+	int i;
+	uint64_t visited;
+	struct ndb_query_state state;
+
+	if (num_filters == 0)
+		return 0;
+
+	state.type = NDB_QUERY_TYPE_VISITOR;
+	state.visitor.done = 0;
+	state.visitor.visited = 0;
+	state.visitor.visitor = visitor;
+	state.visitor.ctx = ctx;
+
+	for (i = 0; i < num_filters; i++) {
+		if (state.visitor.done)
+			break;
+
+		/* update limit for this filter: set to absolute target count */
+		visited = state.visitor.visited;
+		ndb_query_state_fill_limit(&state, &filters[i], NULL);
+		if (state.limit != 0)
+			state.limit += visited;
+
+		if (!ndb_query_filter(txn, &filters[i], &state))
+			return 0;
+	}
+
 	return 1;
 }
 
 int ndb_query(struct ndb_txn *txn, struct ndb_filter *filters, int num_filters,
 	      struct ndb_query_result *results, int result_capacity, int *count)
 {
-	int i, out;
-	struct ndb_query_result *p = results;
+	int i, total, dst, cap, ok;
+	struct ndb_query_state state;
+	struct ndb_query_result *tmp, *buf;
+	int *counts;
 
-	out = 0;
-	*count = 0;
+	if (num_filters == 0)
+		return 0;
 
-	for (i = 0; i < num_filters; i++) {
-		if (!ndb_query_filter(txn, &filters[i], p,
-				      result_capacity, &out)) {
+	/* single filter: run directly into output buffer */
+	if (num_filters == 1) {
+		state.type = NDB_QUERY_TYPE_STANDARD;
+		state.query.capacity = result_capacity;
+		make_cursor((unsigned char *)results,
+			    ((unsigned char *)results) +
+			    result_capacity * sizeof(*results),
+			    &state.query.results.cur);
+
+		ndb_query_state_fill_limit(&state, &filters[0],
+					   &result_capacity);
+
+		if (!ndb_query_filter(txn, &filters[0], &state))
 			return 0;
-		}
 
-		*count += out;
-		p += out;
-		result_capacity -= out;
-		if (result_capacity <= 0)
-			break;
+		*count = cursor_count(&state.query.results.cur,
+				      sizeof(*results));
+		qsort(results, *count, sizeof(*results),
+		      compare_query_results);
+		return 1;
 	}
 
-	// sort results
-	qsort(results, *count, sizeof(*results), compare_query_results);
+	/* multi-filter: run each filter into its own buffer, then merge
+	 * the results by created_at so that every filter gets a fair
+	 * chance to contribute */
+	tmp = malloc(num_filters * result_capacity * sizeof(*tmp));
+	counts = calloc(num_filters, sizeof(int));
+	if (!tmp || !counts) {
+		free(tmp);
+		free(counts);
+		return 0;
+	}
+
+	ok = 1;
+	for (i = 0; i < num_filters; i++) {
+		buf = tmp + i * result_capacity;
+		cap = result_capacity;
+
+		state.type = NDB_QUERY_TYPE_STANDARD;
+		state.query.capacity = cap;
+		make_cursor((unsigned char *)buf,
+			    ((unsigned char *)buf) + cap * sizeof(*buf),
+			    &state.query.results.cur);
+
+		ndb_query_state_fill_limit(&state, &filters[i], &cap);
+
+		if (!ndb_query_filter(txn, &filters[i], &state)) {
+			ok = 0;
+			break;
+		}
+
+		counts[i] = cursor_count(&state.query.results.cur,
+					 sizeof(*buf));
+	}
+
+	if (!ok) {
+		free(tmp);
+		free(counts);
+		return 0;
+	}
+
+	/* compact: remove gaps between per-filter result slabs */
+	total = counts[0];
+	dst = counts[0];
+	for (i = 1; i < num_filters; i++) {
+		if (counts[i] > 0) {
+			buf = tmp + i * result_capacity;
+			memmove(tmp + dst, buf, counts[i] * sizeof(*tmp));
+			dst += counts[i];
+			total += counts[i];
+		}
+	}
+
+	/* sort all results by created_at descending */
+	qsort(tmp, total, sizeof(*tmp), compare_query_results);
+
+	/* copy top results into output */
+	*count = total < result_capacity ? total : result_capacity;
+	memcpy(results, tmp, *count * sizeof(*results));
+
+	free(tmp);
+	free(counts);
 	return 1;
 }
 
@@ -5476,31 +6790,367 @@ static int ndb_write_new_blocks(struct ndb_txn *txn, struct ndb_note *note,
 	return 1;
 }
 
-static uint64_t ndb_write_note(struct ndb_txn *txn,
+
+// find the last id tag in a note (e, p, etc)
+static unsigned char *ndb_note_first_tag_id(struct ndb_note *note, char tag)
+{
+	struct ndb_iterator iter;
+	struct ndb_str str;
+
+	// get the liked event id (last id)
+	ndb_tags_iterate_start(note, &iter);
+
+	while (ndb_tags_iterate_next(&iter)) {
+		if (iter.tag->count < 2)
+			continue;
+
+		str = ndb_tag_str(note, iter.tag, 0);
+
+		if (str.flag == NDB_PACKED_STR && str.str[0] == tag) {
+			str = ndb_tag_str(note, iter.tag, 1);
+			if (str.flag == NDB_PACKED_ID)
+				return str.id;
+		}
+	}
+
+	return NULL;
+}
+
+static int ndb_increment_quote_metadata(
+		struct ndb_txn *txn,
+		unsigned char *quoted_note_id,
+		unsigned char *scratch,
+		size_t scratch_size)
+{
+	MDB_val key, val;
+	uint16_t *quotes;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	int rc;
+
+	meta = ndb_get_note_meta(txn, quoted_note_id);
+	rc = ndb_note_meta_clone_with_entry(&meta, &entry,
+		NDB_NOTE_META_COUNTS,
+		NULL, /* payload to match. only relevant for reactions */
+		scratch,
+		scratch_size);
+
+	switch (rc) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_note_meta_counts_set(entry, 0, 1, 0, 0, 0);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		quotes = ndb_note_meta_counts_quotes(entry);
+		(*quotes)++;
+		break;
+	}
+
+	key.mv_data = quoted_note_id;
+	key.mv_size = 32;
+
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
+		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+/* update reply count metadata for a specific note id */
+static int ndb_increment_direct_reply_metadata(
+		struct ndb_txn *txn,
+		unsigned char *id,
+		unsigned char *scratch,
+		size_t scratch_size)
+{
+	MDB_val key, val;
+	uint16_t *direct_replies;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	int rc;
+
+	meta = ndb_get_note_meta(txn, id);
+	rc = ndb_note_meta_clone_with_entry(&meta, &entry,
+		NDB_NOTE_META_COUNTS,
+		NULL, /* payload to match. only relevant for reactions */
+		scratch,
+		scratch_size);
+
+	switch (rc) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_note_meta_counts_set(entry, 0, 0, 1, 0, 0);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		direct_replies = ndb_note_meta_counts_direct_replies(entry);
+		(*direct_replies)++;
+		break;
+	}
+
+	key.mv_data = id;
+	key.mv_size = 32;
+
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
+		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+/* update reply count metadata for a specific note id */
+static int ndb_increment_thread_reply_metadata(
+		struct ndb_txn *txn,
+		unsigned char *id,
+		unsigned char *scratch,
+		size_t scratch_size)
+{
+	MDB_val key, val;
+	uint32_t *replies;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	int rc;
+
+	meta = ndb_get_note_meta(txn, id);
+	rc = ndb_note_meta_clone_with_entry(&meta, &entry,
+		NDB_NOTE_META_COUNTS,
+		NULL, /* payload to match. only relevant for reactions */
+		scratch,
+		scratch_size);
+
+	switch (rc) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_note_meta_counts_set(entry, 0, 0, 0, 1, 0);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		replies = ndb_note_meta_counts_thread_replies(entry);
+		(*replies)++;
+		break;
+	}
+
+	key.mv_data = id;
+	key.mv_size = 32;
+
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
+		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+/* update reply count metadata for a specific note id */
+static int ndb_increment_repost_metadata(
+		struct ndb_txn *txn,
+		unsigned char *id,
+		unsigned char *scratch,
+		size_t scratch_size)
+{
+	MDB_val key, val;
+	uint16_t *reposts;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	int rc;
+
+	meta = ndb_get_note_meta(txn, id);
+	rc = ndb_note_meta_clone_with_entry(&meta, &entry,
+		NDB_NOTE_META_COUNTS,
+		NULL, /* payload to match. only relevant for reactions */
+		scratch,
+		scratch_size);
+
+	switch (rc) {
+	case NDB_META_CLONE_FAILED:
+		return 0;
+	case NDB_META_CLONE_NEW_ENTRY:
+		ndb_note_meta_counts_set(entry, 0, 0, 0, 0, 1);
+		break;
+	case NDB_META_CLONE_EXISTING_ENTRY:
+		reposts = ndb_note_meta_counts_reposts(entry);
+		(*reposts)++;
+		break;
+	}
+
+	key.mv_data = id;
+	key.mv_size = 32;
+
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	assert((val.mv_size % 8) == 0);
+
+	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0))) {
+		ndb_debug("write reaction stats to db failed: %s\n", mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+static void ndb_process_repost_stats(struct ndb_txn *txn, struct ndb_note *note, unsigned char *scratch, size_t scratch_size)
+{
+	unsigned char *reposted_note_id;
+	reposted_note_id = ndb_note_first_tag_id(note, 'e');
+
+	/* find q tag to see if we are quoting anything */
+	if (reposted_note_id) {
+		ndb_increment_repost_metadata(txn, reposted_note_id, scratch, scratch_size);
+	}
+}
+
+/* process quote and reply count metadata */
+static void ndb_process_note_stats(
+		struct ndb_txn *txn,
+		struct ndb_note *note,
+		unsigned char *scratch,
+		size_t scratch_size)
+{
+	unsigned char *quoted_note_id, *reply_id;
+	struct ndb_note_reply reply;
+
+	reply_id = NULL;
+
+	/* find q tag to see if we are quoting anything */
+	if ((quoted_note_id = ndb_note_first_tag_id(note, 'q'))) {
+		ndb_increment_quote_metadata(txn, quoted_note_id, scratch, scratch_size);
+	}
+
+	ndb_parse_reply(note, &reply);
+	if (ndb_is_reply_to_root(&reply)) {
+		reply_id = reply.root;
+	} else {
+		reply_id = reply.reply;
+	}
+
+	if (reply_id) {
+		ndb_increment_direct_reply_metadata(txn, reply_id, scratch, scratch_size);
+	}
+
+	if (reply.root) {
+		ndb_increment_thread_reply_metadata(txn, reply.root, scratch, scratch_size);
+	}
+}
+
+static int handle_reprocessed_giftwrap(
+	struct ndb_txn *txn,
+	struct ndb_note *rumor,
+	const char *relay,
+	struct prot_queue *writer_inbox)
+{
+	unsigned char *giftwrap_id;
+	struct ndb_note *giftwrap;
+	void *data;
+	uint16_t *flags;
+	size_t note_size;
+	struct ndb_writer_msg msg;
+	uint64_t note_key;
+
+	giftwrap_id = ndb_note_rumor_giftwrap_id(rumor);
+	giftwrap = ndb_get_note_by_id(txn, giftwrap_id, &note_size, &note_key);
+
+	if (!giftwrap)
+		return 0;
+
+	/* looks like this is not a reprocessed giftwrap */
+	if (*ndb_note_flags(giftwrap) & NDB_NOTE_FLAG_UNWRAPPED)
+		return 1;
+
+	data = malloc(note_size);
+	memcpy(data, giftwrap, note_size);
+	giftwrap = (struct ndb_note*)data;
+	flags = ndb_note_flags(giftwrap);
+	*flags = *flags | NDB_NOTE_FLAG_UNWRAPPED;
+
+	msg.type = NDB_WRITER_NOTE;
+
+	/* relay must be dup'd because it is assumed to be cloned */
+	if (relay != NULL) {
+		relay = strdup(relay);
+		if (relay == NULL)
+			return 0;
+	}
+	ndb_writer_note_init(&msg.note, giftwrap, note_size, relay, note_key);
+
+	return ndb_writer_queue_msg(writer_inbox, &msg);
+}
+
+static uint64_t ndb_write_note(secp256k1_context *secp,
+			       struct ndb_txn *txn,
 			       struct ndb_writer_note *note,
 			       unsigned char *scratch, size_t scratch_size,
-			       uint32_t ndb_flags)
+			       uint32_t ndb_flags,
+			       struct prot_queue *writer_inbox)
 {
 	int rc;
 	uint64_t note_key, kind;
 	struct ndb_relay_kind_key relay_key;
+	struct ndb_note *existing;
 	MDB_dbi note_db;
 	MDB_val key, val;
+	int promoted = 0;
 
 	kind = note->note->kind;
 
 	// let's quickly sanity check if we already have this note
-	if ((note_key = ndb_get_notekey_by_id(txn, note->note->id))) {
-		if (ndb_relay_kind_key_init(&relay_key, note_key, kind, ndb_note_created_at(note->note), note->relay))
-			ndb_write_note_relay_indexes(txn, &relay_key);
-		return 0;
+	if (!note->overwrite_note_id &&
+	    (note_key = ndb_get_notekey_by_id(txn, note->note->id)))
+	{
+		// Promote a plaintext note to a team-sealed rumor in place: if the
+		// incoming note is a rumor (unwrapped from an SNS envelope) but the
+		// stored record at this id is still plaintext, overwrite it under the
+		// SAME note_key so it gains the NDB_NOTE_FLAG_RUMOR flag + receiver
+		// pubkey (kept in the sig field) that the shared fold's team_sealed check
+		// reads. Reusing the key keeps the DUPSORT id/kind/tag indexes idempotent
+		// (identical key+value). We fall through to the write path and return 0
+		// (below) so no subscription is notified — the note content is unchanged,
+		// only its sealed provenance is.
+		existing = ndb_note_is_rumor(note->note)
+			? ndb_get_note_by_key(txn, note_key, NULL)
+			: NULL;
+		if (existing && !(*ndb_note_flags(existing) & NDB_NOTE_FLAG_RUMOR)) {
+			note->overwrite_note_id = note_key;
+			promoted = 1;
+		} else {
+			if (ndb_relay_kind_key_init(&relay_key, note_key, kind, ndb_note_created_at(note->note), note->relay))
+				ndb_write_note_relay_indexes(txn, &relay_key);
+			return 0;
+		}
+	}
+
+	/* this might be a reprocessed rumor, we need to update the giftwrap
+	 * UNWRAPPED flag if so
+	 */
+	if (ndb_note_is_rumor(note->note) && writer_inbox) {
+		handle_reprocessed_giftwrap(txn, note->note, note->relay,
+					    writer_inbox);
 	}
 
 	// get dbs
 	note_db = txn->lmdb->dbs[NDB_DB_NOTE];
 
 	// get new key
-	note_key = ndb_get_last_key(txn->mdb_txn, note_db) + 1;
+	if (note->overwrite_note_id) {
+		ndb_debug("overwriting note_key %ld\n", note->overwrite_note_id);
+	}
+	note_key = note->overwrite_note_id
+			? note->overwrite_note_id
+			: ndb_get_last_key(txn->mdb_txn, note_db) + 1;
 
 	// write note to event store
 	key.mv_data = &note_key;
@@ -5533,11 +7183,632 @@ static uint64_t ndb_write_note(struct ndb_txn *txn,
 		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_NOTE_BLOCKS)) {
 			ndb_write_new_blocks(txn, note->note, note_key, scratch, scratch_size);
 		}
+
+		ndb_process_note_stats(txn, note->note, scratch, scratch_size);
 	} else if (kind == 7 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
-		ndb_write_reaction_stats(txn, note->note);
+		ndb_write_reaction_stats(txn, note->note, scratch, scratch_size);
+	} else if (kind == 6 || kind == 16) {
+		ndb_process_repost_stats(txn, note->note, scratch, scratch_size);
+	} else if (kind == 9735 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
+		ndb_write_unverified_zap_stats(txn, note->note, scratch, scratch_size);
 	}
 
-	return note_key;
+	// A promote rewrote an existing note_key in place (plaintext -> sealed rumor);
+	// return 0 so the writer doesn't notify subscriptions for the same content.
+	return promoted ? 0 : note_key;
+}
+
+static int ndb_ingest_rumor(secp256k1_context *secp,
+			    struct ndb_ingester *ingester,
+			    const char *rumor_json, size_t json_len,
+			    unsigned char *sender_pubkey,
+			    const char *relay,
+			    unsigned char *scratch, size_t scratch_size,
+			    unsigned char *wrap_id,
+			    struct keypair *unwrap_key,
+			    struct keypair *keys, int nkeys)
+{
+	struct ndb_note *rumor;
+	unsigned char *id;
+	int rc, parse_cond;
+	void *rumor_msg;
+	uint16_t *flags;
+	unsigned char *sig;
+
+	/* We don't trust the pubkey or sig on rumors, and we don't require
+	 * them to be parsed.
+	 * We will copy the pubkey from the seal onto the rumor instead */
+	parse_cond = NDB_PARSED_ALL & ~(NDB_PARSED_SIG | NDB_PARSED_PUBKEY);
+
+	rc = ndb_note_from_json_custom(rumor_json, json_len, &rumor,
+				       scratch, scratch_size, parse_cond);
+	if (!rc) {
+		ndb_debug("failed to parse rumor json\n");
+		return 0;
+	}
+
+	sig = ndb_note_sig(rumor);
+
+	memcpy(ndb_note_pubkey(rumor), sender_pubkey, 32);
+
+	/* since we have no signature, instead we store the unwrapping
+	 * pubkey and giftwrap id in the lower and upper half of the
+	 * signature field. You can access these via:
+	 *
+	 * ndb_note_rumor_receiver_pubkey
+	 * ndb_note_rumor_giftwrap_id
+	 *
+	 * we know the note is a rumor via the NDB_NOTE_FLAG_RUMOR
+	 * note flag set below
+	 */
+	memcpy(sig, unwrap_key->pubkey, 32);
+	memcpy(sig+32, wrap_id, 32);
+
+	if ((scratch_size - rc) <= 0)
+		return 0;
+
+	/* we recalculate id since we have trust issues */
+	id = ndb_note_id(rumor);
+	if (!ndb_calculate_id(rumor, scratch+rc, scratch_size-rc, id))
+		return 0;
+
+	flags = ndb_note_flags(rumor);
+	*flags = *flags | NDB_NOTE_FLAG_RUMOR;
+
+	rumor_msg = malloc(rc);
+	memcpy(rumor_msg, rumor, rc);
+
+	/* relay must be dup'd because it is assumed to be cloned */
+	if (relay != NULL) {
+		relay = strdup(relay);
+		if (relay == NULL)
+			return 0;
+	}
+	return ndb_ingester_process_note(secp, rumor_msg, rc, ingester,
+					 scratch+rc, scratch_size-rc,
+					 relay, keys, nkeys,
+					 NULL, 0, NULL, 0);
+}
+
+static int ndb_process_seal(secp256k1_context *secp,
+			    struct ndb_ingester *ingester,
+			    const char *seal_json, size_t json_len,
+			    unsigned char *wrap_id,
+			    struct keypair *unwrap_key,
+			    const char *relay,
+			    unsigned char *scratch, size_t scratch_size,
+			    struct keypair *keys, int nkeys)
+{
+	struct ndb_note *seal;
+	const char *payload;
+	unsigned char *sender_pubkey, *decrypted;
+	int note_size;
+	size_t payload_len;
+	uint16_t decrypted_len;
+	unsigned char *old_scratch;
+	enum ndb_decrypt_result rc;
+
+	note_size = ndb_note_from_json(seal_json, json_len, &seal, scratch,
+				       scratch_size);
+
+	if (!note_size) {
+		ndb_debug("seal json parse failed (%ld scratch_size)\n",
+			  scratch_size);
+		return 0;
+	}
+
+	if (ndb_note_kind(seal) != 13) {
+		ndb_debug("seal kind != 13: %d\n", ndb_note_kind(seal));
+		return 0;
+	}
+
+	if ((scratch_size - note_size) <= 0) {
+		ndb_debug("process seal scratch size too small\n");
+		return 0;
+	}
+
+	scratch += note_size;
+	scratch_size -= note_size;
+
+	if (ndb_note_verify(secp,
+			    scratch, scratch_size,
+			    seal) == 0) {
+		/* seal is not valid, reject */
+		ndb_debug("seal signature was invalid\n");
+		return 0;
+	}
+
+	sender_pubkey = ndb_note_pubkey(seal);
+	payload = ndb_note_content(seal);
+	payload_len = ndb_note_content_length(seal);
+
+	/* decrypt the seal contents */
+	rc = nip44_decrypt(secp, sender_pubkey, unwrap_key->seckey,
+			   payload, payload_len,
+			   scratch, scratch_size,
+			   &decrypted, &decrypted_len);
+
+	if (rc != NIP44_OK) {
+		ndb_debug("seal nip44 decrypt failed: %s\n", nip44_err_msg(rc));
+		return 0;
+	}
+
+	old_scratch = scratch;
+	scratch = decrypted + decrypted_len;
+	scratch_size -= scratch - old_scratch;
+
+	/* ingest rumor */
+	return ndb_ingest_rumor(secp, ingester,
+				(const char*)decrypted, decrypted_len,
+				sender_pubkey, relay,
+				scratch,
+				scratch_size,
+				wrap_id, unwrap_key,
+				keys, nkeys);
+}
+
+int ndb_process_giftwraps(struct ndb *ndb, struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	struct ndb_note *note;
+	uint64_t note_key;
+	struct ndb_ingester_msg msg;
+	struct ndb_u64_ts index_key, *ik;
+	int dispatched = 0;
+
+	MDB_val k, v;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_KIND], &cur))
+		return 0;
+
+	ndb_u64_ts_init(&index_key, 1059, UINT64_MAX);
+
+	k.mv_data = &index_key;
+	k.mv_size = sizeof(index_key);
+
+	if (!ndb_cursor_start(cur, &k, &v)) {
+		mdb_cursor_close(cur);
+		return 0;
+	}
+
+	// Dispatch *every* not-yet-unwrapped gift wrap, not just the first: a backlog
+	// of 1059s can arrive before a key is registered (e.g. several shared-board
+	// key-shares, or a batch of DMs), and each needs peeling. Reprocessing runs
+	// async on the ingester pool (inbox DEFAULT_QUEUE_SIZE, far larger than any
+	// real backlog); if it fills, stop early and the next call / reboot catches
+	// the rest. Returns the number dispatched.
+	do {
+		ik = (struct ndb_u64_ts *)k.mv_data;
+		note_key = *(uint64_t*)v.mv_data;
+		if (ik->u64 != 1059)
+			break;
+
+		if (!(note = ndb_get_note_by_key(txn, note_key, NULL)))
+			continue;
+
+		if (*ndb_note_flags(note) & NDB_NOTE_FLAG_UNWRAPPED)
+			continue;
+
+		msg.type = NDB_INGEST_PROCESS_GIFTWRAP;
+		msg.process_giftwrap.giftwrap_key = note_key;
+
+		ndb_debug("dispatching process giftwrap %ld\n", note_key);
+
+		if (!threadpool_dispatch(&ndb->ingester.tp, &msg))
+			break;
+
+		dispatched++;
+	} while (mdb_cursor_get(cur, &k, &v, MDB_PREV) == 0);
+
+	mdb_cursor_close(cur);
+	return dispatched;
+}
+
+int ndb_process_pns(struct ndb *ndb, struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	struct ndb_note *note;
+	uint64_t note_key;
+	struct ndb_ingester_msg msg;
+	struct ndb_u64_ts index_key, *ik;
+	int dispatched = 0;
+
+	MDB_val k, v;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_KIND], &cur))
+		return 0;
+
+	ndb_u64_ts_init(&index_key, 1080, UINT64_MAX);
+
+	k.mv_data = &index_key;
+	k.mv_size = sizeof(index_key);
+
+	if (!ndb_cursor_start(cur, &k, &v)) {
+		mdb_cursor_close(cur);
+		return 0;
+	}
+
+	// Dispatch *every* not-yet-unwrapped PNS envelope, not just the first: a
+	// backlog can be stored before the key is registered, and each needs peeling.
+	// Reprocessing runs async on the ingester pool (inbox DEFAULT_QUEUE_SIZE, far
+	// larger than any real backlog); if it fills, stop early and the next call /
+	// reboot catches the rest. Returns the number dispatched.
+	do {
+		ik = (struct ndb_u64_ts *)k.mv_data;
+		note_key = *(uint64_t*)v.mv_data;
+		if (ik->u64 != 1080)
+			break;
+
+		if (!(note = ndb_get_note_by_key(txn, note_key, NULL)))
+			continue;
+
+		if (*ndb_note_flags(note) & NDB_NOTE_FLAG_UNWRAPPED)
+			continue;
+
+		msg.type = NDB_INGEST_PROCESS_PNS;
+		msg.process_pns.note_key = note_key;
+
+		ndb_debug("dispatching process pns %ld\n", note_key);
+
+		if (!threadpool_dispatch(&ndb->ingester.tp, &msg))
+			break;
+
+		dispatched++;
+	} while (mdb_cursor_get(cur, &k, &v, MDB_PREV) == 0);
+
+	mdb_cursor_close(cur);
+	return dispatched;
+}
+
+/* Re-dispatch stored kind-1081 SNS envelopes for a second unwrap attempt.
+ * Called after a team_root is registered so envelopes that arrived before the
+ * root was known get peeled. Mirrors ndb_process_pns but scans kind 1081. */
+int ndb_process_sns(struct ndb *ndb, struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	struct ndb_note *note;
+	uint64_t note_key;
+	struct ndb_ingester_msg msg;
+	struct ndb_u64_ts index_key, *ik;
+	int dispatched = 0;
+
+	MDB_val k, v;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_KIND], &cur))
+		return 0;
+
+	ndb_u64_ts_init(&index_key, 1081, UINT64_MAX);
+
+	k.mv_data = &index_key;
+	k.mv_size = sizeof(index_key);
+
+	if (!ndb_cursor_start(cur, &k, &v)) {
+		mdb_cursor_close(cur);
+		return 0;
+	}
+
+	// Dispatch *every* not-yet-unwrapped 1081 envelope for reprocessing, not just
+	// the first: a whole board (its definition plus every card and overlay) can be
+	// stored before its team root is registered, and each envelope needs peeling.
+	// Reprocessing runs async on the ingester pool, whose inbox (DEFAULT_QUEUE_SIZE)
+	// far exceeds any real board; if it ever fills, stop early and let the next
+	// ndb_process_sns / reboot catch the remainder. Returns the number dispatched.
+	do {
+		ik = (struct ndb_u64_ts *)k.mv_data;
+		note_key = *(uint64_t*)v.mv_data;
+		if (ik->u64 != 1081)
+			break;
+
+		if (!(note = ndb_get_note_by_key(txn, note_key, NULL)))
+			continue;
+
+		if (*ndb_note_flags(note) & NDB_NOTE_FLAG_UNWRAPPED)
+			continue;
+
+		msg.type = NDB_INGEST_PROCESS_SNS;
+		msg.process_sns.note_key = note_key;
+
+		ndb_debug("dispatching process sns %ld\n", note_key);
+
+		if (!threadpool_dispatch(&ndb->ingester.tp, &msg))
+			break;
+
+		dispatched++;
+	} while (mdb_cursor_get(cur, &k, &v, MDB_PREV) == 0);
+
+	mdb_cursor_close(cur);
+	return dispatched;
+}
+
+int ndb_process_giftwrap(secp256k1_context *secp,
+			 struct ndb_ingester *ingester,
+			 struct ndb_note *giftwrap,
+			 struct keypair *keys, int nkeys,
+			 const char *relay,
+			 unsigned char *scratch, size_t scratch_size)
+{
+	const char *payload;
+	unsigned char *sender_pubkey;
+	struct nip44_payload decoded;
+	struct keypair *unwrap_key;
+	unsigned char *decrypted, *wrap_id;
+	enum ndb_decrypt_result rc;
+	uint16_t decrypted_len, *flags;
+	size_t payload_len;
+	unsigned char *old_scratch;
+	int i;
+
+	wrap_id = ndb_note_id(giftwrap);
+	payload = ndb_note_content(giftwrap);
+	sender_pubkey = ndb_note_pubkey(giftwrap);
+	payload_len = ndb_note_content_length(giftwrap);
+
+	/* decode payload! */
+	if ((rc = nip44_decode_payload(&decoded, scratch, scratch_size,
+				       payload, payload_len))) {
+		ndb_debug("failed to decode payload\n");
+		return 0;
+	}
+
+
+	for (i = 0; i < nkeys; i++) {
+		unwrap_key = &keys[i];
+		rc = nip44_decrypt_raw(secp, sender_pubkey, unwrap_key->seckey,
+				       &decoded, &decrypted, &decrypted_len);
+		if (rc == NIP44_ERR_INVALID_PADDING) {
+			/* ciphertext was mutated, so we have to restore.
+			 * this is unlikely, but we put this here for
+			 * correctness. It might be more efficient to save
+			 * the original ciphertext in a buffer somewhere,
+			 * but this is not a hot path and I'm lazy.
+			 **/
+			if ((rc = nip44_decode_payload(&decoded, scratch,
+						       scratch_size,
+						       payload, payload_len))) {
+				return 0;
+			}
+			continue;
+		} else if (rc != NIP44_OK) {
+			continue;
+		}
+
+		old_scratch = scratch;
+		scratch = decrypted + decrypted_len;
+		if (scratch - old_scratch <= 0)
+			return 0;
+		scratch_size -= scratch - old_scratch;
+
+		/* decrypt success */
+		rc = ndb_process_seal(secp, ingester,
+				      (const char *)decrypted, decrypted_len,
+				      wrap_id, unwrap_key,
+				      relay, scratch, scratch_size,
+				      keys, nkeys);
+
+		if (!rc) {
+			fprintf(stderr, "ndb_process_giftwrap: failed to process seal\n");
+			return 0;
+		} else  {
+			/* mark giftwrap as unwrapped */
+			flags = ndb_note_flags(giftwrap);
+			*flags = *flags | NDB_NOTE_FLAG_UNWRAPPED;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+/* Process a PNS (kind-1080) event. Unlike giftwrap which has 3 layers
+ * (giftwrap -> seal -> rumor), PNS is a single layer of NIP-44 decryption
+ * with a pre-derived symmetric key.
+ *
+ * 1. Match event.pubkey against registered pns_pubkeys
+ * 2. Decrypt event.content with the matching pns_nip44_key
+ * 3. Parse and ingest the inner event
+ */
+static int ndb_process_pns_event(struct ndb_ingester *ingester,
+				 struct ndb_note *note,
+				 struct pns_key *pns_keys, int npns_keys,
+				 const char *relay,
+				 unsigned char *scratch, size_t scratch_size,
+				 struct keypair *keys, int nkeys,
+				 secp256k1_context *secp)
+{
+	const char *payload;
+	unsigned char *sender_pubkey, *decrypted, *wrap_id;
+	enum ndb_decrypt_result rc;
+	uint16_t decrypted_len, *flags;
+	size_t payload_len;
+	struct pns_key *pk;
+	int i, note_size, parse_cond;
+	struct ndb_note *inner;
+	void *inner_msg;
+	unsigned char *inner_scratch;
+	size_t inner_scratch_size;
+
+	wrap_id = ndb_note_id(note);
+	payload = ndb_note_content(note);
+	sender_pubkey = ndb_note_pubkey(note);
+	payload_len = ndb_note_content_length(note);
+
+	for (i = 0; i < npns_keys; i++) {
+		pk = &pns_keys[i];
+
+		/* match by pns_pubkey */
+		if (memcmp(sender_pubkey, pk->pubkey, 32) != 0)
+			continue;
+
+		/* decrypt using the pre-derived NIP-44 conversation key */
+		rc = nip44_decrypt_with_key(pk->nip44_key,
+					    payload, payload_len,
+					    scratch, scratch_size,
+					    &decrypted, &decrypted_len);
+
+		if (rc != NIP44_OK) {
+			ndb_debug("pns nip44 decrypt failed: %s\n",
+				  nip44_err_msg(rc));
+			return 0;
+		}
+
+		/* advance scratch past decrypted data */
+		inner_scratch = decrypted + decrypted_len;
+		if (inner_scratch <= scratch)
+			return 0;
+		inner_scratch_size = scratch_size - (inner_scratch - scratch);
+
+		/* parse the inner event. PNS inner events may be
+		 * signed (full events) or unsigned (rumors). We
+		 * accept both but don't require sig/pubkey. */
+		parse_cond = NDB_PARSED_ALL &
+			     ~(NDB_PARSED_SIG | NDB_PARSED_PUBKEY);
+
+		note_size = ndb_note_from_json_custom(
+			(const char *)decrypted, decrypted_len,
+			&inner, inner_scratch, inner_scratch_size,
+			parse_cond);
+
+		if (!note_size) {
+			ndb_debug("failed to parse pns inner json\n");
+			return 0;
+		}
+
+		/* set pubkey on inner event: use the one from the
+		 * inner event if present, otherwise use the device
+		 * pubkey (PNS is self-to-self) */
+		{
+			unsigned char *inner_pubkey;
+			unsigned char zeros[32] = {0};
+			inner_pubkey = ndb_note_pubkey(inner);
+
+			if (memcmp(inner_pubkey, zeros, 32) == 0)
+				memcpy(inner_pubkey, pk->device_pubkey, 32);
+		}
+
+		/* store device pubkey (receiver) and wrapper id in
+		 * sig field, same pattern as giftwrap rumors */
+		{
+			unsigned char *sig = ndb_note_sig(inner);
+			memcpy(sig, pk->device_pubkey, 32);
+			memcpy(sig + 32, wrap_id, 32);
+		}
+
+		/* recalculate id */
+		if (!ndb_calculate_id(inner,
+				      inner_scratch + note_size,
+				      inner_scratch_size - note_size,
+				      ndb_note_id(inner)))
+			return 0;
+
+		flags = ndb_note_flags(inner);
+		*flags = *flags | NDB_NOTE_FLAG_RUMOR;
+
+		inner_msg = malloc(note_size);
+		memcpy(inner_msg, inner, note_size);
+
+		if (relay != NULL) {
+			relay = strdup(relay);
+			if (relay == NULL)
+				return 0;
+		}
+
+		if (!ndb_ingester_process_note(secp, inner_msg, note_size,
+					       ingester,
+					       inner_scratch + note_size,
+					       inner_scratch_size - note_size,
+					       relay, keys, nkeys,
+					       pns_keys, npns_keys, NULL, 0)) {
+			ndb_debug("failed to process pns inner note\n");
+			return 0;
+		}
+
+		/* mark the wrapper as unwrapped */
+		flags = ndb_note_flags(note);
+		*flags = *flags | NDB_NOTE_FLAG_UNWRAPPED;
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Process an SNS (kind-1081) envelope. Three layers like a giftwrap
+ * (envelope -> seal -> rumor) but the outer layer is symmetric (a shared team
+ * key) instead of ECDH:
+ *
+ * 1. Match event.pubkey against a registered team pubkey
+ * 2. Symmetric-decrypt event.content with that team's nip44 key -> seal json
+ * 3. Reuse ndb_process_seal with the team keypair as the ECDH recipient to
+ *    peel the kind-13 seal and ingest the member's rumor, so the machinery is
+ *    shared with giftwrap and this function is just the outer envelope.
+ */
+static int ndb_process_sns_event(secp256k1_context *secp,
+				 struct ndb_ingester *ingester,
+				 struct ndb_note *note,
+				 struct sns_key *sns_keys, int nsns_keys,
+				 const char *relay,
+				 unsigned char *scratch, size_t scratch_size,
+				 struct keypair *keys, int nkeys)
+{
+	const char *payload;
+	unsigned char *sender_pubkey, *decrypted, *wrap_id, *old_scratch;
+	enum ndb_decrypt_result rc;
+	uint16_t decrypted_len, *flags;
+	size_t payload_len;
+	struct sns_key *sk;
+	struct keypair team_kp;
+	int i;
+
+	wrap_id = ndb_note_id(note);
+	payload = ndb_note_content(note);
+	sender_pubkey = ndb_note_pubkey(note);
+	payload_len = ndb_note_content_length(note);
+
+	for (i = 0; i < nsns_keys; i++) {
+		sk = &sns_keys[i];
+
+		/* match by team pubkey */
+		if (memcmp(sender_pubkey, sk->pubkey, 32) != 0)
+			continue;
+
+		/* peel the outer envelope: symmetric nip44 with team_nip44_key */
+		rc = nip44_decrypt_with_key(sk->nip44_key,
+					    payload, payload_len,
+					    scratch, scratch_size,
+					    &decrypted, &decrypted_len);
+		if (rc != NIP44_OK) {
+			ndb_debug("sns envelope nip44 decrypt failed: %s\n",
+				  nip44_err_msg(rc));
+			return 0;
+		}
+
+		/* advance scratch past the decrypted seal json */
+		old_scratch = scratch;
+		scratch = decrypted + decrypted_len;
+		if (scratch - old_scratch <= 0)
+			return 0;
+		scratch_size -= scratch - old_scratch;
+
+		/* reuse the seal machinery with the team keypair as the ECDH
+		 * recipient; the rumor inside carries the member's real pubkey */
+		memcpy(team_kp.pubkey, sk->pubkey, 32);
+		memcpy(team_kp.seckey, sk->seckey, 32);
+
+		if (!ndb_process_seal(secp, ingester,
+				      (const char *)decrypted, decrypted_len,
+				      wrap_id, &team_kp,
+				      relay, scratch, scratch_size,
+				      keys, nkeys)) {
+			ndb_debug("sns: failed to process seal\n");
+			return 0;
+		}
+
+		/* mark the envelope as unwrapped */
+		flags = ndb_note_flags(note);
+		*flags = *flags | NDB_NOTE_FLAG_UNWRAPPED;
+		return 1;
+	}
+
+	return 0;
 }
 
 static void ndb_monitor_lock(struct ndb_monitor *mon) {
@@ -5598,19 +7869,26 @@ static void ndb_notify_subscriptions(struct ndb_monitor *monitor,
 		}
 	}
 
+	// wake up any threads blocked in ndb_wait_for_notes
+	pthread_cond_broadcast(&monitor->cond);
+
 	ndb_monitor_unlock(monitor);
 }
 
 uint64_t ndb_write_note_and_profile(
+		secp256k1_context *secp,
 		struct ndb_txn *txn,
 		struct ndb_writer_profile *profile,
 		unsigned char *scratch,
 		size_t scratch_size,
-		uint32_t ndb_flags)
+		uint32_t ndb_flags,
+		struct prot_queue *writer_inbox)
 {
 	uint64_t note_nkey;
 
-	note_nkey = ndb_write_note(txn, &profile->note, scratch, scratch_size, ndb_flags);
+	note_nkey = ndb_write_note(secp, txn, &profile->note,
+				   scratch, scratch_size, ndb_flags,
+				   writer_inbox);
 
 	if (profile->record.builder) {
 		// only write if parsing didn't fail
@@ -5699,7 +7977,9 @@ static void *ndb_writer_thread(void *data)
 	struct ndb_txn txn;
 	unsigned char *scratch;
 	struct ndb_relay_kind_key relay_key;
+	secp256k1_context *secp;
 
+	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 	// 2MB scratch buffer for parsing note content
 	scratch = malloc(writer->scratch_size);
 	MDB_txn *mdb_txn = NULL;
@@ -5717,13 +7997,16 @@ static void *ndb_writer_thread(void *data)
 		for (i = 0 ; i < popped; i++) {
 			msg = &msgs[i];
 			switch (msg->type) {
-			case NDB_WRITER_NOTE: needs_commit = 1; break;
-			case NDB_WRITER_PROFILE: needs_commit = 1; break;
-			case NDB_WRITER_DBMETA: needs_commit = 1; break;
-			case NDB_WRITER_PROFILE_LAST_FETCH: needs_commit = 1; break;
-			case NDB_WRITER_BLOCKS: needs_commit = 1; break;
-			case NDB_WRITER_MIGRATE: needs_commit = 1; break;
-			case NDB_WRITER_NOTE_RELAY: needs_commit = 1; break;
+			case NDB_WRITER_NOTE:
+			case NDB_WRITER_NOTE_META:
+			case NDB_WRITER_PROFILE:
+			case NDB_WRITER_DBMETA:
+			case NDB_WRITER_PROFILE_LAST_FETCH:
+			case NDB_WRITER_BLOCKS:
+			case NDB_WRITER_MIGRATE:
+			case NDB_WRITER_NOTE_RELAY:
+				needs_commit = 1;
+				break;
 			case NDB_WRITER_QUIT: break;
 			}
 		}
@@ -5748,11 +8031,13 @@ static void *ndb_writer_thread(void *data)
 			case NDB_WRITER_PROFILE:
 				note_nkey =
 					ndb_write_note_and_profile(
+						secp,
 						&txn,
 						&msg->profile,
 						scratch,
 						writer->scratch_size,
-						writer->ndb_flags);
+						writer->ndb_flags,
+						&writer->inbox);
 
 				if (note_nkey > 0) {
 					written_notes[num_notes++] =
@@ -5764,11 +8049,18 @@ static void *ndb_writer_thread(void *data)
 					ndb_debug("failed to write note\n");
 				}
 				break;
+			case NDB_WRITER_NOTE_META:
+				ndb_writer_set_note_meta(&txn, msg->note_meta.note_id, msg->note_meta.metadata);
+				break;
+
 			case NDB_WRITER_NOTE:
-				note_nkey = ndb_write_note(&txn, &msg->note,
+				note_nkey = ndb_write_note(secp,
+							   &txn,
+							   &msg->note,
 							   scratch,
 							   writer->scratch_size,
-							   writer->ndb_flags);
+							   writer->ndb_flags,
+							   &writer->inbox);
 
 				if (note_nkey > 0) {
 					written_notes[num_notes++] = (struct written_note){
@@ -5814,7 +8106,7 @@ static void *ndb_writer_thread(void *data)
 			if (!ndb_end_query(&txn)) {
 				ndb_debug("writer thread txn commit failed\n");
 			} else {
-				ndb_debug("notifying subscriptions, %d notes\n", num_notes);
+				ndb_debug("commit write thead txn. notifying subscriptions, %d notes\n", num_notes);
 				ndb_notify_subscriptions(writer->monitor,
 							 written_notes,
 							 num_notes);
@@ -5836,14 +8128,285 @@ static void *ndb_writer_thread(void *data)
 				ndb_blocks_free(msg->blocks.blocks);
 			} else if (msg->type == NDB_WRITER_NOTE_RELAY) {
 				free((void*)msg->note_relay.relay);
+			} else if (msg->type == NDB_WRITER_NOTE_META) {
+				free(msg->note_meta.metadata);
 			}
 		}
 	}
 
 bail:
+	secp256k1_context_destroy(secp);
 	free(scratch);
 	ndb_debug("quitting writer thread\n");
 	return NULL;
+}
+
+static int ndb_ingester_add_keypair(secp256k1_context *ctx,
+				    unsigned char *seckey,
+				    struct keypair *keys, int *nkeys)
+{
+	struct keypair *kp;
+	int pk_parity = 0;
+	secp256k1_pubkey pubkey;
+	secp256k1_xonly_pubkey xonly_pubkey;
+
+	if (*nkeys == MAX_INGESTER_KEYS)
+		return 0;
+
+	if (!secp256k1_ec_seckey_verify(ctx, seckey))
+		return 0;
+
+	if (!secp256k1_ec_pubkey_create(ctx, &pubkey, seckey))
+		return 0;
+
+	if (!secp256k1_xonly_pubkey_from_pubkey(ctx, &xonly_pubkey, &pk_parity,
+						&pubkey))
+		return 0;
+
+	kp = &keys[(*nkeys)++];
+	memcpy(kp->seckey, seckey, 32);
+
+	/* Serialize the public key. Should always return 1 for a valid public key. */
+	if (!secp256k1_xonly_pubkey_serialize(ctx, kp->pubkey, &xonly_pubkey)) {
+		(*nkeys)--;
+		return 0;
+	}
+
+	return 1;
+}
+
+/* Derive a PNS key from a device secret key:
+ *   pns_key      = HMAC-SHA256(key="nip-pns", msg=device_secret_key)
+ *   pns_nip44_key = HMAC-SHA256(key="nip44-v2", msg=pns_key)
+ *   pns_pubkey   = secp256k1_xonly_pubkey(pns_key)
+ */
+static int ndb_ingester_add_pns_key(secp256k1_context *ctx,
+				    unsigned char *seckey,
+				    struct pns_key *pns_keys, int *npns_keys)
+{
+	struct pns_key *pk;
+	struct hmac_sha256 pns_secret, pns_nip44;
+	int pk_parity = 0;
+	secp256k1_pubkey pubkey;
+	secp256k1_xonly_pubkey xonly_pubkey;
+
+	if (*npns_keys == MAX_INGESTER_KEYS)
+		return 0;
+
+	/* Derive device pubkey from the original secret key */
+	if (!secp256k1_ec_pubkey_create(ctx, &pubkey, seckey))
+		return 0;
+
+	if (!secp256k1_xonly_pubkey_from_pubkey(ctx, &xonly_pubkey, &pk_parity,
+						&pubkey))
+		return 0;
+
+	pk = &pns_keys[*npns_keys];
+
+	if (!secp256k1_xonly_pubkey_serialize(ctx, pk->device_pubkey,
+					      &xonly_pubkey))
+		return 0;
+
+	/* pns_key = HKDF-Extract(salt="nip-pns", ikm=device_secret_key)
+	 *         = HMAC-SHA256(key="nip-pns", msg=device_secret_key) */
+	hmac_sha256(&pns_secret, "nip-pns", 7, seckey, 32);
+
+	/* Verify the derived key is a valid secp256k1 secret */
+	if (!secp256k1_ec_seckey_verify(ctx, pns_secret.sha.u.u8))
+		return 0;
+
+	/* pns_nip44_key = HKDF-Extract(salt="nip44-v2", ikm=pns_key)
+	 *              = HMAC-SHA256(key="nip44-v2", msg=pns_key) */
+	hmac_sha256(&pns_nip44, "nip44-v2", 8, pns_secret.sha.u.u8, 32);
+
+	memcpy(pk->nip44_key, pns_nip44.sha.u.u8, 32);
+
+	/* Derive pns_pubkey from pns_key */
+	if (!secp256k1_ec_pubkey_create(ctx, &pubkey, pns_secret.sha.u.u8))
+		return 0;
+
+	if (!secp256k1_xonly_pubkey_from_pubkey(ctx, &xonly_pubkey, &pk_parity,
+						&pubkey))
+		return 0;
+
+	if (!secp256k1_xonly_pubkey_serialize(ctx, pk->pubkey, &xonly_pubkey))
+		return 0;
+
+	(*npns_keys)++;
+	return 1;
+}
+
+/* Register a shared SNS team channel from a 32-byte team_root:
+ *   team_seckey    = team_root (used as-is)
+ *   team_pubkey    = secp256k1_xonly_pubkey(team_root)
+ *   team_nip44_key = HMAC-SHA256(key="nip44-v2", msg=team_root)
+ * Unlike ndb_ingester_add_pns_key there is no extra HKDF step deriving the
+ * secret: the root IS the channel secret key. This must byte-match enostr's
+ * derive_sns_keys.
+ */
+static int ndb_ingester_add_sns_key(secp256k1_context *ctx,
+				    unsigned char *team_root,
+				    struct sns_key *sns_keys, int *nsns_keys)
+{
+	struct sns_key *sk;
+	struct hmac_sha256 team_nip44;
+	int pk_parity = 0;
+	secp256k1_pubkey pubkey;
+	secp256k1_xonly_pubkey xonly_pubkey;
+
+	if (*nsns_keys == MAX_INGESTER_KEYS)
+		return 0;
+
+	/* the root arrives over the wire, so validate it as a secp secret */
+	if (!secp256k1_ec_seckey_verify(ctx, team_root))
+		return 0;
+
+	if (!secp256k1_ec_pubkey_create(ctx, &pubkey, team_root))
+		return 0;
+
+	if (!secp256k1_xonly_pubkey_from_pubkey(ctx, &xonly_pubkey, &pk_parity,
+						&pubkey))
+		return 0;
+
+	sk = &sns_keys[*nsns_keys];
+
+	if (!secp256k1_xonly_pubkey_serialize(ctx, sk->pubkey, &xonly_pubkey))
+		return 0;
+
+	/* team_nip44_key = HKDF-Extract(salt="nip44-v2", ikm=team_root)
+	 *              = HMAC-SHA256(key="nip44-v2", msg=team_root) */
+	hmac_sha256(&team_nip44, "nip44-v2", 8, team_root, 32);
+	memcpy(sk->nip44_key, team_nip44.sha.u.u8, 32);
+
+	/* keep the secret: peeling the inner seal needs the team keypair */
+	memcpy(sk->seckey, team_root, 32);
+
+	(*nsns_keys)++;
+	return 1;
+}
+
+static const char *ndb_ingest_msg_name(enum ndb_ingester_msgtype type)
+{
+	switch (type) {
+	case NDB_INGEST_PROCESS_GIFTWRAP: return "process_giftwrap";
+	case NDB_INGEST_PROCESS_PNS: return "process_pns";
+	case NDB_INGEST_PROCESS_SNS: return "process_sns";
+	case NDB_INGEST_ADD_KEY: return "add_key";
+	case NDB_INGEST_ADD_TEAM_ROOT: return "add_team_root";
+	case NDB_INGEST_QUIT: return "quit";
+	case NDB_INGEST_EVENT: return "event";
+	}
+
+	return "unknown";
+}
+
+
+/* reprocess a gift wrap if we can */
+static int ndb_ingester_reprocess_giftwrap(
+	secp256k1_context *secp,
+	struct ndb_ingester *ingester,
+	struct ndb_txn *txn,
+	struct ndb_ingester_process_giftwrap *proc_gw,
+	unsigned char *scratch, size_t scratch_size,
+	struct keypair *keys, int nkeys)
+{
+	struct ndb_note *giftwrap;
+	size_t note_size;
+	int rc;
+
+	giftwrap = ndb_get_note_by_key(txn, proc_gw->giftwrap_key, &note_size);
+	if (!giftwrap) {
+		ndb_debug("failed to find giftwrap "
+			  "with note_key %ld\n",
+			  proc_gw->giftwrap_key);
+		return 0;
+	}
+
+	memcpy(scratch, giftwrap, note_size);
+	giftwrap = (struct ndb_note*)scratch;
+
+	rc = ndb_process_giftwrap(secp, ingester, giftwrap, keys, nkeys, NULL,
+				  scratch+note_size, scratch_size-note_size);
+	if (!rc) {
+		ndb_debug("failed to reprocess giftwrap %ld\n",
+			  proc_gw->giftwrap_key);
+		return 0;
+	}
+
+	ndb_debug("reprocess giftwrap %ld success\n", proc_gw->giftwrap_key);
+	return 1;
+}
+
+/* reprocess a PNS event if we can */
+static int ndb_ingester_reprocess_pns(
+	secp256k1_context *secp,
+	struct ndb_ingester *ingester,
+	struct ndb_txn *txn,
+	struct ndb_ingester_process_pns *proc_pns,
+	unsigned char *scratch, size_t scratch_size,
+	struct pns_key *pns_keys, int npns_keys,
+	struct keypair *keys, int nkeys)
+{
+	struct ndb_note *note;
+	size_t note_size;
+	int rc;
+
+	note = ndb_get_note_by_key(txn, proc_pns->note_key, &note_size);
+	if (!note) {
+		ndb_debug("failed to find pns note with note_key %ld\n",
+			  proc_pns->note_key);
+		return 0;
+	}
+
+	memcpy(scratch, note, note_size);
+	note = (struct ndb_note *)scratch;
+
+	rc = ndb_process_pns_event(ingester, note, pns_keys, npns_keys, NULL,
+				   scratch + note_size, scratch_size - note_size,
+				   keys, nkeys, secp);
+	if (!rc) {
+		ndb_debug("failed to reprocess pns %ld\n", proc_pns->note_key);
+		return 0;
+	}
+
+	ndb_debug("reprocess pns %ld success\n", proc_pns->note_key);
+	return 1;
+}
+
+/* reprocess an SNS envelope if we can */
+static int ndb_ingester_reprocess_sns(
+	secp256k1_context *secp,
+	struct ndb_ingester *ingester,
+	struct ndb_txn *txn,
+	struct ndb_ingester_process_sns *proc_sns,
+	unsigned char *scratch, size_t scratch_size,
+	struct sns_key *sns_keys, int nsns_keys,
+	struct keypair *keys, int nkeys)
+{
+	struct ndb_note *note;
+	size_t note_size;
+	int rc;
+
+	note = ndb_get_note_by_key(txn, proc_sns->note_key, &note_size);
+	if (!note) {
+		ndb_debug("failed to find sns note with note_key %ld\n",
+			  proc_sns->note_key);
+		return 0;
+	}
+
+	memcpy(scratch, note, note_size);
+	note = (struct ndb_note *)scratch;
+
+	rc = ndb_process_sns_event(secp, ingester, note, sns_keys, nsns_keys,
+				   NULL, scratch + note_size,
+				   scratch_size - note_size, keys, nkeys);
+	if (!rc) {
+		ndb_debug("failed to reprocess sns %ld\n", proc_sns->note_key);
+		return 0;
+	}
+
+	ndb_debug("reprocess sns %ld success\n", proc_sns->note_key);
+	return 1;
 }
 
 static void *ndb_ingester_thread(void *data)
@@ -5853,11 +8416,20 @@ static void *ndb_ingester_thread(void *data)
 	struct ndb_ingester *ingester = (struct ndb_ingester *)thread->ctx;
 	struct ndb_lmdb *lmdb = ingester->lmdb;
 	struct ndb_ingester_msg msgs[THREAD_QUEUE_BATCH], *msg;
-	struct ndb_writer_msg outs[THREAD_QUEUE_BATCH], *out;
-	int i, to_write, popped, done, any_event;
+	int i, popped, done, any_event, rc, nkeys, npns_keys, nsns_keys;
 	MDB_txn *read_txn = NULL;
+	struct keypair *keys;
+	struct pns_key *pns_keys;
+	struct sns_key *sns_keys;
+	struct ndb_txn txn;
 	unsigned char *scratch;
-	int rc;
+
+	nkeys = 0;
+	npns_keys = 0;
+	nsns_keys = 0;
+	keys = malloc(sizeof(*keys) * MAX_INGESTER_KEYS);
+	pns_keys = malloc(sizeof(*pns_keys) * MAX_INGESTER_KEYS);
+	sns_keys = malloc(sizeof(*sns_keys) * MAX_INGESTER_KEYS);
 
 	// this is used in note verification and anything else that
 	// needs a temporary buffer
@@ -5868,21 +8440,44 @@ static void *ndb_ingester_thread(void *data)
 
 	done = 0;
 	while (!done) {
-		to_write = 0;
 		any_event = 0;
 
-		popped = prot_queue_pop_all(&thread->inbox, msgs, THREAD_QUEUE_BATCH);
-		ndb_debug("ingester popped %d items\n", popped);
+		popped = prot_queue_pop_all(&thread->inbox, msgs,
+					    THREAD_QUEUE_BATCH);
+#ifdef NDB_LOG
+		ndb_debug("ingester %lx popped %d items ",
+			  thread->thread_id & 0xFFFFFFF, popped);
+		if (popped < 10) {
+			ndb_debug("(");
+			for (i = 0; i < popped; i++) {
+				if (i != 0)
+					ndb_debug(",");
+				ndb_debug("%s", ndb_ingest_msg_name(msgs[i].type));
+			}
+			ndb_debug(")\n");
+		} else {
+			ndb_debug("\n");
+		}
+#endif
 
 		for (i = 0; i < popped; i++) {
 			msg = &msgs[i];
-			if (msg->type == NDB_INGEST_EVENT) {
+			switch (msg->type) {
+			case NDB_INGEST_EVENT:
+			case NDB_INGEST_PROCESS_GIFTWRAP:
+			case NDB_INGEST_PROCESS_PNS:
+			case NDB_INGEST_PROCESS_SNS:
 				any_event = 1;
+				break;
+			case NDB_INGEST_ADD_KEY:
+			case NDB_INGEST_ADD_TEAM_ROOT:
+			case NDB_INGEST_QUIT:
 				break;
 			}
 		}
 
-		if (any_event && (rc = mdb_txn_begin(lmdb->env, NULL, MDB_RDONLY, &read_txn))) {
+		if (any_event && (rc = mdb_txn_begin(lmdb->env, NULL,
+						     MDB_RDONLY, &read_txn))) {
 			// this is bad
 			fprintf(stderr, "UNUSUAL ndb_ingester: mdb_txn_begin failed: '%s'\n",
 					mdb_strerror(rc));
@@ -5896,31 +8491,70 @@ static void *ndb_ingester_thread(void *data)
 				done = 1;
 				break;
 
+			case NDB_INGEST_PROCESS_GIFTWRAP:
+				ndb_txn_from_mdb(&txn, lmdb, read_txn);
+				ndb_ingester_reprocess_giftwrap(
+					ctx, ingester, &txn,
+					&msg->process_giftwrap,
+					scratch, ingester->scratch_size,
+					keys, nkeys);
+				break;
+
+			case NDB_INGEST_PROCESS_PNS:
+				ndb_txn_from_mdb(&txn, lmdb, read_txn);
+				ndb_ingester_reprocess_pns(
+					ctx, ingester, &txn,
+					&msg->process_pns,
+					scratch, ingester->scratch_size,
+					pns_keys, npns_keys,
+					keys, nkeys);
+				break;
+
+			case NDB_INGEST_PROCESS_SNS:
+				ndb_txn_from_mdb(&txn, lmdb, read_txn);
+				ndb_ingester_reprocess_sns(
+					ctx, ingester, &txn,
+					&msg->process_sns,
+					scratch, ingester->scratch_size,
+					sns_keys, nsns_keys,
+					keys, nkeys);
+				break;
+
+			case NDB_INGEST_ADD_KEY:
+				ndb_ingester_add_keypair(ctx, msg->add_key.key,
+							 keys, &nkeys);
+				ndb_ingester_add_pns_key(ctx, msg->add_key.key,
+							 pns_keys, &npns_keys);
+				break;
+
+			case NDB_INGEST_ADD_TEAM_ROOT:
+				ndb_ingester_add_sns_key(ctx,
+							 msg->add_team_root.root,
+							 sns_keys, &nsns_keys);
+				break;
+
 			case NDB_INGEST_EVENT:
-				out = &outs[to_write];
-				if (ndb_ingester_process_event(ctx, ingester,
-							       &msg->event, out,
-							       scratch,
-							       read_txn)) {
-					to_write++;
-				}
+				ndb_ingester_process_event(ctx, ingester,
+							   &msg->event,
+							   scratch,
+							   keys, nkeys,
+							   pns_keys, npns_keys,
+							   sns_keys, nsns_keys,
+							   read_txn);
+				break;
 			}
 		}
 
 		if (any_event)
 			mdb_txn_abort(read_txn);
-
-		if (to_write > 0) {
-			ndb_debug("pushing %d events to write queue\n", to_write);
-			if (!prot_queue_push_all(ingester->writer_inbox, outs, to_write)) {
-				ndb_debug("failed pushing %d events to write queue\n", to_write);
-			}
-		}
 	}
 
 	ndb_debug("quitting ingester thread\n");
 	secp256k1_context_destroy(ctx);
 	free(scratch);
+	free(keys);
+	free(pns_keys);
+	free(sns_keys);
 	return NULL;
 }
 
@@ -6179,7 +8813,7 @@ static int ndb_queue_write_version(struct ndb *ndb, uint64_t version)
 	struct ndb_writer_msg msg;
 	msg.type = NDB_WRITER_DBMETA;
 	msg.ndb_meta.version = version;
-	return ndb_writer_queue_msg(&ndb->writer, &msg);
+	return ndb_writer_queue_msg(&ndb->writer.inbox, &msg);
 }
 
 static void ndb_monitor_init(struct ndb_monitor *monitor, ndb_sub_fn cb,
@@ -6189,6 +8823,7 @@ static void ndb_monitor_init(struct ndb_monitor *monitor, ndb_sub_fn cb,
 	monitor->sub_cb = cb;
 	monitor->sub_cb_ctx = sub_cb_ctx;
 	pthread_mutex_init(&monitor->mutex, NULL);
+	pthread_cond_init(&monitor->cond, NULL);
 }
 
 void ndb_filter_group_destroy(struct ndb_filter_group *group)
@@ -6225,6 +8860,7 @@ static void ndb_monitor_destroy(struct ndb_monitor *monitor)
 	ndb_monitor_unlock(monitor);
 
 	pthread_mutex_destroy(&monitor->mutex);
+	pthread_cond_destroy(&monitor->cond);
 }
 
 int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *config)
@@ -6260,7 +8896,7 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 
 	if (!ndb_flag_set(config->flags, NDB_FLAG_NOMIGRATE)) {
 		struct ndb_writer_msg msg = { .type = NDB_WRITER_MIGRATE };
-		ndb_writer_queue_msg(&ndb->writer, &msg);
+		ndb_writer_queue_msg(&ndb->writer.inbox, &msg);
 	}
 
 	// Initialize LMDB environment and spin up threads
@@ -6268,7 +8904,188 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 }
 
 int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags) {
-    return mdb_env_copy2(ndb->lmdb.env, path, flags);
+	return mdb_env_copy2(ndb->lmdb.env, path, flags);
+}
+
+static int ndb_compact_is_own_pubkey(const unsigned char *pubkey,
+				     const unsigned char (*own_pubkeys)[32],
+				     int num_pubkeys)
+{
+	for (int i = 0; i < num_pubkeys; i++) {
+		if (memcmp(pubkey, own_pubkeys[i], 32) == 0)
+			return 1;
+	}
+	return 0;
+}
+
+int ndb_compact(struct ndb *ndb, const char *output_path,
+		const unsigned char (*own_pubkeys)[32], int num_pubkeys)
+{
+	int rc, ret;
+	struct ndb_lmdb dst_lmdb;
+	MDB_txn *src_mdb_txn, *dst_mdb_txn;
+	MDB_cursor *cur;
+	MDB_val k, v;
+	MDB_envinfo info;
+	struct ndb_txn src_txn, dst_txn;
+	secp256k1_context *secp;
+	size_t scratch_size;
+	unsigned char *scratch;
+	int count_profiles, count_notes;
+
+	ret = 0;
+	scratch_size = 2 * 1024 * 1024;
+	scratch = malloc(scratch_size);
+	if (!scratch) {
+		fprintf(stderr, "ndb_compact: failed to allocate scratch buffer\n");
+		return 0;
+	}
+
+	// get source mapsize
+	if ((rc = mdb_env_info(ndb->lmdb.env, &info))) {
+		fprintf(stderr, "ndb_compact: mdb_env_info failed: %s\n", mdb_strerror(rc));
+		free(scratch);
+		return 0;
+	}
+
+	// create destination lmdb environment
+	if (!ndb_init_lmdb(output_path, &dst_lmdb, info.me_mapsize)) {
+		fprintf(stderr, "ndb_compact: failed to init destination lmdb\n");
+		free(scratch);
+		return 0;
+	}
+
+	// open read txn on source
+	if ((rc = mdb_txn_begin(ndb->lmdb.env, NULL, MDB_RDONLY, &src_mdb_txn))) {
+		fprintf(stderr, "ndb_compact: src mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		goto cleanup_env;
+	}
+	src_txn.lmdb = &ndb->lmdb;
+	src_txn.mdb_txn = src_mdb_txn;
+
+	// open write txn on destination
+	if ((rc = mdb_txn_begin(dst_lmdb.env, NULL, 0, &dst_mdb_txn))) {
+		fprintf(stderr, "ndb_compact: dst mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		mdb_txn_abort(src_mdb_txn);
+		goto cleanup_env;
+	}
+	dst_txn.lmdb = &dst_lmdb;
+	dst_txn.mdb_txn = dst_mdb_txn;
+
+	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
+
+	// Phase 1: Copy all profiles
+	count_profiles = 0;
+	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
+		fprintf(stderr, "ndb_compact: profile cursor open failed: %s\n", mdb_strerror(rc));
+		goto cleanup_txns;
+	}
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		NdbProfileRecord_table_t record;
+		uint64_t note_key;
+		struct ndb_note *note;
+		size_t note_len;
+		struct ndb_writer_profile profile;
+
+		record = NdbProfileRecord_as_root(v.mv_data);
+		note_key = NdbProfileRecord_note_key(record);
+		note = ndb_get_note_by_key(&src_txn, note_key, &note_len);
+
+		if (note == NULL)
+			continue;
+
+		// re-process profile from JSON content
+		if (!ndb_process_profile_note(note, &profile.record))
+			continue;
+
+		// note data is stable in source mmap for duration of read txn
+		ndb_writer_note_init(&profile.note, note, note_len, NULL, 0);
+
+		if (ndb_write_note_and_profile(secp, &dst_txn, &profile,
+					       scratch, scratch_size,
+					       NDB_FLAG_NO_STATS, NULL))
+		{
+			count_profiles++;
+		}
+
+		ndb_profile_record_builder_free(&profile.record);
+	}
+	mdb_cursor_close(cur);
+
+	fprintf(stderr, "ndb_compact: copied %d profiles\n", count_profiles);
+
+	// Phase 2: Copy own notes (skip kind 0, already handled above)
+	count_notes = 0;
+	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_NOTE], &cur))) {
+		fprintf(stderr, "ndb_compact: note cursor open failed: %s\n", mdb_strerror(rc));
+		goto cleanup_txns;
+	}
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		struct ndb_note *note;
+		struct ndb_writer_note writer_note;
+
+		note = v.mv_data;
+
+		// skip kind 0 (profiles already handled)
+		if (ndb_note_kind(note) == 0)
+			continue;
+
+		// only keep notes from our own pubkeys
+		if (!ndb_compact_is_own_pubkey(ndb_note_pubkey(note),
+					       own_pubkeys, num_pubkeys))
+			continue;
+
+		// note data is stable in source mmap for duration of read txn
+		ndb_writer_note_init(&writer_note, note, v.mv_size, NULL, 0);
+
+		if (ndb_write_note(secp, &dst_txn, &writer_note,
+				   scratch, scratch_size,
+				   NDB_FLAG_NO_STATS, NULL))
+		{
+			count_notes++;
+		}
+	}
+	mdb_cursor_close(cur);
+
+	fprintf(stderr, "ndb_compact: copied %d own notes\n", count_notes);
+
+	// Phase 3: Copy profile_last_fetch entries
+	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &cur))) {
+		fprintf(stderr, "ndb_compact: profile_last_fetch cursor open failed: %s\n", mdb_strerror(rc));
+		goto cleanup_txns;
+	}
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		mdb_put(dst_mdb_txn, dst_lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &k, &v, 0);
+	}
+	mdb_cursor_close(cur);
+
+	// Write database version
+	ndb_write_version(&dst_txn, sizeof(MIGRATIONS) / sizeof(MIGRATIONS[0]));
+
+	// Commit destination
+	if ((rc = mdb_txn_commit(dst_mdb_txn))) {
+		fprintf(stderr, "ndb_compact: dst commit failed: %s\n", mdb_strerror(rc));
+		dst_mdb_txn = NULL;
+		goto cleanup_txns;
+	}
+	dst_mdb_txn = NULL;
+
+	ret = 1;
+
+cleanup_txns:
+	if (dst_mdb_txn)
+		mdb_txn_abort(dst_mdb_txn);
+	mdb_txn_abort(src_mdb_txn);
+	secp256k1_context_destroy(secp);
+
+cleanup_env:
+	mdb_env_close(dst_lmdb.env);
+	free(scratch);
+
+	return ret;
 }
 
 void ndb_destroy(struct ndb *ndb)
@@ -6334,6 +9151,119 @@ int ndb_process_event_with(struct ndb *ndb, const char *json, int json_len,
 			   struct ndb_ingest_meta *meta)
 {
 	return ndb_ingest_event(&ndb->ingester, json, json_len, meta);
+}
+
+int ndb_verify_zap(struct ndb *ndb, struct ndb_txn *txn,
+		   const unsigned char *zap_note_id)
+{
+	struct ndb_note *note;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta *zap_meta, *target_meta;
+	uint64_t *flags;
+	uint64_t msats;
+	unsigned char *zapped_id;
+	size_t meta_size;
+
+	note = ndb_get_note_by_id(txn, zap_note_id, NULL, NULL);
+	if (note == NULL)
+		return 0;
+
+	// check if already verified
+	meta = ndb_get_note_meta(txn, zap_note_id);
+	if (meta != NULL) {
+		flags = ndb_note_meta_flags(meta);
+		if (*flags & NDB_NOTE_META_FLAG_ZAP_VERIFIED)
+			return 1; // already verified, idempotent
+	}
+
+	if (!ndb_parse_zap_bolt11(note, &msats))
+		return 0;
+
+	// find zapped note (e tag)
+	zapped_id = ndb_note_last_id_tag(note, 'e');
+
+	// update zap stats on the zapped note if we have an e tag
+	if (zapped_id != NULL) {
+		unsigned char scratch[4096];
+		struct ndb_note_meta_entry *entry;
+		int rc;
+
+		target_meta = ndb_get_note_meta(txn, zapped_id);
+
+		// increment verified zap count
+		rc = ndb_note_meta_clone_with_entry(&target_meta, &entry,
+			NDB_NOTE_META_ZAP, NULL, scratch, sizeof(scratch));
+
+		switch (rc) {
+		case NDB_META_CLONE_FAILED:
+			break;
+		case NDB_META_CLONE_NEW_ENTRY:
+			ndb_note_meta_zap_set(entry, 1, msats);
+			break;
+		case NDB_META_CLONE_EXISTING_ENTRY: {
+			uint32_t *count = ndb_note_meta_zap_count(entry);
+			uint64_t *total = ndb_note_meta_zap_msats(entry);
+			(*count)++;
+			*total += msats;
+			break;
+		}
+		}
+
+		// decrement unverified zap count (move from unverified to verified)
+		if (rc != NDB_META_CLONE_FAILED) {
+			rc = ndb_note_meta_clone_with_entry(&target_meta, &entry,
+				NDB_NOTE_META_ZAP_UNVERIFIED, NULL,
+				scratch, sizeof(scratch));
+
+			if (rc == NDB_META_CLONE_EXISTING_ENTRY) {
+				uint32_t *count = ndb_note_meta_zap_unverified_count(entry);
+				uint64_t *total = ndb_note_meta_zap_unverified_msats(entry);
+				if (*count > 0)
+					(*count)--;
+				if (*total >= msats)
+					*total -= msats;
+				else
+					*total = 0;
+			}
+
+			meta_size = ndb_note_meta_total_size(target_meta);
+			struct ndb_note_meta *heap_meta = malloc(meta_size);
+			if (heap_meta) {
+				memcpy(heap_meta, target_meta, meta_size);
+				ndb_set_note_meta(ndb, zapped_id, heap_meta);
+			}
+		}
+	}
+
+	// mark the zap receipt as verified
+	{
+		unsigned char scratch2[4096];
+		struct ndb_note_meta *receipt_meta = meta;
+
+		if (receipt_meta == NULL) {
+			struct ndb_note_meta_builder builder;
+			ndb_note_meta_builder_init(&builder, scratch2, sizeof(scratch2));
+			ndb_note_meta_build(&builder, &receipt_meta);
+		} else {
+			meta_size = ndb_note_meta_total_size(receipt_meta);
+			if (meta_size > sizeof(scratch2))
+				return 0;
+			memcpy(scratch2, receipt_meta, meta_size);
+			receipt_meta = (struct ndb_note_meta *)scratch2;
+		}
+
+		flags = ndb_note_meta_flags(receipt_meta);
+		*flags |= NDB_NOTE_META_FLAG_ZAP_VERIFIED;
+
+		meta_size = ndb_note_meta_total_size(receipt_meta);
+		zap_meta = malloc(meta_size);
+		if (zap_meta == NULL)
+			return 0;
+		memcpy(zap_meta, receipt_meta, meta_size);
+		ndb_set_note_meta(ndb, zap_note_id, zap_meta);
+	}
+
+	return 1;
 }
 
 int _ndb_process_events(struct ndb *ndb, const char *ldjson, size_t json_len,
@@ -6489,6 +9419,7 @@ static inline int ndb_json_parser_parse(struct ndb_json_parser *p,
 {
 	jsmntok_t *tok;
 	int cap = ((unsigned char *)p->toks_end - (unsigned char*)p->toks)/sizeof(*p->toks);
+
 	int res =
 		jsmn_parse(&p->json_parser, p->json, p->json_len, p->toks, cap, cb != NULL);
 
@@ -6923,7 +9854,7 @@ int ndb_create_keypair(struct ndb_keypair *kp)
 	secp256k1_xonly_pubkey pubkey;
 
 	secp256k1_context *ctx =
-		secp256k1_context_create(SECP256K1_CONTEXT_NONE);;
+		secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 
 	/* Try to create a keypair with a valid context, it should only
 	 * fail if the secret key is zero or out of range. */
@@ -7305,7 +10236,10 @@ int ndb_client_event_from_json(const char *json, int len, struct ndb_fce *fce,
 	struct ndb_json_parser parser;
 	struct ndb_event *ev = &fce->event;
 
-	ndb_json_parser_init(&parser, json, len, buf, bufsize);
+	if (!ndb_json_parser_init(&parser, json, len, buf, bufsize)) {
+		ndb_debug("failed to init parser\n");
+		return 0;
+	}
 
 	if ((res = ndb_json_parser_parse(&parser, cb)) < 0)
 		return res;
@@ -7346,13 +10280,16 @@ int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce,
 	tce->subid_len = 0;
 	tce->subid = "";
 
-	ndb_json_parser_init(&parser, json, len, buf, bufsize);
+	if (!ndb_json_parser_init(&parser, json, len, buf, bufsize)) {
+		ndb_debug("ndb_ws_event_from_json: failed to init json parser\n");
+		return 0;
+	}
 
 	if ((res = ndb_json_parser_parse(&parser, cb)) < 0)
 		return res;
 
 	if (parser.toks[0].type == JSMN_OBJECT) {
-		ndb_debug("got raw json in ws_event_from_json\n");
+		//ndb_debug("got raw json in ws_event_from_json\n");
 		tce->evtype = NDB_TCE_EVENT;
 		return ndb_parse_json_note(&parser, &ev->note);
 	}
@@ -7720,7 +10657,9 @@ static int ndb_filter_parse_json(struct ndb_json_parser *parser,
 	return ndb_filter_end(filter);
 }
 
-int ndb_parse_json_note(struct ndb_json_parser *parser, struct ndb_note **note)
+int ndb_parse_json_note_custom(struct ndb_json_parser *parser,
+			       struct ndb_note **note,
+			       int parse_cond)
 {
 	jsmntok_t *tok = NULL;
 	unsigned char hexbuf[64];
@@ -7769,20 +10708,26 @@ int ndb_parse_json_note(struct ndb_json_parser *parser, struct ndb_note **note)
 			if (tok->type != JSMN_PRIMITIVE || tok_len <= 0)
 				return 0;
 			if (!parse_unsigned_int(start, toksize(tok),
-						&parser->builder.note->kind))
+						&parser->builder.note->kind)) {
+					ndb_debug("kind parse_unsigned_int failed\n");
 					return 0;
+			}
 			parsed |= NDB_PARSED_KIND;
 		} else if (start[0] == 'c') {
 			if (jsoneq(json, tok, tok_len, "created_at")) {
 				// created_at
 				tok = &parser->toks[i+1];
 				start = json + tok->start;
-				if (tok->type != JSMN_PRIMITIVE || tok_len <= 0)
+				if (tok->type != JSMN_PRIMITIVE || tok_len <= 0) {
+					ndb_debug("creatd_at parse failed\n");
 					return 0;
+				}
 				// TODO: update to int64 in 2106 ... xD
 				unsigned int bigi;
-				if (!parse_unsigned_int(start, toksize(tok), &bigi))
+				if (!parse_unsigned_int(start, toksize(tok), &bigi)) {
+					ndb_debug("parsed_unsigned_int failed\n");
 					return 0;
+				}
 				parser->builder.note->created_at = bigi;
 				parsed |= NDB_PARSED_CREATED_AT;
 			} else if (jsoneq(json, tok, tok_len, "content")) {
@@ -7810,11 +10755,18 @@ int ndb_parse_json_note(struct ndb_json_parser *parser, struct ndb_note **note)
 		}
 	}
 
-	//ndb_debug("parsed %d = %d, &->%d", parsed, NDB_PARSED_ALL, parsed & NDB_PARSED_ALL);
-	if (parsed != NDB_PARSED_ALL)
+	if ((parsed & parse_cond) != parse_cond)  {
+		ndb_debug("json parse_cond failed, parsed(%d) != parse_cond(%d)\n",
+			  parsed, parse_cond);
 		return 0;
+	}
 
 	return ndb_builder_finalize(&parser->builder, note, NULL);
+}
+
+int ndb_parse_json_note(struct ndb_json_parser *parser, struct ndb_note **note)
+{
+	return ndb_parse_json_note_custom(parser, note, NDB_PARSED_ALL);
 }
 
 int ndb_filter_from_json(const char *json, int len, struct ndb_filter *filter,
@@ -7836,21 +10788,33 @@ int ndb_filter_from_json(const char *json, int len, struct ndb_filter *filter,
 	return ndb_filter_parse_json(&parser, filter);
 }
 
-int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
-		       unsigned char *buf, int bufsize)
+int ndb_note_from_json_custom(const char *json, int len, struct ndb_note **note,
+			      unsigned char *buf, int bufsize, int parse_cond)
 {
 	struct ndb_json_parser parser;
 	int res;
 
-	ndb_json_parser_init(&parser, json, len, buf, bufsize);
+	if (!ndb_json_parser_init(&parser, json, len, buf, bufsize)) {
+		ndb_debug("failed to init json parser in custom\n");
+		return 0;
+	}
+
 	if ((res = ndb_json_parser_parse(&parser, NULL)) < 0)
 		return res;
 
 	if (parser.num_tokens < 1)
 		return 0;
 
-	return ndb_parse_json_note(&parser, note);
+	return ndb_parse_json_note_custom(&parser, note, parse_cond);
 }
+
+int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
+		       unsigned char *buf, int bufsize)
+{
+	return ndb_note_from_json_custom(json, len, note, buf, bufsize,
+					 NDB_PARSED_ALL);
+}
+
 
 void ndb_builder_set_pubkey(struct ndb_builder *builder, unsigned char *pubkey)
 {
@@ -8044,6 +11008,29 @@ void ndb_config_set_ingest_filter(struct ndb_config *config,
 	config->filter_context = filter_ctx;
 }
 
+int ndb_print_note_metadata(struct ndb_txn *txn)
+{
+	MDB_cursor *cur;
+	MDB_val k, v;
+	int i;
+
+	if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &cur))
+		return 0;
+
+	i = 1;
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		print_hex(k.mv_data, 32);
+		printf("\t");
+		print_note_meta((struct ndb_note_meta*)v.mv_data);
+		i++;
+	}
+
+	mdb_cursor_close(cur);
+
+	return i;
+}
+
+
 int ndb_print_author_kind_index(struct ndb_txn *txn)
 {
 	MDB_cursor *cur;
@@ -8210,6 +11197,27 @@ unsigned char * ndb_note_id(struct ndb_note *note)
 	return note->id;
 }
 
+int ndb_note_is_rumor(struct ndb_note *note)
+{
+	return ((*ndb_note_flags(note)) & NDB_NOTE_FLAG_RUMOR) == NDB_NOTE_FLAG_RUMOR;
+}
+
+unsigned char *ndb_note_rumor_receiver_pubkey(struct ndb_note *note)
+{
+	if (!ndb_note_is_rumor(note))
+		return NULL;
+
+	return ndb_note_sig(note);
+}
+
+unsigned char *ndb_note_rumor_giftwrap_id(struct ndb_note *note)
+{
+	if (!ndb_note_is_rumor(note))
+		return NULL;
+
+	return ndb_note_sig(note) + 32;
+}
+
 unsigned char * ndb_note_pubkey(struct ndb_note *note)
 {
 	return note->pubkey;
@@ -8238,6 +11246,11 @@ void _ndb_note_set_kind(struct ndb_note *note, uint32_t kind)
 const char *ndb_note_content(struct ndb_note *note)
 {
 	return ndb_note_str(note, &note->content).str;
+}
+
+uint16_t *ndb_note_flags(struct ndb_note *note)
+{
+	return &note->aux.flags;
 }
 
 uint32_t ndb_note_content_length(struct ndb_note *note)
@@ -8509,7 +11522,7 @@ struct ndb_blocks *ndb_get_blocks_by_key(struct ndb *ndb, struct ndb_txn *txn, u
 	 struct ndb_writer_msg msg = { .type = NDB_WRITER_BLOCKS };
 	 msg.blocks = write_blocks;
 
-	 ndb_writer_queue_msg(&ndb->writer, &msg);
+	 ndb_writer_queue_msg(&ndb->writer.inbox, &msg);
 
 	 return blocks;
 }
@@ -8558,30 +11571,35 @@ int ndb_poll_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
 int ndb_wait_for_notes(struct ndb *ndb, uint64_t subid, uint64_t *note_ids,
                        int note_id_capacity)
 {
+	int res;
 	struct ndb_subscription *sub;
-	struct prot_queue *queue_inbox;
 
-        // this is not a valid subscription id
+	// this is not a valid subscription id
 	if (subid == 0)
 		return 0;
 
 	ndb_monitor_lock(&ndb->monitor);
 
-        if (!(sub = ndb_monitor_find_subscription(&ndb->monitor, subid, NULL))) {
-		ndb_monitor_unlock(&ndb->monitor);
-		return 0;
-	}
+	for (;;) {
+		sub = ndb_monitor_find_subscription(&ndb->monitor,
+						    subid, NULL);
+		if (!sub) {
+			res = 0;
+			break;
+		}
 
-	queue_inbox = &sub->inbox;
+		res = prot_queue_try_pop_all(&sub->inbox, note_ids,
+					     note_id_capacity);
+		if (res > 0)
+			break;
+
+		// nothing available yet — wait for the writer to signal
+		pthread_cond_wait(&ndb->monitor.cond, &ndb->monitor.mutex);
+	}
 
 	ndb_monitor_unlock(&ndb->monitor);
 
-	// there is technically a race condition if the thread yeilds at this
-	// comment and a subscription is added/removed. A deadlock in the
-	// writer queue would be much worse though. This function is dubious
-	// anyways.
-
-        return prot_queue_pop_all(queue_inbox, note_ids, note_id_capacity);
+	return res;
 }
 
 int ndb_unsubscribe(struct ndb *ndb, uint64_t subid)

@@ -34,6 +34,9 @@ typedef CONDITION_VARIABLE pthread_cond_t;
 #define pthread_cond_signal(cond) \
     (WakeConditionVariable(cond), 0)
 
+#define pthread_cond_broadcast(cond) \
+    (WakeAllConditionVariable(cond), 0)
+
 #define pthread_cond_wait(cond, mutex) \
     (SleepConditionVariableCS(cond, mutex, INFINITE) ? 0 : ErrCode())
 
