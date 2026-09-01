@@ -77,6 +77,7 @@ class WalletModel: ObservableObject {
         self.settings.nostr_wallet_connect = nil
         self.connect_state = .none
         self.previous_state = .none
+        WalletConnect.ConnectURL.forgetCachedParses()
     }
     
     func new(_ nwc: WalletConnectURL) {
@@ -84,6 +85,8 @@ class WalletModel: ObservableObject {
     }
     
     func connect(_ nwc: WalletConnectURL) {
+        // Drop the outgoing wallet's memoized parse (and its secret) before replacing it.
+        WalletConnect.ConnectURL.forgetCachedParses()
         self.settings.nostr_wallet_connect = nwc.to_url().absoluteString
         notify(.attached_wallet(nwc))
         self.connect_state = .existing(nwc)

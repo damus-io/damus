@@ -79,6 +79,50 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(url_2.relay.url.absoluteString, relay_2)
     }
 
+    /// Parsing an NWC URL derives a pubkey from the connection secret, which is expensive
+    /// enough that the result is memoized. Check that memoization is transparent: repeated
+    /// parses agree, distinct URLs do not bleed into each other, and dropping the cache
+    /// (as disconnecting a wallet does) leaves parsing working.
+    func testNWCParsingIsMemoizedTransparently() {
+        let sec_1 = Privkey(hex: "ff2eefd57196d42089e1b42acc39916d7ecac52e0625bd70597bbd5be14aff18")!
+        let sec_2 = Privkey(hex: "71a8c14c1407c113601079c4302dab36460f0ccd0ad506f1f2dc73b5100e4f3c")!
+        let str_1 = "nostrwalletconnect://9d088f4760422443d4699b485e2ac66e565a2f5da1198c55ddc5679458e3f67a?relay=wss://relay.getalby.com/v1&secret=\(sec_1)&lud16=jb55@jb55.com"
+        let str_2 = "nostrwalletconnect://b889ff5b1513b641e2a139f661a661364979c5beee91842f8f0ef42ab558e9d4?relay=wss://relay.damus.io&secret=\(sec_2)"
+
+        // The first parse populates the cache, the second must be served from it.
+        guard let cold = WalletConnectURL(str: str_1), let warm = WalletConnectURL(str: str_1) else {
+            XCTFail("NWC URL should parse")
+            return
+        }
+        XCTAssertEqual(cold.pubkey, warm.pubkey)
+        XCTAssertEqual(cold.keypair, warm.keypair)
+        XCTAssertEqual(cold.relay, warm.relay)
+        XCTAssertEqual(cold.lud16, warm.lud16)
+        XCTAssertEqual(warm.keypair.pubkey, privkey_to_pubkey(privkey: sec_1))
+        XCTAssertEqual(warm.lud16, "jb55@jb55.com")
+
+        // A different URL must not be answered with the cached one.
+        guard let other = WalletConnectURL(str: str_2) else {
+            XCTFail("second NWC URL should parse")
+            return
+        }
+        XCTAssertEqual(other.keypair.privkey, sec_2)
+        XCTAssertEqual(other.keypair.pubkey, privkey_to_pubkey(privkey: sec_2))
+        XCTAssertNil(other.lud16)
+        XCTAssertNotEqual(other.pubkey, warm.pubkey)
+
+        // Disconnecting a wallet drops memoized parses; parsing must still work afterwards.
+        WalletConnect.ConnectURL.forgetCachedParses()
+        guard let reparsed = WalletConnectURL(str: str_1) else {
+            XCTFail("NWC URL should still parse after the cache is dropped")
+            return
+        }
+        XCTAssertEqual(reparsed.pubkey, cold.pubkey)
+        XCTAssertEqual(reparsed.keypair, cold.keypair)
+        XCTAssertEqual(reparsed.relay, cold.relay)
+        XCTAssertEqual(reparsed.lud16, cold.lud16)
+    }
+
     @MainActor
     func testNWCEphemeralRelay() async {
         let sec = "8ba3a6b3b57d0f4211bb1ea4d8d1e351a367e9b4ea694746e0a4a452b2bc4d37"
