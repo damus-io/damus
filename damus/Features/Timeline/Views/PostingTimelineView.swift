@@ -141,15 +141,18 @@ struct PostingTimelineView: View {
     var body: some View {
         VStack {
             ZStack {
-                TabView(selection: $filter_state) {
-                    contentTimelineView(filter: content_filter(.posts))
-                        .tag(FilterState.posts)
-                        .id(FilterState.posts)
-                    contentTimelineView(filter: content_filter(.posts_and_replies))
-                        .tag(FilterState.posts_and_replies)
-                        .id(FilterState.posts_and_replies)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                // Driven by the `CustomPicker` in `HeaderView`. This used to be
+                // a paged `TabView`, which the iOS 26 tab bar cannot see
+                // through: a paged `TabView` neither reports its scrolling to
+                // the enclosing tab bar (so the bar never minimized on the home
+                // timeline) nor lets content run under the floating bar
+                // (leaving an opaque `adaptableWhite` slab where notes should
+                // show through the glass). Rendering the selected timeline
+                // directly hands the real `ScrollView` to the tab bar. The cost
+                // is the swipe-between-filters gesture, which the picker
+                // already duplicates.
+                contentTimelineView(filter: content_filter(filter_state))
+                    .id(filter_state)
                 
                 if damus_state.keypair.privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {

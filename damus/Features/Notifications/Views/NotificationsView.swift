@@ -82,37 +82,26 @@ struct NotificationsView: View {
     
     var body: some View {
         let showTrustedButton = would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications)
-        TabView(selection: $filter_state) {
-            NotificationTab(
-                NotificationFilter(
-                    state: .all,
-                    friend_filter: filter.friend_filter,
-                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
-                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
-                )
+        // Driven by the `CustomPicker` below. This used to be a `TabView` with
+        // no explicit style, which meant it defaulted to the *bar* style and
+        // drew a second, unlabelled tab bar of its own — harmless while the old
+        // custom `TabBar` overlay covered that strip, and plainly visible once
+        // the tab bar became native glass. Rendering the selected filter
+        // directly removes that phantom bar and hands the real `ScrollView` to
+        // the tab bar, so it can still minimize on scroll. Switching to a paged
+        // `TabView` would have removed the phantom bar too, but at the cost of
+        // the minimize behaviour and an opaque slab behind the glass. The cost
+        // here is the swipe-between-filters gesture, which the picker already
+        // duplicates.
+        NotificationTab(
+            NotificationFilter(
+                state: filter_state,
+                friend_filter: filter.friend_filter,
+                hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
+                hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
             )
-            .tag(NotificationFilterState.all)
-            
-            NotificationTab(
-                NotificationFilter(
-                    state: .zaps,
-                    friend_filter: filter.friend_filter,
-                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
-                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
-                )
-            )
-            .tag(NotificationFilterState.zaps)
-            
-            NotificationTab(
-                NotificationFilter(
-                    state: .replies,
-                    friend_filter: filter.friend_filter,
-                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
-                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
-                )
-            )
-            .tag(NotificationFilterState.replies)
-        }
+        )
+        .id(filter_state)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(

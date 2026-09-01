@@ -97,14 +97,17 @@ struct DirectMessagesView: View {
             Divider()
                 .frame(height: 1)
             
-            TabView(selection: $dm_type) {
-                MainContent(requests: false)
-                    .tag(DMType.friend)
-                
-                MainContent(requests: true)
-                    .tag(DMType.rando)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            // Driven by the `CustomPicker` above. This used to be a paged
+            // `TabView`, which the iOS 26 tab bar cannot see through: a paged
+            // `TabView` neither reports its scrolling to the enclosing tab bar
+            // (so the bar never minimized on this tab) nor lets content run
+            // under the floating bar (leaving an opaque `adaptableWhite` slab
+            // where the timeline should show through the glass). Rendering the
+            // selected list directly hands the real `ScrollView` to the tab
+            // bar. The cost is the swipe-between-filters gesture, which the
+            // picker already duplicates.
+            MainContent(requests: dm_type == .rando)
+                .id(dm_type)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
