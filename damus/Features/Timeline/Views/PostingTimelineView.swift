@@ -30,17 +30,6 @@ struct PostingTimelineView: View {
     @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
     @Binding var timeline_source: TimelineSource
     
-    @State private var damusTips: Any? = {
-        if #available(iOS 18.0, *) {
-            return TipGroup(.ordered) {
-                TrustedNetworkButtonTip.shared
-                TrustedNetworkRepliesTip.shared
-                PostingTimelineSwitcherView.TimelineSwitcherTip.shared
-            }
-        }
-        return nil
-    }()
-
     var loading: Binding<Bool> {
         Binding(get: {
             return home.loading
@@ -115,11 +104,8 @@ struct PostingTimelineView: View {
                 }
             }
             .padding(.horizontal, 20)
-            if #available(iOS 18.0, *), let tipGroup = damusTips as? TipGroup {
-                TipView(tipGroup.currentTip as? PostingTimelineSwitcherView.TimelineSwitcherTip)
-                    .tipBackground(.clear)
-                    .tipViewStyle(TrustedNetworkButtonTipViewStyle())
-                    .padding(.horizontal)
+            if #available(iOS 18.0, *) {
+                TipsView()
             }
             VStack(spacing: 0) {
                 CustomPicker(tabs: [
@@ -135,6 +121,33 @@ struct PostingTimelineView: View {
         .background {
             DamusColors.adaptableWhite
                 .ignoresSafeArea()
+        }
+    }
+
+    /// The home timeline's tips.
+    ///
+    /// This lives in its own view because reading `TipGroup.currentTip` goes
+    /// through TipKit's datastore and costs real time on the main thread, and
+    /// ``HeaderView()`` is rebuilt on every scroll frame — `TimelineView`
+    /// writes `headerOffset` from its scroll callback, and that binding lives
+    /// all the way up in ``ContentView``, so each frame invalidates this
+    /// view's body. A view with no stored properties compares equal across
+    /// those rebuilds, so SwiftUI skips its body and TipKit is left alone.
+    /// `TipGroup` is `Observable`, so reading `currentTip` in here still
+    /// invalidates this view when the group advances to the next tip.
+    @available(iOS 18.0, *)
+    struct TipsView: View {
+        private static let group = TipGroup(.ordered) {
+            TrustedNetworkButtonTip.shared
+            TrustedNetworkRepliesTip.shared
+            PostingTimelineSwitcherView.TimelineSwitcherTip.shared
+        }
+
+        var body: some View {
+            TipView(Self.group.currentTip as? PostingTimelineSwitcherView.TimelineSwitcherTip)
+                .tipBackground(.clear)
+                .tipViewStyle(TrustedNetworkButtonTipViewStyle())
+                .padding(.horizontal)
         }
     }
 
