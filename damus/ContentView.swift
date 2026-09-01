@@ -239,6 +239,7 @@ struct ContentView: View {
                         NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
                     }
                 }
+                .minimizeTabBarOnScroll()
                 .background(tabKeyboardShortcuts)
                 .overlay(
                     SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
@@ -903,6 +904,7 @@ struct TimelineTabRootModifier: ViewModifier {
                 .hideToolbarBackground()
             }
             .staticNavigationBarAppearance()
+            .softBottomScrollEdgeEffect()
     }
 }
 

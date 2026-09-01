@@ -1704,10 +1704,13 @@
 		D76BE18E2E0CF3DA004AD0C6 /* Interests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */; };
 		D76C034D2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */; };
 		D7A11C042F700004002CAEB5 /* NavigationBarAppearanceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C012F700001002CAEB5 /* NavigationBarAppearanceModifier.swift */; };
+		D7A11C142F700014002CAEB5 /* TabBarAppearanceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C112F700011002CAEB5 /* TabBarAppearanceModifier.swift */; };
 		D76C034E2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */; };
 		D7A11C022F700002002CAEB5 /* NavigationBarAppearanceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C012F700001002CAEB5 /* NavigationBarAppearanceModifier.swift */; };
+		D7A11C122F700012002CAEB5 /* TabBarAppearanceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C112F700011002CAEB5 /* TabBarAppearanceModifier.swift */; };
 		D76C034F2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */; };
 		D7A11C032F700003002CAEB5 /* NavigationBarAppearanceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C012F700001002CAEB5 /* NavigationBarAppearanceModifier.swift */; };
+		D7A11C132F700013002CAEB5 /* TabBarAppearanceModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A11C112F700011002CAEB5 /* TabBarAppearanceModifier.swift */; };
 		D77135D32E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
 		D77135D42E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
 		D77135D52E7B766B00E7639F /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77135D22E7B766300E7639F /* DataExtensions.swift */; };
@@ -2882,6 +2885,7 @@
 		D76BE18B2E0CF3D5004AD0C6 /* Interests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interests.swift; sourceTree = "<group>"; };
 		D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarItemModifier.swift; sourceTree = "<group>"; };
 		D7A11C012F700001002CAEB5 /* NavigationBarAppearanceModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarAppearanceModifier.swift; sourceTree = "<group>"; };
+		D7A11C112F700011002CAEB5 /* TabBarAppearanceModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarAppearanceModifier.swift; sourceTree = "<group>"; };
 		D77135D22E7B766300E7639F /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
 		D773BC5E2C6D538500349F0A /* CommentItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentItem.swift; sourceTree = "<group>"; };
 		D774A5C72F4F93F5006A4D64 /* StorageStatsViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageStatsViewHelper.swift; sourceTree = "<group>"; };
@@ -5498,6 +5502,7 @@
 				F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */,
 				D76C034C2F6B6D78002CAEB5 /* ToolbarItemModifier.swift */,
 				D7A11C012F700001002CAEB5 /* NavigationBarAppearanceModifier.swift */,
+				D7A11C112F700011002CAEB5 /* TabBarAppearanceModifier.swift */,
 			);
 			path = Modifiers;
 			sourceTree = "<group>";
@@ -6243,6 +6248,7 @@
 				4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */,
 				D76C034E2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */,
 				D7A11C022F700002002CAEB5 /* NavigationBarAppearanceModifier.swift in Sources */,
+				D7A11C122F700012002CAEB5 /* TabBarAppearanceModifier.swift in Sources */,
 				4C32B95E2A9AD44700DC3548 /* FlatBufferObject.swift in Sources */,
 				D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */,
 				D73FA9E12DDC12AA00C706E1 /* OnboardingContentSettings.swift in Sources */,
@@ -6825,6 +6831,7 @@
 				82D6FB902CD99F7900C925F4 /* DirectMessageModel.swift in Sources */,
 				D76C034F2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */,
 				D7A11C032F700003002CAEB5 /* NavigationBarAppearanceModifier.swift in Sources */,
+				D7A11C132F700013002CAEB5 /* TabBarAppearanceModifier.swift in Sources */,
 				82D6FB912CD99F7900C925F4 /* UserSettingsStore.swift in Sources */,
 				82D6FB922CD99F7900C925F4 /* Wallet.swift in Sources */,
 				82D6FB932CD99F7900C925F4 /* Report.swift in Sources */,
@@ -7401,6 +7408,7 @@
 				D5C1AFC12E5DF7E60092F72F /* ContactCardManager.swift in Sources */,
 				D76C034D2F6B6D78002CAEB5 /* ToolbarItemModifier.swift in Sources */,
 				D7A11C042F700004002CAEB5 /* NavigationBarAppearanceModifier.swift in Sources */,
+				D7A11C142F700014002CAEB5 /* TabBarAppearanceModifier.swift in Sources */,
 				D73B74E32D8365BA0067BDBC /* ExtraFonts.swift in Sources */,
 				D73E5EF92C6A97F4007EB227 /* EventGroupView.swift in Sources */,
 				D73E5EFA2C6A97F4007EB227 /* NotificationItemView.swift in Sources */,
