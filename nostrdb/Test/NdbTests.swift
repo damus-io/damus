@@ -164,6 +164,173 @@ final class NdbTests: XCTestCase {
         }
     }
 
+    // MARK: - Filtered text search (ndb_text_search_with)
+
+    /// The two kind-1 notes from `test_wire_events` that reach the fulltext index.
+    ///
+    /// Both are of the form "a quick brown fox <verb phrase> the lazy dog", by
+    /// different authors, ten seconds apart. Note that `test_wire_events` looks
+    /// like it holds a third such note ("...the lazy cat") but its last line is not
+    /// newline-terminated, and `ndb_process_events` only ingests whole lines, so
+    /// that event never lands. Don't write assertions against it.
+    private enum SearchFixture {
+        /// "a quick brown fox jumped over the lazy dog"
+        static let jumped = (
+            id: NoteId(hex: "8f68cdc0c72dcf5c37868428cb477f28b13b1561e717f92053921b3b3c4ab712")!,
+            author: Pubkey(hex: "ba4b26df771a0839d5a26550ada6ac19547e164136994951d2d5c5815993a28e")!,
+            created_at: UInt32(1701187327)
+        )
+        /// "a quick brown fox barked at the lazy dog"
+        static let barked = (
+            id: NoteId(hex: "b17a540710fe8495b16bfbaf31c6962c4ba8387f3284a7973ad523988095417e")!,
+            author: Pubkey(hex: "df51637b1a19115d6c532081461a3e24f19b02f15815771dd26de2617fe2ea90")!,
+            created_at: UInt32(1701187337)
+        )
+    }
+
+    /// Ingests `test_wire_events` and hands back a freshly opened Ndb to search.
+    private func ndb_with_search_fixture() throws -> Ndb {
+        do {
+            let ndb = try XCTUnwrap(Ndb(path: db_dir))
+            XCTAssertTrue(ndb.process_events(test_wire_events))
+        }
+        return try XCTUnwrap(Ndb(path: db_dir))
+    }
+
+    private func note_ids(_ ndb: Ndb, _ results: [Ndb.TextSearchResult]) throws -> [NoteId] {
+        return try results.map { result in
+            try XCTUnwrap(ndb.lookup_note_by_key(result.noteKey, borrow: { maybeNote -> NoteId? in
+                switch maybeNote {
+                case .none: return nil
+                case .some(let note): return note.id
+                }
+            }))
+        }
+    }
+
+    /// An `authors` filter narrows a text search to that author's notes. Both
+    /// fixture notes match "quick brown fox"; only one is by this author.
+    func test_ndb_search_with_author_filter() throws {
+        let ndb = try ndb_with_search_fixture()
+
+        let unfiltered = try ndb.text_search(query: "quick brown fox", filter: nil)
+        XCTAssertEqual(try note_ids(ndb, unfiltered), [SearchFixture.barked.id, SearchFixture.jumped.id],
+                       "both fixture notes contain 'quick brown fox'")
+
+        let filter = try NdbFilter(from: NostrFilter(authors: [SearchFixture.jumped.author]))
+        let filtered = try ndb.text_search(query: "quick brown fox", filter: filter)
+        XCTAssertEqual(try note_ids(ndb, filtered), [SearchFixture.jumped.id])
+
+        // and an author with nothing indexed matches nothing, rather than falling
+        // back to the unfiltered result set
+        let stranger = try NdbFilter(from: NostrFilter(authors: [test_pubkey]))
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: stranger).count, 0)
+    }
+
+    /// `since`/`until` on the filter bracket the results. nostrdb treats `since` as
+    /// inclusive and `until` as exclusive (`created_at < until`).
+    func test_ndb_search_with_date_range_filter() throws {
+        let ndb = try ndb_with_search_fixture()
+
+        func search(_ filter: NostrFilter) throws -> [NoteId] {
+            return try note_ids(ndb, try ndb.text_search(query: "quick brown fox", filter: try NdbFilter(from: filter)))
+        }
+
+        // `since` alone drops everything older than it.
+        XCTAssertEqual(try search(NostrFilter(since: SearchFixture.barked.created_at)),
+                       [SearchFixture.barked.id])
+        // `until` alone drops everything at or newer than it.
+        XCTAssertEqual(try search(NostrFilter(until: SearchFixture.barked.created_at)),
+                       [SearchFixture.jumped.id])
+        // a window containing both
+        XCTAssertEqual(try search(NostrFilter(since: SearchFixture.jumped.created_at,
+                                              until: SearchFixture.barked.created_at + 1)),
+                       [SearchFixture.barked.id, SearchFixture.jumped.id])
+        // a window containing neither
+        XCTAssertEqual(try search(NostrFilter(since: SearchFixture.barked.created_at + 1)), [])
+    }
+
+    /// Each hit carries the matched note's `created_at`, so a caller can page on it
+    /// without looking the note up.
+    func test_ndb_search_results_carry_timestamps() throws {
+        let ndb = try ndb_with_search_fixture()
+
+        let results = try ndb.text_search(query: "quick brown fox", filter: nil)
+        XCTAssertEqual(results.count, 2)
+
+        for result in results {
+            let created_at = try XCTUnwrap(ndb.lookup_note_by_key(result.noteKey, borrow: { maybeNote -> UInt32? in
+                switch maybeNote {
+                case .none: return nil
+                case .some(let note): return note.createdAt
+                }
+            }))
+            XCTAssertEqual(result.timestamp, UInt64(created_at),
+                           "the hit's timestamp must be the note's created_at")
+        }
+
+        XCTAssertEqual(results.map(\.timestamp),
+                       [UInt64(SearchFixture.barked.created_at), UInt64(SearchFixture.jumped.created_at)],
+                       "newest-first by default")
+
+        let ascending = try ndb.text_search(query: "quick brown fox", filter: nil, order: .oldest_first)
+        XCTAssertEqual(ascending.map(\.timestamp),
+                       [UInt64(SearchFixture.jumped.created_at), UInt64(SearchFixture.barked.created_at)])
+    }
+
+    /// nostrdb parses at most `Ndb.max_text_search_words` words from a query and
+    /// silently drops the rest, so an over-long query is matched on its first N
+    /// words only — which widens the result set rather than narrowing it, since
+    /// matching is an AND over the parsed words.
+    func test_ndb_search_drops_words_past_the_cap() throws {
+        let ndb = try ndb_with_search_fixture()
+        XCTAssertEqual(Ndb.max_text_search_words, 8)
+
+        // Exactly at the cap: all eight words are honoured, and the note matches.
+        let eight = "quick brown fox jumped over the lazy dog"
+        XCTAssertEqual(eight.split(separator: " ").count, 8)
+        XCTAssertEqual(try note_ids(ndb, try ndb.text_search(query: eight, filter: nil)),
+                       [SearchFixture.jumped.id])
+
+        // Control: swapping the 8th word for one no note contains does narrow to
+        // nothing, so the cap really is 8 rather than "trailing words are ignored".
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox jumped over the lazy cat", filter: nil).count, 0)
+
+        // One past the cap: the 9th word would have excluded the note, but it is
+        // dropped, so the results are the 8-word results unchanged.
+        XCTAssertEqual(try note_ids(ndb, try ndb.text_search(query: eight + " cat", filter: nil)),
+                       [SearchFixture.jumped.id],
+                       "the 9th query word must be dropped, not matched")
+    }
+
+    /// `limit` is clamped to the fixed size of nostrdb's result struct, so an
+    /// oversized limit is harmless rather than a buffer overrun.
+    func test_ndb_search_clamps_limit() throws {
+        let ndb = try ndb_with_search_fixture()
+
+        XCTAssertEqual(Ndb.max_text_search_results, 128)
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: nil, limit: 10_000).count, 2)
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: nil, limit: 1).count, 1)
+
+        // a `limit` on the filter narrows it further
+        let filter = try NdbFilter(from: NostrFilter(limit: 1))
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: filter).count, 1)
+    }
+
+    /// A `search` field on a `NostrFilter` survives conversion to an `ndb_filter`,
+    /// which is what routes `ndb_query` onto its SEARCH plan.
+    func test_nostr_filter_carries_search() throws {
+        let filter = NostrFilter(kinds: [.text], search: "quick brown fox")
+        XCTAssertNoThrow(try NdbFilter(from: filter))
+
+        let encoded = try JSONEncoder().encode(filter)
+        let decoded = try JSONDecoder().decode(NostrFilter.self, from: encoded)
+        XCTAssertEqual(decoded.search, "quick brown fox")
+
+        let json = try XCTUnwrap(String(data: encoded, encoding: .utf8))
+        XCTAssertTrue(json.contains("\"search\""), "NIP-50 coding key must be `search`, got \(json)")
+    }
+
     /// Phase 0 regression guard: a `{kinds:[1], authors:[a, b]}` query must be
     /// served by nostrdb's AUTHOR_KINDS plan, whose index merger interleaves the
     /// per-author runs and yields strictly newest-first. Before the upstream sync

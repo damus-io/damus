@@ -315,6 +315,23 @@ class NdbFilter {
             ndb_filter_end_field(filterPointer)
         }
 
+        // Handle `search`
+        if let search = nostrFilter.search {
+            guard ndb_filter_start_field(filterPointer, NDB_FILTER_SEARCH) == 1 else {
+                ndb_filter_destroy(filterPointer)
+                filterPointer.deallocate()
+                throw NdbFilterConversionError.failedToStartField
+            }
+
+            if ndb_filter_add_str_element(filterPointer, search.cString(using: .utf8)) != 1 {
+                ndb_filter_destroy(filterPointer)
+                filterPointer.deallocate()
+                throw NdbFilterConversionError.failedToAddElement
+            }
+
+            ndb_filter_end_field(filterPointer)
+        }
+
         // Finalize the filter
         guard ndb_filter_end(filterPointer) == 1 else {
             ndb_filter_destroy(filterPointer)

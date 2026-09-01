@@ -19,6 +19,9 @@ struct NostrFilter: Codable, Equatable {
     var hashtag: [String]?
     var parameter: [String]?
     var quotes: [NoteId]?
+    /// NIP-50 fulltext search. Locally this routes the query through nostrdb's
+    /// text index instead of the note indices; see `Ndb.text_search`.
+    var search: String?
 
     private enum CodingKeys : String, CodingKey {
         case ids
@@ -32,9 +35,10 @@ struct NostrFilter: Codable, Equatable {
         case until
         case authors
         case limit
+        case search
     }
     
-    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, quotes: [NoteId]? = nil) {
+    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil, quotes: [NoteId]? = nil, search: String? = nil) {
         self.ids = ids
         self.kinds = kinds
         self.referenced_ids = referenced_ids
@@ -45,10 +49,11 @@ struct NostrFilter: Codable, Equatable {
         self.authors = authors
         self.hashtag = hashtag
         self.quotes = quotes
+        self.search = search
     }
     
     public static func copy(from: NostrFilter) -> NostrFilter {
-        NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, authors: from.authors, hashtag: from.hashtag)
+        NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, authors: from.authors, hashtag: from.hashtag, search: from.search)
     }
     
     public static func filter_hashtag(_ htags: [String]) -> NostrFilter {
