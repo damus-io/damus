@@ -468,6 +468,36 @@ class Ndb {
         })
     }
     
+    /// Maps many note keys to values under a single read transaction.
+    ///
+    /// `lookup_note_by_key` opens (or inherits) a transaction per call, which is
+    /// right for one note and wasteful for thousands. The local search paths walk
+    /// an index and then have to open every candidate to match its content, so
+    /// they need the batched form.
+    ///
+    /// Keys whose note is missing, and notes `transform` returns `nil` for, are
+    /// dropped — the result can be shorter than `keys`, and is in the same order.
+    ///
+    /// - Warning: the note handed to `transform` is only valid for that call. Copy
+    ///   anything you need to keep, as with the other borrowing lookups.
+    func compact_map_notes<T>(keys: [NoteKey], _ transform: (_ key: NoteKey, _ note: borrowing UnownedNdbNote) throws -> T?) throws -> [T] {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self, name: "compact_map_notes") else { return [] }
+
+            var values: [T] = []
+            values.reserveCapacity(keys.count)
+
+            for key in keys {
+                guard let rawNote = lookup_note_by_key_with_txn(key, txn: txn) else { continue }
+                if let value = try transform(key, UnownedNdbNote(rawNote)) {
+                    values.append(value)
+                }
+            }
+
+            return values
+        })
+    }
+
     func lookup_note_by_key_and_copy(_ key: NoteKey) throws -> NdbNote? {
         return try withNdb({
             return try lookup_note_by_key(key, borrow: { maybeUnownedNote -> NdbNote? in
