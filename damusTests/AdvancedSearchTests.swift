@@ -331,7 +331,7 @@ final class AdvancedSearchEngineTests: XCTestCase {
     }
 
     private func search(_ ndb: Ndb, _ query: AdvancedSearchQuery) throws -> [String] {
-        return try contents(ndb, try AdvancedSearchEngine.search(query, in: ndb))
+        return try contents(ndb, try AdvancedSearchEngine.search(query, in: ndb).keys)
     }
 
     private func at(_ timestamp: Double) -> Date { Date(timeIntervalSince1970: timestamp) }
@@ -790,5 +790,179 @@ final class AdvancedSearchQueryDSLTests: XCTestCase {
         let text = render(parsed)
         XCTAssertTrue(text.hasPrefix("since:2026-08-26T"), "unexpected rendering: \(text)")
         XCTAssertEqual(parse(text).query, parsed)
+    }
+}
+
+// MARK: - The search runner
+
+/// Drives ``AdvancedSearchModel`` end to end.
+///
+/// These seed `test_damus_state.ndb` rather than standing up their own
+/// `DamusState`, and so share a database with the rest of the suite. The fixture
+/// notes are signed with a throwaway keypair and carry content nothing else
+/// searches for, so they cannot be mistaken for anybody else's fixture.
+@MainActor
+final class AdvancedSearchModelTests: XCTestCase {
+    private let keypair = generate_new_keypair()
+
+    /// Far away from the other fixtures' timestamps so a window in one cannot
+    /// catch the other.
+    private let base: UInt32 = 1750000000
+
+    private func seed() throws -> DamusState {
+        let state = test_damus_state
+        let notes = [
+            try note("runnerfixture alpha", at: base),
+            try note("runnerfixture beta", at: base + 10),
+            try note("runnerfixture gamma", at: base + 20),
+        ]
+        for note in notes { try state.ndb.add(event: note) }
+
+        // `add(event:)` hands the note to nostrdb's writer, which is not
+        // synchronous with the read side, so wait for it to land rather than
+        // assuming it has.
+        let filter = NostrFilter(kinds: [.text], authors: [keypair.pubkey])
+        for _ in 0..<200 {
+            let keys = (try? state.ndb.query(filters: [try NdbFilter(from: filter)], maxResults: 16)) ?? []
+            if keys.count >= notes.count { return state }
+            usleep(25_000)
+        }
+        XCTFail("nostrdb never ingested the fixture notes")
+        return state
+    }
+
+    private func note(_ content: String, at timestamp: UInt32) throws -> NostrEvent {
+        return try XCTUnwrap(NostrEvent(content: content,
+                                        keypair: keypair.to_keypair(),
+                                        kind: 1,
+                                        tags: [],
+                                        createdAt: timestamp))
+    }
+
+    /// Waits for the model to reach a state `predicate` accepts.
+    private func settle(_ model: AdvancedSearchModel,
+                        until predicate: (AdvancedSearchModel.State) -> Bool) async throws -> AdvancedSearchModel.State {
+        for _ in 0..<200 {
+            if predicate(model.state) { return model.state }
+            try await Task.sleep(for: .milliseconds(25))
+        }
+        XCTFail("model never settled; last state was \(model.state)")
+        return model.state
+    }
+
+    private func contents(_ state: AdvancedSearchModel.State) -> [String] {
+        state.events.map(\.content)
+    }
+
+    /// A query with nothing to run must say so immediately, without waiting out
+    /// the debounce — the reason is what lets the results view distinguish "we did
+    /// not search" from "we searched and found nothing".
+    func test_a_query_with_nothing_to_run_reports_why_synchronously() {
+        let model = AdvancedSearchModel(damus_state: test_damus_state)
+
+        guard case .idle(let reason) = model.state else { return XCTFail("expected idle") }
+        XCTAssertEqual(reason, .emptyQuery)
+
+        model.query = AdvancedSearchQuery(since: Date(timeIntervalSince1970: 1700000000))
+        guard case .idle(let dateOnly) = model.state else { return XCTFail("expected idle") }
+        XCTAssertEqual(dateOnly, .unconstrained, "a bare date range is a timeline, not a search")
+
+        model.query = AdvancedSearchQuery(keywords: ["a"])
+        guard case .idle(let tooShort) = model.state else { return XCTFail("expected idle") }
+        XCTAssertEqual(tooShort, .noIndexableTerms)
+    }
+
+    func test_a_search_returns_the_matching_notes_newest_first() async throws {
+        let state = try seed()
+        let model = AdvancedSearchModel(damus_state: state,
+                                        query: AdvancedSearchQuery(keywords: ["runnerfixture"],
+                                                                   authors: [keypair.pubkey]))
+        model.search()
+
+        let settled = try await settle(model, until: { if case .results = $0 { return true }; return false })
+        XCTAssertEqual(contents(settled),
+                       ["runnerfixture gamma", "runnerfixture beta", "runnerfixture alpha"])
+
+        guard case .results(_, let reachedLimit) = settled else { return XCTFail("expected results") }
+        XCTAssertFalse(reachedLimit, "three notes is nowhere near the candidate cap")
+    }
+
+    func test_order_is_honoured() async throws {
+        let state = try seed()
+        let model = AdvancedSearchModel(damus_state: state,
+                                        query: AdvancedSearchQuery(keywords: ["runnerfixture"],
+                                                                   authors: [keypair.pubkey],
+                                                                   order: .oldest_first))
+        model.search()
+
+        let settled = try await settle(model, until: { if case .results = $0 { return true }; return false })
+        XCTAssertEqual(contents(settled),
+                       ["runnerfixture alpha", "runnerfixture beta", "runnerfixture gamma"])
+    }
+
+    /// Results must not blink out from under the user mid-keystroke.
+    func test_the_previous_results_survive_while_the_next_search_runs() async throws {
+        let state = try seed()
+        let model = AdvancedSearchModel(damus_state: state,
+                                        query: AdvancedSearchQuery(keywords: ["runnerfixture"],
+                                                                   authors: [keypair.pubkey]))
+        model.search()
+        _ = try await settle(model, until: { if case .results = $0 { return true }; return false })
+
+        model.query = AdvancedSearchQuery(keywords: ["runnerfixture", "beta"], authors: [keypair.pubkey])
+        XCTAssertTrue(model.state.isSearching)
+        XCTAssertEqual(contents(model.state).count, 3, "the old results are still on screen")
+
+        let settled = try await settle(model, until: { state in
+            if case .results(let events, _) = state { return events.count == 1 }
+            return false
+        })
+        XCTAssertEqual(contents(settled), ["runnerfixture beta"])
+    }
+
+    /// Typing supersedes rather than queues: the results that arrive belong to the
+    /// last query, not to whichever search happened to finish last.
+    func test_a_superseded_search_does_not_land() async throws {
+        let state = try seed()
+        let model = AdvancedSearchModel(damus_state: state)
+
+        model.query = AdvancedSearchQuery(keywords: ["runnerfixture"], authors: [keypair.pubkey])
+        model.query = AdvancedSearchQuery(keywords: ["runnerfixture", "alpha"], authors: [keypair.pubkey])
+
+        let settled = try await settle(model, until: { if case .results = $0 { return true }; return false })
+        XCTAssertEqual(contents(settled), ["runnerfixture alpha"])
+
+        // and nothing arrives afterwards to overwrite it
+        try await Task.sleep(for: .milliseconds(300))
+        XCTAssertEqual(contents(model.state), ["runnerfixture alpha"])
+    }
+
+    /// A search nobody is waiting for must stop competing for read transactions.
+    func test_cancel_stops_a_pending_search() async throws {
+        let state = try seed()
+        let model = AdvancedSearchModel(damus_state: state)
+
+        model.query = AdvancedSearchQuery(keywords: ["runnerfixture"], authors: [keypair.pubkey])
+        XCTAssertTrue(model.state.isSearching)
+        model.cancel()
+
+        try await Task.sleep(for: .milliseconds(400))
+        XCTAssertTrue(model.state.isSearching, "cancelling leaves the state where it was rather than lying about it")
+        XCTAssertEqual(contents(model.state), [])
+    }
+
+    /// Assigning the same query again must not restart anything, or a view that
+    /// re-renders would re-search on every pass.
+    func test_reassigning_the_same_query_is_a_no_op() async throws {
+        let state = try seed()
+        let query = AdvancedSearchQuery(keywords: ["runnerfixture"], authors: [keypair.pubkey])
+        let model = AdvancedSearchModel(damus_state: state, query: query)
+        model.search()
+        _ = try await settle(model, until: { if case .results = $0 { return true }; return false })
+
+        model.query = query
+        guard case .results = model.state else {
+            return XCTFail("expected the results to still be there, not a fresh search")
+        }
     }
 }
