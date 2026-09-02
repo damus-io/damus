@@ -120,6 +120,22 @@ struct InnerSearchResults: View {
         .buttonStyle(.plain)
     }
 
+    /// Names a `from:` that matched nobody on this device.
+    ///
+    /// The DSL neither drops such an author nor degrades it to a keyword, because
+    /// both would silently change what the query means — dropping it widens the
+    /// search to everybody, and keeping it as a keyword searches note text for
+    /// "from:jb55". So it reports it instead and leaves somebody to say so, and
+    /// this is where the question comes up.
+    private func UnresolvedAuthors(_ names: [String]) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "exclamationmark.circle")
+            Text("No profile found for \(names.joined(separator: ", "))", comment: "Warning that an author named in a search query matches nobody known to this device.")
+        }
+        .font(.footnote)
+        .foregroundColor(.secondary)
+    }
+
     func ProfilesSearch(_ results: [Pubkey]) -> some View {
         return LazyVStack {
             ForEach(results, id: \.id) { pk in
@@ -138,6 +154,11 @@ struct InnerSearchResults: View {
             HStack(spacing: 20) {
                 HashtagSearch(multi.hashtag)
                 NoteSearch(parsed, text: multi.text)
+            }
+
+            if !parsed.unresolvedAuthors.isEmpty {
+                UnresolvedAuthors(parsed.unresolvedAuthors)
+                    .padding(.top, 10)
             }
 
             Spacer()
