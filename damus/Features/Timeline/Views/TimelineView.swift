@@ -11,10 +11,9 @@ struct TimelineView<Content: View>: View {
     @ObservedObject var events: EventHolder
     @Binding var loading: Bool
     @Binding var headerHeight: CGFloat
-    @Binding var headerOffset: CGFloat
-    @State var shiftOffset: CGFloat = 0
-    @State var lastHeaderOffset: CGFloat = 0
-    @State var direction: SwipeDirection = .none
+    /// Drives the header's hide/reveal. Held unobserved on purpose: this view writes it on
+    /// every scroll frame, and observing it here would rebuild the whole timeline per frame.
+    let headerOffset: HeaderOffsetModel?
 
     let damus: DamusState
     let show_friend_icon: Bool
@@ -23,11 +22,11 @@ struct TimelineView<Content: View>: View {
     let apply_mute_rules: Bool
     let viewId: AnyHashable?
 
-    init(events: EventHolder, loading: Binding<Bool>, headerHeight: Binding<CGFloat>, headerOffset: Binding<CGFloat>, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, viewId: AnyHashable? = nil, content: (() -> Content)? = nil) {
+    init(events: EventHolder, loading: Binding<Bool>, headerHeight: Binding<CGFloat>, headerOffset: HeaderOffsetModel, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool, apply_mute_rules: Bool = true, viewId: AnyHashable? = nil, content: (() -> Content)? = nil) {
         self.events = events
         self._loading = loading
         self._headerHeight = headerHeight
-        self._headerOffset = headerOffset
+        self.headerOffset = headerOffset
         self.damus = damus
         self.show_friend_icon = show_friend_icon
         self.filter = filter
@@ -40,7 +39,7 @@ struct TimelineView<Content: View>: View {
         self.events = events
         self._loading = loading
         self._headerHeight = .constant(0.0)
-        self._headerOffset = .constant(0.0)
+        self.headerOffset = nil
         self.damus = damus
         self.show_friend_icon = show_friend_icon
         self.filter = filter
@@ -80,24 +79,27 @@ struct TimelineView<Content: View>: View {
                     .disabled(loading)
                     .padding(.top, topPadding)
                     .offsetY { previous, current in
+                        // No header to move: this timeline has no chrome bound to the scroll.
+                        guard let header = headerOffset else { return }
+
                         if previous > current{
-                            if direction != .up && current < 0 {
-                                shiftOffset = current - headerOffset
-                                direction = .up
-                                lastHeaderOffset = headerOffset
+                            if header.direction != .up && current < 0 {
+                                header.shiftOffset = current - header.offset
+                                header.direction = .up
+                                header.lastOffset = header.offset
                             }
-                            
-                            let offset = current < 0 ? (current - shiftOffset) : 0
-                            headerOffset = (-offset < headerHeight ? (offset < 0 ? offset : 0) : -headerHeight)
+
+                            let offset = current < 0 ? (current - header.shiftOffset) : 0
+                            header.offset = (-offset < headerHeight ? (offset < 0 ? offset : 0) : -headerHeight)
                         }else {
-                            if direction != .down {
-                                shiftOffset = current
-                                direction = .down
-                                lastHeaderOffset = headerOffset
+                            if header.direction != .down {
+                                header.shiftOffset = current
+                                header.direction = .down
+                                header.lastOffset = header.offset
                             }
-                            
-                            let offset = lastHeaderOffset + (current - shiftOffset)
-                            headerOffset = (offset > 0 ? 0 : offset)
+
+                            let offset = header.lastOffset + (current - header.shiftOffset)
+                            header.offset = (offset > 0 ? 0 : offset)
                         }
                     }
                     .background {

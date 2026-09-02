@@ -26,7 +26,9 @@ struct PostingTimelineView: View {
     @State private var indicatorWidth: CGFloat = 0
     @State private var indicatorPosition: CGFloat = 0
     @State var headerHeight: CGFloat = 0
-    @Binding var headerOffset: CGFloat
+    /// Held unobserved: it changes on every scroll frame, and only the placement modifiers
+    /// on the header and the post button consume it.
+    let headerOffset: HeaderOffsetModel
     /// Which of the home timeline's two filters to show.
     ///
     /// Owned by ``ContentView`` rather than by this view, because on iOS 26 the
@@ -60,7 +62,7 @@ struct PostingTimelineView: View {
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         let eventsSource = timeline_source == .favorites ? home.favoriteEvents : home.events
-        return TimelineView<AnyView>(events: eventsSource, loading: self.loading, headerHeight: $headerHeight, headerOffset: $headerOffset, damus: damus_state, show_friend_icon: false, filter: filter, viewId: timeline_source)
+        return TimelineView<AnyView>(events: eventsSource, loading: self.loading, headerHeight: $headerHeight, headerOffset: headerOffset, damus: damus_state, show_friend_icon: false, filter: filter, viewId: timeline_source)
     }
     
     func HeaderView() -> some View {
@@ -131,13 +133,17 @@ struct PostingTimelineView: View {
     ///
     /// This lives in its own view because reading `TipGroup.currentTip` goes
     /// through TipKit's datastore and costs real time on the main thread, and
-    /// ``HeaderView()`` is rebuilt on every scroll frame — `TimelineView`
-    /// writes `headerOffset` from its scroll callback, and that binding lives
-    /// all the way up in ``ContentView``, so each frame invalidates this
-    /// view's body. A view with no stored properties compares equal across
-    /// those rebuilds, so SwiftUI skips its body and TipKit is left alone.
-    /// `TipGroup` is `Observable`, so reading `currentTip` in here still
-    /// invalidates this view when the group advances to the next tip.
+    /// ``HeaderView()`` is rebuilt whenever anything invalidates
+    /// ``PostingTimelineView`` — most often a new event arriving, since this
+    /// view observes `homeEvents`. A view with no stored properties compares
+    /// equal across those rebuilds, so SwiftUI skips its body and TipKit is
+    /// left alone. `TipGroup` is `Observable`, so reading `currentTip` in here
+    /// still invalidates this view when the group advances to the next tip.
+    ///
+    /// The scroll offset used to be the worst of those invalidations — it was
+    /// written per frame into a binding rooted in ``ContentView`` — but it now
+    /// lives in ``HeaderOffsetModel``, which only the placement modifiers
+    /// observe, so scrolling no longer rebuilds the header at all.
     @available(iOS 18.0, *)
     struct TipsView: View {
         private static let group = TipGroup(.ordered) {
@@ -175,7 +181,7 @@ struct PostingTimelineView: View {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                         self.active_sheet = .post(.posting(.none))
                     }
-                    .opacity(0.35 + abs(1.25 - (abs(headerOffset/100.0))))
+                    .headerOffsetFade(headerOffset, base: 0.35)
                 }
             }
         }
@@ -192,8 +198,7 @@ struct PostingTimelineView: View {
                         }
                     }
                 }
-                .offset(y: -headerOffset < headerHeight ? headerOffset : (headerOffset < 0 ? headerOffset : 0))
-                .opacity(1.0 - (abs(headerOffset/100.0)))
+                .headerOffsetPlacement(headerOffset, headerHeight: headerHeight)
         }
     }
 }
@@ -206,7 +211,7 @@ struct PostingTimelineView_Previews: PreviewProvider {
             homeEvents: .init(),
             isSideBarOpened: .constant(false),
             active_sheet: .constant(nil),
-            headerOffset: .constant(0),
+            headerOffset: HeaderOffsetModel(),
             filter_state: .constant(.posts_and_replies),
             timeline_source: .constant(.follows)
         )

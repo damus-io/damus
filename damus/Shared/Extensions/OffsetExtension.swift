@@ -76,3 +76,63 @@ func getSafeAreaBottom()->CGFloat{
     guard let bottomSafeArea = scene.windows.first?.safeAreaInsets.bottom else{return .zero}
     return bottomSafeArea
 }
+
+/// The scroll-driven offset that hides and reveals the home timeline's chrome.
+///
+/// This is a reference type rather than a `@State` value because `TimelineView`'s scroll
+/// callback writes it on every frame. Held as plain state it invalidated every view between
+/// its owner and the header, so the whole header subtree — including the timeline switcher's
+/// `Menu` — was reconstructed per frame even though none of its *content* depends on the offset.
+///
+/// Owners keep it in `@State`, which stores the reference without subscribing to it. Only the
+/// small `ViewModifier`s below observe it, so a write re-runs the placement and leaves the
+/// already-built views it wraps alone. Keep it an `ObservableObject` for that reason: `@State`
+/// *does* track an `@Observable` type, which would put the per-frame invalidation right back.
+@MainActor
+final class HeaderOffsetModel: ObservableObject {
+    @Published var offset: CGFloat = 0
+
+    /// Scratch state for the scroll callback. Deliberately not `@Published` — it changes only
+    /// when the scroll direction flips, and nothing draws from it.
+    var shiftOffset: CGFloat = 0
+    var lastOffset: CGFloat = 0
+    var direction: SwipeDirection = .none
+}
+
+/// Applies the header's scroll-driven hide/reveal placement without rebuilding the header.
+///
+/// The offset is read inside a `ViewModifier` body, where `content` is a placeholder for the
+/// already-built subtree, so a scroll frame re-runs only this placement.
+struct HeaderOffsetPlacement: ViewModifier {
+    @ObservedObject var model: HeaderOffsetModel
+    let headerHeight: CGFloat
+
+    func body(content: Content) -> some View {
+        let offset = model.offset
+        return content
+            .offset(y: -offset < headerHeight ? offset : (offset < 0 ? offset : 0))
+            .opacity(1.0 - (abs(offset / 100.0)))
+    }
+}
+
+/// Fades chrome in step with the header's scroll-driven offset, without rebuilding it.
+struct HeaderOffsetFade: ViewModifier {
+    @ObservedObject var model: HeaderOffsetModel
+    let base: CGFloat
+
+    func body(content: Content) -> some View {
+        content.opacity(base + abs(1.25 - (abs(model.offset / 100.0))))
+    }
+}
+
+extension View {
+    /// See ``HeaderOffsetPlacement``.
+    func headerOffsetPlacement(_ model: HeaderOffsetModel, headerHeight: CGFloat) -> some View {
+        modifier(HeaderOffsetPlacement(model: model, headerHeight: headerHeight))
+    }
+
+    /// See ``HeaderOffsetFade``.
+    func headerOffsetFade(_ model: HeaderOffsetModel, base: CGFloat) -> some View {
+        modifier(HeaderOffsetFade(model: model, base: base))
+    }
+}

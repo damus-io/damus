@@ -127,7 +127,10 @@ struct ContentView: View {
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
     @State private var isSideBarOpened = false
-    @State var headerOffset: CGFloat = 0.0
+    /// Kept in `@State` so the reference survives, but deliberately unobserved: the home
+    /// timeline's scroll writes it on every frame, and observing it here would rebuild the
+    /// whole content view — and with it the timeline header — per frame.
+    @State var headerOffset = HeaderOffsetModel()
     @State private var postingTimelineSource: TimelineSource = .follows
 
     // The three tabs' filter states live here rather than in the tab roots that
@@ -261,7 +264,7 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 TabView(selection: tab_selection) {
                     timelineTab(.home, damus: damus) {
-                        PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, filter_state: $home_filter_state, timeline_source: $postingTimelineSource)
+                        PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: headerOffset, filter_state: $home_filter_state, timeline_source: $postingTimelineSource)
                     }
 
                     timelineTab(.dms, damus: damus) {
