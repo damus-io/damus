@@ -183,6 +183,29 @@ struct ProfileView: View {
         }
     }
 
+    /// The flow this whole search feature exists for: "which notes did *this
+    /// person* post about X". Prefilled with the author, so the filter sheet
+    /// only has to be opened to add terms.
+    ///
+    /// This gets its own toolbar item rather than sitting beside
+    /// ``navActionSheetButton``, because that button is swapped out for a follow
+    /// button once you scroll past the banner on a profile you don't follow
+    /// (see ``showFollowBtnInBlurrBanner()``) — and search shouldn't vanish with it.
+    var navSearchButton: some View {
+        Button(action: {
+            let query = AdvancedSearchQuery(authors: [profile.pubkey])
+            damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: query)))
+        }) {
+            // Same dark circular chip as the other nav buttons, so it stays
+            // legible over an arbitrarily bright banner photo.
+            Image(systemName: "magnifyingglass")
+                .frame(width: 33, height: 33)
+                .background(Color.black.opacity(0.6))
+                .clipShape(Circle())
+        }
+        .accessibilityLabel(NSLocalizedString("Search their notes", comment: "Accessibility label for the button that searches only this profile's notes."))
+    }
+
     var navActionSheetButton: some View {
         Button(action: {
             action_sheet_presented = true
@@ -199,14 +222,6 @@ struct ProfileView: View {
 
             Button(NSLocalizedString("QR Code", comment: "Button to view profile's qr code.")) {
                 show_qr_code = true
-            }
-
-            // The flow this whole search feature exists for: "which notes did
-            // *this person* post about X". Prefilled with the author, so the
-            // filter sheet only has to be opened to add terms.
-            Button(NSLocalizedString("Search Their Notes", comment: "Button to search only this profile's notes.")) {
-                let query = AdvancedSearchQuery(authors: [profile.pubkey])
-                damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: query)))
             }
 
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
@@ -513,6 +528,13 @@ struct ProfileView: View {
                 }
                 .hideToolbarBackground()
                 
+                ToolbarItem(placement: .topBarTrailing) {
+                    navSearchButton
+                        .padding(.top, 5)
+                        .accentColor(DamusColors.white)
+                }
+                .hideToolbarBackground()
+
                 if showFollowBtnInBlurrBanner() {
                     ToolbarItem(placement: .topBarTrailing) {
                         FollowButtonView(
