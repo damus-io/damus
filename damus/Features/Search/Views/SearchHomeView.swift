@@ -15,10 +15,59 @@ struct SearchHomeView: View {
     @State var search: String = ""
     @FocusState private var isFocused: Bool
 
+    /// The advanced query the filter sheet edits.
+    ///
+    /// Seeded from ``search`` every time the sheet opens and rendered back into it
+    /// when the sheet runs, so the sheet really is a front-end to the same query
+    /// the text field expresses rather than a second place to say things.
+    @State private var advancedQuery = AdvancedSearchQuery()
+    @State private var filtersPresented = false
+
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
         var filters = ContentFilters.defaults(damus_state: damus_state)
         filters.append(fstate.filter)
         return ContentFilters(filters: filters).filter
+    }
+
+    /// Resolves a `from:` name against the local profile index, the same path the
+    /// existing profile search uses.
+    private func resolveAuthor(_ name: String) -> Pubkey? {
+        search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: name).first
+    }
+
+    private func authorToken(_ pubkey: Pubkey) -> String {
+        let profile = try? damus_state.profiles.lookup(id: pubkey)
+        let name = Profile.displayName(profile: profile, pubkey: pubkey).username
+        return AdvancedSearchQueryDSL.friendlyAuthorToken(for: pubkey, name: name, resolve: resolveAuthor)
+    }
+
+    /// The filter button, badged so an active author or date window is never
+    /// invisible.
+    ///
+    /// On the search input's trailing edge rather than in a bottom accessory: the
+    /// pane's bottom is already spoken for by `TimelineFilterAccessory` on iOS 26.
+    var FilterButton: some View {
+        let query = AdvancedSearchQueryDSL.parse(search, resolveAuthor: resolveAuthor).query
+        let count = AdvancedSearchConstraint.all(in: query).filter(\.isFilter).count
+
+        return Button(action: {
+            advancedQuery = AdvancedSearchQueryDSL.parse(search, resolveAuthor: resolveAuthor).query
+            filtersPresented = true
+        }) {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+                .font(.title2)
+                .overlay(alignment: .topTrailing) {
+                    if count > 0 {
+                        Text(verbatim: "\(count)")
+                            .font(.caption2)
+                            .padding(4)
+                            .background(Circle().fill(Color.accentColor))
+                            .foregroundColor(.white)
+                            .offset(x: 8, y: -6)
+                    }
+                }
+        }
+        .accessibilityLabel(NSLocalizedString("Search filters", comment: "Accessibility label for the button that opens the advanced search filters."))
     }
 
     var SearchInput: some View {
@@ -34,7 +83,9 @@ struct SearchHomeView: View {
             .padding(10)
             .background(.secondary.opacity(0.2))
             .cornerRadius(20)
-            
+
+            FilterButton
+
             if(!search.isEmpty) {
                 Text("Cancel", comment: "Cancel out of search view.")
                     .foregroundColor(.accentColor)
@@ -116,6 +167,17 @@ struct SearchHomeView: View {
         }
         .onReceive(handle_notify(.new_mutes)) { _ in
             self.model.filter_muted()
+        }
+        .sheet(isPresented: $filtersPresented) {
+            AdvancedSearchFilterSheet(damus_state: damus_state, query: $advancedQuery, onSearch: {
+                // Render the query back into the field before navigating, so
+                // the sheet and the text field stay the same query rather than
+                // two descriptions of it that can disagree.
+                isFocused = false
+                search = AdvancedSearchQueryDSL.render(advancedQuery, authorToken: authorToken)
+                guard !advancedQuery.isTrivial else { return }
+                damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: advancedQuery)))
+            })
         }
         .task {
             await model.load()

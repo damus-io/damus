@@ -245,6 +245,27 @@ enum AdvancedSearchQueryDSL {
         return tokens.joined(separator: " ")
     }
 
+    /// An author token that reads like a name but still means the right person.
+    ///
+    /// ``render(_:calendar:authorToken:)`` defaults to the npub, which always
+    /// round-trips but fills a search field with unreadable keys. This uses
+    /// `name` instead, but only when `resolve` maps it straight back to `pubkey` —
+    /// so a display name shared with somebody else, or one the profile index ranks
+    /// below another match, falls back to the key rather than quietly changing who
+    /// the query is about.
+    static func friendlyAuthorToken(for pubkey: Pubkey,
+                                    name: String,
+                                    resolve: (String) -> Pubkey?) -> String {
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        // A name that is itself DSL — a leading `#`, an embedded quote, something
+        // shaped like a prefix — would not survive the round trip whatever it
+        // resolves to.
+        guard !name.isEmpty, !name.hasPrefix("#"), !name.contains("\"") else { return pubkey.npub }
+        if case .some = split(prefixed: name) { return pubkey.npub }
+        guard resolve(name) == pubkey else { return pubkey.npub }
+        return name
+    }
+
     // MARK: - Tokens
 
     /// A prefix the DSL understands.

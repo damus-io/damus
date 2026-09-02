@@ -1035,3 +1035,98 @@ final class AdvancedSearchConstraintTests: XCTestCase {
         XCTAssertEqual(AdvancedSearchConstraint.keyword("art").label(authorName: { _ in "" }), "art")
     }
 }
+
+// MARK: - Date presets
+
+final class AdvancedSearchDatePresetTests: XCTestCase {
+    /// 2026-09-02 12:00:00 UTC — a Wednesday, mid-day, so a day-boundary bug
+    /// cannot hide.
+    let now = Date(timeIntervalSince1970: 1788350400)
+
+    var calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    private func window(_ preset: AdvancedSearchDatePreset) -> (since: Date?, until: Date?)? {
+        preset.window(now: now, calendar: calendar)
+    }
+
+    /// Every preset starts at a day boundary, so "Last 7 days" means seven whole
+    /// days rather than 168 hours back from whenever the sheet happened to open.
+    func test_presets_start_at_a_day_boundary() throws {
+        let startOfToday = Date(timeIntervalSince1970: 1788307200)   // 2026-09-02T00:00:00Z
+
+        XCTAssertEqual(try XCTUnwrap(window(.today)).since, startOfToday)
+        XCTAssertEqual(try XCTUnwrap(window(.last7Days)).since, startOfToday.addingTimeInterval(-6 * 86400))
+        XCTAssertEqual(try XCTUnwrap(window(.last30Days)).since, startOfToday.addingTimeInterval(-29 * 86400))
+        XCTAssertEqual(try XCTUnwrap(window(.thisYear)).since,
+                       Date(timeIntervalSince1970: 1767225600))      // 2026-01-01T00:00:00Z
+    }
+
+    /// A preset must not pin an upper bound. "Now" would go stale while the sheet
+    /// sat open, and leaving `until` unset lets nostrdb seek from the end of the
+    /// index rather than into the middle of it.
+    func test_presets_leave_the_upper_bound_open() throws {
+        for preset in AdvancedSearchDatePreset.selectable {
+            XCTAssertNil(try XCTUnwrap(window(preset)).until, "\(preset.rawValue) pinned an upper bound")
+        }
+    }
+
+    func test_all_time_clears_the_window() {
+        let query = AdvancedSearchQuery(keywords: ["art"],
+                                        since: Date(timeIntervalSince1970: 1700000000),
+                                        until: Date(timeIntervalSince1970: 1700000100))
+        let cleared = AdvancedSearchDatePreset.allTime.applied(to: query, now: now, calendar: calendar)
+        XCTAssertNil(cleared.since)
+        XCTAssertNil(cleared.until)
+        XCTAssertEqual(cleared.keywords, ["art"], "clearing the window must not touch the terms")
+    }
+
+    /// The preset is derived from the query's window rather than remembered, which
+    /// is what lets a `since:7d` typed into the search field light up the same row
+    /// the sheet would have set.
+    func test_the_selected_preset_is_derived_from_the_query() {
+        for preset in AdvancedSearchDatePreset.selectable {
+            let query = preset.applied(to: AdvancedSearchQuery(keywords: ["art"]), now: now, calendar: calendar)
+            XCTAssertEqual(AdvancedSearchDatePreset.matching(query, now: now, calendar: calendar), preset)
+        }
+    }
+
+    func test_a_window_matching_no_preset_reports_custom() {
+        let query = AdvancedSearchQuery(keywords: ["art"],
+                                        since: Date(timeIntervalSince1970: 1700000000),
+                                        until: Date(timeIntervalSince1970: 1700000100))
+        XCTAssertEqual(AdvancedSearchDatePreset.matching(query, now: now, calendar: calendar), .custom)
+    }
+
+    func test_custom_is_not_offered_as_a_preset_and_changes_nothing() {
+        XCTAssertFalse(AdvancedSearchDatePreset.selectable.contains(.custom))
+
+        let query = AdvancedSearchQuery(keywords: ["art"], since: Date(timeIntervalSince1970: 1700000000))
+        XCTAssertEqual(AdvancedSearchDatePreset.custom.applied(to: query, now: now, calendar: calendar), query)
+    }
+}
+
+// MARK: - The filter sheet's phrase field
+
+final class AdvancedSearchFilterSheetTests: XCTestCase {
+    /// One phrase stays unquoted: making quoting discoverable is the point of
+    /// having a separate field, so the field must not demand it.
+    func test_a_single_phrase_needs_no_quotes() {
+        XCTAssertEqual(AdvancedSearchFilterSheet.phraseFieldText(for: ["jumped over"]), "jumped over")
+        XCTAssertEqual(AdvancedSearchFilterSheet.phrases(from: "jumped over"), ["jumped over"])
+        XCTAssertEqual(AdvancedSearchFilterSheet.phrases(from: "  "), [])
+        XCTAssertEqual(AdvancedSearchFilterSheet.phraseFieldText(for: []), "")
+    }
+
+    /// Several phrases have to survive a trip through the one field, or opening the
+    /// sheet on a DSL query would quietly collapse them into one.
+    func test_several_phrases_round_trip_through_the_field() {
+        let phrases = ["jumped over", "lazy dog"]
+        let text = AdvancedSearchFilterSheet.phraseFieldText(for: phrases)
+        XCTAssertEqual(text, "\"jumped over\" \"lazy dog\"")
+        XCTAssertEqual(AdvancedSearchFilterSheet.phrases(from: text), phrases)
+    }
+}

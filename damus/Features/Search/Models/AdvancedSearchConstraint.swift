@@ -102,6 +102,19 @@ enum AdvancedSearchConstraint: Equatable, Identifiable {
         }
     }
 
+    /// True when this constraint narrows *where* the search looks rather than
+    /// *what* it looks for.
+    ///
+    /// These are what the filter badge counts. A keyword or phrase is already
+    /// visible in the search field, but an author or a date window is not, and an
+    /// invisible narrowing is what makes an empty result look like an answer.
+    var isFilter: Bool {
+        switch self {
+        case .keyword, .phrase: return false
+        case .author, .hashtag, .since, .until, .kinds, .order: return true
+        }
+    }
+
     var id: String {
         switch self {
         case .author(let pubkey): return "author:\(pubkey.hex())"

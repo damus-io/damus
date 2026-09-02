@@ -18,6 +18,8 @@ struct AdvancedSearchView: View {
     let damus_state: DamusState
     @ObservedObject var model: AdvancedSearchModel
 
+    @State private var filtersPresented = false
+
     /// The terms `EventView` highlights in the results.
     ///
     /// Taken from the query rather than re-split out of the raw search text, which
@@ -202,6 +204,20 @@ struct AdvancedSearchView: View {
             .padding(.top, 10)
         }
         .navigationTitle(NSLocalizedString("Search", comment: "Title of the advanced search results screen."))
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: { filtersPresented = true }) {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                }
+                .accessibilityLabel(NSLocalizedString("Search filters", comment: "Accessibility label for the button that opens the advanced search filters."))
+            }
+        }
+        // Bound straight to the model's query, so editing the filters re-runs the
+        // search in place rather than pushing another screen. Chips take a
+        // constraint off; this is how one goes back on.
+        .sheet(isPresented: $filtersPresented) {
+            AdvancedSearchFilterSheet(damus_state: damus_state, query: $model.query, onSearch: { model.search() })
+        }
         .task {
             // `.task` rather than `onAppear`: a prefilled query — from a profile,
             // a hashtag, or the filter sheet — has to run without waiting out a

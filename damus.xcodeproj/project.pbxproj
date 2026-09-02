@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5EA2C4000000000000000028 /* AdvancedSearchFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */; };
+		5EA2C4000000000000000029 /* AdvancedSearchFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */; };
+		5EA2C400000000000000002A /* AdvancedSearchFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */; };
+		5EA2C4000000000000000024 /* AdvancedSearchDatePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000023 /* AdvancedSearchDatePreset.swift */; };
+		5EA2C4000000000000000025 /* AdvancedSearchDatePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000023 /* AdvancedSearchDatePreset.swift */; };
+		5EA2C4000000000000000026 /* AdvancedSearchDatePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000023 /* AdvancedSearchDatePreset.swift */; };
 		5EA2C4000000000000000020 /* AdvancedSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000001F /* AdvancedSearchView.swift */; };
 		5EA2C4000000000000000021 /* AdvancedSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000001F /* AdvancedSearchView.swift */; };
 		5EA2C4000000000000000022 /* AdvancedSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000001F /* AdvancedSearchView.swift */; };
@@ -2128,6 +2134,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchFilterSheet.swift; sourceTree = "<group>"; };
+		5EA2C4000000000000000023 /* AdvancedSearchDatePreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchDatePreset.swift; sourceTree = "<group>"; };
 		5EA2C400000000000000001F /* AdvancedSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchView.swift; sourceTree = "<group>"; };
 		5EA2C400000000000000001B /* AdvancedSearchConstraint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchConstraint.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000017 /* AdvancedSearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchModel.swift; sourceTree = "<group>"; };
@@ -4515,6 +4523,7 @@
 		5C78A7822E3033E600CF177D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */,
 				5EA2C400000000000000001F /* AdvancedSearchView.swift */,
 				4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */,
 				4C9D6D1A2B1D35D7004E5CD9 /* PullDownSearch.swift */,
@@ -4530,6 +4539,7 @@
 		5C78A7832E30340800CF177D /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5EA2C4000000000000000023 /* AdvancedSearchDatePreset.swift */,
 				5EA2C400000000000000001B /* AdvancedSearchConstraint.swift */,
 				5EA2C4000000000000000017 /* AdvancedSearchModel.swift */,
 				5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */,
@@ -5997,6 +6007,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5EA2C4000000000000000028 /* AdvancedSearchFilterSheet.swift in Sources */,
+				5EA2C4000000000000000024 /* AdvancedSearchDatePreset.swift in Sources */,
 				5EA2C4000000000000000020 /* AdvancedSearchView.swift in Sources */,
 				5EA2C400000000000000001C /* AdvancedSearchConstraint.swift in Sources */,
 				5EA2C4000000000000000018 /* AdvancedSearchModel.swift in Sources */,
@@ -6683,6 +6695,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5EA2C4000000000000000029 /* AdvancedSearchFilterSheet.swift in Sources */,
+				5EA2C4000000000000000025 /* AdvancedSearchDatePreset.swift in Sources */,
 				5EA2C4000000000000000021 /* AdvancedSearchView.swift in Sources */,
 				5EA2C400000000000000001D /* AdvancedSearchConstraint.swift in Sources */,
 				5EA2C4000000000000000019 /* AdvancedSearchModel.swift in Sources */,
@@ -7270,6 +7284,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5EA2C400000000000000002A /* AdvancedSearchFilterSheet.swift in Sources */,
+				5EA2C4000000000000000026 /* AdvancedSearchDatePreset.swift in Sources */,
 				5EA2C4000000000000000022 /* AdvancedSearchView.swift in Sources */,
 				5EA2C400000000000000001E /* AdvancedSearchConstraint.swift in Sources */,
 				5EA2C400000000000000001A /* AdvancedSearchModel.swift in Sources */,
