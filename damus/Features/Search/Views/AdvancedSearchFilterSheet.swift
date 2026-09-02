@@ -22,7 +22,20 @@ struct AdvancedSearchFilterSheet: View {
     /// Called when Search is tapped, after the fields have been committed.
     let onSearch: () -> Void
 
+    /// Whether the keyword field takes the keyboard as the sheet appears.
+    ///
+    /// True only for the entry points that arrive with nothing but a *scope*
+    /// filled in — the profile and hashtag buttons — where the words are the
+    /// entire reason the sheet is open and the first tap is always into that
+    /// field. It stays false where the sheet is opened over terms somebody
+    /// already typed (the explore pane's filter button, the results screen's),
+    /// because a keyboard rising over an existing query hides the filters they
+    /// came to look at.
+    let autofocusKeywords: Bool
+
     @Environment(\.dismiss) private var dismiss
+
+    @FocusState private var keywordsFocused: Bool
 
     /// The keyword field's text.
     ///
@@ -58,9 +71,13 @@ struct AdvancedSearchFilterSheet: View {
 
     @State private var authorSearch: String = ""
 
-    init(damus_state: DamusState, query: Binding<AdvancedSearchQuery>, onSearch: @escaping () -> Void) {
+    init(damus_state: DamusState,
+         query: Binding<AdvancedSearchQuery>,
+         autofocusKeywords: Bool = false,
+         onSearch: @escaping () -> Void) {
         self.damus_state = damus_state
         self._query = query
+        self.autofocusKeywords = autofocusKeywords
         self.onSearch = onSearch
     }
 
@@ -248,6 +265,7 @@ struct AdvancedSearchFilterSheet: View {
                       text: $keywordsText)
                 .autocorrectionDisabled(true)
                 .textInputAutocapitalization(.never)
+                .focused($keywordsFocused)
                 .onChange(of: keywordsText) { _ in commitFields() }
 
             TextField(NSLocalizedString("Exact phrase", comment: "Placeholder for the exact-phrase field of an advanced search."),
@@ -364,7 +382,13 @@ struct AdvancedSearchFilterSheet: View {
                 typeSection
                 sortSection
             }
-            .task { seedFields() }
+            .task {
+                seedFields()
+                // After seeding, not before: focusing an empty field and then
+                // filling it in behind the cursor is how a scoped entry point
+                // would land somebody mid-word.
+                if autofocusKeywords { keywordsFocused = true }
+            }
             .navigationTitle(NSLocalizedString("Search filters", comment: "Title of the advanced search filter sheet."))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -416,7 +440,12 @@ struct AdvancedSearchScopeModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content.sheet(isPresented: $isPresented) {
-            AdvancedSearchFilterSheet(damus_state: damus_state, query: $query, onSearch: {
+            // Always autofocusing here rather than taking it as a parameter: every
+            // screen that presents the sheet this way arrives with a scope and no
+            // terms, which is exactly the condition the flag exists for. The flag
+            // lives on the sheet because the *other* two presenters — over a typed
+            // query, and over a running search — need it off.
+            AdvancedSearchFilterSheet(damus_state: damus_state, query: $query, autofocusKeywords: true, onSearch: {
                 // Reset can leave nothing to look for. Staying put beats pushing a
                 // results screen that could only say "Search notes".
                 guard !query.isTrivial else { return }
