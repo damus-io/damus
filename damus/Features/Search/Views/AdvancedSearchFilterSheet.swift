@@ -71,6 +71,22 @@ struct AdvancedSearchFilterSheet: View {
 
     @State private var authorSearch: String = ""
 
+    /// The query as the sheet found it, restored by Cancel.
+    ///
+    /// The sheet edits the binding directly, so by the time Cancel is tapped every
+    /// change has already been written through — there is no draft to throw away.
+    /// The two honest readings were "Cancel means stop editing" and "Cancel undoes
+    /// what this sheet did"; this is the second, because the first is a lie on the
+    /// results screen, where the binding is the running search and its chips. Edit
+    /// the filters there, tap Cancel, and without this you are left looking at a
+    /// *different* search than the one you cancelled out of.
+    ///
+    /// Captured alongside ``seedFields`` rather than in `init` for the same reason
+    /// the text fields are: a presenter that sets the query and raises the sheet in
+    /// one action can build this view before the assignment is visible, so an
+    /// `init`-time snapshot would restore an empty query.
+    @State private var restoreQuery: AdvancedSearchQuery?
+
     init(damus_state: DamusState,
          query: Binding<AdvancedSearchQuery>,
          autofocusKeywords: Bool = false,
@@ -81,13 +97,23 @@ struct AdvancedSearchFilterSheet: View {
         self.onSearch = onSearch
     }
 
-    /// Fills the text fields in from the query the sheet was opened with. See
-    /// ``keywordsText``.
+    /// Fills the text fields in from the query the sheet was opened with, and takes
+    /// the snapshot Cancel restores. See ``keywordsText`` and ``restoreQuery``.
     private func seedFields() {
         guard !didSeedFields else { return }
         didSeedFields = true
         keywordsText = query.keywords.joined(separator: " ")
         phraseText = Self.phraseFieldText(for: query.phrases)
+        restoreQuery = query
+    }
+
+    /// Clears every filter, the text fields included.
+    private func resetFilters() {
+        query = AdvancedSearchQuery()
+        keywordsText = ""
+        phraseText = ""
+        tagDraft = ""
+        authorSearch = ""
     }
 
     // MARK: - Text fields
@@ -359,6 +385,18 @@ struct AdvancedSearchFilterSheet: View {
         }
     }
 
+    /// Reset, at the bottom of the form rather than in the leading toolbar slot it
+    /// used to hold. That slot belongs to Cancel — it is where every form sheet in
+    /// iOS puts the way out — and Reset is the rarer, more destructive of the two,
+    /// so it reads better as the last row of what it clears.
+    private var resetSection: some View {
+        Section {
+            Button(role: .destructive, action: resetFilters) {
+                Text("Reset filters", comment: "Button clearing every advanced search filter.")
+            }
+        }
+    }
+
     private var sortSection: some View {
         Section {
             Picker(selection: $query.order) {
@@ -381,6 +419,7 @@ struct AdvancedSearchFilterSheet: View {
                 dateSection
                 typeSection
                 sortSection
+                resetSection
             }
             .task {
                 seedFields()
@@ -393,13 +432,12 @@ struct AdvancedSearchFilterSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
-                        query = AdvancedSearchQuery()
-                        keywordsText = ""
-                        phraseText = ""
-                        tagDraft = ""
-                        authorSearch = ""
+                        // Undo what this sheet wrote through the binding. See
+                        // ``restoreQuery``.
+                        if let restoreQuery { query = restoreQuery }
+                        dismiss()
                     }) {
-                        Text("Reset", comment: "Button clearing every advanced search filter.")
+                        Text("Cancel", comment: "Button leaving the advanced search filter sheet without searching.")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
