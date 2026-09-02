@@ -13,11 +13,30 @@ enum DMType: Hashable {
     case friend
 }
 
+extension DMType {
+    /// The labelled options the DM filter selector offers.
+    ///
+    /// Shared by the top ``CustomPicker`` and the tab view's bottom accessory —
+    /// only one of the two is on screen at a time, but they must offer the same
+    /// options in the same order, so the labels live in one place.
+    static var timeline_filter_options: [(String, DMType)] {
+        [
+            (NSLocalizedString("DMs", comment: "Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message."), .friend),
+            (NSLocalizedString("Requests", comment: "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet"), .rando),
+        ]
+    }
+}
+
 struct DirectMessagesView: View {
     let damus_state: DamusState
     let home: HomeModel
 
-    @State var dm_type: DMType = .friend
+    /// Which of the two DM lists to show.
+    ///
+    /// Owned by ``ContentView`` rather than by this view, because on iOS 26 the
+    /// selector for it is the tab view's bottom accessory, which attaches to the
+    /// `TabView` and so cannot reach state that lives in here.
+    @Binding var dm_type: DMType
     @ObservedObject var model: DirectMessagesModel
     @ObservedObject var settings: UserSettingsStore
     @Binding var subtitle: String?
@@ -44,7 +63,6 @@ struct DirectMessagesView: View {
             // been missed due to the optimized network filter.
             await home.fetchFullDMHistory()
         }
-        .padding(.bottom, tabHeight)
     }
     
     func filter_dms(dms: [DirectMessageModel]) -> [DirectMessageModel] {
@@ -90,22 +108,25 @@ struct DirectMessagesView: View {
                     .padding(.horizontal)
             }
 
-            CustomPicker(tabs: [
-                (NSLocalizedString("DMs", comment: "Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message."), DMType.friend),
-                (NSLocalizedString("Requests", comment: "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet"), DMType.rando),
-            ], selection: $dm_type)
+            if !timelineFilterLivesInTabViewAccessory {
+                CustomPicker(tabs: DMType.timeline_filter_options, selection: $dm_type)
 
-            Divider()
-                .frame(height: 1)
-            
-            TabView(selection: $dm_type) {
-                MainContent(requests: false)
-                    .tag(DMType.friend)
-                
-                MainContent(requests: true)
-                    .tag(DMType.rando)
+                Divider()
+                    .frame(height: 1)
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+
+            // Driven by the filter selector: the `CustomPicker` above pre-26,
+            // the tab view's bottom glass accessory from iOS 26 on. This used to
+            // be a paged `TabView`, which the iOS 26 tab bar cannot see through:
+            // a paged `TabView` neither reports its scrolling to the enclosing
+            // tab bar (so the bar never minimized on this tab) nor lets content
+            // run under the floating bar (leaving an opaque `adaptableWhite`
+            // slab where the timeline should show through the glass). Rendering
+            // the selected list directly hands the real `ScrollView` to the tab
+            // bar. The cost is the swipe-between-filters gesture, which the
+            // selector already duplicates.
+            MainContent(requests: dm_type == .rando)
+                .id(dm_type)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -143,6 +164,6 @@ func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageMo
 struct DirectMessagesView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state
-        DirectMessagesView(damus_state: ds, home: HomeModel(), model: ds.dms, settings: ds.settings, subtitle: .constant(nil))
+        DirectMessagesView(damus_state: ds, home: HomeModel(), dm_type: .constant(.friend), model: ds.dms, settings: ds.settings, subtitle: .constant(nil))
     }
 }

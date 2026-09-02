@@ -31,9 +31,6 @@ struct SearchView: View {
             }
         }
         .ignoresSafeArea()
-        .onReceive(handle_notify(.switched_timeline)) { obj in
-            dismiss()
-        }
         .onAppear() {
             search.subscribe()
         }

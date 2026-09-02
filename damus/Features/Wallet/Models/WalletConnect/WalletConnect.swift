@@ -42,6 +42,11 @@ extension WalletConnect {
         }
         
         init?(str: String) {
+            if let cached = ConnectURL.parseCache.url(for: str) {
+                self = cached
+                return
+            }
+
             guard let components = URLComponents(string: str),
                   components.scheme == "nostrwalletconnect" || components.scheme == "nostr+walletconnect",
                   // The line below provides flexibility for both `nostrwalletconnect://` (non-compliant, but commonly used) and `nostrwalletconnect:` (NIP-47 compliant) formats
@@ -62,7 +67,9 @@ extension WalletConnect {
             
             let lud16 = items.first(where: { qi in qi.name == "lud16" })?.value
             let keypair = FullKeypair(pubkey: our_pk, privkey: privkey)
-            self = ConnectURL(pubkey: pubkey, relay: relay_url, keypair: keypair, lud16: lud16)
+            let url = ConnectURL(pubkey: pubkey, relay: relay_url, keypair: keypair, lud16: lud16)
+            ConnectURL.parseCache.store(url, for: str)
+            self = url
         }
         
         init(pubkey: Pubkey, relay: RelayURL, keypair: FullKeypair, lud16: String?) {
@@ -70,6 +77,49 @@ extension WalletConnect {
             self.relay = relay
             self.keypair = keypair
             self.lud16 = lud16
+        }
+
+        // MARK: - Parse caching
+
+        private static let parseCache = ParseCache()
+
+        /// Forgets every memoized parse, so that a disconnected wallet's secret is not
+        /// kept alive in memory by the cache.
+        static func forgetCachedParses() {
+            ConnectURL.parseCache.removeAll()
+        }
+
+        /// Memoizes `ConnectURL(str:)` results.
+        ///
+        /// Parsing an NWC URL derives our pubkey from the connection secret, and secp256k1
+        /// key generation is slow enough that doing it for every incoming NWC response shows
+        /// up as a main thread stall (~18% of a profiled sample). Parsing is a pure function
+        /// of the URL string, so the result can simply be reused.
+        ///
+        /// This is a mutex rather than an actor so that callers on any isolation can use
+        /// `ConnectURL(str:)` synchronously, as they always have.
+        private final class ParseCache {
+            /// How many distinct URLs to keep, so that repeatedly parsing strings we do not
+            /// control (scanned QR codes, deep links) cannot grow this without bound.
+            private static let capacity = 8
+
+            private let lock = NSLock()
+            private var urls: [String: ConnectURL] = [:]
+
+            func url(for str: String) -> ConnectURL? {
+                lock.withLock { urls[str] }
+            }
+
+            func store(_ url: ConnectURL, for str: String) {
+                lock.withLock {
+                    if urls.count >= Self.capacity { urls.removeAll() }
+                    urls[str] = url
+                }
+            }
+
+            func removeAll() {
+                lock.withLock { urls.removeAll() }
+            }
         }
     }
     

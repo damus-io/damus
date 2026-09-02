@@ -4,9 +4,7 @@
 #include "nostrdb.h"
 #include "invoice.h"
 
-#ifndef _WIN32
 #include "bolt11/bolt11.h"
-#endif
 
 #include "bolt11/bech32.h"
 
@@ -171,11 +169,6 @@ fail:
 
 static int push_invoice_str(struct ndb_content_parser *p, struct ndb_str_block *str)
 {
-#ifdef _WIN32
-	// we shouldn't be pushing invoices on windows until we fix
-	// bolt11 parser portability
-	return 0;
-#else
 	unsigned char *start;
 	struct bolt11 *bolt11;
 	char *fail;
@@ -206,7 +199,6 @@ static int push_invoice_str(struct ndb_content_parser *p, struct ndb_str_block *
 
 	tal_free(bolt11);
 	return 1;
-#endif
 }
 
 int push_block(struct ndb_content_parser *p, struct ndb_block *block);
@@ -476,35 +468,29 @@ static int parse_url(struct cursor *cur, struct ndb_block *block) {
 static int parse_invoice(struct cursor *cur, struct ndb_block *block) {
 	unsigned char *start, *end;
 
-#ifdef _WIN32
-	// bolt11 stuff requires non-portable cc stuff, so ignore for now
-	return 0;
-#else
-
 	// optional
 	parse_str(cur, "lightning:");
-	
+
 	start = cur->p;
-	
+
 	if (!parse_str(cur, "lnbc"))
 		return 0;
-	
+
 	if (!consume_until_whitespace(cur, 1)) {
 		cur->p = start;
 		return 0;
 	}
-	
+
 	end = cur->p;
-	
+
 	block->type = BLOCK_INVOICE;
-	
+
 	block->block.str.str = (const char*)start;
 	block->block.str.len = end - start;
-	
+
 	cur->p = end;
-	
+
 	return 1;
-#endif
 }
 
 

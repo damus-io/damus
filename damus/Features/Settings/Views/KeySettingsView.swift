@@ -102,9 +102,6 @@ struct KeySettingsView: View {
             
         }
         .navigationTitle(NSLocalizedString("Keys", comment: "Navigation title for managing keys."))
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
 }
 

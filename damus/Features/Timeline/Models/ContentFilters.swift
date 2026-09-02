@@ -49,6 +49,20 @@ enum FilterState : Int {
     }
 }
 
+extension FilterState {
+    /// The labelled options the home timeline's filter selector offers.
+    ///
+    /// Shared by the top ``CustomPicker`` and the tab view's bottom accessory —
+    /// only one of the two is on screen at a time, but they must offer the same
+    /// options in the same order, so the labels live in one place.
+    static var timeline_filter_options: [(String, FilterState)] {
+        [
+            (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), .posts),
+            (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), .posts_and_replies),
+        ]
+    }
+}
+
 /// Simple filter to determine whether to show posts with #nsfw tags
 func nsfw_tag_filter(ev: NostrEvent) -> Bool {
     return ev.referenced_hashtags.first(where: { t in t.hashtag.caseInsensitiveCompare("nsfw") == .orderedSame }) == nil

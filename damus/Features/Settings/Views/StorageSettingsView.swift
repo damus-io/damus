@@ -248,9 +248,6 @@ struct StorageSettingsView: View {
                 compact_scheduling_state = .scheduled
             }
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
     
     /// Prepare export text on background thread before showing share sheet

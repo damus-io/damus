@@ -157,10 +157,7 @@ struct ConfigView: View {
                 }
                 // Version info
                 if showSettingsButton(title: versionTitle) {
-                    Section(
-                        header: Text(versionTitle),
-                        footer: Text("").padding(.bottom, tabHeight + getSafeAreaBottom())
-                    ) {
+                    Section(header: Text(versionTitle)) {
                         Text(verbatim: VersionInfo.version)
                             .contextMenu {
                                 Button {
@@ -211,9 +208,6 @@ struct ConfigView: View {
             }
         } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
-        }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
         }
     }
 }

@@ -690,13 +690,13 @@ static inline int consume_until_non_alphanumeric(struct cursor *cur, int or_end)
 
 static inline int cursor_memset(struct cursor *cursor, unsigned char c, int n)
 {
-    if (cursor->p + n >= cursor->end)
-        return 0;
+	if (cursor->p + n >= cursor->end)
+		return 0;
 
-    memset(cursor->p, c, n);
-    cursor->p += n;
+	memset(cursor->p, c, n);
+	cursor->p += n;
 
-    return 1;
+	return 1;
 }
 
 static void consume_whitespace_or_punctuation(struct cursor *cur)

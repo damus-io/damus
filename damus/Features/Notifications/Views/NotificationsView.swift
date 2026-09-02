@@ -71,48 +71,59 @@ enum NotificationFilterState: String {
     }
 }
 
+extension NotificationFilterState {
+    /// The labelled options the notifications filter selector offers.
+    ///
+    /// Shared by the top ``CustomPicker`` and the tab view's bottom accessory —
+    /// only one of the two is on screen at a time, but they must offer the same
+    /// options in the same order, so the labels live in one place.
+    static var timeline_filter_options: [(String, NotificationFilterState)] {
+        [
+            (NSLocalizedString("All", comment: "Label for filter for all notifications."), .all),
+            (NSLocalizedString("Zaps", comment: "Label for filter for zap notifications."), .zaps),
+            (NSLocalizedString("Mentions", comment: "Label for filter for seeing mention notifications (replies, etc)."), .replies),
+        ]
+    }
+}
+
 struct NotificationsView: View {
     let state: DamusState
     @ObservedObject var notifications: NotificationsModel
     @StateObject var filter = NotificationFilter()
-    @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
+    /// Which notifications to show.
+    ///
+    /// Owned by ``ContentView`` rather than by this view, because on iOS 26 the
+    /// selector for it is the tab view's bottom accessory, which attaches to the
+    /// `TabView` and so cannot reach state that lives in here.
+    @Binding var filter_state: NotificationFilterState
     @Binding var subtitle: String?
 
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         let showTrustedButton = would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications)
-        TabView(selection: $filter_state) {
-            NotificationTab(
-                NotificationFilter(
-                    state: .all,
-                    friend_filter: filter.friend_filter,
-                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
-                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
-                )
+        // Driven by the filter selector: the `CustomPicker` below pre-26, the
+        // tab view's bottom glass accessory from iOS 26 on. This used to be a
+        // `TabView` with no explicit style, which meant it defaulted to the
+        // *bar* style and drew a second, unlabelled tab bar of its own —
+        // harmless while the old custom `TabBar` overlay covered that strip, and
+        // plainly visible once the tab bar became native glass. It is also, as
+        // it happens, where the bottom accessory idea came from. Rendering the
+        // selected filter directly removes that phantom bar and hands the real
+        // `ScrollView` to the tab bar, so it can still minimize on scroll.
+        // Switching to a paged `TabView` would have removed the phantom bar too,
+        // but at the cost of the minimize behaviour and an opaque slab behind
+        // the glass. The cost here is the swipe-between-filters gesture, which
+        // the selector already duplicates.
+        NotificationTab(
+            NotificationFilter(
+                state: filter_state,
+                friend_filter: filter.friend_filter,
+                hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
+                hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
             )
-            .tag(NotificationFilterState.all)
-            
-            NotificationTab(
-                NotificationFilter(
-                    state: .zaps,
-                    friend_filter: filter.friend_filter,
-                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
-                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
-                )
-            )
-            .tag(NotificationFilterState.zaps)
-            
-            NotificationTab(
-                NotificationFilter(
-                    state: .replies,
-                    friend_filter: filter.friend_filter,
-                    hellthread_notifications_disabled: state.settings.hellthread_notifications_disabled,
-                    hellthread_notification_max_pubkeys: state.settings.hellthread_notification_max_pubkeys
-                )
-            )
-            .tag(NotificationFilterState.replies)
-        }
+        )
+        .id(filter_state)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(
@@ -158,13 +169,11 @@ struct NotificationsView: View {
                         .padding(.horizontal)
                 }
 
-                CustomPicker(tabs: [
-                    (NSLocalizedString("All", comment: "Label for filter for all notifications."), NotificationFilterState.all),
-                    (NSLocalizedString("Zaps", comment: "Label for filter for zap notifications."), NotificationFilterState.zaps),
-                    (NSLocalizedString("Mentions", comment: "Label for filter for seeing mention notifications (replies, etc)."), NotificationFilterState.replies),
-                ], selection: $filter_state)
-                Divider()
-                    .frame(height: 1)
+                if !timelineFilterLivesInTabViewAccessory {
+                    CustomPicker(tabs: NotificationFilterState.timeline_filter_options, selection: $filter_state)
+                    Divider()
+                        .frame(height: 1)
+                }
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
         }
@@ -214,7 +223,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state, notifications: NotificationsModel(), filter: NotificationFilter(), subtitle: .constant(nil))
+        NotificationsView(state: test_damus_state, notifications: NotificationsModel(), filter: NotificationFilter(), filter_state: .constant(.all), subtitle: .constant(nil))
     }
 }
 

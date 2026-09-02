@@ -100,12 +100,7 @@ struct RelayConfigView: View {
         .onReceive(handle_notify(.relays_changed)) { _ in
             self.relays = state.nostrNetwork.ourRelayDescriptors
         }
-        .onAppear {
-            notify(.display_tabbar(false))
-        }
-        .onDisappear {
-            notify(.display_tabbar(true))
-        }
+        .toolbar(.hidden, for: .tabBar)
         .ignoresSafeArea(.all)
     }
     

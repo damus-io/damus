@@ -19,9 +19,6 @@ struct SearchSettingsView: View {
             }
         }
         .navigationTitle(NSLocalizedString("Search/Universe", comment: "Navigation title for universe/search settings."))
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
 }
 

@@ -370,158 +370,90 @@ class Ndb {
         return NdbNote(note: ptr, size: size, owned: false, key: key)
     }
 
-    func text_search(query: String, limit: Int = 128, order: NdbSearchOrder = .newest_first) throws -> [NoteKey] {
+    /// The hard ceiling on how many results a single `text_search` call can return.
+    ///
+    /// nostrdb fills a fixed, stack-allocated `struct ndb_text_search_results`, so
+    /// this is a structural limit rather than a tuning knob: `limit` is clamped to
+    /// it, and anything beyond is never produced. Callers who need more must
+    /// paginate by re-querying with a lower `until` on the filter.
+    static let max_text_search_results: Int = Int(MAX_TEXT_SEARCH_RESULTS)
+
+    /// The maximum number of words nostrdb will take from a search query.
+    ///
+    /// `ndb_parse_words` silently drops every word past this one, so a longer
+    /// query is matched on its first `max_text_search_words` words only — which
+    /// widens the result set rather than narrowing it, since matching is an AND
+    /// over the parsed words.
+    static let max_text_search_words: Int = Int(MAX_TEXT_SEARCH_WORDS)
+
+    /// A single hit from nostrdb's fulltext index.
+    struct TextSearchResult: Equatable {
+        /// The key of the matching note. Resolve it with `lookup_note_by_key`.
+        let noteKey: NoteKey
+        /// The matching note's `created_at`, as recorded in the fulltext index key.
+        ///
+        /// This comes back for free with the hit, and is what pagination past
+        /// `max_text_search_results` uses as its cursor — no note lookup needed.
+        let timestamp: UInt64
+    }
+
+    /// Searches the local fulltext index for notes matching `query`.
+    ///
+    /// - Parameters:
+    ///   - query: The search query. Only its first ``max_text_search_words`` words
+    ///     are used; see that constant for what dropping the rest means.
+    ///   - limit: Maximum number of results, clamped to ``max_text_search_results``.
+    ///   - order: Whether to walk the index newest-first or oldest-first.
+    /// - Returns: The matching note keys, in `order`.
+    func text_search(query: String, limit: Int = Ndb.max_text_search_results, order: NdbSearchOrder = .newest_first) throws -> [NoteKey] {
+        return try self.text_search(query: query, filter: nil, limit: limit, order: order).map({ $0.noteKey })
+    }
+
+    /// Searches the local fulltext index for notes matching `query` and `filter`.
+    ///
+    /// The filter constrains the search the same way it constrains `query(filters:maxResults:)`:
+    /// `authors`, `kinds` and tags are checked against each candidate note, and
+    /// `since`/`until`/`limit` bound the index walk itself. Note that `until` is
+    /// exclusive here (`created_at < until`) while `since` is inclusive.
+    ///
+    /// - Note: `since` is not a scan terminator in the text-search path — a narrow
+    ///   date window over a common word still walks that word's index back from
+    ///   `until`. Only `limit` and index exhaustion stop the walk.
+    ///
+    /// - Parameters:
+    ///   - query: The search query. Only its first ``max_text_search_words`` words
+    ///     are used; see that constant for what dropping the rest means.
+    ///   - filter: Extra constraints, or `nil` for an unfiltered search.
+    ///   - limit: Maximum number of results, clamped to ``max_text_search_results``.
+    ///     A `limit` on `filter` narrows this further, it cannot widen it.
+    ///   - order: Whether to walk the index newest-first or oldest-first.
+    /// - Returns: The matching hits, in `order`.
+    func text_search(query: String, filter: NdbFilter?, limit: Int = Ndb.max_text_search_results, order: NdbSearchOrder = .newest_first) throws -> [TextSearchResult] {
         return try withNdb({
             guard let txn = NdbTxn(ndb: self) else { return [] }
+            // `results` is the fixed-size C struct, so the limit has to be clamped
+            // here or nostrdb would write past the end of it.
+            let limit = min(max(limit, 0), Ndb.max_text_search_results)
             var results = ndb_text_search_results()
             let res = query.withCString { q in
                 let order = order == .newest_first ? NDB_ORDER_DESCENDING : NDB_ORDER_ASCENDING
                 var config = ndb_text_search_config(order: order, limit: Int32(limit))
-                return ndb_text_search(&txn.txn, q, &results, &config)
+                guard let filter else {
+                    return ndb_text_search(&txn.txn, q, &results, &config)
+                }
+                return ndb_text_search_with(&txn.txn, q, &results, &config, filter.unsafePointer)
             }
 
-            if res == 0 {
-                return []
-            }
+            guard res != 0 else { return [] }
 
-            var note_ids = [NoteKey]()
-            for i in 0..<results.num_results {
-                // seriously wtf
-                switch i {
-                case 0: note_ids.append(results.results.0.key.note_id)
-                case 1: note_ids.append(results.results.1.key.note_id)
-                case 2: note_ids.append(results.results.2.key.note_id)
-                case 3: note_ids.append(results.results.3.key.note_id)
-                case 4: note_ids.append(results.results.4.key.note_id)
-                case 5: note_ids.append(results.results.5.key.note_id)
-                case 6: note_ids.append(results.results.6.key.note_id)
-                case 7: note_ids.append(results.results.7.key.note_id)
-                case 8: note_ids.append(results.results.8.key.note_id)
-                case 9: note_ids.append(results.results.9.key.note_id)
-                case 10: note_ids.append(results.results.10.key.note_id)
-                case 11: note_ids.append(results.results.11.key.note_id)
-                case 12: note_ids.append(results.results.12.key.note_id)
-                case 13: note_ids.append(results.results.13.key.note_id)
-                case 14: note_ids.append(results.results.14.key.note_id)
-                case 15: note_ids.append(results.results.15.key.note_id)
-                case 16: note_ids.append(results.results.16.key.note_id)
-                case 17: note_ids.append(results.results.17.key.note_id)
-                case 18: note_ids.append(results.results.18.key.note_id)
-                case 19: note_ids.append(results.results.19.key.note_id)
-                case 20: note_ids.append(results.results.20.key.note_id)
-                case 21: note_ids.append(results.results.21.key.note_id)
-                case 22: note_ids.append(results.results.22.key.note_id)
-                case 23: note_ids.append(results.results.23.key.note_id)
-                case 24: note_ids.append(results.results.24.key.note_id)
-                case 25: note_ids.append(results.results.25.key.note_id)
-                case 26: note_ids.append(results.results.26.key.note_id)
-                case 27: note_ids.append(results.results.27.key.note_id)
-                case 28: note_ids.append(results.results.28.key.note_id)
-                case 29: note_ids.append(results.results.29.key.note_id)
-                case 30: note_ids.append(results.results.30.key.note_id)
-                case 31: note_ids.append(results.results.31.key.note_id)
-                case 32: note_ids.append(results.results.32.key.note_id)
-                case 33: note_ids.append(results.results.33.key.note_id)
-                case 34: note_ids.append(results.results.34.key.note_id)
-                case 35: note_ids.append(results.results.35.key.note_id)
-                case 36: note_ids.append(results.results.36.key.note_id)
-                case 37: note_ids.append(results.results.37.key.note_id)
-                case 38: note_ids.append(results.results.38.key.note_id)
-                case 39: note_ids.append(results.results.39.key.note_id)
-                case 40: note_ids.append(results.results.40.key.note_id)
-                case 41: note_ids.append(results.results.41.key.note_id)
-                case 42: note_ids.append(results.results.42.key.note_id)
-                case 43: note_ids.append(results.results.43.key.note_id)
-                case 44: note_ids.append(results.results.44.key.note_id)
-                case 45: note_ids.append(results.results.45.key.note_id)
-                case 46: note_ids.append(results.results.46.key.note_id)
-                case 47: note_ids.append(results.results.47.key.note_id)
-                case 48: note_ids.append(results.results.48.key.note_id)
-                case 49: note_ids.append(results.results.49.key.note_id)
-                case 50: note_ids.append(results.results.50.key.note_id)
-                case 51: note_ids.append(results.results.51.key.note_id)
-                case 52: note_ids.append(results.results.52.key.note_id)
-                case 53: note_ids.append(results.results.53.key.note_id)
-                case 54: note_ids.append(results.results.54.key.note_id)
-                case 55: note_ids.append(results.results.55.key.note_id)
-                case 56: note_ids.append(results.results.56.key.note_id)
-                case 57: note_ids.append(results.results.57.key.note_id)
-                case 58: note_ids.append(results.results.58.key.note_id)
-                case 59: note_ids.append(results.results.59.key.note_id)
-                case 60: note_ids.append(results.results.60.key.note_id)
-                case 61: note_ids.append(results.results.61.key.note_id)
-                case 62: note_ids.append(results.results.62.key.note_id)
-                case 63: note_ids.append(results.results.63.key.note_id)
-                case 64: note_ids.append(results.results.64.key.note_id)
-                case 65: note_ids.append(results.results.65.key.note_id)
-                case 66: note_ids.append(results.results.66.key.note_id)
-                case 67: note_ids.append(results.results.67.key.note_id)
-                case 68: note_ids.append(results.results.68.key.note_id)
-                case 69: note_ids.append(results.results.69.key.note_id)
-                case 70: note_ids.append(results.results.70.key.note_id)
-                case 71: note_ids.append(results.results.71.key.note_id)
-                case 72: note_ids.append(results.results.72.key.note_id)
-                case 73: note_ids.append(results.results.73.key.note_id)
-                case 74: note_ids.append(results.results.74.key.note_id)
-                case 75: note_ids.append(results.results.75.key.note_id)
-                case 76: note_ids.append(results.results.76.key.note_id)
-                case 77: note_ids.append(results.results.77.key.note_id)
-                case 78: note_ids.append(results.results.78.key.note_id)
-                case 79: note_ids.append(results.results.79.key.note_id)
-                case 80: note_ids.append(results.results.80.key.note_id)
-                case 81: note_ids.append(results.results.81.key.note_id)
-                case 82: note_ids.append(results.results.82.key.note_id)
-                case 83: note_ids.append(results.results.83.key.note_id)
-                case 84: note_ids.append(results.results.84.key.note_id)
-                case 85: note_ids.append(results.results.85.key.note_id)
-                case 86: note_ids.append(results.results.86.key.note_id)
-                case 87: note_ids.append(results.results.87.key.note_id)
-                case 88: note_ids.append(results.results.88.key.note_id)
-                case 89: note_ids.append(results.results.89.key.note_id)
-                case 90: note_ids.append(results.results.90.key.note_id)
-                case 91: note_ids.append(results.results.91.key.note_id)
-                case 92: note_ids.append(results.results.92.key.note_id)
-                case 93: note_ids.append(results.results.93.key.note_id)
-                case 94: note_ids.append(results.results.94.key.note_id)
-                case 95: note_ids.append(results.results.95.key.note_id)
-                case 96: note_ids.append(results.results.96.key.note_id)
-                case 97: note_ids.append(results.results.97.key.note_id)
-                case 98: note_ids.append(results.results.98.key.note_id)
-                case 99: note_ids.append(results.results.99.key.note_id)
-                case 100: note_ids.append(results.results.100.key.note_id)
-                case 101: note_ids.append(results.results.101.key.note_id)
-                case 102: note_ids.append(results.results.102.key.note_id)
-                case 103: note_ids.append(results.results.103.key.note_id)
-                case 104: note_ids.append(results.results.104.key.note_id)
-                case 105: note_ids.append(results.results.105.key.note_id)
-                case 106: note_ids.append(results.results.106.key.note_id)
-                case 107: note_ids.append(results.results.107.key.note_id)
-                case 108: note_ids.append(results.results.108.key.note_id)
-                case 109: note_ids.append(results.results.109.key.note_id)
-                case 110: note_ids.append(results.results.110.key.note_id)
-                case 111: note_ids.append(results.results.111.key.note_id)
-                case 112: note_ids.append(results.results.112.key.note_id)
-                case 113: note_ids.append(results.results.113.key.note_id)
-                case 114: note_ids.append(results.results.114.key.note_id)
-                case 115: note_ids.append(results.results.115.key.note_id)
-                case 116: note_ids.append(results.results.116.key.note_id)
-                case 117: note_ids.append(results.results.117.key.note_id)
-                case 118: note_ids.append(results.results.118.key.note_id)
-                case 119: note_ids.append(results.results.119.key.note_id)
-                case 120: note_ids.append(results.results.120.key.note_id)
-                case 121: note_ids.append(results.results.121.key.note_id)
-                case 122: note_ids.append(results.results.122.key.note_id)
-                case 123: note_ids.append(results.results.123.key.note_id)
-                case 124: note_ids.append(results.results.124.key.note_id)
-                case 125: note_ids.append(results.results.125.key.note_id)
-                case 126: note_ids.append(results.results.126.key.note_id)
-                case 127: note_ids.append(results.results.127.key.note_id)
-                default:
-                    break
+            let count = min(Int(results.num_results), Ndb.max_text_search_results)
+            // `results.results` is a C array, which Swift imports as a 128-element
+            // tuple. Rebind it to a buffer so we can just index into it.
+            return withUnsafePointer(to: &results.results) { tuple in
+                tuple.withMemoryRebound(to: ndb_text_search_result.self, capacity: Ndb.max_text_search_results) { hits in
+                    (0..<count).map({ TextSearchResult(noteKey: hits[$0].key.note_id, timestamp: hits[$0].key.timestamp) })
                 }
             }
-
-            return note_ids
         })
     }
 
@@ -536,6 +468,36 @@ class Ndb {
         })
     }
     
+    /// Maps many note keys to values under a single read transaction.
+    ///
+    /// `lookup_note_by_key` opens (or inherits) a transaction per call, which is
+    /// right for one note and wasteful for thousands. The local search paths walk
+    /// an index and then have to open every candidate to match its content, so
+    /// they need the batched form.
+    ///
+    /// Keys whose note is missing, and notes `transform` returns `nil` for, are
+    /// dropped — the result can be shorter than `keys`, and is in the same order.
+    ///
+    /// - Warning: the note handed to `transform` is only valid for that call. Copy
+    ///   anything you need to keep, as with the other borrowing lookups.
+    func compact_map_notes<T>(keys: [NoteKey], _ transform: (_ key: NoteKey, _ note: borrowing UnownedNdbNote) throws -> T?) throws -> [T] {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self, name: "compact_map_notes") else { return [] }
+
+            var values: [T] = []
+            values.reserveCapacity(keys.count)
+
+            for key in keys {
+                guard let rawNote = lookup_note_by_key_with_txn(key, txn: txn) else { continue }
+                if let value = try transform(key, UnownedNdbNote(rawNote)) {
+                    values.append(value)
+                }
+            }
+
+            return values
+        })
+    }
+
     func lookup_note_by_key_and_copy(_ key: NoteKey) throws -> NdbNote? {
         return try withNdb({
             return try lookup_note_by_key(key, borrow: { maybeUnownedNote -> NdbNote? in

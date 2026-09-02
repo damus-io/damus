@@ -12,7 +12,7 @@ struct SetupView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     
     var body: some View {
-        NavigationStack(path: $navigationCoordinator.path) {
+        NavigationStack(path: navigationCoordinator.activeBinding) {
             ZStack {
                 VStack(alignment: .center) {
                     Spacer()

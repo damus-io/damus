@@ -6,9 +6,17 @@
 #include "win.h"
 #include "cursor.h"
 
+/* static assert helper */
+#define STATIC_ASSERT(cond, msg) typedef char static_assert_##msg[(cond) ? 1 : -1]
+/* #define STATIC_ASSERT(cond, msg)  */
+
 // maximum number of filters allowed in a filter group
 #define NDB_PACKED_STR     0x1
 #define NDB_PACKED_ID      0x2
+
+#define NDB_NOTE_FLAG_DELETED     (1 << 0) /* this note is deleted */
+#define NDB_NOTE_FLAG_RUMOR       (1 << 1) /* this is a rumor that came from a giftwrap */
+#define NDB_NOTE_FLAG_UNWRAPPED   (1 << 2) /* we have processed this giftwrap and have ingested the rumor */
 
 #define NDB_FLAG_NOMIGRATE        (1 << 0)
 #define NDB_FLAG_SKIP_NOTE_VERIFY (1 << 1)
@@ -34,8 +42,24 @@ struct ndb_note;
 struct ndb_tag;
 struct ndb_tags;
 struct ndb_lmdb;
+struct ndb_note_meta;
+struct ndb_note_meta_entry;
+struct ndb_note_meta_builder;
 union ndb_packed_str;
 struct bolt11;
+
+/* Types, standard types are multiplied by 2, since odd types are user defined.
+ * We explicitly multiply by two in the enum to be unambiguous
+ */
+enum ndb_metadata_type {
+	NDB_NOTE_META_RESERVED = 0, /* not used */
+	NDB_NOTE_META_COUNTS   = 100, /* replies, quotes, etc */
+	NDB_NOTE_META_REACTION = 200, /* count of all the reactions on a post, grouped by different reaction strings */
+	NDB_NOTE_META_ZAP      = 300, /* verified zap count and total msats */
+	NDB_NOTE_META_ZAP_UNVERIFIED = 302, /* unverified zap count and total msats */
+};
+
+#include "nip44.h"
 
 // some bindings like swift needs help with forward declared pointers
 struct ndb_tag_ptr { struct ndb_tag *ptr; };
@@ -46,6 +70,33 @@ struct ndb_note_ptr { struct ndb_note *ptr; };
 
 struct ndb_t {
 	struct ndb *ndb;
+};
+
+/* Compact reaction strings for the metadata table.
+ *
+ * We compact all emojis into 64bits using binmojis (github.com/jb55/binmoji)
+ *
+ * 6-byte non-emoji strings are also supported in the same memory layout. This
+ * is achieved by reserving the LSB byte of the compact string, which overlaps
+ * with the binmojis user flag bit. If this flag is set, then we know its not
+ * really a bitmoji, its a compact string.
+ */
+union ndb_reaction_str {
+	uint64_t binmoji;
+	struct {
+		/* flag is at LSB, which aligns with our binmoji user flag */
+		uint8_t flag;
+		char str[7];
+	} packed;
+};
+STATIC_ASSERT(sizeof(union ndb_reaction_str) == 8, reaction_string_must_be_8_bytes);
+
+/* An ndb_note_meta builder. Maintains a cursor of a fixed sized buffer while adding
+ * metadata entries.
+ *
+ */
+struct ndb_note_meta_builder {
+	struct cursor cursor;
 };
 
 struct ndb_str {
@@ -77,6 +128,15 @@ typedef enum ndb_idres (*ndb_id_fn)(void *, const char *);
 
 // callback function for when we receive new subscription results
 typedef void (*ndb_sub_fn)(void *, uint64_t subid);
+
+struct ndb_query_result {
+	struct ndb_note *note;
+	uint64_t note_size;
+	uint64_t note_id;
+};
+
+// callback function for when we visit a note during a query (used in ndb_query_visit)
+typedef enum ndb_visitor_action (*ndb_visitor_fn)(void *ctx, struct ndb_query_result *res);
 
 // id callback + closure data
 struct ndb_id_cb {
@@ -239,6 +299,14 @@ struct ndb_note_relay_iterator {
 	uint64_t note_key;
 	int cursor_op;
 	void *mdb_cur;
+};
+
+struct ndb_note_meta_iterator {
+	struct ndb_note_meta *header;
+	struct ndb_note_meta *cur;
+
+	// current outer index
+	int index;
 };
 
 struct ndb_iterator {
@@ -469,14 +537,41 @@ struct ndb_block_iterator {
 	unsigned char *p;
 };
 
-struct ndb_query_result {
-	struct ndb_note *note;
-	uint64_t note_size;
-	uint64_t note_id;
+enum ndb_query_type {
+	/* standard query, fills a result buffer */
+	NDB_QUERY_TYPE_STANDARD = 1,
+
+	/* visitor query. scan/folds over data */
+	NDB_QUERY_TYPE_VISITOR  = 2
+};
+
+/* visitor actions, this allows us to prematurely stop the query */
+enum ndb_visitor_action {
+	NDB_VISITOR_STOP = 0,
+	NDB_VISITOR_CONT = 1,
 };
 
 struct ndb_query_results {
 	struct cursor cur;
+};
+
+struct ndb_query_state {
+	enum ndb_query_type type;
+	uint64_t limit;
+
+	union {
+		struct {
+			int capacity;
+			struct ndb_query_results results;
+		} query;
+
+		struct {
+			uint64_t visited;
+			void *ctx;
+			int done;
+			ndb_visitor_fn visitor;
+		} visitor;
+	};
 };
 
 // CONFIG
@@ -502,16 +597,37 @@ int ndb_note_verify(void *secp_ctx, unsigned char *scratch, size_t scratch_size,
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);
 int ndb_db_version(struct ndb_txn *txn);
+
 /// Takes a snapshot of the NostrDB contents to a separate path
 /// See `mdb_env_copy2` header for documentation on `path` and `flags`
 int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags);
 
+/// Compact the database, copying only selected data to a new database at
+/// `output_path`. All profiles are kept. Only notes authored by pubkeys in
+/// the `own_pubkeys` array are kept. Returns 1 on success, 0 on failure.
+int ndb_compact(struct ndb *ndb, const char *output_path,
+		const unsigned char (*own_pubkeys)[32], int num_pubkeys);
+
 // NOTE PROCESSING
+
+/* add a key for processing giftwraps */
+int ndb_add_key(struct ndb *ndb, unsigned char *key);
+
+/* register a shared SNS team_root (32 bytes) for monitoring kind-1081 envelopes */
+int ndb_add_team_root(struct ndb *ndb, unsigned char *team_root);
+
 int ndb_process_event(struct ndb *, const char *json, int len);
 void ndb_ingest_meta_init(struct ndb_ingest_meta *meta, unsigned client, const char *relay);
 // Process an event, recording the relay where it came from.
 int ndb_process_event_with(struct ndb *, const char *json, int len, struct ndb_ingest_meta *meta);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
+/* reprocess unwrapped giftwraps */
+int ndb_process_giftwraps(struct ndb *, struct ndb_txn *);
+/* reprocess kind-1080 PNS events that arrived before keys were registered */
+int ndb_process_pns(struct ndb *, struct ndb_txn *);
+/* reprocess kind-1081 SNS envelopes that arrived before the team_root was registered */
+int ndb_process_sns(struct ndb *, struct ndb_txn *);
+int ndb_verify_zap(struct ndb *ndb, struct ndb_txn *txn, const unsigned char *zap_note_id);
 int ndb_process_events_with(struct ndb *ndb, const char *ldjson, size_t json_len, struct ndb_ingest_meta *meta);
 #ifndef _WIN32
 // TODO: fix on windows
@@ -535,7 +651,6 @@ uint64_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id);
 uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *id);
 struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *primkey);
 struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
-void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *len);
 int ndb_note_seen_on_relay(struct ndb_txn *txn, uint64_t note_key, const char *relay);
 void ndb_destroy(struct ndb *);
 
@@ -544,6 +659,7 @@ int ndb_parse_json_note(struct ndb_json_parser *, struct ndb_note **);
 int ndb_client_event_from_json(const char *json, int len, struct ndb_fce *fce, unsigned char *buf, int bufsize, struct ndb_id_cb *cb);
 int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce, unsigned char *buf, int bufsize, struct ndb_id_cb *);
 int ndb_note_from_json(const char *json, int len, struct ndb_note **, unsigned char *buf, int buflen);
+int ndb_note_from_json_custom(const char *json, int len, struct ndb_note **, unsigned char *buf, int buflen, int parse_cond);
 int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf, size_t bufsize);
 int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note, struct ndb_keypair *privkey);
 int ndb_builder_set_content(struct ndb_builder *builder, const char *content, int len);
@@ -610,6 +726,46 @@ void ndb_text_search_config_set_limit(struct ndb_text_search_config *, int limit
 
 // QUERY
 int ndb_query(struct ndb_txn *txn, struct ndb_filter *filters, int num_filters, struct ndb_query_result *results, int result_capacity, int *count);
+int ndb_query_visit(struct ndb_txn *txn, struct ndb_filter *filters, int num_filters, ndb_visitor_fn visitor, void *ctx);
+
+// NOTE METADATA
+int ndb_note_meta_builder_init(struct ndb_note_meta_builder *builder, unsigned char *, size_t);
+int ndb_set_note_meta(struct ndb *ndb, const unsigned char *id, struct ndb_note_meta *meta);
+size_t ndb_note_meta_total_size(struct ndb_note_meta *header);
+size_t ndb_note_meta_total_size(struct ndb_note_meta *meta);
+struct ndb_note_meta *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id);
+struct ndb_note_meta_entry *ndb_note_meta_add_entry(struct ndb_note_meta_builder *builder);
+struct ndb_note_meta_entry *ndb_note_meta_builder_find_entry(struct ndb_note_meta_builder *builder, uint16_t type, uint64_t *payload);
+struct ndb_note_meta_entry *ndb_note_meta_entries(struct ndb_note_meta *meta);
+struct ndb_note_meta_entry *ndb_note_meta_entry_at(struct ndb_note_meta *meta, int ind);
+struct ndb_note_meta_entry *ndb_note_meta_find_entry(struct ndb_note_meta *meta, uint16_t type, uint64_t *payload);
+uint16_t *ndb_note_meta_counts_direct_replies(struct ndb_note_meta_entry *entry);
+uint16_t *ndb_note_meta_counts_quotes(struct ndb_note_meta_entry *entry);
+uint16_t *ndb_note_meta_counts_reposts(struct ndb_note_meta_entry *entry);
+uint16_t *ndb_note_meta_entry_type(struct ndb_note_meta_entry *entry);
+uint16_t ndb_note_meta_entries_count(struct ndb_note_meta *meta);
+uint32_t *ndb_note_meta_counts_thread_replies(struct ndb_note_meta_entry *entry);
+uint32_t *ndb_note_meta_counts_total_reactions(struct ndb_note_meta_entry *entry);
+uint32_t *ndb_note_meta_reaction_count(struct ndb_note_meta_entry *entry);
+union ndb_reaction_str *ndb_note_meta_reaction_str(struct ndb_note_meta_entry *entry);
+uint64_t *ndb_note_meta_flags(struct ndb_note_meta *meta);
+void ndb_note_meta_build(struct ndb_note_meta_builder *builder, struct ndb_note_meta **meta);
+void ndb_note_meta_builder_resized(struct ndb_note_meta_builder *builder, unsigned char *buf, size_t bufsize);
+void ndb_note_meta_counts_set(struct ndb_note_meta_entry *entry, uint32_t total_reactions, uint16_t quotes, uint16_t direct_replies, uint32_t thread_replies, uint16_t reposts);
+void ndb_note_meta_header_init(struct ndb_note_meta *);
+void ndb_note_meta_reaction_set(struct ndb_note_meta_entry *entry, uint32_t count, union ndb_reaction_str str);
+uint32_t *ndb_note_meta_zap_count(struct ndb_note_meta_entry *entry);
+uint64_t *ndb_note_meta_zap_msats(struct ndb_note_meta_entry *entry);
+void ndb_note_meta_zap_set(struct ndb_note_meta_entry *entry, uint32_t count, uint64_t msats);
+uint32_t *ndb_note_meta_zap_unverified_count(struct ndb_note_meta_entry *entry);
+uint64_t *ndb_note_meta_zap_unverified_msats(struct ndb_note_meta_entry *entry);
+void ndb_note_meta_zap_unverified_set(struct ndb_note_meta_entry *entry, uint32_t count, uint64_t msats);
+void print_note_meta(struct ndb_note_meta *meta);
+
+// META STRINGS
+int ndb_reaction_set(union ndb_reaction_str *reaction, const char *str);
+int ndb_reaction_str_is_emoji(union ndb_reaction_str);
+const char *ndb_reaction_to_str(union ndb_reaction_str *str, char buf[128]);
 
 // STATS
 int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);
@@ -627,6 +783,10 @@ unsigned char *ndb_note_sig(struct ndb_note *note);
 void _ndb_note_set_kind(struct ndb_note *note, uint32_t kind);
 struct ndb_tags *ndb_note_tags(struct ndb_note *note);
 int ndb_str_len(struct ndb_str *str);
+uint16_t *ndb_note_flags(struct ndb_note *);
+int ndb_note_is_rumor(struct ndb_note *note);
+unsigned char *ndb_note_rumor_receiver_pubkey(struct ndb_note *note);
+unsigned char *ndb_note_rumor_giftwrap_id(struct ndb_note *note);
 
 /// write the note as json to a buffer
 int ndb_note_json(struct ndb_note *, char *buf, int buflen);

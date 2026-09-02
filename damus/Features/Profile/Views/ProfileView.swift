@@ -481,8 +481,7 @@ struct ProfileView: View {
                     .zIndex(-yOffset > navbarHeight ? 0 : 1)
                 }
             }
-            .padding(.bottom, tabHeight + getSafeAreaBottom())
-            .ignoresSafeArea()
+            .ignoresSafeArea(edges: .top)
             .navigationTitle("")
             .navigationBarBackButtonHidden()
             .toolbar {
@@ -526,9 +525,6 @@ struct ProfileView: View {
                 }
             }
             .toolbarBackground(.hidden)
-            .onReceive(handle_notify(.switched_timeline)) { _ in
-                dismiss()
-            }
             .onAppear() {
                 check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
                 profile.subscribe()
@@ -551,7 +547,6 @@ struct ProfileView: View {
                 PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                     notify(.compose(.posting(.user(profile.pubkey))))
                 }
-                .padding(.bottom, tabHeight)
             }
         }
     }

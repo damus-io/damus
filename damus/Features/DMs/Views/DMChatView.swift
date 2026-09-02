@@ -47,7 +47,6 @@ struct DMChatView: View, KeyboardReadable {
                     }
                 }
         }
-        .padding(.bottom, isTextFieldFocused ? 0 : tabHeight)
     }
     
     func scroll_to_end(_ scroller: ScrollViewProxy, animated: Bool = false) {

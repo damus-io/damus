@@ -99,8 +99,6 @@ func present_sheet(_ sheet: Sheets) {
     notify(.present_sheet(sheet))
 }
 
-var tabHeight: CGFloat = 0.0
-
 struct ContentView: View {
     let keypair: Keypair
     let appDelegate: AppDelegate?
@@ -126,12 +124,24 @@ struct ContentView: View {
     }
     @State var muting: MuteItem? = nil
     @State var confirm_mute: Bool = false
-    @State var hide_bar: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
     @State private var isSideBarOpened = false
     @State var headerOffset: CGFloat = 0.0
     @State private var postingTimelineSource: TimelineSource = .follows
+
+    // The three tabs' filter states live here rather than in the tab roots that
+    // read them, because from iOS 26 on the control that drives them is the tab
+    // view's bottom glass accessory — and that attaches to the `TabView`, which
+    // is right here, with no way to reach into a tab root's own state. The tab
+    // roots take them as bindings. Pre-26 nothing about them moved: each keeps
+    // the `@SceneStorage` key it had inside its view, so a scene restored from
+    // before this change still comes back on the filter the user left it on.
+    @SceneStorage("PostingTimelineView.filter_state") var home_filter_state: FilterState = .posts_and_replies
+    @SceneStorage("NotificationsView.filter_state") var notifications_filter_state: NotificationFilterState = .all
+    /// `DirectMessagesView` held this as plain `@State`, so unlike the other two
+    /// there is no storage key to preserve.
+    @State private var dm_type: DMType = .friend
     var home: HomeModel = HomeModel()
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
@@ -146,67 +156,75 @@ struct ContentView: View {
         self.appDelegate = appDelegate
     }
     
-    func navIsAtRoot() -> Bool {
-        return navigationCoordinator.isAtRoot()
+    /// The tab bar's selection binding.
+    ///
+    /// Writes are routed through ``switch_timeline(_:)`` so that re-tapping the
+    /// already-selected tab pops it to root (the native convention), the side
+    /// menu closes, and the `willSet` on `selected_timeline` still gets a
+    /// chance to clear the subtitle.
+    var tab_selection: Binding<Timeline> {
+        Binding(
+            get: { self.selected_timeline },
+            set: { self.switch_timeline($0) }
+        )
     }
-    
-    func popToRoot() {
-        navigationCoordinator.popToRoot()
-        isSideBarOpened = false
+
+    /// The tab keyboard shortcuts, which used to live on the custom tab bar's buttons.
+    ///
+    /// A system tab bar gives us nowhere to hang them, so they live on hidden
+    /// buttons behind the tab view instead. `.opacity(0)` rather than
+    /// `.hidden()`, because a hidden view stops responding to its shortcut.
+    var tabKeyboardShortcuts: some View {
+        ForEach(Timeline.tab_order, id: \.self) { timeline in
+            Button("") { self.switch_timeline(timeline) }
+                .keyboardShortcut(timeline.keyboard_shortcut)
+        }
+        .opacity(0)
+        .accessibilityHidden(true)
     }
-    
-    var timelineNavItem: some View {
-        VStack {
-            Text(timeline_name(selected_timeline))
-                .bold()
-            if let menu_subtitle {
-                Text(menu_subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+
+    /// The filter selector the tab view's bottom accessory should show, for
+    /// whichever tab is currently selected.
+    ///
+    /// `nil` when there is nothing to filter — see
+    /// ``SwiftUI/View/timelineFilterAccessory(_:)`` for what an absent filter
+    /// does and why the modifier is applied unconditionally anyway. Two cases
+    /// give that:
+    ///
+    /// - The search tab, which has no filter of its own.
+    /// - Any tab that has something pushed on it. A thread or a profile is not a
+    ///   filtered timeline, and the accessory belongs to the `TabView`, so
+    ///   without this it would hover over the pushed view still offering a filter
+    ///   that does nothing there. `paths` is `@Published` and the coordinator is
+    ///   a `@StateObject`, so pushing and popping re-evaluates this.
+    var selected_timeline_filter: TimelineFilterSelection? {
+        guard self.navigationCoordinator.isAtRoot(self.selected_timeline) else { return nil }
+
+        switch self.selected_timeline {
+        case .home:          return .notes($home_filter_state)
+        case .dms:           return .dms($dm_type)
+        case .notifications: return .notifications($notifications_filter_state)
+        case .search:        return nil
         }
     }
-    
-    func MainContent(damus: DamusState) -> some View {
-        VStack {
-            switch selected_timeline {
-            case .search:
-                if #available(iOS 16.0, *) {
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                        .scrollDismissesKeyboard(.immediately)
-                } else {
-                    // Fallback on earlier versions
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+
+    /// One timeline tab: its own navigation stack, destinations and tab bar item.
+    func timelineTab<Content: View>(_ timeline: Timeline, damus: DamusState, @ViewBuilder content: () -> Content) -> some View {
+        NavigationStack(path: navigationCoordinator.binding(for: timeline)) {
+            content()
+                .modifier(TimelineTabRootModifier(timeline: timeline, damus_state: damus, isSideBarOpened: $isSideBarOpened, menu_subtitle: menu_subtitle))
+                .navigationDestination(for: Route.self) { route in
+                    route.view(navigationCoordinator: navigationCoordinator, damusState: damus)
                 }
-                
-            case .home:
-                PostingTimelineView(damus_state: damus_state!, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, timeline_source: $postingTimelineSource)
-                
-            case .notifications:
-                NotificationsView(state: damus, notifications: home.notifications, subtitle: $menu_subtitle)
-                
-            case .dms:
-                DirectMessagesView(damus_state: damus_state!, home: home, model: damus_state!.dms, settings: damus_state!.settings, subtitle: $menu_subtitle)
-            }
         }
-        .background(DamusColors.adaptableWhite)
-        .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
-        .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
-        .toolbar(selected_timeline != .home ? .visible : .hidden)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack {
-                    timelineNavItem
-                        .opacity(isSideBarOpened ? 0 : 1)
-                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                }
-            }
+        .modifier(TimelineTabBadge(timeline: timeline, notification_status: home.notification_status, settings: damus.settings))
+        .tabItem {
+            Image(timeline.tab_image)
+                .accessibilityLabel(timeline.tab_accessibility_label)
         }
-        .onAppear {
-            notify(.display_tabbar(true))
-        }
+        .tag(timeline)
     }
-    
+
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
             if let keypair = damus_state.keypair.to_full() {
@@ -241,76 +259,45 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                NavigationStack(path: $navigationCoordinator.path) {
-                    TabView { // Prevents navbar appearance change on scroll
-                        MainContent(damus: damus)
-                            .toolbar() {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    TopbarSideMenuButton(damus_state: damus, isSideBarOpened: $isSideBarOpened)
-                                }
-                                .hideToolbarBackground()
-                                
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: damus_state!.nostrNetwork.signal)
-                                        
-                                        // maybe expand this to other timelines in the future
-                                        if selected_timeline == .search {
-                                            
-                                            Button(action: {
-                                                present_sheet(.filter)
-                                            }, label: {
-                                                Image("filter")
-                                                    .foregroundColor(.gray)
-                                            })
-                                        }
-                                    }
-                                }
-                                .hideToolbarBackground()
-                            }
+                TabView(selection: tab_selection) {
+                    timelineTab(.home, damus: damus) {
+                        PostingTimelineView(damus_state: damus, home: home, homeEvents: home.events, isSideBarOpened: $isSideBarOpened, active_sheet: $active_sheet, headerOffset: $headerOffset, filter_state: $home_filter_state, timeline_source: $postingTimelineSource)
                     }
-                    .background(DamusColors.adaptableWhite)
-                    .edgesIgnoringSafeArea(selected_timeline != .home ? [] : [.top, .bottom])
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .overlay(
-                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
-                    )
-                    .navigationDestination(for: Route.self) { route in
-                        route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
+
+                    timelineTab(.dms, damus: damus) {
+                        DirectMessagesView(damus_state: damus, home: home, dm_type: $dm_type, model: damus.dms, settings: damus.settings, subtitle: $menu_subtitle)
                     }
-                    .onReceive(handle_notify(.switched_timeline)) { _ in
-                        navigationCoordinator.popToRoot()
+
+                    timelineTab(.search, damus: damus) {
+                        SearchHomeView(damus_state: damus, model: SearchHomeModel(damus_state: damus))
+                            .scrollDismissesKeyboard(.immediately)
+                    }
+
+                    timelineTab(.notifications, damus: damus) {
+                        NotificationsView(state: damus, notifications: home.notifications, filter_state: $notifications_filter_state, subtitle: $menu_subtitle)
                     }
                 }
-                .navigationViewStyle(.stack)
+                .minimizeTabBarOnScroll()
+                .timelineFilterAccessory(self.selected_timeline_filter)
+                .background(tabKeyboardShortcuts)
+                .overlay(
+                    SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation(), selected: $selected_timeline)
+                )
                 .damus_full_screen_cover($active_full_screen_item, damus_state: damus, content: { item in
                     return item.view(damus_state: damus)
                 })
-                .overlay(alignment: .bottom) {
-                    if !hide_bar {
-                        if !isSideBarOpened {
-                            TabBar(nstatus: home.notification_status, navIsAtRoot: navIsAtRoot(), selected: $selected_timeline, headerOffset: $headerOffset, settings: damus.settings, action: switch_timeline)
-                                .padding([.bottom], 8)
-                                .background(selected_timeline != .home || (selected_timeline == .home && !self.navIsAtRoot()) ? DamusColors.adaptableWhite : DamusColors.adaptableWhite.opacity(abs(1.25 - (abs(headerOffset/100.0)))))
-                                .anchorPreference(key: HeaderBoundsKey.self, value: .bounds){$0}
-                                .overlayPreferenceValue(HeaderBoundsKey.self) { value in
-                                    GeometryReader{ proxy in
-                                        if let anchor = value{
-                                            Color.clear
-                                                .onAppear {
-                                                    tabHeight = proxy[anchor].height
-                                                }
-                                        }
-                                    }
-                                }
-                        }
-                    }
-                }
             }
         }
         .ignoresSafeArea(.keyboard)
-        .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
+        .onChange(of: selected_timeline) { (timeline: Timeline) in
+            // Keep the tab-agnostic `nav.push` / `popToRoot` pointed at the
+            // stack the user is actually looking at.
+            navigationCoordinator.activeTab = timeline
+        }
         .onAppear() {
+            // `selected_timeline` is restored from @SceneStorage, so sync once
+            // on appear as well as on change.
+            navigationCoordinator.activeTab = selected_timeline
             Task {
                 await self.connect()
                 try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
@@ -380,10 +367,6 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.compose)) { action in
             self.active_sheet = .post(action)
-        }
-        .onReceive(handle_notify(.display_tabbar)) { display in
-            let show = display
-            self.hide_bar = !show
         }
         .onReceive(timer) { n in
             Task{ await self.damus_state?.nostrNetwork.postbox.try_flushing_events() }
@@ -665,18 +648,27 @@ struct ContentView: View {
         })
     }
     
+    /// Selects a timeline tab, or acts on the already-selected one.
+    ///
+    /// Native tab bar semantics: switching tabs leaves each tab's navigation
+    /// stack where the user left it, and re-tapping the selected tab pops it to
+    /// root (or scrolls to top if it is already there).
     func switch_timeline(_ timeline: Timeline) {
         self.isSideBarOpened = false
-        let navWasAtRoot = self.navIsAtRoot()
-        self.popToRoot()
 
-        notify(.switched_timeline(timeline))
+        // The custom tab bar's buttons used to clear the tab's new-event bits.
+        let bits = timeline_to_notification_bits(timeline, ev: nil)
+        home.notification_status.new_events = NewEventsBits(rawValue: home.notification_status.new_events.rawValue & ~bits.rawValue)
 
-        if timeline == self.selected_timeline && navWasAtRoot {
-            notify(.scroll_to_top)
+        if timeline == self.selected_timeline {
+            if self.navigationCoordinator.isAtRoot(timeline) {
+                notify(.scroll_to_top)
+            } else {
+                self.navigationCoordinator.popToRoot(timeline)
+            }
             return
         }
-        
+
         self.selected_timeline = timeline
     }
 
@@ -699,7 +691,7 @@ struct ContentView: View {
         }
         let local = notification
         let openAction = local.toViewOpenAction()
-        self.execute_open_action(openAction)
+        self.execute_open_action(openAction, on: local.type.timeline)
     }
 
     func connect() async {
@@ -841,11 +833,24 @@ struct ContentView: View {
     
     /// Executes an action to open something in the app view
     ///
-    /// - Parameter open_action: The action to perform
-    func execute_open_action(_ open_action: ViewOpenAction) {
+    /// - Parameters:
+    ///   - open_action: The action to perform
+    ///   - tab: The timeline tab the action belongs to, if it has one. Each tab
+    ///     owns its own navigation stack now, so a push notification or deep
+    ///     link that semantically belongs to a tab (a DM, a reply) should select
+    ///     that tab and push there, rather than landing in whichever tab the
+    ///     user happens to be looking at. `nil` means "wherever we are".
+    func execute_open_action(_ open_action: ViewOpenAction, on tab: Timeline? = nil) {
         switch open_action {
         case .route(let route):
-            navigationCoordinator.push(route: route)
+            if let tab {
+                self.isSideBarOpened = false
+                self.selected_timeline = tab
+                navigationCoordinator.activeTab = tab
+                navigationCoordinator.push(route: route, on: tab)
+            } else {
+                navigationCoordinator.push(route: route)
+            }
         case .sheet(let sheet):
             self.active_sheet = sheet
         case .external_url(let url):
@@ -872,6 +877,73 @@ struct TopbarSideMenuButton: View {
         .accessibilityIdentifier(AppAccessibilityIdentifiers.main_side_menu_button.rawValue)
         .accessibilityLabel(NSLocalizedString("Side menu", comment: "Accessibility label for the side menu button at the topbar"))
         .disabled(isSideBarOpened)
+    }
+}
+
+/// The chrome shared by every timeline tab root.
+///
+/// The navigation bar (side menu button, title and subtitle, connection signal,
+/// search filter) and the navigation bar appearance suppression that the old
+/// single-child `TabView(.page)` wrapper used to provide.
+struct TimelineTabRootModifier: ViewModifier {
+    let timeline: Timeline
+    let damus_state: DamusState
+    @Binding var isSideBarOpened: Bool
+    let menu_subtitle: String?
+
+    var timelineNavItem: some View {
+        VStack {
+            Text(timeline_name(timeline))
+                .bold()
+            if let menu_subtitle {
+                Text(menu_subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .background(DamusColors.adaptableWhite)
+            // The home timeline draws its own header behind the status bar. The
+            // bottom inset belongs to the tab bar now, so it is never ignored.
+            .edgesIgnoringSafeArea(timeline == .home ? [.top] : [])
+            .navigationBarTitle(timeline_name(timeline), displayMode: .inline)
+            // `for: .navigationBar` matters: an unqualified `.toolbar(.hidden)`
+            // would take the tab bar down with it.
+            .toolbar(timeline == .home ? .hidden : .visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    timelineNavItem
+                        .opacity(isSideBarOpened ? 0 : 1)
+                        .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                }
+
+                ToolbarItem(placement: .navigationBarLeading) {
+                    TopbarSideMenuButton(damus_state: damus_state, isSideBarOpened: $isSideBarOpened)
+                }
+                .hideToolbarBackground()
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(alignment: .center) {
+                        SignalView(state: damus_state, signal: damus_state.nostrNetwork.signal)
+
+                        // maybe expand this to other timelines in the future
+                        if timeline == .search {
+                            Button(action: {
+                                present_sheet(.filter)
+                            }, label: {
+                                Image("filter")
+                                    .foregroundColor(.gray)
+                            })
+                        }
+                    }
+                }
+                .hideToolbarBackground()
+            }
+            .staticNavigationBarAppearance()
+            .softBottomScrollEdgeEffect()
     }
 }
 

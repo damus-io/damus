@@ -160,9 +160,6 @@ struct NostrDBDetailView: View {
         .refreshable {
             await loadStorageStatsAsync()
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
     
     /// Prepare export text on background thread before showing share sheet

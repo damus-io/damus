@@ -39,11 +39,8 @@ struct BookmarksView: View {
                 ScrollView {
                     InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, filter: noneFilter)
                 }
-                .padding(.bottom, 10 + tabHeight + getSafeAreaBottom())
+                .padding(.bottom, 10)
             }
-        }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(bookmarksTitle)

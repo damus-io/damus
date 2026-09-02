@@ -209,10 +209,7 @@ struct NotificationSettingsView: View {
                 }
             }
             
-            Section(
-                header: Text("Notification Dots", comment: "Section header for notification indicator dot settings"),
-                footer: Text("").padding(.bottom, tabHeight + getSafeAreaBottom())
-            ) {
+            Section(header: Text("Notification Dots", comment: "Section header for notification indicator dot settings")) {
                 Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: indicator_binding(.zaps))
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: indicator_binding(.mentions))
@@ -224,9 +221,6 @@ struct NotificationSettingsView: View {
             }
         }
         .navigationTitle("Notifications")
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
         .onAppear(perform: {
             Task {
                 if self.settings.notification_mode == .push {

@@ -72,9 +72,6 @@ struct ZapSettingsView: View {
             }
         }
         .navigationTitle(NSLocalizedString("Zaps", comment: "Navigation title for zap settings."))
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
     }
 }
 

@@ -27,20 +27,14 @@ struct PostingTimelineView: View {
     @State private var indicatorPosition: CGFloat = 0
     @State var headerHeight: CGFloat = 0
     @Binding var headerOffset: CGFloat
-    @SceneStorage("PostingTimelineView.filter_state") var filter_state : FilterState = .posts_and_replies
+    /// Which of the home timeline's two filters to show.
+    ///
+    /// Owned by ``ContentView`` rather than by this view, because on iOS 26 the
+    /// selector for it is the tab view's bottom accessory, which attaches to the
+    /// `TabView` and so cannot reach state that lives in here.
+    @Binding var filter_state: FilterState
     @Binding var timeline_source: TimelineSource
     
-    @State private var damusTips: Any? = {
-        if #available(iOS 18.0, *) {
-            return TipGroup(.ordered) {
-                TrustedNetworkButtonTip.shared
-                TrustedNetworkRepliesTip.shared
-                PostingTimelineSwitcherView.TimelineSwitcherTip.shared
-            }
-        }
-        return nil
-    }()
-
     var loading: Binding<Bool> {
         Binding(get: {
             return home.loading
@@ -115,21 +109,16 @@ struct PostingTimelineView: View {
                 }
             }
             .padding(.horizontal, 20)
-            if #available(iOS 18.0, *), let tipGroup = damusTips as? TipGroup {
-                TipView(tipGroup.currentTip as? PostingTimelineSwitcherView.TimelineSwitcherTip)
-                    .tipBackground(.clear)
-                    .tipViewStyle(TrustedNetworkButtonTipViewStyle())
-                    .padding(.horizontal)
+            if #available(iOS 18.0, *) {
+                TipsView()
             }
-            VStack(spacing: 0) {
-                CustomPicker(tabs: [
-                    (NSLocalizedString("Notes", comment: "Label for filter for seeing only notes (instead of notes and replies)."), FilterState.posts),
-                    (NSLocalizedString("Notes & Replies", comment: "Label for filter for seeing notes and replies (instead of only notes)."), FilterState.posts_and_replies)
-                ],
-                             selection: $filter_state)
-                
-                Divider()
-                    .frame(height: 1)
+            if !timelineFilterLivesInTabViewAccessory {
+                VStack(spacing: 0) {
+                    CustomPicker(tabs: FilterState.timeline_filter_options, selection: $filter_state)
+
+                    Divider()
+                        .frame(height: 1)
+                }
             }
         }
         .background {
@@ -138,24 +127,54 @@ struct PostingTimelineView: View {
         }
     }
 
+    /// The home timeline's tips.
+    ///
+    /// This lives in its own view because reading `TipGroup.currentTip` goes
+    /// through TipKit's datastore and costs real time on the main thread, and
+    /// ``HeaderView()`` is rebuilt on every scroll frame — `TimelineView`
+    /// writes `headerOffset` from its scroll callback, and that binding lives
+    /// all the way up in ``ContentView``, so each frame invalidates this
+    /// view's body. A view with no stored properties compares equal across
+    /// those rebuilds, so SwiftUI skips its body and TipKit is left alone.
+    /// `TipGroup` is `Observable`, so reading `currentTip` in here still
+    /// invalidates this view when the group advances to the next tip.
+    @available(iOS 18.0, *)
+    struct TipsView: View {
+        private static let group = TipGroup(.ordered) {
+            TrustedNetworkButtonTip.shared
+            TrustedNetworkRepliesTip.shared
+            PostingTimelineSwitcherView.TimelineSwitcherTip.shared
+        }
+
+        var body: some View {
+            TipView(Self.group.currentTip as? PostingTimelineSwitcherView.TimelineSwitcherTip)
+                .tipBackground(.clear)
+                .tipViewStyle(TrustedNetworkButtonTipViewStyle())
+                .padding(.horizontal)
+        }
+    }
+
     var body: some View {
         VStack {
             ZStack {
-                TabView(selection: $filter_state) {
-                    contentTimelineView(filter: content_filter(.posts))
-                        .tag(FilterState.posts)
-                        .id(FilterState.posts)
-                    contentTimelineView(filter: content_filter(.posts_and_replies))
-                        .tag(FilterState.posts_and_replies)
-                        .id(FilterState.posts_and_replies)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                // Driven by the filter selector: the `CustomPicker` in
+                // `HeaderView` pre-26, the tab view's bottom glass accessory
+                // from iOS 26 on. This used to be a paged `TabView`, which the
+                // iOS 26 tab bar cannot see through: a paged `TabView` neither
+                // reports its scrolling to the enclosing tab bar (so the bar
+                // never minimized on the home timeline) nor lets content run
+                // under the floating bar (leaving an opaque `adaptableWhite`
+                // slab where notes should show through the glass). Rendering
+                // the selected timeline directly hands the real `ScrollView` to
+                // the tab bar. The cost is the swipe-between-filters gesture,
+                // which the selector already duplicates.
+                contentTimelineView(filter: content_filter(filter_state))
+                    .id(filter_state)
                 
                 if damus_state.keypair.privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
                         self.active_sheet = .post(.posting(.none))
                     }
-                    .padding(.bottom, tabHeight + getSafeAreaBottom())
                     .opacity(0.35 + abs(1.25 - (abs(headerOffset/100.0))))
                 }
             }
@@ -188,6 +207,7 @@ struct PostingTimelineView_Previews: PreviewProvider {
             isSideBarOpened: .constant(false),
             active_sheet: .constant(nil),
             headerOffset: .constant(0),
+            filter_state: .constant(.posts_and_replies),
             timeline_source: .constant(.follows)
         )
     }

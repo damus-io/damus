@@ -37,8 +37,7 @@ struct NIP05DomainTimelineView: View {
                     .padding(.top, 30)
             }
         }
-        .ignoresSafeArea()
-        .padding(.bottom, tabHeight)
+        .ignoresSafeArea(edges: .top)
         .onAppear {
             guard model.events.all_events.isEmpty else { return }
 

@@ -94,13 +94,12 @@ struct LiveStreamView: View {
         .opacity(isDragging ? Double(1 - min(abs(dragOffset.height) / 250, 0.5)) : 1.0)
         .animation(.interactiveSpring(), value: dragOffset)
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            notify(.display_tabbar(false))
             model.subscribe()
             setupVideoModel()
         }
         .onDisappear {
-            notify(.display_tabbar(true))
             model.unsubscribe()
         }
     }

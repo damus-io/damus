@@ -34,12 +34,7 @@ struct DamusLabsView: View {
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: BackNav())
         }
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
-        .onAppear {
-            notify(.display_tabbar(false))
-        }
+        .toolbar(.hidden, for: .tabBar)
         .task {
             if damus_state.purple.enable_purple {
                 self.purple_account = try? await damus_state.purple.get_maybe_cached_account(pubkey: damus_state.pubkey)
