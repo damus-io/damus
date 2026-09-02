@@ -46,19 +46,29 @@ enum AdvancedSearchEngine {
     ///   ``AdvancedSearchPlan/Reason`` says which.
     static func search(_ query: AdvancedSearchQuery,
                        in ndb: Ndb,
-                       excluding rules: MuteRules? = nil) throws -> AdvancedSearchResults {
+                       excluding rules: MuteRules? = nil,
+                       isCancelled: () -> Bool = { false }) throws -> AdvancedSearchResults {
         return try run(AdvancedSearchPlanner.plan(for: query),
                        order: query.order,
                        in: ndb,
-                       excluding: rules)
+                       excluding: rules,
+                       isCancelled: isCancelled)
     }
 
-    /// Runs an already-made plan. Split out from ``search(_:in:excluding:)`` so a
-    /// caller that inspected the plan does not have to re-plan to run it.
+    /// Runs an already-made plan. Split out from
+    /// ``search(_:in:excluding:isCancelled:)`` so a caller that inspected the plan
+    /// does not have to re-plan to run it.
+    ///
+    /// - Parameter isCancelled: Checked before content matching starts and once per
+    ///   candidate note, throwing `CancellationError` when it returns true. The
+    ///   index walk itself runs inside nostrdb and cannot be interrupted, so this
+    ///   bounds the matching half — which is the half that can open thousands of
+    ///   notes.
     static func run(_ plan: AdvancedSearchPlan,
                     order: NdbSearchOrder,
                     in ndb: Ndb,
-                    excluding rules: MuteRules? = nil) throws -> AdvancedSearchResults {
+                    excluding rules: MuteRules? = nil,
+                    isCancelled: () -> Bool = { false }) throws -> AdvancedSearchResults {
         switch plan {
         case .nothingToRun:
             return .none
@@ -72,7 +82,8 @@ enum AdvancedSearchEngine {
             // that limit is sized for; a query that hits the cap gets the oldest of
             // the newest `maxResults` rather than the true oldest.
             let ordered = order == .newest_first ? Array(candidates) : candidates.reversed()
-            let keys = try contentMatcher.map({ try keep(Array(ordered), matching: $0, in: ndb) })
+            if isCancelled() { throw CancellationError() }
+            let keys = try contentMatcher.map({ try keep(Array(ordered), matching: $0, in: ndb, isCancelled: isCancelled) })
                 ?? Array(ordered)
             return AdvancedSearchResults(keys: keys, reachedLimit: candidates.count >= maxResults)
 
@@ -81,7 +92,8 @@ enum AdvancedSearchEngine {
                                            filter: try ndbFilter(filter, excluding: rules),
                                            limit: limit,
                                            order: order)
-            return AdvancedSearchResults(keys: try keep(hits.map(\.noteKey), matching: contentMatcher, in: ndb),
+            if isCancelled() { throw CancellationError() }
+            return AdvancedSearchResults(keys: try keep(hits.map(\.noteKey), matching: contentMatcher, in: ndb, isCancelled: isCancelled),
                                          reachedLimit: hits.count >= limit)
         }
     }
@@ -106,9 +118,18 @@ enum AdvancedSearchEngine {
     ///
     /// Notes that went missing between the index walk and the lookup are dropped
     /// too — nostrdb can hand back a key for a note that has since been evicted.
-    private static func keep(_ keys: [NoteKey], matching matcher: SearchContentMatcher, in ndb: Ndb) throws -> [NoteKey] {
+    ///
+    /// Cancellation is a `throw` rather than an early `return` because
+    /// ``Ndb/compact_map_notes(keys:_:)`` has no way to stop part-way through:
+    /// throwing out of the transform aborts the walk and unwinds the read
+    /// transaction with it, which is what a superseded search wants.
+    private static func keep(_ keys: [NoteKey],
+                             matching matcher: SearchContentMatcher,
+                             in ndb: Ndb,
+                             isCancelled: () -> Bool) throws -> [NoteKey] {
         return try ndb.compact_map_notes(keys: keys, { key, note in
-            matcher.matches(note.content) ? key : nil
+            if isCancelled() { throw CancellationError() }
+            return matcher.matches(note.content) ? key : nil
         })
     }
 }

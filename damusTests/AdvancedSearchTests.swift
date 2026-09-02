@@ -1175,3 +1175,95 @@ final class AdvancedSearchDayBoundTests: XCTestCase {
         }
     }
 }
+
+// MARK: - Runner cancellation and debounce policy
+
+final class AdvancedSearchRunnerPolicyTests: XCTestCase {
+    let author_a = Pubkey(hex: "32b3256865a224450d5f8d09c271ad1520fae7d940000f09c9d44dd7595e1bb8")!
+    let author_b = Pubkey(hex: "51778facb56343cfd08eb21041886c0db2d840596b6e32b7d3ea1ad95fb98ae3")!
+
+    /// Typing is debounced; picking an author, a date, a content type or a sort is
+    /// not. Those are deliberate, discrete edits, and a quarter second of nothing
+    /// happening after tapping a date preset reads as a bug.
+    func test_only_term_edits_are_debounced() {
+        let base = AdvancedSearchQuery(keywords: ["art"], authors: [author_a])
+
+        var terms = base
+        terms.keywords = ["art", "fox"]
+        XCTAssertTrue(AdvancedSearchModel.onlyTermsChanged(from: base, to: terms))
+
+        var phrases = base
+        phrases.phrases = ["jumped over"]
+        XCTAssertTrue(AdvancedSearchModel.onlyTermsChanged(from: base, to: phrases))
+
+        var authors = base
+        authors.authors = [author_a, author_b]
+        XCTAssertFalse(AdvancedSearchModel.onlyTermsChanged(from: base, to: authors))
+
+        var dated = base
+        dated.since = Date(timeIntervalSince1970: 1700000000)
+        XCTAssertFalse(AdvancedSearchModel.onlyTermsChanged(from: base, to: dated))
+
+        var kinds = base
+        kinds.kinds = [.longform]
+        XCTAssertFalse(AdvancedSearchModel.onlyTermsChanged(from: base, to: kinds))
+
+        var order = base
+        order.order = .oldest_first
+        XCTAssertFalse(AdvancedSearchModel.onlyTermsChanged(from: base, to: order))
+
+        var hashtags = base
+        hashtags.hashtags = ["nostr"]
+        XCTAssertFalse(AdvancedSearchModel.onlyTermsChanged(from: base, to: hashtags))
+    }
+
+    /// A term edit that also moves another axis is not a term edit — otherwise the
+    /// non-term half would be debounced along with it.
+    func test_a_mixed_edit_is_not_debounced() {
+        let base = AdvancedSearchQuery(keywords: ["art"])
+        var mixed = base
+        mixed.keywords = ["fox"]
+        mixed.since = Date(timeIntervalSince1970: 1700000000)
+        XCTAssertFalse(AdvancedSearchModel.onlyTermsChanged(from: base, to: mixed))
+    }
+
+    /// Cancellation has to reach the per-note match loop, not just the ends of the
+    /// search: the index walk hands back up to
+    /// `indexWalkCandidateLimit` candidates and matching opens every one.
+    func test_cancellation_reaches_the_match_loop() throws {
+        let db_dir = try XCTUnwrap(test_ndb_dir(), "could not create temp directory")
+        do {
+            let ndb = try XCTUnwrap(Ndb(path: db_dir))
+            XCTAssertTrue(ndb.process_events(multi_author_wire_events))
+        }
+        let ndb = try XCTUnwrap(Ndb(path: db_dir))
+
+        let query = AdvancedSearchQuery(keywords: ["author"], authors: [author_a])
+
+        // Control: it finds things when it is not cancelled.
+        XCTAssertFalse(try AdvancedSearchEngine.search(query, in: ndb).keys.isEmpty)
+
+        XCTAssertThrowsError(try AdvancedSearchEngine.search(query, in: ndb, isCancelled: { true })) { error in
+            XCTAssertTrue(error is CancellationError, "expected CancellationError, got \(error)")
+        }
+    }
+
+    /// A plan with no content matcher never opens a note, so there is no match loop
+    /// to cancel — it must still come back rather than throwing.
+    func test_a_walk_with_nothing_to_match_is_not_cancelled_spuriously() throws {
+        let db_dir = try XCTUnwrap(test_ndb_dir(), "could not create temp directory")
+        do {
+            let ndb = try XCTUnwrap(Ndb(path: db_dir))
+            XCTAssertTrue(ndb.process_events(multi_author_wire_events))
+        }
+        let ndb = try XCTUnwrap(Ndb(path: db_dir))
+
+        // Cancelled before matching starts, and there is no matching to do — but the
+        // check before it still fires, which is what we want: the caller drops the
+        // result anyway.
+        XCTAssertThrowsError(try AdvancedSearchEngine.search(AdvancedSearchQuery(authors: [author_a]),
+                                                             in: ndb,
+                                                             isCancelled: { true }))
+        XCTAssertEqual(try AdvancedSearchEngine.search(AdvancedSearchQuery(authors: [author_a]), in: ndb).keys.count, 8)
+    }
+}

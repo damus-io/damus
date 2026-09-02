@@ -34,8 +34,23 @@ final class AdvancedSearchModel: ObservableObject {
     @Published var query: AdvancedSearchQuery {
         didSet {
             guard query != oldValue else { return }
-            restart()
+            // Typing gets debounced; picking an author, a date or a content type
+            // does not. Those are deliberate, discrete edits — a quarter second of
+            // nothing happening after tapping "Last 7 days" reads as a bug.
+            restart(debounced: Self.onlyTermsChanged(from: oldValue, to: query))
         }
+    }
+
+    /// True when the only difference between two queries is the terms somebody
+    /// types into a field.
+    ///
+    /// `nonisolated` and not private: it is pure, and the debounce decision is
+    /// worth testing directly rather than by racing a stopwatch against it.
+    nonisolated static func onlyTermsChanged(from old: AdvancedSearchQuery, to new: AdvancedSearchQuery) -> Bool {
+        var withOldTerms = new
+        withOldTerms.keywords = old.keywords
+        withOldTerms.phrases = old.phrases
+        return withOldTerms == old
     }
 
     /// Where the current search has got to.
@@ -162,19 +177,29 @@ final class AdvancedSearchModel: ObservableObject {
     /// Runs a plan off the main actor and brings back owned notes.
     ///
     /// `nonisolated async` rather than a detached task: the caller is on the main
-    /// actor, and a nonisolated async function hops off it on its own. Note that
-    /// the index walk itself cannot be interrupted once nostrdb is inside it —
-    /// cancellation is checked either side of it, so a superseded search stops
-    /// mattering promptly but does not stop immediately.
+    /// actor, and a nonisolated async function hops off it on its own.
+    ///
+    /// The index walk itself cannot be interrupted once nostrdb is inside it, but
+    /// the matching half can, and that is the half that opens notes — up to
+    /// ``AdvancedSearchPlanner/indexWalkCandidateLimit`` of them. So cancellation
+    /// is handed down into the engine rather than only checked either side of it.
     private nonisolated static func run(_ plan: AdvancedSearchPlan,
                                         order: NdbSearchOrder,
                                         in state: DamusState) async -> Output? {
         let rules = await state.mutelist_manager.rules
 
         do {
-            let found = try AdvancedSearchEngine.run(plan, order: order, in: state.ndb, excluding: rules)
+            let found = try AdvancedSearchEngine.run(plan,
+                                                     order: order,
+                                                     in: state.ndb,
+                                                     excluding: rules,
+                                                     isCancelled: { Task.isCancelled })
+            if Task.isCancelled { return nil }
             let events = try state.ndb.compact_map_notes(keys: found.keys, { _, note in note.toOwned() })
             return Output(events: ordered(events, by: order), reachedLimit: found.reachedLimit)
+        } catch is CancellationError {
+            // Superseded, not broken. The caller drops the result either way.
+            return nil
         } catch {
             Log.error("advanced search failed: %s", for: .ndb, error.localizedDescription)
             return nil
