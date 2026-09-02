@@ -320,6 +320,8 @@ class Ndb {
         // `reopen` went through `ndb_init`, so the ingester threads are brand new and
         // hold no keys. Hand ours back before anything can be ingested against them.
         self.reregisterKeys()
+        // Anything that landed while we were closed came in with no key registered.
+        self.backfillGiftwrapsInBackground()
         return true
     }
 
@@ -370,6 +372,69 @@ class Ndb {
             var key = privkey.bytes
             return ndb_add_key(self.ndb.ndb, &key) != 0
         })) ?? false
+    }
+
+    private var hasRegisteredKeys: Bool {
+        self.registeredKeysLock.lock()
+        defer { self.registeredKeysLock.unlock() }
+        return !self.registeredKeys.isEmpty
+    }
+
+    // MARK: Giftwrap backfill
+
+    /// Re-dispatches every giftwrap in the database that has not been unwrapped yet.
+    ///
+    /// A kind-1059 ingested before ``add_key(_:)`` ran is stored as it arrived and
+    /// nothing ever looks at it again, so it stays wrapped forever unless we ask for it.
+    /// That covers every giftwrap already in the database the first time we register a
+    /// key, and anything that lands during a window where we have none — notably
+    /// between ``close()`` and ``reopen()``.
+    ///
+    /// Safe to call repeatedly: a wrap that was peeled successfully carries
+    /// `NDB_NOTE_FLAG_UNWRAPPED` and is skipped from then on. Note that the flag is set
+    /// on *success* only, so a wrap none of our keys can open — one addressed to a key
+    /// we have since rotated away from, say — is re-dispatched on every run and keeps
+    /// the count above zero.
+    ///
+    /// - Warning: this walks the entire kind-1059 index with an lmdb cursor and holds
+    ///   the ndb use-lock for the duration, which is unbounded in the number of wraps we
+    ///   have stored. Do not call it on the main thread — use
+    ///   ``backfillGiftwrapsInBackground()``. Only the walk is synchronous; the
+    ///   unwrapping itself happens on the ingester pool.
+    ///
+    /// - Returns: how many wraps were handed to the ingester pool. If the pool's inbox
+    ///   fills the walk stops early, and the remainder is picked up by the next call.
+    func process_giftwraps() throws -> Int {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self, with: { txn in
+                Int(ndb_process_giftwraps(self.ndb.ndb, &txn.txn))
+            }, name: "process_giftwraps") else { return 0 }
+
+            return txn.value
+        })
+    }
+
+    /// Runs ``process_giftwraps()`` off the main thread, logging what it dispatched.
+    ///
+    /// Only worth doing once we hold a key — an unwrap attempt without one peels
+    /// nothing — so a database with no registered keys returns immediately.
+    ///
+    /// This uses a global queue rather than a detached `Task` on purpose: the walk is
+    /// synchronous and can be long, and parking a cooperative-pool thread on it is
+    /// exactly what that pool is not for.
+    func backfillGiftwrapsInBackground() {
+        guard self.hasRegisteredKeys else { return }
+
+        DispatchQueue.global(qos: .utility).async {
+            do {
+                let dispatched = try self.process_giftwraps()
+                // Expected to be zero on every launch after the first one that had a key.
+                Log.info("Dispatched %d stored giftwraps for unwrapping", for: .storage, dispatched)
+            }
+            catch {
+                Log.error("Failed to backfill giftwraps: %{public}@", for: .storage, error.localizedDescription)
+            }
+        }
     }
     
     /// Makes a copy of the database in a separate location

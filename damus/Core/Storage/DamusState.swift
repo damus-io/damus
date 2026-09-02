@@ -110,6 +110,10 @@ class DamusState: HeadlessDamusState, ObservableObject {
         // register, and no DMs it could unwrap anyway.
         if let privkey = keypair.privkey {
             ndb.add_key(privkey)
+            // Wraps that arrived before we ever had a key registered — including every
+            // 1059 already in the database — are still sitting there sealed. Peel them
+            // in the background; this must not block launch.
+            ndb.backfillGiftwrapsInBackground()
         }
 
         let model_cache = RelayModelCache()

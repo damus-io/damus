@@ -718,6 +718,7 @@ struct ContentView: View {
         // `Ndb.add_key`. Nothing to do for a pubkey-only (read-only) login.
         if let privkey = keypair.privkey {
             ndb.add_key(privkey)
+            ndb.backfillGiftwrapsInBackground()
         }
 
         let model_cache = RelayModelCache()
