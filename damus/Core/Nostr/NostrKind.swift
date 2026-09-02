@@ -13,11 +13,29 @@ enum NostrKind: UInt32, Codable {
     case metadata = 0
     case text = 1
     case contacts = 3
+    /// A legacy NIP-04 direct message.
     case dm = 4
     case delete = 5
     case boost = 6
     case like = 7
+    /// A NIP-59 seal: the sender-signed, NIP-44 encrypted envelope around a rumor.
+    ///
+    /// We never read one of these directly — nostrdb's ingester peels the seal and
+    /// stores the rumor inside it. The kind is here for filters and completeness.
+    case seal = 13
+    /// A NIP-17 private direct message, i.e. the rumor sealed inside a ``seal``.
+    ///
+    /// Notes of this kind only ever reach the database by way of nostrdb unwrapping a
+    /// ``giftwrap``, so they are always rumors: unsigned, with the sender's pubkey copied
+    /// from the seal and the signature field repurposed (see ``NdbNote/is_rumor``).
+    /// They must never be sent to a relay.
+    case private_dm = 14
     case chat = 42
+    /// A NIP-59 giftwrap: the ephemerally-signed outer wrapper around a ``seal``.
+    ///
+    /// Its `created_at` is deliberately randomized noise (up to ~2 days off), so order
+    /// conversations by the rumor's `created_at`, never the wrap's.
+    case giftwrap = 1059
     case live_chat = 1311
     case mute_list = 10000
     case relay_list = 10002

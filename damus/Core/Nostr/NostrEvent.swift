@@ -833,6 +833,13 @@ func aes_operation(operation: CCOperation, data: [UInt8], iv: [UInt8], shared_se
 
 
 
+/// Recomputes `ev`'s id and checks its signature.
+///
+/// - Warning: A rumor cannot pass this — it has no signature (see ``NdbNote/is_rumor``), so it
+///   comes back `.bad_sig`. That is the safe direction, and no caller currently reaches here
+///   with a note read out of nostrdb: the two live call sites validate JSON parsed out of a
+///   repost's content and out of a zap receipt's description tag. Anything new that validates
+///   an ndb-sourced note has to check ``NdbNote/is_rumor`` first.
 func validate_event(ev: NostrEvent) -> ValidationResult {
     let id = calculate_event_id(pubkey: ev.pubkey, created_at: ev.created_at, kind: ev.kind, tags: ev.tags.strings(), content: ev.content)
 

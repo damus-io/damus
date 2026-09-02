@@ -110,7 +110,18 @@ func make_nostr_auth_event(ev: NostrEvent) -> String? {
     return encoded
 }
 
+/// Encodes an `EVENT` frame for pushing `ev` to a relay (or to the local nostrdb).
+///
+/// Refuses to encode a rumor. A rumor is an unsigned note nostrdb unwrapped out of a NIP-59
+/// giftwrap (see ``NdbNote/is_rumor``): its signature field holds the receiver pubkey and the
+/// giftwrap id, so the JSON we would produce carries a bogus signature — and its content is
+/// the plaintext of a private message. This is the single chokepoint every relay write funnels
+/// through, so the guard lives here as well as at the `PostBox` entrance.
 func make_nostr_push_event(ev: NostrEvent) -> String? {
+    guard !ev.is_rumor else {
+        Log.error("refusing to push rumor %s to a relay", for: .networking, ev.id.hex())
+        return nil
+    }
     guard let event = encode_json(ev) else {
         return nil
     }

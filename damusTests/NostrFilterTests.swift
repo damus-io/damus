@@ -74,4 +74,75 @@ final class NostrFilterTests: XCTestCase {
         XCTAssertEqual(chunked_authors_filters_size_5[0].authors, [test_pubkey_5, test_pubkey_6, test_pubkey_7, test_pubkey_8])
         XCTAssertEqual(chunked_authors_filters_size_5[0].pubkeys, pubkeys)
     }
+
+    // MARK: NIP-17/59 kinds through the NdbFilter conversion
+
+    /// The NIP-17/59 kinds are just numbers to nostrdb, but they only reach it if
+    /// ``NostrKind`` knows them and the conversion copies them into `NDB_FILTER_KINDS`.
+    /// Round-trip the filter back out through `ndb_filter_json` and read what landed.
+    func testConversionRoundTripsGiftwrapKinds() throws {
+        let filter = NostrFilter(kinds: [.seal, .private_dm, .giftwrap])
+
+        let json = try Self.convertedFilterJson(filter)
+
+        XCTAssertEqual(json["kinds"] as? [Int], [13, 14, 1059],
+                       "seal/private_dm/giftwrap should survive the NostrFilter -> NdbFilter conversion")
+    }
+
+    /// The inbound giftwrap subscription is `kind 1059` narrowed by `#p: <us>`, so both
+    /// fields have to make it across together.
+    func testConversionRoundTripsGiftwrapTagFilter() throws {
+        let us = try XCTUnwrap(Pubkey(hex: "760f108754eb415561239d4079e71766d87e23f7e71c8e5b00d759e54dd8d082"))
+        let filter = NostrFilter(kinds: [.giftwrap], pubkeys: [us])
+
+        let json = try Self.convertedFilterJson(filter)
+
+        XCTAssertEqual(json["kinds"] as? [Int], [1059])
+        XCTAssertEqual(json["#p"] as? [String], [us.hex()])
+    }
+
+    /// The JSON above only proves the fields were stored. This proves nostrdb actually
+    /// *uses* them: a real signed kind-1059 tagged with our pubkey matches, and the same
+    /// wrap addressed to someone else does not.
+    func testConvertedGiftwrapTagFilterMatchesTheRightWrap() throws {
+        let us = generate_new_keypair()
+        let someoneElse = generate_new_keypair()
+        let sender = generate_new_keypair()
+
+        let ndbFilter = try NdbFilter(from: NostrFilter(kinds: [.giftwrap], pubkeys: [us.pubkey]))
+
+        let toUs = try XCTUnwrap(NostrEvent(content: "wrapped", keypair: sender.to_keypair(),
+                                            kind: 1059, tags: [["p", us.pubkey.hex()]]))
+        let toSomeoneElse = try XCTUnwrap(NostrEvent(content: "wrapped", keypair: sender.to_keypair(),
+                                                     kind: 1059, tags: [["p", someoneElse.pubkey.hex()]]))
+        let wrongKind = try XCTUnwrap(NostrEvent(content: "not a wrap", keypair: sender.to_keypair(),
+                                                 kind: 1, tags: [["p", us.pubkey.hex()]]))
+
+        XCTAssertEqual(ndb_filter_matches(ndbFilter.unsafePointer, toUs.note.ptr), 1,
+                       "a 1059 tagged with our pubkey should match a `kinds: [1059], #p: [us]` filter")
+        XCTAssertEqual(ndb_filter_matches(ndbFilter.unsafePointer, toSomeoneElse.note.ptr), 0,
+                       "a 1059 addressed to somebody else should not match")
+        XCTAssertEqual(ndb_filter_matches(ndbFilter.unsafePointer, wrongKind.note.ptr), 0,
+                       "the kind still has to match")
+    }
+
+    // MARK: Helpers
+
+    /// Converts `filter` to an `NdbFilter` and reads it back out as JSON via
+    /// `ndb_filter_json`, so assertions can be made on what nostrdb actually stored
+    /// rather than on the Swift value that went in.
+    private static func convertedFilterJson(_ filter: NostrFilter) throws -> [String: Any] {
+        let ndbFilter = try NdbFilter(from: filter)
+
+        var buf = [CChar](repeating: 0, count: 4096)
+        let len = buf.withUnsafeMutableBufferPointer { ptr in
+            ndb_filter_json(ndbFilter.unsafePointer, ptr.baseAddress, Int32(ptr.count))
+        }
+        XCTAssertGreaterThan(len, 0, "ndb_filter_json should have written the filter out")
+
+        let json = String(cString: buf)
+        let data = try XCTUnwrap(json.data(using: .utf8))
+        return try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                             "ndb_filter_json produced something that is not a JSON object: \(json)")
+    }
 }

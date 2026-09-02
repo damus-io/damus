@@ -290,6 +290,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break   // Don't care for now
         case .live, .live_chat:
             break
+        case .seal, .giftwrap:
+            break   // nostrdb's ingester peels these; we only ever read the rumor inside
+        case .private_dm:
+            break   // TODO: read NIP-17 DMs off the local kind-14 rumors
         }
     }
 
