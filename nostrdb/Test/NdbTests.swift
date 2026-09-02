@@ -166,13 +166,12 @@ final class NdbTests: XCTestCase {
 
     // MARK: - Filtered text search (ndb_text_search_with)
 
-    /// The two kind-1 notes from `test_wire_events` that reach the fulltext index.
+    /// The three kind-1 notes from `test_wire_events` that reach the fulltext index.
     ///
-    /// Both are of the form "a quick brown fox <verb phrase> the lazy dog", by
-    /// different authors, ten seconds apart. Note that `test_wire_events` looks
-    /// like it holds a third such note ("...the lazy cat") but its last line is not
-    /// newline-terminated, and `ndb_process_events` only ingests whole lines, so
-    /// that event never lands. Don't write assertions against it.
+    /// All three are of the form "a quick brown fox <verb phrase> the lazy
+    /// {dog,cat}", by three different authors. ``jumped`` and ``barked`` are ten
+    /// seconds apart; ``jumped_at_cat`` is a little over twelve minutes later, so
+    /// it sorts newest.
     private enum SearchFixture {
         /// "a quick brown fox jumped over the lazy dog"
         static let jumped = (
@@ -185,6 +184,12 @@ final class NdbTests: XCTestCase {
             id: NoteId(hex: "b17a540710fe8495b16bfbaf31c6962c4ba8387f3284a7973ad523988095417e")!,
             author: Pubkey(hex: "df51637b1a19115d6c532081461a3e24f19b02f15815771dd26de2617fe2ea90")!,
             created_at: UInt32(1701187337)
+        )
+        /// "a quick brown fox jumped over the lazy cat"
+        static let jumped_at_cat = (
+            id: NoteId(hex: "35c717f1d905b05e16868107f78ec013399b01e9dcdd40fcaf8112b3d1f63ad4")!,
+            author: Pubkey(hex: "381eac026b7d3053236eef30c1a3cd0674809d050b1ba9f05c694efb5ea002d4")!,
+            created_at: UInt32(1701188103)
         )
     }
 
@@ -214,8 +219,9 @@ final class NdbTests: XCTestCase {
         let ndb = try ndb_with_search_fixture()
 
         let unfiltered = try ndb.text_search(query: "quick brown fox", filter: nil)
-        XCTAssertEqual(try note_ids(ndb, unfiltered), [SearchFixture.barked.id, SearchFixture.jumped.id],
-                       "both fixture notes contain 'quick brown fox'")
+        XCTAssertEqual(try note_ids(ndb, unfiltered),
+                       [SearchFixture.jumped_at_cat.id, SearchFixture.barked.id, SearchFixture.jumped.id],
+                       "every fixture note contains 'quick brown fox'")
 
         let filter = try NdbFilter(from: NostrFilter(authors: [SearchFixture.jumped.author]))
         let filtered = try ndb.text_search(query: "quick brown fox", filter: filter)
@@ -238,16 +244,16 @@ final class NdbTests: XCTestCase {
 
         // `since` alone drops everything older than it.
         XCTAssertEqual(try search(NostrFilter(since: SearchFixture.barked.created_at)),
-                       [SearchFixture.barked.id])
+                       [SearchFixture.jumped_at_cat.id, SearchFixture.barked.id])
         // `until` alone drops everything at or newer than it.
         XCTAssertEqual(try search(NostrFilter(until: SearchFixture.barked.created_at)),
                        [SearchFixture.jumped.id])
-        // a window containing both
+        // a window containing exactly two of the three
         XCTAssertEqual(try search(NostrFilter(since: SearchFixture.jumped.created_at,
                                               until: SearchFixture.barked.created_at + 1)),
                        [SearchFixture.barked.id, SearchFixture.jumped.id])
-        // a window containing neither
-        XCTAssertEqual(try search(NostrFilter(since: SearchFixture.barked.created_at + 1)), [])
+        // a window containing none of them
+        XCTAssertEqual(try search(NostrFilter(since: SearchFixture.jumped_at_cat.created_at + 1)), [])
     }
 
     /// Each hit carries the matched note's `created_at`, so a caller can page on it
@@ -256,7 +262,7 @@ final class NdbTests: XCTestCase {
         let ndb = try ndb_with_search_fixture()
 
         let results = try ndb.text_search(query: "quick brown fox", filter: nil)
-        XCTAssertEqual(results.count, 2)
+        XCTAssertEqual(results.count, 3)
 
         for result in results {
             let created_at = try XCTUnwrap(ndb.lookup_note_by_key(result.noteKey, borrow: { maybeNote -> UInt32? in
@@ -270,12 +276,16 @@ final class NdbTests: XCTestCase {
         }
 
         XCTAssertEqual(results.map(\.timestamp),
-                       [UInt64(SearchFixture.barked.created_at), UInt64(SearchFixture.jumped.created_at)],
+                       [UInt64(SearchFixture.jumped_at_cat.created_at),
+                        UInt64(SearchFixture.barked.created_at),
+                        UInt64(SearchFixture.jumped.created_at)],
                        "newest-first by default")
 
         let ascending = try ndb.text_search(query: "quick brown fox", filter: nil, order: .oldest_first)
         XCTAssertEqual(ascending.map(\.timestamp),
-                       [UInt64(SearchFixture.jumped.created_at), UInt64(SearchFixture.barked.created_at)])
+                       [UInt64(SearchFixture.jumped.created_at),
+                        UInt64(SearchFixture.barked.created_at),
+                        UInt64(SearchFixture.jumped_at_cat.created_at)])
     }
 
     /// nostrdb parses at most `Ndb.max_text_search_words` words from a query and
@@ -294,7 +304,7 @@ final class NdbTests: XCTestCase {
 
         // Control: swapping the 8th word for one no note contains does narrow to
         // nothing, so the cap really is 8 rather than "trailing words are ignored".
-        XCTAssertEqual(try ndb.text_search(query: "quick brown fox jumped over the lazy cat", filter: nil).count, 0)
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox jumped over the lazy badger", filter: nil).count, 0)
 
         // One past the cap: the 9th word would have excluded the note, but it is
         // dropped, so the results are the 8-word results unchanged.
@@ -309,7 +319,7 @@ final class NdbTests: XCTestCase {
         let ndb = try ndb_with_search_fixture()
 
         XCTAssertEqual(Ndb.max_text_search_results, 128)
-        XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: nil, limit: 10_000).count, 2)
+        XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: nil, limit: 10_000).count, 3)
         XCTAssertEqual(try ndb.text_search(query: "quick brown fox", filter: nil, limit: 1).count, 1)
 
         // a `limit` on the filter narrows it further
