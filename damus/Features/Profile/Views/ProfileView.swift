@@ -78,6 +78,12 @@ struct ProfileView: View {
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
 
+    /// The search this profile's search button opens the filters on. Seeded with
+    /// the author every time the button is tapped, so the sheet never comes back
+    /// carrying terms that were typed and abandoned.
+    @State private var search_query = AdvancedSearchQuery()
+    @State private var search_filters_presented = false
+
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
@@ -184,8 +190,12 @@ struct ProfileView: View {
     }
 
     /// The flow this whole search feature exists for: "which notes did *this
-    /// person* post about X". Prefilled with the author, so the filter sheet
-    /// only has to be opened to add terms.
+    /// person* post about X".
+    ///
+    /// Opens the filters with the author already pinned, rather than pushing
+    /// results: the *about X* half is the search, and running the author on its
+    /// own would answer with every note they ever posted — see
+    /// ``AdvancedSearchScopeModifier``.
     ///
     /// This gets its own toolbar item rather than sitting beside
     /// ``navActionSheetButton``, because that button is swapped out for a follow
@@ -193,8 +203,8 @@ struct ProfileView: View {
     /// (see ``showFollowBtnInBlurrBanner()``) — and search shouldn't vanish with it.
     var navSearchButton: some View {
         Button(action: {
-            let query = AdvancedSearchQuery(authors: [profile.pubkey])
-            damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: query)))
+            search_query = AdvancedSearchQuery(authors: [profile.pubkey])
+            search_filters_presented = true
         }) {
             // Same dark circular chip as the other nav buttons, so it stays
             // legible over an arbitrarily bright banner photo.
@@ -555,6 +565,7 @@ struct ProfileView: View {
                 }
             }
             .toolbarBackground(.hidden)
+            .advancedSearchScope(damus_state: damus_state, query: $search_query, isPresented: $search_filters_presented)
             .onAppear() {
                 check_nip05_validity(pubkey: self.profile.pubkey, damus_state: self.damus_state)
                 profile.subscribe()

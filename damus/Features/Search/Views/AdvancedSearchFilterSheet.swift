@@ -393,6 +393,49 @@ struct AdvancedSearchFilterSheet: View {
     }
 }
 
+/// Presents the filters over the screen a search started from, and pushes the
+/// results once one runs.
+///
+/// This is how the contextual entry points — the search button on a profile, the
+/// one on a hashtag timeline — reach advanced search. They land on the filters
+/// rather than straight on results, because all those buttons can prefill is the
+/// *scope*: "everything this person ever posted" and "every note carrying this
+/// tag" are not searches anybody tapped a magnifying glass to get, and the second
+/// is a local-only copy of the timeline already on screen. The terms are the
+/// search, so the filters are the destination and nothing runs until Search is
+/// tapped.
+///
+/// Presented over the screen it started from rather than over a results view that
+/// has not run: dismissing without searching then leaves you on the profile or
+/// timeline you came from, rather than on an empty results screen whose only way
+/// forward is the button you just dismissed.
+struct AdvancedSearchScopeModifier: ViewModifier {
+    let damus_state: DamusState
+    @Binding var query: AdvancedSearchQuery
+    @Binding var isPresented: Bool
+
+    func body(content: Content) -> some View {
+        content.sheet(isPresented: $isPresented) {
+            AdvancedSearchFilterSheet(damus_state: damus_state, query: $query, onSearch: {
+                // Reset can leave nothing to look for. Staying put beats pushing a
+                // results screen that could only say "Search notes".
+                guard !query.isTrivial else { return }
+                damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: query)))
+            })
+        }
+    }
+}
+
+extension View {
+    /// Makes this screen an entry point into advanced search, scoped to `query`.
+    /// See ``AdvancedSearchScopeModifier``.
+    func advancedSearchScope(damus_state: DamusState,
+                             query: Binding<AdvancedSearchQuery>,
+                             isPresented: Binding<Bool>) -> some View {
+        modifier(AdvancedSearchScopeModifier(damus_state: damus_state, query: query, isPresented: isPresented))
+    }
+}
+
 struct AdvancedSearchFilterSheet_Previews: PreviewProvider {
     struct Container: View {
         @State var query = AdvancedSearchQuery(keywords: ["fox"], phrases: ["jumped over"])
