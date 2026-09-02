@@ -35,4 +35,7 @@ enum NostrKind: UInt32, Codable {
     case status = 30315
     case contact_card = 30_382
     case follow_list = 39089
+
+    /// Community convention for typing indicators (ephemeral range 20000-29999)
+    case typing = 20001
 }
