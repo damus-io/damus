@@ -201,6 +201,14 @@ struct ProfileView: View {
                 show_qr_code = true
             }
 
+            // The flow this whole search feature exists for: "which notes did
+            // *this person* post about X". Prefilled with the author, so the
+            // filter sheet only has to be opened to add terms.
+            Button(NSLocalizedString("Search Their Notes", comment: "Button to search only this profile's notes.")) {
+                let query = AdvancedSearchQuery(authors: [profile.pubkey])
+                damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: query)))
+            }
+
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if profile.pubkey != damus_state.pubkey && damus_state.is_privkey_user {
                 Button(NSLocalizedString("Report", comment: "Button to report a profile."), role: .destructive) {

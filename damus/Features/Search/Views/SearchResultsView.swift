@@ -83,6 +83,40 @@ struct InnerSearchResults: View {
         }
     }
     
+    /// An "advanced search" row, when what was typed says more than a keyword.
+    ///
+    /// Only shown when the DSL actually recognised something — a `from:`, a date,
+    /// a quoted phrase — so a plain word search still gets the plain "Search word"
+    /// chip and nothing extra. A `Button` rather than a `NavigationLink(value:)`
+    /// because the route carries a model, and a link's value is rebuilt on every
+    /// render of a view that re-renders on every keystroke.
+    @ViewBuilder
+    func AdvancedSearchRow(_ txt: String) -> some View {
+        let parsed = AdvancedSearchQueryDSL.parse(txt, resolveAuthor: { name in
+            search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: name).first
+        })
+
+        if parsed.usedAdvancedSyntax && !parsed.query.isTrivial {
+            Button(action: {
+                damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: parsed.query)))
+            }) {
+                HStack {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                    Text("Advanced search", comment: "Navigation link to run the typed query as an advanced search.")
+                }
+                .padding(.horizontal, 15)
+                .padding(.vertical, 5)
+                .background(DamusColors.neutral1)
+                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(DamusColors.neutral3, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     func ProfilesSearch(_ results: [Pubkey]) -> some View {
         return LazyVStack {
             ForEach(results, id: \.id) { pk in
@@ -121,8 +155,13 @@ struct InnerSearchResults: View {
                         HashtagSearch(multi.hashtag)
                         TextSearch(multi.text)
                     }
-                    .padding(.bottom, 10)
-                    
+
+                    AdvancedSearchRow(multi.text)
+                        .padding(.top, 10)
+
+                    Spacer()
+                        .frame(height: 10)
+
                     ProfilesSearch(multi.profiles)
                 }
                 

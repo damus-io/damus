@@ -55,6 +55,16 @@ struct SearchView: View {
             if let hashtag = search.search.hashtag?.first {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
+                        // Prefilled with the tag, so narrowing a hashtag by author
+                        // or date is one tap from the hashtag itself rather than a
+                        // query to retype on the explore pane.
+                        Button {
+                            let query = AdvancedSearchQuery(hashtags: [hashtag])
+                            appstate.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: appstate, query: query)))
+                        } label: {
+                            Text("Advanced Search", comment: "Button opening advanced search prefilled with this hashtag.")
+                        }
+
                         if is_hashtag_muted {
                             Button {
                                 guard
