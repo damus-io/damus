@@ -30,7 +30,7 @@ enum AdvancedSearchEngine {
         case .nothingToRun:
             return []
 
-        case .authorScoped(let filter, let maxResults, let contentMatcher):
+        case .indexWalk(let filter, let maxResults, let contentMatcher):
             let candidates = try ndb.query(filters: [try NdbFilter(from: filter)], maxResults: maxResults)
             // `ndb_query` takes no order argument: every plan seeks its index at
             // `until` and walks backwards, so results arrive newest-first. Reversing

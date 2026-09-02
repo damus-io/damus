@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5EA2C4000000000000000014 /* AdvancedSearchQueryDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */; };
+		5EA2C4000000000000000015 /* AdvancedSearchQueryDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */; };
+		5EA2C4000000000000000016 /* AdvancedSearchQueryDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */; };
 		5EA2C4000000000000000012 /* AdvancedSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000011 /* AdvancedSearchTests.swift */; };
 		5EA2C400000000000000000E /* AdvancedSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000000D /* AdvancedSearchEngine.swift */; };
 		5EA2C400000000000000000F /* AdvancedSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000000D /* AdvancedSearchEngine.swift */; };
@@ -2116,6 +2119,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchQueryDSL.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000011 /* AdvancedSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchTests.swift; sourceTree = "<group>"; };
 		5EA2C400000000000000000D /* AdvancedSearchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchEngine.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000009 /* AdvancedSearchPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchPlanner.swift; sourceTree = "<group>"; };
@@ -4513,6 +4517,7 @@
 		5C78A7832E30340800CF177D /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */,
 				5EA2C400000000000000000D /* AdvancedSearchEngine.swift */,
 				5EA2C4000000000000000009 /* AdvancedSearchPlanner.swift */,
 				5EA2C4000000000000000005 /* SearchContentMatcher.swift */,
@@ -5977,6 +5982,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5EA2C4000000000000000014 /* AdvancedSearchQueryDSL.swift in Sources */,
 				5EA2C400000000000000000E /* AdvancedSearchEngine.swift in Sources */,
 				5EA2C400000000000000000A /* AdvancedSearchPlanner.swift in Sources */,
 				5EA2C4000000000000000006 /* SearchContentMatcher.swift in Sources */,
@@ -6659,6 +6665,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5EA2C4000000000000000015 /* AdvancedSearchQueryDSL.swift in Sources */,
 				5EA2C400000000000000000F /* AdvancedSearchEngine.swift in Sources */,
 				5EA2C400000000000000000B /* AdvancedSearchPlanner.swift in Sources */,
 				5EA2C4000000000000000007 /* SearchContentMatcher.swift in Sources */,
@@ -7242,6 +7249,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5EA2C4000000000000000016 /* AdvancedSearchQueryDSL.swift in Sources */,
 				5EA2C4000000000000000010 /* AdvancedSearchEngine.swift in Sources */,
 				5EA2C400000000000000000C /* AdvancedSearchPlanner.swift in Sources */,
 				5EA2C4000000000000000008 /* SearchContentMatcher.swift in Sources */,

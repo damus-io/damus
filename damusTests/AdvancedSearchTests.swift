@@ -65,6 +65,25 @@ final class AdvancedSearchQueryTests: XCTestCase {
         XCTAssertTrue(AdvancedSearchQuery(authors: authors).exceedsAuthorLimit)
     }
 
+    /// nostrdb's tag index is keyed by the tag value as written, and hashtags are
+    /// written lowercase by convention and by `NostrFilter.filter_hashtag`, so the
+    /// model has to agree or the index lookup misses.
+    func test_hashtags_are_normalized() {
+        var query = AdvancedSearchQuery(hashtags: ["#Bitcoin", "bitcoin", "  #nostr  ", "#", "", "two words"])
+        XCTAssertEqual(query.hashtags, ["bitcoin", "nostr", "twowords"])
+
+        query.hashtags = ["##PlebChain"]
+        XCTAssertEqual(query.hashtags, ["plebchain"])
+    }
+
+    /// A hashtag on its own is a real search — it has an index to walk — so it must
+    /// not be mistaken for a bare date range.
+    func test_a_hashtag_alone_is_not_trivial() {
+        let query = AdvancedSearchQuery(hashtags: ["nostr"])
+        XCTAssertFalse(query.isEmpty)
+        XCTAssertFalse(query.isTrivial)
+    }
+
     func test_empty_and_trivial() {
         XCTAssertTrue(AdvancedSearchQuery().isEmpty)
         XCTAssertTrue(AdvancedSearchQuery().isTrivial)
@@ -160,27 +179,27 @@ final class SearchContentMatcherTests: XCTestCase {
 final class AdvancedSearchPlannerTests: XCTestCase {
     let author_a = Pubkey(hex: "32b3256865a224450d5f8d09c271ad1520fae7d940000f09c9d44dd7595e1bb8")!
 
-    func test_a_pinned_author_takes_the_author_scoped_strategy() {
+    func test_a_pinned_author_takes_the_index_walk_strategy() {
         let query = AdvancedSearchQuery(keywords: ["art"], authors: [author_a])
 
-        guard case .authorScoped(let filter, let maxResults, let matcher) = AdvancedSearchPlanner.plan(for: query) else {
-            return XCTFail("expected the author-scoped strategy")
+        guard case .indexWalk(let filter, let maxResults, let matcher) = AdvancedSearchPlanner.plan(for: query) else {
+            return XCTFail("expected the index-walk strategy")
         }
 
         XCTAssertEqual(filter.authors, [author_a])
         XCTAssertEqual(filter.kinds, [.text, .longform], "kinds must always be set, or the query falls to a full scan")
-        XCTAssertNil(filter.search, "the author-scoped strategy must not route onto nostrdb's SEARCH plan")
-        XCTAssertEqual(maxResults, AdvancedSearchPlanner.authorScopedCandidateLimit)
+        XCTAssertNil(filter.search, "the index-walk strategy must not route onto nostrdb's SEARCH plan")
+        XCTAssertEqual(maxResults, AdvancedSearchPlanner.indexWalkCandidateLimit)
         XCTAssertEqual(matcher, SearchContentMatcher(keywords: ["art"], phrases: []))
     }
 
-    /// "No keywords at all" is the author-scoped strategy with the content match
+    /// "No keywords at all" is the index-walk strategy with the content match
     /// skipped — the index walk is the whole answer.
     func test_an_author_with_no_terms_skips_content_matching() {
         let query = AdvancedSearchQuery(authors: [author_a], since: Date(timeIntervalSince1970: 1700000000))
 
-        guard case .authorScoped(let filter, _, let matcher) = AdvancedSearchPlanner.plan(for: query) else {
-            return XCTFail("expected the author-scoped strategy")
+        guard case .indexWalk(let filter, _, let matcher) = AdvancedSearchPlanner.plan(for: query) else {
+            return XCTFail("expected the index-walk strategy")
         }
 
         XCTAssertNil(matcher)
@@ -199,6 +218,43 @@ final class AdvancedSearchPlannerTests: XCTestCase {
         XCTAssertEqual(filter.kinds, [.text, .longform])
         XCTAssertEqual(limit, Ndb.max_text_search_results)
         XCTAssertFalse(matcher.isEmpty, "the global strategy always verifies its hits")
+    }
+
+    /// A hashtag is an index axis, so it earns the exact, uncapped index walk even
+    /// with no author. `ndb_filter_plan` checks tags above kinds, so carrying kinds
+    /// still lands on `NDB_PLAN_TAGS`.
+    func test_a_hashtag_takes_the_index_walk_strategy() {
+        let query = AdvancedSearchQuery(hashtags: ["#Nostr"])
+
+        guard case .indexWalk(let filter, _, let matcher) = AdvancedSearchPlanner.plan(for: query) else {
+            return XCTFail("expected the index-walk strategy")
+        }
+
+        XCTAssertEqual(filter.hashtag, ["nostr"])
+        XCTAssertEqual(filter.kinds, [.text, .longform])
+        XCTAssertNil(filter.authors)
+        XCTAssertNil(matcher, "a hashtag is enforced by the filter, so no note has to be opened")
+    }
+
+    /// Keywords plus a hashtag still take the index walk rather than the fulltext
+    /// index: the tag index is exact and uncapped where the text index is capped at
+    /// 128 hits and only matches word prefixes.
+    func test_keywords_with_a_hashtag_still_take_the_index_walk() {
+        let query = AdvancedSearchQuery(keywords: ["art"], hashtags: ["nostr"])
+
+        guard case .indexWalk(let filter, _, let matcher) = AdvancedSearchPlanner.plan(for: query) else {
+            return XCTFail("expected the index-walk strategy")
+        }
+
+        XCTAssertEqual(filter.hashtag, ["nostr"])
+        XCTAssertEqual(matcher, SearchContentMatcher(keywords: ["art"], phrases: []))
+    }
+
+    /// Hashtags are a filter axis, not content: probing the text index for them
+    /// would reject notes that carry the tag without writing it in the body.
+    func test_the_probe_ignores_hashtags() {
+        let query = AdvancedSearchQuery(keywords: ["art"], hashtags: ["nostr"])
+        XCTAssertEqual(AdvancedSearchPlanner.probe(for: query), "art")
     }
 
     func test_queries_with_nothing_to_run() {
@@ -280,6 +336,28 @@ final class AdvancedSearchEngineTests: XCTestCase {
 
     private func at(_ timestamp: Double) -> Date { Date(timeIntervalSince1970: timestamp) }
 
+    /// Wraps freshly signed events into the wire format `process_events` reads.
+    ///
+    /// Built rather than pasted so a fixture that needs tags does not have to be a
+    /// hand-signed literal — and so the trailing newline is always there.
+    /// `ndb_process_events` (`nostrdb/src/nostrdb.c:9280`) only ingests up to the
+    /// last `\n`, which is how a static Swift multiline fixture silently drops its
+    /// final event.
+    private func wire(_ events: [NostrEvent]) -> String {
+        return events.compactMap({ encode_json($0) }).map({ "[\"EVENT\",\"s\",\($0)]\n" }).joined()
+    }
+
+    private func note(_ content: String,
+                      _ keypair: FullKeypair,
+                      tags: [[String]] = [],
+                      at timestamp: UInt32) throws -> NostrEvent {
+        return try XCTUnwrap(NostrEvent(content: content,
+                                        keypair: keypair.to_keypair(),
+                                        kind: 1,
+                                        tags: tags,
+                                        createdAt: timestamp))
+    }
+
     /// The question the whole epic exists to answer: what did this person post
     /// containing this phrase, between these dates.
     func test_author_phrase_and_window_returns_exactly_the_expected_notes() throws {
@@ -294,7 +372,7 @@ final class AdvancedSearchEngineTests: XCTestCase {
         XCTAssertEqual(try search(ndb, query), ["author A note 3"])
     }
 
-    func test_author_scoped_search_without_terms_returns_the_window() throws {
+    func test_index_walk_search_without_terms_returns_the_window() throws {
         let ndb = try seeded(with: multi_author_wire_events)
 
         let query = AdvancedSearchQuery(authors: [author_a], since: at(1700000010), until: at(1700000013))
@@ -426,5 +504,291 @@ final class AdvancedSearchEngineTests: XCTestCase {
 
         let query = AdvancedSearchQuery(keywords: ["note"], since: at(1700000013))
         XCTAssertEqual(try search(ndb, query), ["author B note 7", "author A note 7", "author B note 6"])
+    }
+
+    /// A hashtag has to match the note's `t` tag rather than its text: a note that
+    /// mentions "bitcoin" in the body but carries no tag is not a hashtag hit, and
+    /// a note tagged `#bitcoin` that never says the word is.
+    func test_a_hashtag_matches_the_tag_and_not_the_text() throws {
+        let keypair = generate_new_keypair()
+        let ndb = try seeded(with: wire([
+            try note("sats go up", keypair, tags: [["t", "bitcoin"]], at: 1700000100),
+            try note("bitcoin go up", keypair, at: 1700000101),
+            try note("purple pill", keypair, tags: [["t", "nostr"]], at: 1700000102),
+        ]))
+
+        XCTAssertEqual(try search(ndb, AdvancedSearchQuery(hashtags: ["#Bitcoin"])), ["sats go up"])
+        XCTAssertEqual(try search(ndb, AdvancedSearchQuery(hashtags: ["nostr"])), ["purple pill"])
+    }
+
+    /// A keyword alongside a hashtag still has to match, and the date window still
+    /// applies — the tag narrows the index walk, it does not replace the rest.
+    func test_a_hashtag_composes_with_keywords_and_a_window() throws {
+        let keypair = generate_new_keypair()
+        let ndb = try seeded(with: wire([
+            try note("sats go up", keypair, tags: [["t", "bitcoin"]], at: 1700000100),
+            try note("sats go down", keypair, tags: [["t", "bitcoin"]], at: 1700000200),
+        ]))
+
+        XCTAssertEqual(try search(ndb, AdvancedSearchQuery(keywords: ["up"], hashtags: ["bitcoin"])),
+                       ["sats go up"])
+        XCTAssertEqual(try search(ndb, AdvancedSearchQuery(keywords: ["sideways"], hashtags: ["bitcoin"])),
+                       [])
+        XCTAssertEqual(try search(ndb, AdvancedSearchQuery(hashtags: ["bitcoin"], since: at(1700000150))),
+                       ["sats go down"])
+    }
+}
+
+// MARK: - The query DSL
+
+final class AdvancedSearchQueryDSLTests: XCTestCase {
+    let author_a = Pubkey(hex: "32b3256865a224450d5f8d09c271ad1520fae7d940000f09c9d44dd7595e1bb8")!
+    let author_b = Pubkey(hex: "51778facb56343cfd08eb21041886c0db2d840596b6e32b7d3ea1ad95fb98ae3")!
+
+    /// Fixed so relative dates are deterministic: 2026-09-02 12:00:00 UTC.
+    /// Deliberately not midnight, so a relative date does not land on a day edge
+    /// and accidentally exercise the short rendering.
+    let now = Date(timeIntervalSince1970: 1788350400)
+
+    /// UTC, so the day boundaries in these tests do not move with the machine
+    /// running them. Production uses the device's time zone — see
+    /// ``AdvancedSearchQueryDSL/defaultCalendar``.
+    var calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    private func parse(_ text: String, resolving names: [String: Pubkey] = [:]) -> AdvancedSearchQueryDSL.ParseResult {
+        AdvancedSearchQueryDSL.parse(text, now: now, calendar: calendar, resolveAuthor: { names[$0] })
+    }
+
+    private func render(_ query: AdvancedSearchQuery) -> String {
+        AdvancedSearchQueryDSL.render(query, calendar: calendar)
+    }
+
+    // MARK: Tokens
+
+    func test_bare_words_are_keywords() {
+        let result = parse("quick brown fox")
+        XCTAssertEqual(result.query, AdvancedSearchQuery(keywords: ["quick", "brown", "fox"]))
+        XCTAssertFalse(result.usedAdvancedSyntax, "a plain word search is not an advanced query")
+    }
+
+    func test_quoted_runs_are_phrases() {
+        let result = parse("\"jumped over\" fox \"lazy dog\"")
+        XCTAssertEqual(result.query.phrases, ["jumped over", "lazy dog"])
+        XCTAssertEqual(result.query.keywords, ["fox"])
+        XCTAssertTrue(result.usedAdvancedSyntax)
+    }
+
+    /// A quote that is still being typed should still search, or the results blink
+    /// out from under the user mid-phrase.
+    func test_an_unterminated_quote_runs_to_the_end() {
+        XCTAssertEqual(parse("fox \"jumped over the").query.phrases, ["jumped over the"])
+    }
+
+    func test_hashtags_go_to_the_tag_axis() {
+        let result = parse("#Nostr art")
+        XCTAssertEqual(result.query.hashtags, ["nostr"])
+        XCTAssertEqual(result.query.keywords, ["art"])
+        XCTAssertTrue(result.usedAdvancedSyntax)
+    }
+
+    /// A lone `#` is not a hashtag, and must not vanish.
+    func test_a_bare_hash_is_a_keyword() {
+        XCTAssertEqual(parse("#").query.keywords, ["#"])
+    }
+
+    // MARK: from:
+
+    func test_from_accepts_every_key_form() {
+        XCTAssertEqual(parse("from:\(author_a.npub)").query.authors, [author_a])
+        XCTAssertEqual(parse("from:\(author_a.hex())").query.authors, [author_a])
+        XCTAssertEqual(parse("from:nostr:\(author_a.npub)").query.authors, [author_a])
+    }
+
+    func test_from_resolves_a_name_through_the_profile_index() {
+        let names = ["jb55": author_a, "will": author_b]
+        XCTAssertEqual(parse("from:jb55", resolving: names).query.authors, [author_a])
+        XCTAssertEqual(parse("from:@will", resolving: names).query.authors, [author_b])
+        XCTAssertEqual(parse("from:jb55 from:will", resolving: names).query.authors, [author_a, author_b])
+    }
+
+    /// A name with a space in it has to be quotable, and quoting it must not turn
+    /// the token into a phrase.
+    func test_from_accepts_a_quoted_name() {
+        let result = parse("from:\"John Doe\" art", resolving: ["John Doe": author_a])
+        XCTAssertEqual(result.query.authors, [author_a])
+        XCTAssertEqual(result.query.phrases, [], "the quotes belong to the from: value, not to a phrase")
+        XCTAssertEqual(result.query.keywords, ["art"])
+    }
+
+    /// Neither dropped silently (which would widen the search to everybody) nor
+    /// turned into a keyword (which would search note text for "from:nobody").
+    func test_an_unresolvable_author_is_reported_not_guessed() {
+        let result = parse("from:nobody art")
+        XCTAssertEqual(result.unresolvedAuthors, ["nobody"])
+        XCTAssertEqual(result.query.authors, [])
+        XCTAssertEqual(result.query.keywords, ["art"], "the rest of the query still runs")
+        XCTAssertTrue(result.usedAdvancedSyntax)
+    }
+
+    /// A malformed key is not a name to look up, so it degrades to a keyword.
+    func test_a_malformed_key_degrades_to_a_keyword() {
+        let result = parse("from:npub1notarealkey")
+        XCTAssertEqual(result.query.keywords, ["from:npub1notarealkey"])
+        XCTAssertEqual(result.unresolvedAuthors, [])
+    }
+
+    func test_a_bare_prefix_is_a_keyword() {
+        XCTAssertEqual(parse("from: since: art").query.keywords, ["from:", "since:", "art"])
+        XCTAssertFalse(parse("from:").usedAdvancedSyntax)
+    }
+
+    // MARK: Dates
+
+    /// A bare date covers the whole day at both ends, which is only coherent
+    /// because both bounds are inclusive: `since:X until:X` is exactly day X.
+    func test_a_bare_date_covers_the_whole_day() {
+        let result = parse("since:2026-01-05 until:2026-01-05 art")
+
+        let startOfDay = Date(timeIntervalSince1970: 1767571200)   // 2026-01-05T00:00:00Z
+        XCTAssertEqual(result.query.since, startOfDay)
+        XCTAssertEqual(result.query.until, startOfDay.addingTimeInterval(86400 - 1))
+        XCTAssertFalse(result.query.hasEmptyDateWindow)
+    }
+
+    func test_a_date_can_name_a_moment() {
+        XCTAssertEqual(parse("since:2026-01-05T06:30:15").query.since,
+                       Date(timeIntervalSince1970: 1767571200 + 6 * 3600 + 30 * 60 + 15))
+        XCTAssertEqual(parse("until:2026-01-05T06:30").query.until,
+                       Date(timeIntervalSince1970: 1767571200 + 6 * 3600 + 30 * 60))
+    }
+
+    func test_relative_dates() {
+        XCTAssertEqual(parse("since:24h").query.since, now.addingTimeInterval(-86400))
+        XCTAssertEqual(parse("since:7d").query.since, now.addingTimeInterval(-7 * 86400))
+        XCTAssertEqual(parse("since:2w").query.since, now.addingTimeInterval(-14 * 86400))
+        XCTAssertEqual(parse("until:1y").query.until,
+                       calendar.date(byAdding: .year, value: -1, to: now))
+        XCTAssertEqual(parse("since:3mo").query.since,
+                       calendar.date(byAdding: .month, value: -3, to: now))
+    }
+
+    func test_an_unparseable_date_degrades_to_a_keyword() {
+        for text in ["since:someday", "since:2026-13-01", "since:2026-02-30", "until:5x", "since:2026-01-05T99:00"] {
+            let result = parse(text)
+            XCTAssertNil(result.query.since, "\(text) should not have produced a since")
+            XCTAssertNil(result.query.until, "\(text) should not have produced an until")
+            XCTAssertEqual(result.query.keywords, [text])
+        }
+    }
+
+    // MARK: kind: and sort:
+
+    func test_kind_narrows_the_content_type() {
+        XCTAssertEqual(parse("kind:note art").query.kinds, [.text])
+        XCTAssertEqual(parse("kind:longform art").query.kinds, [.longform])
+        XCTAssertEqual(parse("kind:article art").query.kinds, [.longform])
+        XCTAssertEqual(parse("kind:note kind:longform art").query.kinds, AdvancedSearchQuery.defaultKinds)
+        XCTAssertEqual(parse("art").query.kinds, AdvancedSearchQuery.defaultKinds)
+    }
+
+    func test_an_unknown_kind_degrades_to_a_keyword() {
+        let result = parse("kind:zap art")
+        XCTAssertEqual(result.query.kinds, AdvancedSearchQuery.defaultKinds)
+        XCTAssertEqual(result.query.keywords, ["kind:zap", "art"])
+    }
+
+    func test_sort_sets_the_order() {
+        XCTAssertEqual(parse("sort:oldest art").query.order, .oldest_first)
+        XCTAssertEqual(parse("sort:newest art").query.order, .newest_first)
+        XCTAssertEqual(parse("sort:sideways art").query.keywords, ["sort:sideways", "art"])
+    }
+
+    func test_prefixes_are_case_insensitive() {
+        XCTAssertEqual(parse("FROM:jb55", resolving: ["jb55": author_a]).query.authors, [author_a])
+        XCTAssertEqual(parse("Since:7d").query.since, now.addingTimeInterval(-7 * 86400))
+    }
+
+    /// The escape hatch: quoting a filter-shaped token searches for it literally.
+    func test_a_quoted_prefix_is_a_phrase() {
+        let result = parse("\"from:jb55\"", resolving: ["jb55": author_a])
+        XCTAssertEqual(result.query.phrases, ["from:jb55"])
+        XCTAssertEqual(result.query.authors, [])
+    }
+
+    // MARK: Rendering
+
+    func test_render_writes_only_what_differs_from_the_default() {
+        XCTAssertEqual(render(AdvancedSearchQuery(keywords: ["quick", "fox"])), "quick fox")
+        XCTAssertEqual(render(AdvancedSearchQuery()), "")
+    }
+
+    func test_render_orders_tokens_predictably() {
+        let query = AdvancedSearchQuery(keywords: ["art"],
+                                        phrases: ["jumped over"],
+                                        hashtags: ["nostr"],
+                                        authors: [author_a],
+                                        since: Date(timeIntervalSince1970: 1767571200),
+                                        until: Date(timeIntervalSince1970: 1767571200 + 86400 - 1),
+                                        kinds: [.longform],
+                                        order: .oldest_first)
+
+        XCTAssertEqual(render(query),
+                       "from:\(author_a.npub) since:2026-01-05 until:2026-01-05 "
+                       + "kind:longform sort:oldest #nostr \"jumped over\" art")
+    }
+
+    /// A bound that does not sit on a day edge keeps its time, or rendering would
+    /// silently widen the window.
+    func test_render_keeps_a_time_when_it_matters() {
+        let since = Date(timeIntervalSince1970: 1767571200 + 3600)
+        XCTAssertEqual(render(AdvancedSearchQuery(keywords: ["art"], since: since)),
+                       "since:2026-01-05T01:00:00 art")
+    }
+
+    // MARK: Round trips
+
+    /// The property the sheet and the field depend on: what the field shows parses
+    /// back to the query the sheet is holding.
+    func test_every_token_round_trips() {
+        let queries: [AdvancedSearchQuery] = [
+            AdvancedSearchQuery(keywords: ["quick", "fox"]),
+            AdvancedSearchQuery(phrases: ["jumped over the lazy dog"]),
+            AdvancedSearchQuery(hashtags: ["nostr", "bitcoin"]),
+            AdvancedSearchQuery(authors: [author_a, author_b]),
+            AdvancedSearchQuery(keywords: ["art"], kinds: [.longform]),
+            AdvancedSearchQuery(keywords: ["art"], order: .oldest_first),
+            AdvancedSearchQuery(keywords: ["art"],
+                                since: Date(timeIntervalSince1970: 1767571200),
+                                until: Date(timeIntervalSince1970: 1767571200 + 86400 - 1)),
+            AdvancedSearchQuery(keywords: ["art"],
+                                since: Date(timeIntervalSince1970: 1767574800),
+                                until: Date(timeIntervalSince1970: 1767578401)),
+            AdvancedSearchQuery(keywords: ["art"],
+                                phrases: ["jumped over"],
+                                hashtags: ["nostr"],
+                                authors: [author_a],
+                                since: Date(timeIntervalSince1970: 1767571200),
+                                until: Date(timeIntervalSince1970: 1767657599),
+                                kinds: [.text],
+                                order: .oldest_first),
+        ]
+
+        for query in queries {
+            let text = render(query)
+            XCTAssertEqual(parse(text).query, query, "round trip failed through \"\(text)\"")
+        }
+    }
+
+    /// Relative dates resolve at parse time, so they round-trip as the absolute
+    /// date they meant — not as the text that was typed.
+    func test_a_relative_date_round_trips_as_an_absolute_one() {
+        let parsed = parse("since:7d art").query
+        let text = render(parsed)
+        XCTAssertTrue(text.hasPrefix("since:2026-08-26T"), "unexpected rendering: \(text)")
+        XCTAssertEqual(parse(text).query, parsed)
     }
 }

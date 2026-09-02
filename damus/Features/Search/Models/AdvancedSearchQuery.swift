@@ -37,6 +37,21 @@ struct AdvancedSearchQuery: Equatable {
         didSet { phrases = Self.normalized(terms: phrases) }
     }
 
+    /// Hashtags (`t` tags) a note must carry, without the leading `#`.
+    ///
+    /// Lowercased on assignment, because that is the form nostrdb's tag index is
+    /// keyed by for a hashtag written any which way — the same normalization
+    /// ``NostrFilter/filter_hashtag(_:)`` already does for the rest of the app.
+    ///
+    /// Unlike the term fields this is an *index* axis rather than a content one:
+    /// it goes into the nostrdb filter and is checked while the index is walked,
+    /// so it narrows the query rather than the results. See
+    /// ``AdvancedSearchPlanner`` for which plan each shape lands on — notably a
+    /// single hashtag is the only count that gets nostrdb's tag index.
+    var hashtags: [String] {
+        didSet { hashtags = Self.normalized(hashtags: hashtags) }
+    }
+
     /// The authors to search, or empty to search everything nostrdb holds.
     ///
     /// Deduplicated on assignment, and that is load-bearing rather than tidy:
@@ -80,6 +95,7 @@ struct AdvancedSearchQuery: Equatable {
 
     init(keywords: [String] = [],
          phrases: [String] = [],
+         hashtags: [String] = [],
          authors: [Pubkey] = [],
          since: Date? = nil,
          until: Date? = nil,
@@ -87,6 +103,7 @@ struct AdvancedSearchQuery: Equatable {
          order: NdbSearchOrder = .newest_first) {
         self.keywords = Self.normalized(terms: keywords)
         self.phrases = Self.normalized(terms: phrases)
+        self.hashtags = Self.normalized(hashtags: hashtags)
         self.authors = Self.normalized(authors: authors)
         self.since = since
         self.until = until
@@ -128,7 +145,8 @@ struct AdvancedSearchQuery: Equatable {
 
     /// True when nothing at all has been entered.
     var isEmpty: Bool {
-        keywords.isEmpty && phrases.isEmpty && authors.isEmpty && since == nil && until == nil
+        keywords.isEmpty && phrases.isEmpty && hashtags.isEmpty && authors.isEmpty
+            && since == nil && until == nil
     }
 
     /// True when there is nothing worth running.
@@ -138,7 +156,9 @@ struct AdvancedSearchQuery: Equatable {
     /// ``isEmpty`` — is the check a pane should use to decide whether to run
     /// anything; ``isEmpty`` only separates "nothing entered" from "entered, but
     /// not enough to search on".
-    var isTrivial: Bool { keywords.isEmpty && phrases.isEmpty && authors.isEmpty }
+    var isTrivial: Bool {
+        keywords.isEmpty && phrases.isEmpty && hashtags.isEmpty && authors.isEmpty
+    }
 
     /// True when the date window cannot contain anything.
     ///
@@ -181,6 +201,17 @@ struct AdvancedSearchQuery: Equatable {
         terms
             .map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })
             .filter({ !$0.isEmpty })
+    }
+
+    private static func normalized(hashtags: [String]) -> [String] {
+        var seen = Set<String>()
+        return hashtags
+            .map({ tag in
+                var tag = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+                while tag.hasPrefix("#") { tag = String(tag.dropFirst()) }
+                return tag.filter({ !$0.isWhitespace }).lowercased()
+            })
+            .filter({ !$0.isEmpty && seen.insert($0).inserted })
     }
 
     private static func normalized(authors: [Pubkey]) -> [Pubkey] {
