@@ -966,3 +966,72 @@ final class AdvancedSearchModelTests: XCTestCase {
         }
     }
 }
+
+// MARK: - Filter chips
+
+final class AdvancedSearchConstraintTests: XCTestCase {
+    let author_a = Pubkey(hex: "32b3256865a224450d5f8d09c271ad1520fae7d940000f09c9d44dd7595e1bb8")!
+
+    /// Only constraints that are doing something get a chip: a chip for "notes and
+    /// long-form" or "newest first" would be noise, and tapping it would be a no-op.
+    func test_defaults_do_not_get_a_chip() {
+        XCTAssertEqual(AdvancedSearchConstraint.all(in: AdvancedSearchQuery()), [])
+        XCTAssertEqual(AdvancedSearchConstraint.all(in: AdvancedSearchQuery(keywords: ["art"])), [.keyword("art")])
+    }
+
+    func test_every_constraint_gets_a_chip_in_a_readable_order() {
+        let since = Date(timeIntervalSince1970: 1767571200)
+        let until = Date(timeIntervalSince1970: 1767657599)
+        let query = AdvancedSearchQuery(keywords: ["art"],
+                                        phrases: ["jumped over"],
+                                        hashtags: ["nostr"],
+                                        authors: [author_a],
+                                        since: since,
+                                        until: until,
+                                        kinds: [.text],
+                                        order: .oldest_first)
+
+        XCTAssertEqual(AdvancedSearchConstraint.all(in: query),
+                       [.author(author_a), .since(since), .until(until), .kinds([.text]),
+                        .order(.oldest_first), .hashtag("nostr"), .phrase("jumped over"), .keyword("art")])
+    }
+
+    /// Every chip has to actually come off, and removing one must leave the rest
+    /// alone — this is the whole affordance for understanding a narrowed search.
+    func test_removing_a_constraint_leaves_the_rest() {
+        let query = AdvancedSearchQuery(keywords: ["art", "fox"],
+                                        phrases: ["jumped over"],
+                                        hashtags: ["nostr", "bitcoin"],
+                                        authors: [author_a],
+                                        since: Date(timeIntervalSince1970: 1767571200),
+                                        until: Date(timeIntervalSince1970: 1767657599),
+                                        kinds: [.longform],
+                                        order: .oldest_first)
+
+        for constraint in AdvancedSearchConstraint.all(in: query) {
+            let reduced = constraint.removed(from: query)
+            XCTAssertNotEqual(reduced, query, "\(constraint.id) did not remove anything")
+            XCTAssertFalse(AdvancedSearchConstraint.all(in: reduced).contains(constraint),
+                           "\(constraint.id) survived its own removal")
+            XCTAssertEqual(AdvancedSearchConstraint.all(in: reduced).count,
+                           AdvancedSearchConstraint.all(in: query).count - 1,
+                           "removing \(constraint.id) changed more than one constraint")
+        }
+    }
+
+    /// Dropping the content-type chip has to go back to searching both kinds, not
+    /// to searching none — which the model would refuse anyway.
+    func test_removing_the_kind_chip_restores_the_default_pair() {
+        let query = AdvancedSearchQuery(keywords: ["art"], kinds: [.text])
+        XCTAssertEqual(AdvancedSearchConstraint.kinds([.text]).removed(from: query).kinds,
+                       AdvancedSearchQuery.defaultKinds)
+    }
+
+    func test_labels() {
+        XCTAssertEqual(AdvancedSearchConstraint.author(author_a).label(authorName: { _ in "jb55" }), "from: jb55")
+        XCTAssertEqual(AdvancedSearchConstraint.hashtag("nostr").label(authorName: { _ in "" }), "#nostr")
+        XCTAssertEqual(AdvancedSearchConstraint.phrase("jumped over").label(authorName: { _ in "" }),
+                       "\u{201C}jumped over\u{201D}")
+        XCTAssertEqual(AdvancedSearchConstraint.keyword("art").label(authorName: { _ in "" }), "art")
+    }
+}

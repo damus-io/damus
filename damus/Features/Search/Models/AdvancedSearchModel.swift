@@ -77,12 +77,21 @@ final class AdvancedSearchModel: ObservableObject {
         }
     }
 
+    /// The query this model was created for, rendered as DSL text.
+    ///
+    /// A stable, `nonisolated` identity for `Route.AdvancedSearch` to hash —
+    /// `Route.hash(into:)` is nonisolated and so cannot read ``query``. Deliberately
+    /// the *initial* query rather than the live one: a route's identity must not
+    /// change under the navigation stack when the user takes a filter chip off.
+    nonisolated let routeID: String
+
     private let damus_state: DamusState
     private var inFlight: Task<Void, Never>?
 
     init(damus_state: DamusState, query: AdvancedSearchQuery = AdvancedSearchQuery()) {
         self.damus_state = damus_state
         self.query = query
+        self.routeID = AdvancedSearchQueryDSL.render(query)
     }
 
     /// Runs ``query`` now, without waiting out the debounce.

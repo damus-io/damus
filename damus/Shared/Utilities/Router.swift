@@ -43,6 +43,9 @@ enum Route: Hashable {
     case Zaps(target: ZapTarget)
     case Search(search: SearchModel)
     case NDBSearch(results:  Binding<[NostrEvent]>, query: String)
+    /// An advanced local search. The model owns its results, so — unlike
+    /// ``NDBSearch`` — nothing has to thread a `Binding` through navigation.
+    case AdvancedSearch(model: AdvancedSearchModel)
     case EULA
     case Login
     case CreateAccount
@@ -128,6 +131,8 @@ enum Route: Hashable {
             SearchView(appstate: damusState, search: search)
         case .NDBSearch(let results, let query):
             NDBSearchView(damus_state: damusState, results: results, searchQuery: query)
+        case .AdvancedSearch(let model):
+            AdvancedSearchView(damus_state: damusState, model: model)
         case .EULA:
             EULAView(nav: navigationCoordinator)
         case .Login:
@@ -251,6 +256,13 @@ enum Route: Hashable {
         case .NDBSearch(_, let query):
             hasher.combine("results")
             hasher.combine(query)
+        case .AdvancedSearch(let model):
+            // Hashed by the query the model was created for, so pushing the same
+            // search twice is a no-op the way every other route here behaves —
+            // and so editing the filter chips does not change the route's identity
+            // underneath the navigation stack.
+            hasher.combine("advancedSearch")
+            hasher.combine(model.routeID)
         case .EULA:
             hasher.combine("eula")
         case .Login:
