@@ -53,18 +53,22 @@ struct SearchView: View {
         }
         .toolbar {
             if let hashtag = search.search.hashtag?.first {
+                // Prefilled with the tag, so narrowing a hashtag by author or date
+                // is one tap from the hashtag itself rather than a query to retype
+                // on the explore pane. Sits beside the overflow menu rather than in
+                // it, because nobody opens the overflow menu looking for search.
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        let query = AdvancedSearchQuery(hashtags: [hashtag])
+                        appstate.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: appstate, query: query)))
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .accessibilityLabel(NSLocalizedString("Advanced search", comment: "Accessibility label for the button that opens advanced search prefilled with this hashtag."))
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        // Prefilled with the tag, so narrowing a hashtag by author
-                        // or date is one tap from the hashtag itself rather than a
-                        // query to retype on the explore pane.
-                        Button {
-                            let query = AdvancedSearchQuery(hashtags: [hashtag])
-                            appstate.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: appstate, query: query)))
-                        } label: {
-                            Text("Advanced Search", comment: "Button opening advanced search prefilled with this hashtag.")
-                        }
-
                         if is_hashtag_muted {
                             Button {
                                 guard
