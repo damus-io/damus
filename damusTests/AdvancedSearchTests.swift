@@ -1130,3 +1130,48 @@ final class AdvancedSearchFilterSheetTests: XCTestCase {
         XCTAssertEqual(AdvancedSearchFilterSheet.phrases(from: text), phrases)
     }
 }
+
+// MARK: - Day bounds shared by the date pickers and the query language
+
+final class AdvancedSearchDayBoundTests: XCTestCase {
+    var calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    /// A date-only picker means a whole day. If `until` kept the time of day the
+    /// clock happened to be at, an inclusive upper bound would silently cut the
+    /// chosen day off part-way through.
+    func test_a_bound_snaps_to_the_edge_of_its_day() {
+        let midAfternoon = Date(timeIntervalSince1970: 1767625980)   // 2026-01-05T15:13:00Z
+
+        XCTAssertEqual(AdvancedSearchQueryDSL.dayBound(midAfternoon, bound: .since, calendar: calendar),
+                       Date(timeIntervalSince1970: 1767571200))      // 2026-01-05T00:00:00Z
+        XCTAssertEqual(AdvancedSearchQueryDSL.dayBound(midAfternoon, bound: .until, calendar: calendar),
+                       Date(timeIntervalSince1970: 1767657599))      // 2026-01-05T23:59:59Z
+    }
+
+    /// The pickers and a typed `since:2026-01-05` have to land on the same second,
+    /// or the sheet and the search field would disagree about the same day.
+    func test_a_snapped_bound_matches_the_typed_form() {
+        let picked = Date(timeIntervalSince1970: 1767625980)
+
+        for bound in [AdvancedSearchQueryDSL.DateBound.since, .until] {
+            let snapped = AdvancedSearchQueryDSL.dayBound(picked, bound: bound, calendar: calendar)
+            let text = AdvancedSearchQueryDSL.render(date: snapped, bound: bound, calendar: calendar)
+            XCTAssertEqual(text, "2026-01-05", "a snapped bound should render as a bare date")
+            XCTAssertEqual(AdvancedSearchQueryDSL.date(from: text, bound: bound, now: picked, calendar: calendar),
+                           snapped)
+        }
+    }
+
+    /// Snapping is idempotent, so re-opening the sheet on a query it produced does
+    /// not walk the window around.
+    func test_snapping_is_idempotent() {
+        for bound in [AdvancedSearchQueryDSL.DateBound.since, .until] {
+            let once = AdvancedSearchQueryDSL.dayBound(Date(timeIntervalSince1970: 1767625980), bound: bound, calendar: calendar)
+            XCTAssertEqual(AdvancedSearchQueryDSL.dayBound(once, bound: bound, calendar: calendar), once)
+        }
+    }
+}

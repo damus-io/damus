@@ -474,6 +474,21 @@ enum AdvancedSearchQueryDSL {
         Date(timeIntervalSince1970: date.timeIntervalSince1970.rounded(.down))
     }
 
+    /// Snaps `date` to the edge of its day that `bound` means.
+    ///
+    /// The same rule a bare `YYYY-MM-DD` follows: a `since` starts the day, an
+    /// `until` ends it. Exposed because a date-only picker means exactly this — a
+    /// picker that left the time of day alone would silently make an inclusive
+    /// `until` cut the day off wherever the clock happened to be.
+    static func dayBound(_ date: Date, bound: DateBound, calendar: Calendar? = nil) -> Date {
+        let calendar = calendar ?? defaultCalendar
+        let startOfDay = calendar.startOfDay(for: date)
+        switch bound {
+        case .since: return floored(startOfDay)
+        case .until: return endOfDay(startOfDay, calendar: calendar) ?? floored(date)
+        }
+    }
+
     /// Renders a bound back to the shortest form that parses to the same second.
     ///
     /// A `since` sitting exactly at midnight, or an `until` sitting exactly on the

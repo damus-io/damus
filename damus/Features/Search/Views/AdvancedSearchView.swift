@@ -68,18 +68,19 @@ struct AdvancedSearchView: View {
                                    constraint.label(authorName: name)))
     }
 
+    @ViewBuilder
     private var chips: some View {
         let constraints = AdvancedSearchConstraint.all(in: model.query)
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(constraints) { constraint in
-                    chip(constraint)
+        if !constraints.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(constraints) { constraint in
+                        chip(constraint)
+                    }
                 }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
         }
-        .opacity(constraints.isEmpty ? 0 : 1)
-        .frame(height: constraints.isEmpty ? 0 : nil)
     }
 
     // MARK: - Status
@@ -161,7 +162,12 @@ struct AdvancedSearchView: View {
             empty(NSLocalizedString("Search failed", comment: "Title shown when an advanced search could not be run at all."),
                   NSLocalizedString("The note database could not run that search. Try changing the filters.",
                                     comment: "Explanation shown when a search could not be run."))
-        case .results, .searching:
+        case .searching:
+            // Nothing yet, but nor is there an answer yet. The status line above
+            // already says a search is running; "No matches" here would contradict
+            // it.
+            EmptyView()
+        case .results:
             empty(NSLocalizedString("No matches", comment: "Title shown when an advanced search ran and matched nothing."),
                   localOnlyNote)
         }

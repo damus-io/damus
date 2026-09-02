@@ -137,6 +137,12 @@ struct AdvancedSearchFilterSheet: View {
 
     // MARK: - Dates
 
+    /// A date-only picker means a whole day, so a bound is snapped to that day's
+    /// edge — the same rule a bare `YYYY-MM-DD` follows in the query language.
+    private static func dayBound(_ date: Date, _ bound: AdvancedSearchQueryDSL.DateBound) -> Date {
+        AdvancedSearchQueryDSL.dayBound(date, bound: bound)
+    }
+
     private var datePreset: AdvancedSearchDatePreset {
         AdvancedSearchDatePreset.matching(query)
     }
@@ -155,30 +161,39 @@ struct AdvancedSearchFilterSheet: View {
                 Text("Date range", comment: "Label for the date range of an advanced search.")
             }
 
-            DatePicker(selection: Binding(get: { query.since ?? Date() },
-                                          set: { query.since = $0 }),
-                       displayedComponents: [.date]) {
-                Toggle(isOn: Binding(get: { query.since != nil },
-                                     set: { query.since = $0 ? Date() : nil })) {
-                    Text("From", comment: "Label for the earliest date an advanced search covers.")
-                }
+            // The toggles are their own rows rather than a DatePicker's label: a
+            // disabled picker would disable the toggle inside it too, and a bound
+            // that had been switched off could never be switched back on.
+            Toggle(isOn: Binding(get: { query.since != nil },
+                                 set: { query.since = $0 ? Self.dayBound(Date(), .since) : nil })) {
+                Text("From", comment: "Label for the earliest date an advanced search covers.")
             }
-            .disabled(query.since == nil)
 
-            DatePicker(selection: Binding(get: { query.until ?? Date() },
-                                          // Both bounds are inclusive, so `since == until`
-                                          // is a valid one-second window and only an
-                                          // inverted pair is empty. Clamp rather than
-                                          // letting the user build one that cannot match.
-                                          set: { query.until = max($0, query.since ?? $0) }),
-                       in: (query.since ?? Date.distantPast)...,
-                       displayedComponents: [.date]) {
-                Toggle(isOn: Binding(get: { query.until != nil },
-                                     set: { query.until = $0 ? Date() : nil })) {
-                    Text("To", comment: "Label for the latest date an advanced search covers.")
+            if query.since != nil {
+                DatePicker(selection: Binding(get: { query.since ?? Date() },
+                                              set: { query.since = Self.dayBound($0, .since) }),
+                           displayedComponents: [.date]) {
+                    Text("Start date", comment: "Label for the date picker choosing the earliest date an advanced search covers.")
                 }
             }
-            .disabled(query.until == nil)
+
+            Toggle(isOn: Binding(get: { query.until != nil },
+                                 set: { query.until = $0 ? Self.dayBound(Date(), .until) : nil })) {
+                Text("To", comment: "Label for the latest date an advanced search covers.")
+            }
+
+            if query.until != nil {
+                DatePicker(selection: Binding(get: { query.until ?? Date() },
+                                              // Snapped to the end of the chosen day, then
+                                              // clamped: both bounds are inclusive, so
+                                              // `since == until` is a valid window and only
+                                              // an inverted pair is empty.
+                                              set: { query.until = max(Self.dayBound($0, .until), query.since ?? .distantPast) }),
+                           in: (query.since ?? Date.distantPast)...,
+                           displayedComponents: [.date]) {
+                    Text("End date", comment: "Label for the date picker choosing the latest date an advanced search covers.")
+                }
+            }
         } header: {
             Text("When", comment: "Section header for the date range of an advanced search.")
         }
