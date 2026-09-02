@@ -306,11 +306,11 @@ extension NostrNetworkManager {
                     return optimizedFilter
                 }
                 return await self.pool.subscribe(filters: optimizedFilters, to: desiredRelays, id: id)
-            case .negentropy(let negentropyStorageVector):
+            case .negentropy(let negentropyStorageVector, let liveStreamSinceBackoff):
                 return AsyncStream<RelayPool.StreamItem>.with(task: { continuation in
                     let id = id ?? UUID()
                     do {
-                        for try await item in try await self.pool.negentropySubscribe(filters: filters, to: desiredRelays, negentropyVector: negentropyStorageVector, id: id, ignoreUnsupportedRelays: true) {
+                        for try await item in try await self.pool.negentropySubscribe(filters: filters, to: desiredRelays, negentropyVector: negentropyStorageVector, liveStreamSinceBackoff: liveStreamSinceBackoff, id: id, ignoreUnsupportedRelays: true) {
                             continuation.yield(item)
                         }
                     }
@@ -745,14 +745,21 @@ extension NostrNetworkManager {
             /// Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
             case sinceOptimization
             /// Returns notes from ndb, negentropy syncs missing notes with relays, then streams normally
-            case negentropy
+            ///
+            /// - Parameter liveStreamSinceBackoff: How far back, in seconds, to move the `since` bound on the
+            ///   live subscription that follows reconciliation. Normally `0`: reconciliation already covers
+            ///   everything published before the sync began, so the live stream only needs what comes after.
+            ///   Kinds whose `created_at` is deliberately fuzzed need a backoff at least as wide as the fuzz
+            ///   window — see ``NostrKind/giftwrapCreatedAtFuzzWindow`` — otherwise the relay drops freshly
+            ///   published events whose fake timestamp lands behind the bound.
+            case negentropy(liveStreamSinceBackoff: UInt32)
         }
         
         enum NetworkOptimizationData {
             /// Returns notes from ndb, then streams from the network with an added "since" filter set to the latest note stored on ndb.
             case sinceOptimization(latestNoteTimestampSeen: UInt32)
             /// Returns notes from ndb, negentropy syncs missing notes with relays, then streams normally
-            case negentropy(negentropyStorageVector: NegentropyStorageVector)
+            case negentropy(negentropyStorageVector: NegentropyStorageVector, liveStreamSinceBackoff: UInt32)
             
             static func from(strategy: NetworkOptimizationStrategy?, latestNoteTimestampSeen: UInt32?, negentropyStorageVector: NegentropyStorageVector?) -> Self? {
                 guard let strategy else { return nil }
@@ -760,9 +767,9 @@ extension NostrNetworkManager {
                 case .sinceOptimization:
                     guard let latestNoteTimestampSeen else { return nil }
                     return .sinceOptimization(latestNoteTimestampSeen: latestNoteTimestampSeen)
-                case .negentropy:
+                case .negentropy(let liveStreamSinceBackoff):
                     guard let negentropyStorageVector else { return nil }
-                    return .negentropy(negentropyStorageVector: negentropyStorageVector)
+                    return .negentropy(negentropyStorageVector: negentropyStorageVector, liveStreamSinceBackoff: liveStreamSinceBackoff)
                 }
             }
         }

@@ -442,4 +442,139 @@ final class NegentropySupportTests: XCTestCase {
         // Then: Should receive only text note B and DM D (text note A and DM C already synced)
         await fulfillment(of: [getsNoteB, getsNoteD, doesNotGetNoteA, doesNotGetNoteC], timeout: 5.0)
     }
+
+    // MARK: - NIP-59 giftwrap timestamps
+
+    /// A NIP-59 giftwrap's `created_at` is deliberately randomized up to two days into the past, so a
+    /// set of wraps arrives in essentially random timestamp order. `NegentropyStorageVector` accepts
+    /// inserts in any order and sorts them in `seal()`, so this should reconcile exactly like any other
+    /// kind — this test pins that down, including the unseal/insert/reseal cycle `SubscriptionManager`
+    /// puts the vector through as ndb streams notes in.
+    func testGiftwrapRandomizedTimestampsReconcile() async throws {
+        // Given: A relay holding six wraps whose timestamps are scattered across a two-day window
+        let relay = try await setupRelay(port: 8092)
+        let relayUrl = RelayURL(await relay.url().description)!
+
+        let now = UInt32(Date().timeIntervalSince1970)
+        let hour: UInt32 = 60 * 60
+        let offsets: [UInt32] = [0, 47 * hour, 3 * hour, 2 * 24 * hour, 25 * hour, 11 * hour]
+        let wraps = offsets.enumerated().map { index, offset in
+            NostrEvent(
+                content: "wrap \(index)",
+                keypair: test_keypair,
+                kind: NostrKind.giftwrap.rawValue,
+                tags: [["p", test_keypair.pubkey.hex()]],
+                createdAt: now - offset
+            )!
+        }
+
+        let relayConnection = await connectToRelay(url: relayUrl)
+        sendEvents(wraps, to: relayConnection)
+
+        let relayPool = try await setupRelayPool(with: [relayUrl])
+
+        // Local storage already has the oldest, the newest and one from the middle, fed in an order that
+        // is deliberately not monotonic, one at a time through the seal/unseal cycle the real stream uses
+        let negentropyVector = NegentropyStorageVector()
+        for alreadyHave in [wraps[0], wraps[3], wraps[2]] {
+            negentropyVector.unsealAndInsert(nostrEvent: alreadyHave)
+            try negentropyVector.seal()
+        }
+
+        var eventExpectations: [NoteId: XCTestExpectation] = [:]
+        for (index, wrap) in wraps.enumerated() {
+            let alreadySynced = [0, 3, 2].contains(index)
+            let expectation = XCTestExpectation(description: alreadySynced ? "Does not get wrap \(index)" : "Gets wrap \(index)")
+            expectation.isInverted = alreadySynced
+            eventExpectations[wrap.id] = expectation
+        }
+
+        // When: Performing negentropy subscribe
+        runNegentropySubscribe(
+            relayPool: relayPool,
+            filters: [NostrFilter(kinds: [.giftwrap])],
+            vector: negentropyVector,
+            eventExpectations: eventExpectations
+        )
+
+        // Then: Exactly the three wraps we were missing come back, regardless of timestamp order
+        await fulfillment(of: Array(eventExpectations.values), timeout: 10.0)
+    }
+
+    /// Streams giftwraps through `negentropySubscribe` and publishes a freshly sent but backdated wrap
+    /// after reconciliation is done, so it can only arrive over the live subscription that follows.
+    /// With a backoff at least as wide as the NIP-59 fuzz window it must be delivered.
+    func testGiftwrapLiveStreamArrivesWithSinceBackoff() async throws {
+        let delivered = try await streamBackdatedGiftwrapAfterReconciliation(
+            port: 8093,
+            liveStreamSinceBackoff: NostrKind.giftwrapCreatedAtFuzzWindow
+        )
+        XCTAssertTrue(delivered, "A backdated wrap must reach the live stream when the since bound is backed off")
+    }
+
+    /// The counterpart to ``testGiftwrapLiveStreamArrivesWithSinceBackoff``: with no backoff the live
+    /// subscription's `since` is the moment syncing began, so the relay withholds a wrap whose fuzzed
+    /// timestamp lands behind that. This is exactly the hole that makes `sinceOptimization` unusable for
+    /// giftwraps, and it exists inside `negentropySubscribe` too if the backoff is left at zero.
+    func testGiftwrapLiveStreamMissedWithoutSinceBackoff() async throws {
+        let delivered = try await streamBackdatedGiftwrapAfterReconciliation(
+            port: 8094,
+            liveStreamSinceBackoff: 0
+        )
+        XCTAssertFalse(delivered, "Without a backoff the relay should filter the backdated wrap out")
+    }
+
+    /// Runs a giftwrap `negentropySubscribe` against an empty relay, publishes a wrap stamped 36 hours in
+    /// the past once reconciliation has finished, and reports whether the live stream delivered it.
+    private func streamBackdatedGiftwrapAfterReconciliation(port: UInt16, liveStreamSinceBackoff: UInt32) async throws -> Bool {
+        let relay = try await setupRelay(port: port)
+        let relayUrl = RelayURL(await relay.url().description)!
+        let relayConnection = await connectToRelay(url: relayUrl)
+        let relayPool = try await setupRelayPool(with: [relayUrl])
+
+        let now = UInt32(Date().timeIntervalSince1970)
+        // Published now, but stamped 36 hours ago the way NIP-59 tells senders to fuzz a wrap
+        let backdatedWrap = NostrEvent(
+            content: "backdated wrap",
+            keypair: test_keypair,
+            kind: NostrKind.giftwrap.rawValue,
+            tags: [["p", test_keypair.pubkey.hex()]],
+            createdAt: now - 36 * 60 * 60
+        )!
+
+        let reconciled = XCTestExpectation(description: "Negentropy reconciliation finished")
+        let gotWrap = XCTestExpectation(description: "Live stream delivered the backdated wrap")
+        gotWrap.assertForOverFulfill = false
+
+        let streamTask = Task {
+            do {
+                for try await item in try await relayPool.negentropySubscribe(
+                    filters: [NostrFilter(kinds: [.giftwrap])],
+                    negentropyVector: NegentropyStorageVector(),
+                    liveStreamSinceBackoff: liveStreamSinceBackoff,
+                    ignoreUnsupportedRelays: false
+                ) {
+                    switch item {
+                    case .event(let event):
+                        if event.id == backdatedWrap.id { gotWrap.fulfill() }
+                    case .eose:
+                        reconciled.fulfill()
+                    }
+                }
+            }
+            catch {
+                XCTFail("Stream Error: \(error)")
+            }
+        }
+        defer { streamTask.cancel() }
+
+        await fulfillment(of: [reconciled], timeout: 10.0)
+        // Give the live subscription that follows reconciliation a moment to actually reach the relay,
+        // otherwise the wrap below could race ahead of the REQ and tell us nothing either way.
+        try await Task.sleep(for: .seconds(2))
+        sendEvents([backdatedWrap], to: relayConnection)
+
+        let outcome = await XCTWaiter.fulfillment(of: [gotWrap], timeout: 8.0)
+        return outcome == .completed
+    }
 }

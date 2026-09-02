@@ -72,6 +72,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
+    var giftwrapsHandlerTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
     
@@ -564,6 +565,21 @@ class HomeModel: ContactsDelegate, ObservableObject {
         dms_filter.pubkeys = [ damus_state.pubkey ]
         our_dms_filter.authors = [ damus_state.pubkey ]
 
+        // NIP-17 DMs arrive as NIP-59 giftwraps addressed to us. There is no companion filter for the
+        // DMs we sent, the way `our_dms_filter` pairs with `dms_filter` for legacy NIP-04: a NIP-17
+        // send emits a second giftwrap addressed to the sender, so `#p: <us>` already covers both
+        // directions of every conversation.
+        //
+        // We do not read these in Swift at all. nostrdb's ingester unwraps each wrap into a plaintext
+        // kind-14 rumor, and the DM models read those rumors locally; getting the wraps into the
+        // database is the entire purpose of this subscription.
+        //
+        // Deliberately no `limit`, unlike `dms_filter`: negentropy already bounds the transfer to the
+        // ids we are actually missing, and a limit on a giftwrap filter truncates by the fuzzed
+        // timestamp, which drops an arbitrary subset of the conversation rather than its oldest part.
+        var giftwraps_filter = NostrFilter(kinds: [.giftwrap])
+        giftwraps_filter.pubkeys = [ damus_state.pubkey ]
+
         var notifications_filter_kinds: [NostrKind] = [
             .text,
             .boost,
@@ -581,6 +597,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
         let dms_filters = [dms_filter, our_dms_filter]
+        let giftwraps_filters = [giftwraps_filter]
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
@@ -626,6 +643,25 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     dms.append(contentsOf: incoming_dms)
                 case .networkEose: break
                 }
+            }
+        }
+        // Giftwraps get their own stream because they need `.negentropy` rather than the
+        // `.sinceOptimization` the legacy DM filters use. A wrap's `created_at` is randomized up to two
+        // days into the past to thwart time-analysis attacks, so a `since = latest seen` watermark would
+        // skip every wrap whose fake timestamp landed behind it and lose those messages for good.
+        // Negentropy reconciles on ids instead, which is immune to the fuzzing; the backoff below covers
+        // the same hazard on the live subscription that follows reconciliation.
+        self.giftwrapsHandlerTask?.cancel()
+        self.giftwrapsHandlerTask = Task {
+            for await _ in damus_state.nostrNetwork.reader.streamIndefinitely(
+                filters: giftwraps_filters,
+                streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: NostrKind.giftwrapCreatedAtFuzzWindow)),
+                // A wrap is signed by a throwaway key and references nobody, so there is no profile
+                // worth preloading — the default `.preload` would just chase thousands of dead pubkeys.
+                preloadStrategy: .noPreloading
+            ) {
+                // Deliberately empty: ingesting the wrap into nostrdb is the whole job, and the ingester
+                // does the unwrapping. Anything the stream hands us here is dropped.
             }
         }
         self.generalHandlerTask?.cancel()
@@ -1004,7 +1040,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let filters = [dms_filter, our_dms_filter]
         let timeoutSeconds: UInt64 = 20
         
-        for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy)) {
+        for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0))) {
             if Task.isCancelled { return }
             lender.justUseACopy({ self.process_event(ev: $0, context: .other) })
         }

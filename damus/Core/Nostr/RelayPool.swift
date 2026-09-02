@@ -830,10 +830,17 @@ class RelayPool {
     /// 1. Performs a negentropy sync, sending missing notes to the stream
     /// 2. Send EOSE to signal end of syncing
     /// 3. Stream new notes
+    ///
+    /// - Parameter liveStreamSinceBackoff: How far back to move the `since` bound of the live subscription
+    ///   in step 3, in seconds. Zero is right for kinds whose `created_at` is the honest send time, since
+    ///   reconciliation already covered everything older than the sync. Kinds that deliberately fuzz their
+    ///   timestamp need a backoff at least as wide as the fuzz window, or the relay will withhold freshly
+    ///   published events whose fake timestamp falls behind the bound.
     func negentropySubscribe(
         filters: [NostrFilter],
         to desiredRelayURLs: [RelayURL]? = nil,
         negentropyVector: NegentropyStorageVector,
+        liveStreamSinceBackoff: UInt32 = 0,
         eoseTimeout: Duration? = nil,
         id: UUID? = nil,
         ignoreUnsupportedRelays: Bool
@@ -848,9 +855,10 @@ class RelayPool {
             // 3. When syncing is done, send the EOSE signal
             continuation.yield(.eose)
             // 3. Stream new notes that match the filter
+            let liveStreamSince = negentropyStartTimestamp > liveStreamSinceBackoff ? negentropyStartTimestamp - liveStreamSinceBackoff : 0
             let updatedFilters = filters.map({ filter in
                 var newFilter = filter
-                newFilter.since = negentropyStartTimestamp
+                newFilter.since = liveStreamSince
                 return newFilter
             })
             for await item in await self.subscribe(filters: updatedFilters, to: desiredRelayURLs, eoseTimeout: eoseTimeout, id: id) {

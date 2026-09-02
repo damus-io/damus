@@ -54,3 +54,14 @@ enum NostrKind: UInt32, Codable {
     case contact_card = 30_382
     case follow_list = 39089
 }
+
+extension NostrKind {
+    /// How far into the past NIP-59 randomizes a ``giftwrap``'s `created_at`.
+    ///
+    /// NIP-59 says the wrap's timestamp "SHOULD be tweaked to thwart time-analysis attacks", up to two
+    /// days in the past, so a relay operator cannot correlate wraps by send time. Any `since` bound
+    /// applied to giftwraps therefore has to be moved back by at least this much, or a freshly
+    /// published wrap whose fake timestamp lands behind the bound is filtered out by the relay and
+    /// never reaches us.
+    static let giftwrapCreatedAtFuzzWindow: UInt32 = 2 * 24 * 60 * 60
+}
