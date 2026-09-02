@@ -17,40 +17,11 @@ struct PullDownSearchView: View {
     let state: DamusState
     let on_cancel: () -> Void
     
-    func do_search(query: String) {
-        let limit = 128
-        let note_keys = (try? state.ndb.text_search(query: query, limit: limit, order: .newest_first)) ?? []
-        var res = [NostrEvent]()
-        // TODO: fix duplicate results from search
-        var keyset = Set<NoteKey>()
+    func do_search(query: String) async {
+        guard let notes = await search_notes(state: state, query: query) else { return }
 
-        // try reverse because newest first is a bit buggy on partial searches
-        if note_keys.count == 0 {
-            // don't touch existing results if there are no new ones
-            return
-        }
-
-        do {
-            for note_key in note_keys {
-                try? state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
-                    switch maybeUnownedNote {
-                    case .none: return  // Skip this
-                    case .some(let unownedNote):
-                        if !keyset.contains(note_key) {
-                            let owned_note = unownedNote.toOwned()
-                            res.append(owned_note)
-                            keyset.insert(note_key)
-                        }
-                    }
-                })
-            }
-        }
-
-        // Text search can return keys in a mixed order; enforce newest-first here
-        let sorted = res.sorted { $0.created_at > $1.created_at }
-
-        Task { @MainActor [sorted] in
-            results = sorted
+        Task { @MainActor [notes] in
+            results = notes
         }
     }
 
@@ -62,7 +33,7 @@ struct PullDownSearchView: View {
                     .onChange(of: search_text) { query in
                         debouncer.debounce {
                             Task.detached {
-                                do_search(query: query)
+                                await do_search(query: query)
                             }
                         }
                     }

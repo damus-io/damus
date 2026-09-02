@@ -140,40 +140,11 @@ struct SearchResultsView: View {
     @State var results: [NostrEvent] = []
     let debouncer: Debouncer = Debouncer(interval: 0.25)
     
-    func do_search(query: String) {
-        let limit = 128
-        var note_keys = (try? damus_state.ndb.text_search(query: query, limit: limit, order: .newest_first)) ?? []
-        var res = [NostrEvent]()
-        // TODO: fix duplicate results from search
-        var keyset = Set<NoteKey>()
+    func do_search(query: String) async {
+        guard let notes = await search_notes(state: damus_state, query: query) else { return }
 
-        // try reverse because newest first is a bit buggy on partial searches
-        if note_keys.count == 0 {
-            // don't touch existing results if there are no new ones
-            return
-        }
-
-        do {
-            for note_key in note_keys {
-                try? damus_state.ndb.lookup_note_by_key(note_key, borrow: { maybeUnownedNote in
-                    switch maybeUnownedNote {
-                    case .none: return
-                    case .some(let unownedNote):
-                        if !keyset.contains(note_key) {
-                            let owned_note = unownedNote.toOwned()
-                            res.append(owned_note)
-                            keyset.insert(note_key)
-                        }
-                    }
-                })
-            }
-        }
-
-        // Text search can return keys in a mixed order; enforce newest-first here
-        let sorted = res.sorted { $0.created_at > $1.created_at }
-
-        Task { @MainActor [sorted] in
-            results = sorted
+        Task { @MainActor [notes] in
+            results = notes
         }
     }
     
@@ -192,11 +163,55 @@ struct SearchResultsView: View {
         .onChange(of: search) { query in
             debouncer.debounce {
                 Task.detached {
-                    do_search(query: query)
+                    await do_search(query: query)
                 }
             }
         }
+        // Muting someone from inside the results has to re-run the search rather than
+        // filter what is on screen: re-running also refills the slots the mute frees up.
+        .onReceive(handle_notify(.new_mutes)) { _ in
+            Task.detached { [search] in
+                await do_search(query: search)
+            }
+        }
+        .onReceive(handle_notify(.new_unmutes)) { _ in
+            Task.detached { [search] in
+                await do_search(query: search)
+            }
+        }
     }
+}
+
+/// Runs a nostrdb fulltext search for `query`, excluding the notes the user has muted.
+///
+/// The mute check is handed to nostrdb as a custom filter element, so muted notes are
+/// rejected during the index walk and never consume one of the `limit` result slots.
+/// Only note results are filtered — muted profiles still show up in profile search,
+/// so you can still navigate to someone you have muted.
+///
+/// - Parameters:
+///   - state: The app state, for the note database and the current mute list.
+///   - query: The raw search query.
+///   - limit: Maximum number of notes to return.
+/// - Returns: the hits newest-first, or `nil` when the search produced none — callers
+///   leave their existing results alone in that case.
+func search_notes(state: DamusState, query: String, limit: Int = Ndb.max_text_search_results) async -> [NostrEvent]? {
+    let rules = await state.mutelist_manager.rules
+    guard let filter = try? NdbFilter.excluding(rules) else { return nil }
+
+    let hits = (try? state.ndb.text_search(query: query, filter: filter, limit: limit, order: .newest_first)) ?? []
+
+    // don't touch existing results if there are no new ones
+    guard !hits.isEmpty else { return nil }
+
+    // TODO: fix duplicate results from search
+    var seen = Set<NoteKey>()
+    let keys = hits.compactMap({ seen.insert($0.noteKey).inserted ? $0.noteKey : nil })
+
+    let notes = (try? state.ndb.compact_map_notes(keys: keys, { _, note in note.toOwned() })) ?? []
+
+    // Text search can return keys in a mixed order; enforce newest-first here
+    return notes.sorted { $0.created_at > $1.created_at }
 }
 
 /// Interprets a raw search string and maps it to an appropriate `Search` case.

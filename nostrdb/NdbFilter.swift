@@ -22,18 +22,59 @@ import Foundation
 /// ```
 class NdbFilter {
     private let filterPointer: UnsafeMutablePointer<ndb_filter>
-    
+    /// Owns the predicate handed to nostrdb, if this filter has one.
+    ///
+    /// nostrdb stores the `ctx` we give it as a bare pointer and never retains it,
+    /// so the box has to live exactly as long as the filter does.
+    private let customPredicate: CustomPredicate?
+
     /// Creates a new NdbFilter from a NostrFilter.
     /// - Parameter nostrFilter: The NostrFilter to convert
     /// - Throws: `NdbFilterError.conversionFailed` if the underlying conversion fails
-    init(from nostrFilter: NostrFilter) throws {
+    convenience init(from nostrFilter: NostrFilter) throws {
+        try self.init(from: nostrFilter, matching: nil)
+    }
+
+    /// Creates a new NdbFilter from a NostrFilter, plus an arbitrary Swift predicate.
+    ///
+    /// The predicate becomes an `NDB_FILTER_CUSTOM` field, which nostrdb checks
+    /// alongside the converted fields: every field has to match, so `matching`
+    /// narrows the filter, it can never widen it. Because it is checked wherever
+    /// `ndb_filter_matches` is — including inside the text-search index walk,
+    /// before a candidate takes up a result slot — rejecting a note here is not the
+    /// same as dropping it from the results afterwards.
+    ///
+    /// - Warning: The note handed to `matching` is borrowed for the duration of the
+    ///   call. It is only valid while the query's transaction is open, and nostrdb
+    ///   does not tell us its size, so the note is created with a size of zero: the
+    ///   predicate must not let it escape, and must not call `to_owned()` on it
+    ///   (that would copy zero bytes). Read what you need and return.
+    ///
+    /// - Parameters:
+    ///   - nostrFilter: The NostrFilter to convert.
+    ///   - matching: A predicate run against each candidate note, returning `true`
+    ///     to keep it. Pass `nil` for no custom field.
+    /// - Throws: `NdbFilterError.conversionFailed` if the underlying conversion fails
+    init(from nostrFilter: NostrFilter, matching: (@Sendable (NostrEvent) -> Bool)?) throws {
+        let predicate = matching.map({ CustomPredicate($0) })
         do {
-            self.filterPointer = try Self.from(nostrFilter: nostrFilter)
+            self.filterPointer = try Self.from(nostrFilter: nostrFilter, matching: predicate)
         } catch {
             throw NdbFilterError.conversionFailed(error)
         }
+        self.customPredicate = predicate
     }
-    
+
+    /// A reference-typed box around a Swift predicate, so it can be handed to C as
+    /// an opaque `ctx` pointer and recovered on the other side.
+    fileprivate final class CustomPredicate {
+        let matches: @Sendable (NostrEvent) -> Bool
+
+        init(_ matches: @escaping @Sendable (NostrEvent) -> Bool) {
+            self.matches = matches
+        }
+    }
+
     /// Provides access to the underlying `ndb_filter` structure.
     /// - Returns: The underlying `ndb_filter` value (not a pointer)
     var ndbFilter: ndb_filter {
@@ -59,7 +100,7 @@ class NdbFilter {
     // MARK: - Conversion to/from ndb_filter
     
     // TODO: This function is long and repetitive, refactor it into something cleaner.
-    private static func from(nostrFilter: NostrFilter) throws(NdbFilterConversionError) -> UnsafeMutablePointer<ndb_filter> {
+    private static func from(nostrFilter: NostrFilter, matching predicate: CustomPredicate?) throws(NdbFilterConversionError) -> UnsafeMutablePointer<ndb_filter> {
         let filterPointer = UnsafeMutablePointer<ndb_filter>.allocate(capacity: 1)
 
         guard ndb_filter_init(filterPointer) == 1 else {
@@ -332,6 +373,26 @@ class NdbFilter {
             ndb_filter_end_field(filterPointer)
         }
 
+        // Handle the custom Swift predicate
+        if let predicate {
+            guard ndb_filter_start_field(filterPointer, NDB_FILTER_CUSTOM) == 1 else {
+                ndb_filter_destroy(filterPointer)
+                filterPointer.deallocate()
+                throw NdbFilterConversionError.failedToStartField
+            }
+
+            // Unretained: `predicate` is stored on the NdbFilter being built, so it
+            // outlives every call nostrdb can make through this pointer.
+            let ctx = Unmanaged.passUnretained(predicate).toOpaque()
+            if ndb_filter_add_custom_filter_element(filterPointer, custom_filter_trampoline, ctx) != 1 {
+                ndb_filter_destroy(filterPointer)
+                filterPointer.deallocate()
+                throw NdbFilterConversionError.failedToAddElement
+            }
+
+            ndb_filter_end_field(filterPointer)
+        }
+
         // Finalize the filter
         guard ndb_filter_end(filterPointer) == 1 else {
             ndb_filter_destroy(filterPointer)
@@ -353,6 +414,21 @@ class NdbFilter {
         ndb_filter_destroy(filterPointer)
         filterPointer.deallocate()
     }
+}
+
+/// The C entry point for `NDB_FILTER_CUSTOM` fields built by `NdbFilter`.
+///
+/// Non-capturing by necessity — nostrdb takes a plain function pointer — so the
+/// Swift predicate travels through the `ctx` pointer instead. Anything unexpected
+/// (a null context or note) keeps the note: a broken filter should never be able
+/// to silently hide notes.
+private let custom_filter_trampoline: @convention(c) (UnsafeMutableRawPointer?, OpaquePointer?) -> Bool = { ctx, note_ptr in
+    guard let ctx, let note_ptr else { return true }
+    let predicate = Unmanaged<NdbFilter.CustomPredicate>.fromOpaque(ctx).takeUnretainedValue()
+    // Size zero: nostrdb hands us no length here, and the note is only borrowed
+    // for this call. See the warning on `init(from:matching:)`.
+    let note = NostrEvent(note: ndb_note_ptr(ptr: note_ptr), size: 0, owned: false, key: nil)
+    return predicate.matches(note)
 }
 
 /// Errors that can occur when working with NdbFilter.

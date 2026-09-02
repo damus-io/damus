@@ -152,11 +152,67 @@ class MutelistManager {
     }
 
 
+    /// The current mute rules, as a value that can be carried off the main actor.
+    ///
+    /// The four sets are copy-on-write, so taking a snapshot is a handful of
+    /// retains rather than a copy of the mute list.
+    var rules: MuteRules {
+        MuteRules(
+            user_keypair: self.user_keypair,
+            users: self.users,
+            hashtags: self.hashtags,
+            threads: self.threads,
+            words: self.words
+        )
+    }
+
     /// Check if an event is muted given a collection of ``MutedItem``.
     ///
     /// - Parameter ev: The ``NostrEvent`` that you want to check the muted reason for.
     /// - Returns: The ``MuteItem`` that matched the event. Or `nil` if the event is not muted.
     func compute_event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
+        return self.rules.event_muted_reason(ev)
+    }
+    
+    enum EventMuteStatus {
+        case muted(reason: MuteItem)
+        case not_muted
+        
+        func mute_reason() -> MuteItem? {
+            switch self {
+                case .muted(reason: let reason):
+                    return reason
+                case .not_muted:
+                    return nil
+            }
+        }
+    }
+}
+
+
+/// A snapshot of the user's mute rules that can be checked anywhere.
+///
+/// ``MutelistManager`` is `@MainActor` because it owns mutable state and a cache,
+/// but muting questions get asked off the main actor too — nostrdb runs the
+/// filter callback on whatever thread is walking the index. This holds the same
+/// rules as a `Sendable` value, and owns the matching logic that the manager then
+/// caches on top of.
+struct MuteRules: Sendable {
+    let user_keypair: Keypair
+    let users: Set<MuteItem>
+    let hashtags: Set<MuteItem>
+    let threads: Set<MuteItem>
+    let words: Set<MuteItem>
+
+    func is_event_muted(_ ev: NostrEvent) -> Bool {
+        return self.event_muted_reason(ev) != nil
+    }
+
+    /// Check if an event is muted given a collection of ``MutedItem``.
+    ///
+    /// - Parameter ev: The ``NostrEvent`` that you want to check the muted reason for.
+    /// - Returns: The ``MuteItem`` that matched the event. Or `nil` if the event is not muted.
+    func event_muted_reason(_ ev: NostrEvent) -> MuteItem? {
         // Events from the current user should not be muted.
         guard self.user_keypair.pubkey != ev.pubkey else { return nil }
 
@@ -195,18 +251,18 @@ class MutelistManager {
 
         return nil
     }
-    
-    enum EventMuteStatus {
-        case muted(reason: MuteItem)
-        case not_muted
-        
-        func mute_reason() -> MuteItem? {
-            switch self {
-                case .muted(reason: let reason):
-                    return reason
-                case .not_muted:
-                    return nil
-            }
-        }
+}
+
+extension NdbFilter {
+    /// A filter that rejects the notes muted by `rules`.
+    ///
+    /// nostrdb checks this while it walks the index, so a muted note is skipped
+    /// before it takes up one of the query's result slots — unlike filtering the
+    /// results afterwards, which would quietly shrink them.
+    ///
+    /// It applies the full mute rules rather than just muted pubkeys, so search
+    /// agrees with the timelines on what "muted" means.
+    static func excluding(_ rules: MuteRules) throws -> NdbFilter {
+        return try NdbFilter(from: NostrFilter(), matching: { !rules.is_event_muted($0) })
     }
 }
