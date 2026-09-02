@@ -144,13 +144,55 @@ struct AdvancedSearchFilterSheet: View {
 
     // MARK: - Authors
 
-    private var authorResults: [Pubkey] {
+    /// What the local profile index has to say about what is in the author field.
+    ///
+    /// ``matched`` and ``addable`` are kept apart so an empty picker can explain
+    /// itself: nothing matched at all is a different answer from everything that
+    /// matched being on the query already, and showing no rows for both is what
+    /// made the field look broken.
+    private struct AuthorSuggestions {
+        /// What was typed, trimmed. Empty means the field is empty and there is
+        /// nothing to say either way.
+        let term: String
+        /// Every profile the index returned for ``term``.
+        let matched: [Pubkey]
+        /// Those of them not already on the query — the rows the picker offers.
+        let addable: [Pubkey]
+    }
+
+    private var authorSuggestions: AuthorSuggestions {
         let search = authorSearch.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !search.isEmpty else { return [] }
-        return search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
+        guard !search.isEmpty else { return AuthorSuggestions(term: "", matched: [], addable: []) }
+        let matched = search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
+        let addable = matched
             .filter({ !query.authors.contains($0) })
             .prefix(20)
             .map({ $0 })
+        return AuthorSuggestions(term: search, matched: matched, addable: addable)
+    }
+
+    /// Why the picker has no rows to show.
+    ///
+    /// The rest of this feature is careful to name where it looked — the results
+    /// empty states, the DSL's "No profile found for" on the explore pane — and the
+    /// picker searches the same local-only profile index, so it says so too rather
+    /// than going blank and leaving somebody retyping a name that was never going to
+    /// resolve.
+    @ViewBuilder
+    private func authorNote(_ suggestions: AuthorSuggestions) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if suggestions.matched.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.circle")
+                    Text("No profile found for \(suggestions.term)", comment: "Warning that a name typed into the advanced search author picker matches nobody known to this device.")
+                }
+                Text("Author search covers only the profiles already stored on this device.", comment: "Explanation that the advanced search author picker can only find profiles the app has already downloaded.")
+            } else {
+                Text("Already added to this search.", comment: "Note that every profile matching what was typed into the advanced search author picker is already one of its authors.")
+            }
+        }
+        .font(.footnote)
+        .foregroundColor(.secondary)
     }
 
     /// True once adding another author would drop the query off nostrdb's fast
@@ -162,7 +204,9 @@ struct AdvancedSearchFilterSheet: View {
     private var authorsAreFull: Bool { query.authors.count >= query.authorLimit }
 
     private var authorSection: some View {
-        Section {
+        let suggestions = authorSuggestions
+
+        return Section {
             ForEach(query.authors, id: \.self) { pubkey in
                 HStack {
                     UserViewRow(damus_state: damus_state, pubkey: pubkey)
@@ -185,7 +229,7 @@ struct AdvancedSearchFilterSheet: View {
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
 
-                ForEach(authorResults, id: \.self) { pubkey in
+                ForEach(suggestions.addable, id: \.self) { pubkey in
                     Button(action: {
                         query.authors.append(pubkey)
                         authorSearch = ""
@@ -198,6 +242,10 @@ struct AdvancedSearchFilterSheet: View {
                         }
                     }
                     .buttonStyle(.plain)
+                }
+
+                if !suggestions.term.isEmpty && suggestions.addable.isEmpty {
+                    authorNote(suggestions)
                 }
             }
         } header: {
