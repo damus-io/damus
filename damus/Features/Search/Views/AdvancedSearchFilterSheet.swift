@@ -26,15 +26,35 @@ struct AdvancedSearchFilterSheet: View {
 
     /// The keyword field's text.
     ///
-    /// Seeded from the query once and then only ever written *to* the query, never
-    /// read back. Deriving the text from `query.keywords` on every render instead
-    /// would rebuild it from the split words and eat the trailing space, making
-    /// multi-word entry impossible. The sheet is modal, so nothing else can change
-    /// the query underneath it while it is open.
-    @State private var keywordsText: String
+    /// Seeded from the query when the sheet appears and then only ever written *to*
+    /// the query, never read back. Deriving the text from `query.keywords` on every
+    /// render instead would rebuild it from the split words and eat the trailing
+    /// space, making multi-word entry impossible. The sheet is modal, so nothing
+    /// else can change the query underneath it while it is open.
+    ///
+    /// Seeded on appear rather than in `init`, which is what it used to do: a
+    /// presenter that sets the query and raises the sheet in one action can build
+    /// this view before that assignment is visible, and the snapshot came back
+    /// empty. That is not cosmetic — ``commitFields`` writes these fields back on
+    /// every keystroke *and* when Search is tapped, so an empty snapshot silently
+    /// dropped the words the sheet was opened with.
+    @State private var keywordsText: String = ""
 
     /// The exact-phrase field's text. Same one-way rule as ``keywordsText``.
-    @State private var phraseText: String
+    @State private var phraseText: String = ""
+
+    /// Whether ``keywordsText`` and ``phraseText`` have been seeded. One-shot: the
+    /// fields are the user's after that, and re-seeding would undo their typing.
+    @State private var didSeedFields = false
+
+    /// The tag being typed, before it is added.
+    ///
+    /// Deliberately *not* a mirror of `query.hashtags` the way ``keywordsText``
+    /// mirrors the keywords: the tags a query already carries are rendered from the
+    /// binding instead, so nothing here can be stale and no keystroke can write an
+    /// empty field back over them. ``keywordsText`` needs its own storage for a
+    /// reason a tag list does not have; where that choice is avoidable, avoid it.
+    @State private var tagDraft: String = ""
 
     @State private var authorSearch: String = ""
 
@@ -42,8 +62,15 @@ struct AdvancedSearchFilterSheet: View {
         self.damus_state = damus_state
         self._query = query
         self.onSearch = onSearch
-        self._keywordsText = State(initialValue: query.wrappedValue.keywords.joined(separator: " "))
-        self._phraseText = State(initialValue: Self.phraseFieldText(for: query.wrappedValue.phrases))
+    }
+
+    /// Fills the text fields in from the query the sheet was opened with. See
+    /// ``keywordsText``.
+    private func seedFields() {
+        guard !didSeedFields else { return }
+        didSeedFields = true
+        keywordsText = query.keywords.joined(separator: " ")
+        phraseText = Self.phraseFieldText(for: query.phrases)
     }
 
     // MARK: - Text fields
@@ -235,6 +262,74 @@ struct AdvancedSearchFilterSheet: View {
         }
     }
 
+    /// The tags the search is scoped to.
+    ///
+    /// Its own section rather than another line of the What section, because a tag
+    /// is an *index* axis nostrdb narrows on while it walks rather than something
+    /// matched against note content — and because the hashtag entry point arrives
+    /// with one already set, which has to be visible here or the sheet would
+    /// misdescribe the search it is about to run.
+    ///
+    /// Shaped like ``authorSection``: what the query holds is rendered from the
+    /// binding and removed a row at a time, and the field only ever *adds*. See
+    /// ``tagDraft``.
+    private var tagSection: some View {
+        Section {
+            ForEach(query.hashtags, id: \.self) { tag in
+                HStack {
+                    Text(verbatim: "#\(tag)")
+                    Spacer()
+                    Button(action: { query.hashtags.removeAll(where: { $0 == tag }) }) {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            TextField(NSLocalizedString("Add a hashtag", comment: "Placeholder for the field used to add a hashtag to an advanced search."),
+                      text: $tagDraft)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.never)
+                .onSubmit { addDraftTag() }
+
+            if !draftTagIsEmpty {
+                Button(action: addDraftTag) {
+                    HStack {
+                        Text(verbatim: draftTagLabel)
+                        Spacer()
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.accentColor)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        } header: {
+            Text("Tags", comment: "Section header for the hashtags an advanced search covers.")
+        } footer: {
+            Text("A note must carry every tag listed, as a tag rather than as a word in its text.", comment: "Explanation that advanced search hashtags are combined with AND and matched as tags.")
+        }
+    }
+
+    private var draftTagIsEmpty: Bool {
+        tagDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// The draft as it will read once added — the `#` shown whether or not it was
+    /// typed, since that is what the query means by a tag.
+    private var draftTagLabel: String {
+        let tag = tagDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        return tag.hasPrefix("#") ? tag : "#\(tag)"
+    }
+
+    /// Adds the draft. The `#`, the case and any duplicate are
+    /// ``AdvancedSearchQuery``'s to sort out, so the raw text goes straight in.
+    private func addDraftTag() {
+        guard !draftTagIsEmpty else { return }
+        query.hashtags.append(tagDraft)
+        tagDraft = ""
+    }
+
     private var typeSection: some View {
         Section {
             kindToggle(.text, NSLocalizedString("Notes", comment: "Toggle for including short text notes in an advanced search."))
@@ -263,11 +358,13 @@ struct AdvancedSearchFilterSheet: View {
         NavigationView {
             Form {
                 contentSection
+                tagSection
                 authorSection
                 dateSection
                 typeSection
                 sortSection
             }
+            .task { seedFields() }
             .navigationTitle(NSLocalizedString("Search filters", comment: "Title of the advanced search filter sheet."))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -275,6 +372,7 @@ struct AdvancedSearchFilterSheet: View {
                         query = AdvancedSearchQuery()
                         keywordsText = ""
                         phraseText = ""
+                        tagDraft = ""
                         authorSearch = ""
                     }) {
                         Text("Reset", comment: "Button clearing every advanced search filter.")
