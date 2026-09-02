@@ -20,7 +20,7 @@ upstreamed rather than carried here forever.
 | Where | What | Origin |
 | --- | --- | --- |
 | `src/sodium/` | Minimal ChaCha20-IETF providing `crypto_stream_chacha20_ietf_xor_ic`, the only libsodium symbol `src/nip44.c` uses. Upstream links all of `deps/libsodium`; vendoring that into the Xcode project would pull in its build system, CPU dispatch, randombytes and utils layers for one stream cipher. Validated against nostrdb's own NIP-44 test vectors. | damus-local |
-| `src/nostrdb.c` | Debug-only watchdog that registers read transactions in `_ndb_begin_query`, clears them in `ndb_end_query`, and aborts with the opening stack trace if one stays open past 3s. `#ifdef DEBUG` only. | `21ea74469b8f` |
+| `src/nostrdb.c` | Debug-only watchdog that registers read transactions in `_ndb_begin_query` keyed by owning `struct ndb_lmdb`, clears them in `ndb_end_query` and per-env in `ndb_destroy`, and aborts with the opening stack trace if one stays open past 3s. `#ifdef DEBUG` only. | `21ea74469b8f` and its follow-ups |
 | `src/nostrdb.c` | `ndb_note_to_blocks` passes the real buffer size (`2<<18`) to `ndb_parse_content`; upstream passes `content_len` as the buffer size. | `12a7b483a0ed` |
 | `src/nostrdb.h`, `src/nostr_bech32.c` | `kind`/`has_kind` on `bech32_nevent` and `bech32_nprofile`, `kind` on `bech32_naddr`, the `nostr_bech32_t` typedef, and `TLV_KIND` parsing (naddr additionally requires a kind). Consumed by `Bech32Object.swift`. | `d8e7b4707e7e` |
 | `src/block.c` | `assert(blocks->total_size < 1000000)` in `ndb_blocks_total_size`. | `919f644cba93` |

@@ -187,6 +187,7 @@ struct ndb_note_reply {
 #define NDB_DEBUG_QUERY_STACK_FRAME_LIMIT 64
 
 struct ndb_debug_query_txn {
+	const struct ndb_lmdb *lmdb;
 	const void *mdb_txn;
 	time_t opened_at;
 	int flags;
@@ -274,7 +275,8 @@ static void ndb_debug_register_query_txn(const struct ndb_txn *txn, int flags)
 	ndb_debug_abort_on_long_lived_queries(now);
 
 	for (i = 0; i < NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS; i++) {
-		if (ndb_debug_query_txns[i].mdb_txn == mdb_txn) {
+		if (ndb_debug_query_txns[i].mdb_txn == mdb_txn &&
+		    ndb_debug_query_txns[i].lmdb == txn->lmdb) {
 			ndb_debug_query_txns[i].opened_at = now;
 			ndb_debug_query_txns[i].flags = flags;
 			ndb_debug_query_txns[i].stack_frame_count = ndb_debug_capture_stack_trace(
@@ -288,6 +290,7 @@ static void ndb_debug_register_query_txn(const struct ndb_txn *txn, int flags)
 		if (ndb_debug_query_txns[i].mdb_txn != NULL)
 			continue;
 
+		ndb_debug_query_txns[i].lmdb = txn->lmdb;
 		ndb_debug_query_txns[i].mdb_txn = mdb_txn;
 		ndb_debug_query_txns[i].opened_at = now;
 		ndb_debug_query_txns[i].flags = flags;
@@ -319,12 +322,29 @@ static void ndb_debug_unregister_query_txn(const struct ndb_txn *txn)
 	for (i = 0; i < NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS; i++) {
 		if (ndb_debug_query_txns[i].mdb_txn != mdb_txn)
 			continue;
+		if (ndb_debug_query_txns[i].lmdb != txn->lmdb)
+			continue;
 
-		ndb_debug_query_txns[i].mdb_txn = NULL;
-		ndb_debug_query_txns[i].opened_at = 0;
-		ndb_debug_query_txns[i].flags = 0;
-		ndb_debug_query_txns[i].stack_frame_count = 0;
+		memset(&ndb_debug_query_txns[i], 0, sizeof(ndb_debug_query_txns[i]));
 		break;
+	}
+	pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
+}
+
+/* Closing the env abandons every read transaction still open on it: the
+ * MDB_txn structs are freed, so their entries would be left pointing at dead
+ * memory with a stale opened_at and would trip the watchdog on some later,
+ * unrelated ndb_begin_query. Forget them along with the env. */
+static void ndb_debug_clear_lmdb_query_txns(const struct ndb_lmdb *lmdb)
+{
+	int i;
+
+	pthread_mutex_lock(&ndb_debug_query_txns_mutex);
+	for (i = 0; i < NDB_DEBUG_MAX_ACTIVE_QUERY_TXNS; i++) {
+		if (ndb_debug_query_txns[i].lmdb != lmdb)
+			continue;
+
+		memset(&ndb_debug_query_txns[i], 0, sizeof(ndb_debug_query_txns[i]));
 	}
 	pthread_mutex_unlock(&ndb_debug_query_txns_mutex);
 }
@@ -9102,6 +9122,9 @@ void ndb_destroy(struct ndb *ndb)
 	ndb_monitor_destroy(&ndb->monitor);
 
 	ndb_debug("closing env\n");
+#ifdef DEBUG
+	ndb_debug_clear_lmdb_query_txns(&ndb->lmdb);
+#endif
 	mdb_env_close(ndb->lmdb.env);
 
 	ndb_debug("ndb destroyed\n");
