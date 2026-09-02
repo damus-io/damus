@@ -714,6 +714,12 @@ struct ContentView: View {
 
         guard let ndb = mndb else { return  }
 
+        // Register our secret key with the ingester threads on every open — see
+        // `Ndb.add_key`. Nothing to do for a pubkey-only (read-only) login.
+        if let privkey = keypair.privkey {
+            ndb.add_key(privkey)
+        }
+
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         

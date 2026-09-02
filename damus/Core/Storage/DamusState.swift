@@ -104,6 +104,14 @@ class DamusState: HeadlessDamusState, ObservableObject {
         guard let ndb = mndb else { return nil }
         let pubkey = keypair.pubkey
 
+        // Hand our secret key to nostrdb's ingester threads so inbound NIP-59 giftwraps
+        // are unwrapped on arrival. Those threads do not persist keys, so this belongs
+        // to opening the database, not to login. A pubkey-only login has nothing to
+        // register, and no DMs it could unwrap anyway.
+        if let privkey = keypair.privkey {
+            ndb.add_key(privkey)
+        }
+
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)

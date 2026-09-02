@@ -36,6 +36,18 @@ class Ndb {
     private var closed: Bool
     private var callbackHandler: Ndb.CallbackHandler
     private let ndbAccessLock: Ndb.UseLockProtocol = initLock()
+    /// Secret keys handed to the ingester threads by ``add_key``.
+    ///
+    /// nostrdb keeps these in ingester-thread memory and never writes them to lmdb —
+    /// `ndb_add_key` just dispatches `NDB_INGEST_ADD_KEY` to the running threads, and
+    /// nothing about it survives `ndb_destroy`. Registering a key is therefore part of
+    /// *opening* the database rather than a one-time migration, which is why we have to
+    /// remember here what to replay after ``reopen()``.
+    ///
+    /// Guarded by ``registeredKeysLock``. `Mutex` would read better but it needs iOS 18,
+    /// which is above our floor — see `Ndb.FallbackUseLock` for the same trade-off.
+    private var registeredKeys: [Privkey] = []
+    private let registeredKeysLock = NSLock()
     
     private static let DEFAULT_WRITER_SCRATCH_SIZE: Int32 = 2097152;  // 2mb scratch size for the writer thread, it should match with the one specified in nostrdb.c
 
@@ -304,7 +316,60 @@ class Ndb {
         self.ndb = db   // Set the new DB before marking it as open to prevent access to the old DB
         self.closed = false
         self.ndbAccessLock.markNdbOpen()
+
+        // `reopen` went through `ndb_init`, so the ingester threads are brand new and
+        // hold no keys. Hand ours back before anything can be ingested against them.
+        self.reregisterKeys()
         return true
+    }
+
+    // MARK: Ingester keys
+
+    /// Registers a secret key with the ingester threads, so that NIP-59 giftwraps
+    /// addressed to it are unwrapped as they arrive (1059 giftwrap -> kind-13 seal ->
+    /// kind-14 rumor) and the plaintext rumor stored as an ordinary note.
+    ///
+    /// Call this on every open, including ``reopen()`` — see ``registeredKeys`` for why
+    /// a registration made earlier, or in another process, says nothing about this one.
+    ///
+    /// Keys we already hold are dropped rather than re-sent: nostrdb does not
+    /// de-duplicate, so a repeat would burn one of its 128 ingester key slots and make
+    /// every giftwrap pay for a redundant decryption attempt.
+    ///
+    /// - Parameter privkey: the secret key to unwrap giftwraps with.
+    /// - Returns: whether the key reached the ingester threads.
+    @discardableResult
+    func add_key(_ privkey: Privkey) -> Bool {
+        self.registeredKeysLock.lock()
+        let alreadyRegistered = self.registeredKeys.contains(privkey)
+        if !alreadyRegistered {
+            self.registeredKeys.append(privkey)
+        }
+        self.registeredKeysLock.unlock()
+
+        guard !alreadyRegistered else { return true }
+        return self.dispatchKeyToIngesters(privkey)
+    }
+
+    /// Hands every key from ``add_key`` back to a freshly started set of ingester threads.
+    private func reregisterKeys() {
+        self.registeredKeysLock.lock()
+        let keys = self.registeredKeys
+        self.registeredKeysLock.unlock()
+
+        for privkey in keys {
+            if !self.dispatchKeyToIngesters(privkey) {
+                Log.error("Failed to re-register a nostrdb ingester key after reopen", for: .storage)
+            }
+        }
+    }
+
+    private func dispatchKeyToIngesters(_ privkey: Privkey) -> Bool {
+        return (try? withNdb({
+            // `ndb_add_key` takes a mutable pointer but only copies out of it.
+            var key = privkey.bytes
+            return ndb_add_key(self.ndb.ndb, &key) != 0
+        })) ?? false
     }
     
     /// Makes a copy of the database in a separate location
