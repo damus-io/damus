@@ -41,80 +41,83 @@ enum Search: Identifiable {
     }
 }
 
+/// The pill every tappable row on the search pane wears.
+private extension View {
+    func searchChip() -> some View {
+        self
+            .padding(.horizontal, 15)
+            .padding(.vertical, 5)
+            .background(DamusColors.neutral1)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(DamusColors.neutral3, lineWidth: 1)
+            )
+    }
+}
+
 struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?
-    @Binding var results: [NostrEvent]
-    
+
     func ProfileSearchResult(pk: Pubkey) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
     }
-    
+
     func HashtagSearch(_ ht: String) -> some View {
         let search_model = SearchModel(state: damus_state, search: .filter_hashtag([ht]))
         return NavigationLink(value: Route.Search(search: search_model)) {
             HStack {
                 Text(verbatim: "#\(ht)")
             }
-            .padding(.horizontal, 15)
-            .padding(.vertical, 5)
-            .background(DamusColors.neutral1)
-            .cornerRadius(20)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(DamusColors.neutral3, lineWidth: 1)
-            )
+            .searchChip()
         }
     }
-    
-    func TextSearch(_ txt: String) -> some View {
-        return NavigationLink(value: Route.NDBSearch(results: $results, query: txt)) {
-            HStack {
-                Text("Search word: \(txt)", comment: "Navigation link to search for a word.")
-            }
-            .padding(.horizontal, 15)
-            .padding(.vertical, 5)
-            .background(DamusColors.neutral1)
-            .cornerRadius(20)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(DamusColors.neutral3, lineWidth: 1)
-            )
-        }
-    }
-    
-    /// An "advanced search" row, when what was typed says more than a keyword.
+
+    /// Parses the typed text into the query the results screen will run.
     ///
-    /// Only shown when the DSL actually recognised something — a `from:`, a date,
-    /// a quoted phrase — so a plain word search still gets the plain "Search word"
-    /// chip and nothing extra. A `Button` rather than a `NavigationLink(value:)`
-    /// because the route carries a model, and a link's value is rebuilt on every
-    /// render of a view that re-renders on every keystroke.
-    @ViewBuilder
-    func AdvancedSearchRow(_ txt: String) -> some View {
-        let parsed = AdvancedSearchQueryDSL.parse(txt, resolveAuthor: { name in
+    /// A full DSL parse rather than a bag of literal keywords. The plain-word row
+    /// and the old "Advanced search" row now lead to the same screen, so anything
+    /// the parser understands has to be understood *here* or typing it would
+    /// quietly stop working: `from:`, `since:`, `kind:` and quoted phrases all keep
+    /// their meaning, and somebody who wants the literal text still has the DSL's
+    /// own escape hatch — quoting it.
+    ///
+    /// `#foo` becoming a tag axis rather than a keyword is the one collision worth
+    /// naming. ``search_for_string`` already routes a *leading* `#` to the hashtag
+    /// timeline before this view is reached, so it only applies to a tag written
+    /// mid-query — where the tag index is what was meant anyway.
+    private func parse(_ text: String) -> AdvancedSearchQueryDSL.ParseResult {
+        AdvancedSearchQueryDSL.parse(text, resolveAuthor: { name in
             search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: name).first
         })
+    }
 
-        if parsed.usedAdvancedSyntax && !parsed.query.isTrivial {
-            Button(action: {
-                damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: parsed.query)))
-            }) {
-                HStack {
+    /// The one row that runs the typed text against the note index.
+    ///
+    /// One row, not the "Search word:" and "Advanced search" pair it replaces:
+    /// those led to two different result screens, and now that they lead to the
+    /// same one a second chip has nothing left to offer. Only the label still
+    /// varies, because "Search word: from:jb55 dog" would misdescribe the query.
+    ///
+    /// A `Button` rather than a `NavigationLink(value:)` because the route carries
+    /// a model, and a link's value is rebuilt on every render of a view that
+    /// re-renders on every keystroke.
+    private func NoteSearch(_ parsed: AdvancedSearchQueryDSL.ParseResult, text: String) -> some View {
+        Button(action: {
+            damus_state.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: damus_state, query: parsed.query)))
+        }) {
+            HStack {
+                if parsed.usedAdvancedSyntax {
                     Image(systemName: "line.3.horizontal.decrease.circle")
                     Text("Advanced search", comment: "Navigation link to run the typed query as an advanced search.")
+                } else {
+                    Text("Search word: \(text)", comment: "Navigation link to search for a word.")
                 }
-                .padding(.horizontal, 15)
-                .padding(.vertical, 5)
-                .background(DamusColors.neutral1)
-                .cornerRadius(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(DamusColors.neutral3, lineWidth: 1)
-                )
             }
-            .buttonStyle(.plain)
+            .searchChip()
         }
+        .buttonStyle(.plain)
     }
 
     func ProfilesSearch(_ results: [Pubkey]) -> some View {
@@ -124,7 +127,26 @@ struct InnerSearchResults: View {
             }
         }
     }
-    
+
+    /// Everything a free-text query offers: the tag timeline, the note search, and
+    /// the profiles whose names match.
+    @ViewBuilder
+    private func MultiSearch(_ multi: MultiSearch) -> some View {
+        let parsed = parse(multi.text)
+
+        VStack(alignment: .leading) {
+            HStack(spacing: 20) {
+                HashtagSearch(multi.hashtag)
+                NoteSearch(parsed, text: multi.text)
+            }
+
+            Spacer()
+                .frame(height: 10)
+
+            ProfilesSearch(multi.profiles)
+        }
+    }
+
     var body: some View {
         Group {
             switch search {
@@ -150,21 +172,7 @@ struct InnerSearchResults: View {
             case .naddr(let naddr):
                 SearchingEventView(state: damus_state, search_type: .naddr(naddr))
             case .multi(let multi):
-                VStack(alignment: .leading) {
-                    HStack(spacing: 20) {
-                        HashtagSearch(multi.hashtag)
-                        TextSearch(multi.text)
-                    }
-
-                    AdvancedSearchRow(multi.text)
-                        .padding(.top, 10)
-
-                    Spacer()
-                        .frame(height: 10)
-
-                    ProfilesSearch(multi.profiles)
-                }
-                
+                MultiSearch(multi)
             case .none:
                 Text("none", comment: "No search results.")
             }
@@ -172,85 +180,30 @@ struct InnerSearchResults: View {
     }
 }
 
+/// The search pane: what the typed string could mean, as a list of ways in.
+///
+/// Nothing is searched from here. Note results live on ``AdvancedSearchView``,
+/// behind ``InnerSearchResults``'s note-search row, which is also what makes the
+/// mute list this view's non-problem: the results screen re-runs its own query
+/// when the mute list changes.
 struct SearchResultsView: View {
     let damus_state: DamusState
     @Binding var search: String
     @State var result: Search? = nil
-    @State var results: [NostrEvent] = []
-    let debouncer: Debouncer = Debouncer(interval: 0.25)
-    
-    func do_search(query: String) async {
-        guard let notes = await search_notes(state: damus_state, query: query) else { return }
 
-        Task { @MainActor [notes] in
-            results = notes
-        }
-    }
-    
     var body: some View {
         ScrollView {
-            InnerSearchResults(damus_state: damus_state, search: result, results: $results)
+            InnerSearchResults(damus_state: damus_state, search: result)
                 .padding()
         }
         .frame(maxHeight: .infinity)
         .onAppear {
             self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
         }
-        .onChange(of: search) { new in
+        .onChange(of: search) { _ in
             self.result = search_for_string(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
         }
-        .onChange(of: search) { query in
-            debouncer.debounce {
-                Task.detached {
-                    await do_search(query: query)
-                }
-            }
-        }
-        // Muting someone from inside the results has to re-run the search rather than
-        // filter what is on screen: re-running also refills the slots the mute frees up.
-        .onReceive(handle_notify(.new_mutes)) { _ in
-            Task.detached { [search] in
-                await do_search(query: search)
-            }
-        }
-        .onReceive(handle_notify(.new_unmutes)) { _ in
-            Task.detached { [search] in
-                await do_search(query: search)
-            }
-        }
     }
-}
-
-/// Runs a nostrdb fulltext search for `query`, excluding the notes the user has muted.
-///
-/// The mute check is handed to nostrdb as a custom filter element, so muted notes are
-/// rejected during the index walk and never consume one of the `limit` result slots.
-/// Only note results are filtered — muted profiles still show up in profile search,
-/// so you can still navigate to someone you have muted.
-///
-/// - Parameters:
-///   - state: The app state, for the note database and the current mute list.
-///   - query: The raw search query.
-///   - limit: Maximum number of notes to return.
-/// - Returns: the hits newest-first, or `nil` when the search produced none — callers
-///   leave their existing results alone in that case.
-func search_notes(state: DamusState, query: String, limit: Int = Ndb.max_text_search_results) async -> [NostrEvent]? {
-    let rules = await state.mutelist_manager.rules
-    guard let filter = try? NdbFilter.excluding(rules) else { return nil }
-
-    let hits = (try? state.ndb.text_search(query: query, filter: filter, limit: limit, order: .newest_first)) ?? []
-
-    // don't touch existing results if there are no new ones
-    guard !hits.isEmpty else { return nil }
-
-    // TODO: fix duplicate results from search
-    var seen = Set<NoteKey>()
-    let keys = hits.compactMap({ seen.insert($0.noteKey).inserted ? $0.noteKey : nil })
-
-    let notes = (try? state.ndb.compact_map_notes(keys: keys, { _, note in note.toOwned() })) ?? []
-
-    // Text search can return keys in a mixed order; enforce newest-first here
-    return notes.sorted { $0.created_at > $1.created_at }
 }
 
 /// Interprets a raw search string and maps it to an appropriate `Search` case.

@@ -7,8 +7,12 @@
 
 import SwiftUI
 
-/// Where an advanced search lands: the results, and the constraints that produced
+/// Where a note search lands: the results, and the constraints that produced
 /// them.
+///
+/// Every note search comes here — a single typed word as much as a `from:` with a
+/// date window — so the chips are a one-word search's only description of itself,
+/// and the empty states have to read for that case as well as the exotic ones.
 ///
 /// The chip row above the list is the load-bearing part. A narrowed local search
 /// can legitimately return very little, and the difference between "there is
@@ -22,9 +26,9 @@ struct AdvancedSearchView: View {
 
     /// The terms `EventView` highlights in the results.
     ///
-    /// Taken from the query rather than re-split out of the raw search text, which
-    /// is what `NDBSearchView` has to do — so a phrase highlights as a phrase and
-    /// a `from:` never highlights as a word.
+    /// Taken from the query rather than re-split out of the raw search text the
+    /// way the search screen this replaced had to — so a phrase highlights as a
+    /// phrase and a `from:` never highlights as a word.
     private var highlightTerms: [String] {
         var terms = model.query.phrases + model.query.keywords + model.query.hashtags
         terms = terms.map({ $0.lowercased() })
@@ -143,8 +147,8 @@ struct AdvancedSearchView: View {
             switch reason {
             case .emptyQuery:
                 empty(NSLocalizedString("Search notes", comment: "Title of the advanced search empty state before anything has been entered."),
-                      NSLocalizedString("Add a word, a phrase, an author or a hashtag to search for.",
-                                        comment: "Explanation of what an advanced search needs before it can run."))
+                      NSLocalizedString("Use the filters button to add a word, a phrase, an author or a hashtag.",
+                                        comment: "Explanation of what an advanced search needs before it can run, and where to add it."))
             case .unconstrained:
                 empty(NSLocalizedString("Nothing to search for", comment: "Title shown when an advanced search has a date range but nothing to look for."),
                       NSLocalizedString("A date range on its own would match every note. Add a word, an author or a hashtag.",

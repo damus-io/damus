@@ -951,6 +951,113 @@ final class AdvancedSearchModelTests: XCTestCase {
         XCTAssertEqual(contents(model.state), [])
     }
 
+    // MARK: Unified plain-word search
+
+    /// A keyword nothing else in the shared database uses.
+    ///
+    /// `test_damus_state` is one process-wide nostrdb and XCTest builds a fresh
+    /// instance of this class per test method, so every test's fixture notes pile
+    /// up in it under a different generated keypair. The author-scoped tests above
+    /// are blind to that; a *global* search — which is exactly what a bare word
+    /// search now takes — sees every one of them, so the word itself has to be
+    /// unique per test rather than the author.
+    private let globalWord = "runnerglobal" + String(UInt64.random(in: 0..<UInt64.max), radix: 36)
+
+    /// Three notes carrying ``globalWord``, for searches that pin no author.
+    private func seedGlobal() throws -> DamusState {
+        let state = test_damus_state
+        let notes = [
+            try note("\(globalWord) alpha", at: base),
+            try note("\(globalWord) beta", at: base + 10),
+            try note("\(globalWord) gamma", at: base + 20),
+        ]
+        for note in notes { try state.ndb.add(event: note) }
+
+        let filter = NostrFilter(kinds: [.text], authors: [keypair.pubkey])
+        for _ in 0..<200 {
+            let keys = (try? state.ndb.query(filters: [try NdbFilter(from: filter)], maxResults: 16)) ?? []
+            if keys.count >= notes.count { return state }
+            usleep(25_000)
+        }
+        XCTFail("nostrdb never ingested the fixture notes")
+        return state
+    }
+
+    /// The parity case for unifying the two result screens: a bare typed word,
+    /// with no author and no filters, is now the *common* shape rather than the
+    /// exotic one, and it has to find what the flat search screen found.
+    ///
+    /// No author means the global strategy, so this also covers the path where
+    /// nostrdb's fulltext index — rather than an index walk — generates the
+    /// candidates.
+    func test_a_plain_word_search_with_no_filters_finds_the_notes() async throws {
+        let state = try seedGlobal()
+        let model = AdvancedSearchModel(damus_state: state,
+                                        query: AdvancedSearchQuery(keywords: [globalWord]))
+        model.search()
+
+        let settled = try await settle(model, until: { if case .results = $0 { return true }; return false })
+        XCTAssertEqual(contents(settled),
+                       ["\(globalWord) gamma", "\(globalWord) beta", "\(globalWord) alpha"])
+    }
+
+    /// Empty results clear the list instead of leaving the last query's hits on
+    /// screen.
+    ///
+    /// A deliberate behaviour change to the shipped search rather than a detail of
+    /// the runner: `search_notes` returned `nil` when it found nothing and both of
+    /// its callers left their results alone, so a query that matched nothing
+    /// displayed the *previous* query's notes as though they were the answer.
+    func test_empty_results_clear_the_previous_hits() async throws {
+        let state = try seedGlobal()
+        let model = AdvancedSearchModel(damus_state: state,
+                                        query: AdvancedSearchQuery(keywords: [globalWord]))
+        model.search()
+        _ = try await settle(model, until: { state in
+            if case .results(let events, _) = state { return events.count == 3 }
+            return false
+        })
+
+        model.query = AdvancedSearchQuery(keywords: [globalWord, "zzzunmatchable"])
+
+        let settled = try await settle(model, until: { state in
+            if case .results(let events, _) = state { return events.isEmpty }
+            return false
+        })
+        XCTAssertEqual(contents(settled), [], "no hits means no results, not the old ones")
+    }
+
+    /// The one way a plain word search's results legitimately change.
+    ///
+    /// nostrdb's index matches a long word fuzzily: `ndb_prefix_matches`
+    /// (`nostrdb/src/nostrdb.c:6323`) keeps a candidate while the shared prefix is
+    /// longer than `search_word->word_len / 1.5`, so searching for `<word>ify`
+    /// returns an indexed `<word>iness` — and the old flat screen rendered that as
+    /// a hit. Every candidate now goes through ``SearchContentMatcher``, which
+    /// narrows the rule to a true prefix.
+    func test_a_plain_word_search_narrows_nostrdbs_fuzzy_prefix_match() async throws {
+        let state = test_damus_state
+        let indexed = globalWord + "iness"
+        let searched = globalWord + "ify"
+        try state.ndb.add(event: try note("\(indexed) abounds", at: base + 30))
+
+        var candidates: [NoteKey] = []
+        for _ in 0..<200 {
+            candidates = (try? state.ndb.text_search(query: searched)) ?? []
+            if !candidates.isEmpty { break }
+            usleep(25_000)
+        }
+        XCTAssertFalse(candidates.isEmpty,
+                       "the index is expected to offer the near-miss word as a candidate")
+
+        let model = AdvancedSearchModel(damus_state: state,
+                                        query: AdvancedSearchQuery(keywords: [searched]))
+        model.search()
+
+        let settled = try await settle(model, until: { if case .results = $0 { return true }; return false })
+        XCTAssertEqual(contents(settled), [], "a fuzzy index candidate is not a match")
+    }
+
     /// Assigning the same query again must not restart anything, or a view that
     /// re-renders would re-search on every pass.
     func test_reassigning_the_same_query_is_a_no_op() async throws {

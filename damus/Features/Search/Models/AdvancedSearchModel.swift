@@ -16,14 +16,14 @@ import Foundation
 /// and the results are always the ones the current query asked for.
 ///
 /// The model owns its results rather than writing into a binding, so a `Route`
-/// can carry it without threading a `Binding` through navigation the way
-/// `Route.NDBSearch` does.
+/// can carry it without threading a `Binding` through navigation the way the
+/// search route it replaced had to.
 @MainActor
 final class AdvancedSearchModel: ObservableObject {
     /// How long to wait for typing to stop before touching the database.
     ///
-    /// Matches the 0.25s the existing search field already uses (`Debouncer` in
-    /// `SearchResultsView`), so the two panes feel the same.
+    /// Matches the 0.25s the explore pane's search field already used before every
+    /// note search came through here, so the timing is unchanged from what shipped.
     static let debounceInterval: Duration = .milliseconds(250)
 
     /// What to search for. Assigning it starts a new search and abandons any
