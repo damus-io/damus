@@ -923,6 +923,35 @@ class RelayPool {
                         // Therefore, realistically, we cannot rely on what the relay advertises and
                         // we have to suppress those errors if we want to ignore unsupported relays to avoid the whole multi-relay negentropy syncing operation to fail
                         Log.error("Error while negentropy streaming: %s", for: .networking, error.localizedDescription)
+
+                        // Reconciliation failed, so fall back to an ordinary REQ for this relay.
+                        //
+                        // Skipping the relay outright is what the code used to do, and for the one
+                        // caller that depends on this — the NIP-17 giftwrap subscription — it meant
+                        // no history at all: negentropy is the only thing fetching it, and what
+                        // follows reconciliation is a `since`-bounded live stream. Most relays do not
+                        // support NIP-77, so on a typical relay set every giftwrap older than the
+                        // live stream's backoff was simply never asked for.
+                        //
+                        // The filter is passed through untouched, without a `since` and without a
+                        // `limit`, which is what makes this correct for giftwraps: their `created_at`
+                        // is randomized up to two days into the past, so a `since` drops wraps whose
+                        // fake timestamp lands behind it and a `limit` truncates by that same fake
+                        // timestamp, taking an arbitrary slice of the conversation rather than its
+                        // oldest part. It costs a full re-listing from this relay on each sync, which
+                        // nostrdb deduplicates on ingest, and that is the cheaper mistake.
+                        do {
+                            for await event in self.subscribeExistingItems(filters: [filter], to: [desiredRelay.descriptor.url], eoseTimeout: eoseTimeout) {
+                                try Task.checkCancellation()
+                                continuation.yield(event)
+                                negentropyVector.unseal()
+                                try negentropyVector.insert(nostrEvent: event)
+                            }
+                        }
+                        catch is CancellationError { throw error }
+                        catch {
+                            Log.error("Fallback REQ after failed negentropy sync also failed: %s", for: .networking, error.localizedDescription)
+                        }
                     }
                     else {
                         DamusSentry.captureSentryError(error) { scope in

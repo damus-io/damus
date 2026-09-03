@@ -350,7 +350,18 @@ class Ndb {
         self.registeredKeysLock.unlock()
 
         guard !alreadyRegistered else { return true }
-        return self.dispatchKeyToIngesters(privkey)
+
+        let registered = self.dispatchKeyToIngesters(privkey)
+        if registered {
+            Log.info("NIP-17: registered a giftwrap unwrapping key with the nostrdb ingesters", for: .storage)
+        }
+        else {
+            // Silent until now, and the most total failure this feature has: without a key in the
+            // ingesters every kind-1059 is stored still wrapped and no kind-14 rumor is ever produced,
+            // so the DM list is simply empty with nothing anywhere saying why.
+            Log.error("NIP-17: nostrdb rejected our giftwrap unwrapping key — no DMs will be unwrapped", for: .storage)
+        }
+        return registered
     }
 
     /// Hands every key from ``add_key`` back to a freshly started set of ingester threads.
@@ -423,13 +434,18 @@ class Ndb {
     /// synchronous and can be long, and parking a cooperative-pool thread on it is
     /// exactly what that pool is not for.
     func backfillGiftwrapsInBackground() {
-        guard self.hasRegisteredKeys else { return }
+        guard self.hasRegisteredKeys else {
+            // Normal for a pubkey-only login, and a dead end for any other: worth saying out loud,
+            // because the symptom either way is a DM list that stays empty for no visible reason.
+            Log.info("NIP-17: skipping giftwrap backfill, no unwrapping key is registered", for: .storage)
+            return
+        }
 
         DispatchQueue.global(qos: .utility).async {
             do {
                 let dispatched = try self.process_giftwraps()
                 // Expected to be zero on every launch after the first one that had a key.
-                Log.info("Dispatched %d stored giftwraps for unwrapping", for: .storage, dispatched)
+                Log.info("NIP-17: dispatched %d stored giftwraps for unwrapping", for: .storage, dispatched)
             }
             catch {
                 Log.error("Failed to backfill giftwraps: %{public}@", for: .storage, error.localizedDescription)

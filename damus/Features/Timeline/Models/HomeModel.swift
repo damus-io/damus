@@ -691,6 +691,11 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 Task { await damus_state.nostrNetwork.userRelayList.releaseDMInboxRelays(inboxRelays.leased) }
             }
 
+            Log.info("NIP-17: subscribing to giftwraps for %s on %d relay(s)", for: .homeModel,
+                     damus_state.pubkey.hex(),
+                     inboxRelays.target.count)
+
+            var giftwrapsSeen = 0
             for await _ in damus_state.nostrNetwork.reader.streamIndefinitely(
                 filters: giftwraps_filters,
                 // `nil` rather than an empty list, which would mean "no relays" instead of "all of
@@ -702,8 +707,14 @@ class HomeModel: ContactsDelegate, ObservableObject {
                 // worth preloading — the default `.preload` would just chase thousands of dead pubkeys.
                 preloadStrategy: .noPreloading
             ) {
-                // Deliberately empty: ingesting the wrap into nostrdb is the whole job, and the ingester
-                // does the unwrapping. Anything the stream hands us here is dropped.
+                // Nothing is read out of the wrap — ingesting it is the whole job, and the ingester
+                // does the unwrapping. We only count them, because "no DMs" has too many possible
+                // causes to tell apart otherwise: a wrap counted here but no rumor logged below means
+                // the unwrap failed, and no wraps counted at all means they never arrived.
+                giftwrapsSeen += 1
+                if giftwrapsSeen == 1 || giftwrapsSeen % 50 == 0 {
+                    Log.info("NIP-17: giftwrap subscription has received %d wrap(s)", for: .homeModel, giftwrapsSeen)
+                }
             }
         }
         self.generalHandlerTask?.cancel()
@@ -1140,6 +1151,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             return
         }
 
+        Log.info("NIP-17: unwrapped rumor %s reached the DM list", for: .homeModel, ev.id.hex())
         self.handle_dm(ev)
     }
 
