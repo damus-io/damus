@@ -158,6 +158,32 @@ class DraftArtifacts: Equatable {
 }
 
 
+/// A NIP-37 draft that has been read out of storage and decrypted, but has not been turned
+/// into editable `DraftArtifacts` yet.
+///
+/// This is the hand-off between the two halves of a draft load. Everything in here is produced
+/// off the main thread by `Drafts.read_draft(wrapped_draft_note:keypair:)`, and
+/// `Drafts.publish(loaded_draft:with:)` turns it into artifacts on the main thread.
+fileprivate struct LoadedDraft {
+    /// The unique ID of this draft, as per NIP-37
+    let draft_id: String
+    /// The parsed contents of the note that was being drafted
+    let parsed_blocks: Blocks
+    /// The references of the note that was being drafted, which become tags once it is published
+    let references: [RefId]
+    /// Where this draft belongs in `Drafts`
+    let slot: Slot
+
+    /// The `Drafts` property a loaded draft should be filed under
+    enum Slot {
+        case post
+        case reply(to: NoteId)
+        case quote(of: NoteId)
+        case highlight(HighlightContentDraft)
+    }
+}
+
+
 /// Holds and keeps track of the note post drafts throughout the app.
 class Drafts: ObservableObject {
     @Published var post: DraftArtifacts? = nil
@@ -168,65 +194,151 @@ class Drafts: ObservableObject {
     /// ## Implementation notes
     /// - Although in practice we also load drafts based on the highlight source for better UX (making it easier to find a draft), we need the keys to be of type `HighlightContentDraft` because we need the selected text information to be able to construct the NIP-37 draft, as well as to load that into post view.
     @Published var highlights: [HighlightContentDraft: DraftArtifacts] = [:]
-    
+
+    /// Serializes access to `pending_loads`, and doubles as the queue drafts are read and
+    /// decrypted on.
+    private let load_queue = DispatchQueue(label: "com.damus.drafts-load", qos: .userInitiated)
+    /// Drafts that have been read off disk but not published into the properties above yet.
+    /// Only touched from `load_queue`.
+    private var pending_loads: [LoadedDraft]? = nil
+
     /// Loads drafts from storage (NostrDB + UserDefaults)
+    ///
+    /// The expensive part of loading a draft — the NostrDB lookup, the NIP-44 decrypt and the
+    /// content parse — runs on `load_queue`, because doing it inline used to put a secp256k1
+    /// ECDH per draft on the main thread during launch. Only building the `DraftArtifacts` and
+    /// publishing them happens on the main thread, in `finish_loading(with:)`.
+    ///
+    /// This returns before the drafts are loaded, so anything that reads the drafts must call
+    /// `finish_loading(with:)` first.
     func load(from damus_state: DamusState) {
+        guard let full_keypair = damus_state.keypair.to_full() else { return }
         guard let note_ids = damus_state.settings.draft_event_ids?.compactMap({ NoteId(hex: $0) }) else { return }
-        for note_id in note_ids {
-            let note = try? damus_state.ndb.lookup_note(note_id, borrow: { event in
-                return event?.toOwned()
-            })
-            guard let note else { continue }
+        let ndb = damus_state.ndb
+        load_queue.async {
+            self.pending_loads = Self.read_drafts(note_ids: note_ids, from: ndb, keypair: full_keypair)
+            DispatchQueue.main.async { self.finish_loading(with: damus_state) }
+        }
+    }
+
+    /// Publishes the drafts read by `load(from:)`, waiting for that read if it is still running.
+    ///
+    /// Everything that reads the drafts must call this first, so that it can never see a
+    /// half-loaded `Drafts` — the post composer would then start a fresh post over a saved
+    /// draft, and saving would drop the saved draft's ID from `draft_event_ids`.
+    ///
+    /// In practice this never actually waits: the read is kicked off during launch and takes a
+    /// few milliseconds, long before there is anything on screen to open the composer from. It
+    /// is a no-op once the drafts have been published, and if `load(from:)` was never called.
+    ///
+    /// Must be called on the main thread, since it writes the `@Published` properties.
+    func finish_loading(with damus_state: DamusState) {
+        let loaded_drafts = load_queue.sync(execute: {
+            defer { self.pending_loads = nil }
+            return self.pending_loads
+        })
+        guard let loaded_drafts else { return }
+        for loaded_draft in loaded_drafts {
+            self.publish(loaded_draft: loaded_draft, with: damus_state)
+        }
+    }
+
+    /// Loads a specific NIP-37 note into this class
+    func load(wrapped_draft_note: NdbNote, with damus_state: DamusState) throws {
+        guard let full_keypair = damus_state.keypair.to_full() else { return }
+        guard let loaded_draft = try Self.read_draft(wrapped_draft_note: wrapped_draft_note, keypair: full_keypair) else { return }
+        self.publish(loaded_draft: loaded_draft, with: damus_state)
+    }
+
+    /// Reads the saved drafts out of NostrDB and decrypts them.
+    ///
+    /// This is the expensive half of loading drafts, and it deliberately touches nothing that
+    /// needs the main thread, so that it can run on `load_queue`.
+    private static func read_drafts(note_ids: [NoteId], from ndb: Ndb, keypair: FullKeypair) -> [LoadedDraft] {
+        return note_ids.compactMap({ note_id in
+            // Copy the note out of NostrDB — a borrowed note is only valid for as long as the lookup.
+            guard let wrapped_draft_note = try? ndb.lookup_note_and_copy(note_id) else { return nil }
             // Implementation note: This currently fails silently, because:
             // 1. Errors are unlikely and not expected
             // 2. It is not mission critical to recover from this error
             // 3. The changes that add a error view sheet with useful info is not yet merged in as of writing.
-            try? self.load(wrapped_draft_note: note, with: damus_state)
-        }
+            return try? Self.read_draft(wrapped_draft_note: wrapped_draft_note, keypair: keypair)
+        })
     }
-    
-    /// Loads a specific NIP-37 note into this class
-    func load(wrapped_draft_note: NdbNote, with damus_state: DamusState) throws {
-        // Extract draft info from the NIP-37 note
-        guard let full_keypair = damus_state.keypair.to_full() else { return }
-        guard let nip37_draft = try NIP37Draft(wrapped_note: wrapped_draft_note, keypair: full_keypair) else { return }
-        guard let known_kind = nip37_draft.unwrapped_note.known_kind else { return }
-        guard let draft_artifacts = DraftArtifacts.from(
-            nip37_draft: nip37_draft,
-            damus_state: damus_state
-        ) else { return }
-        
-        // Find out where to place these drafts
-        guard let blocks = parse_note_content(content: .note(nip37_draft.unwrapped_note)) else {
-            return
-        }
 
+    /// Decrypts a NIP-37 draft note, parses it, and works out where the draft belongs.
+    ///
+    /// Safe to call off the main thread: this only touches the note, the keypair and the
+    /// content parser.
+    private static func read_draft(wrapped_draft_note: NdbNote, keypair: FullKeypair) throws -> LoadedDraft? {
+        // Extract draft info from the NIP-37 note
+        guard let nip37_draft = try NIP37Draft(wrapped_note: wrapped_draft_note, keypair: keypair) else { return nil }
+        let draft_note = nip37_draft.unwrapped_note
+        guard let known_kind = draft_note.known_kind else { return nil }
+        guard let parsed_blocks = parse_note_content(content: .init(note: draft_note, keypair: keypair.to_keypair())) else { return nil }
+
+        // Find out where to place this draft
+        let slot: LoadedDraft.Slot
         switch known_kind {
         case .text:
-            if let replied_to_note_id = nip37_draft.unwrapped_note.direct_replies() {
-                self.replies[replied_to_note_id] = draft_artifacts
+            if let replied_to_note_id = draft_note.direct_replies() {
+                slot = .reply(to: replied_to_note_id)
             }
             else {
-                for block in blocks.blocks {
-                    if case .mention(let mention) = block {
-                        if case .note(let note_id) = mention.ref.nip19 {
-                            self.quotes[note_id] = draft_artifacts
-                            return
-                        }
-                    }
-                }
-                self.post = draft_artifacts
+                // Implementation note: `NoteContent.init(note:keypair:)` parses a `.text` note as-is,
+                // so `parsed_blocks` is what a plain parse of the note would give us here.
+                slot = Self.quoted_note_id(in: parsed_blocks).map({ .quote(of: $0) }) ?? .post
             }
         case .highlight:
-            guard let highlight = HighlightContentDraft(from: nip37_draft.unwrapped_note) else { return }
-            self.highlights[highlight] = draft_artifacts
+            guard let highlight = HighlightContentDraft(from: draft_note) else { return nil }
+            slot = .highlight(highlight)
         default:
-            return
+            return nil
+        }
+
+        return LoadedDraft(
+            draft_id: nip37_draft.id ?? UUID().uuidString,  // Generate random UUID as the draft ID if none is specified. It is always better to have an ID that we can use for addressing later.
+            parsed_blocks: parsed_blocks,
+            references: Array(draft_note.references),
+            slot: slot
+        )
+    }
+
+    /// The note a draft quotes, if it quotes one.
+    private static func quoted_note_id(in blocks: Blocks) -> NoteId? {
+        for block in blocks.blocks {
+            if case .mention(let mention) = block, case .note(let note_id) = mention.ref.nip19 {
+                return note_id
+            }
+        }
+        return nil
+    }
+
+    /// Turns a decrypted draft into editable artifacts and files it under the right property.
+    ///
+    /// Must be called on the main thread: it writes the `@Published` properties, and building the
+    /// artifacts resolves SwiftUI colors through UIKit.
+    private func publish(loaded_draft: LoadedDraft, with damus_state: DamusState) {
+        let draft_artifacts = DraftArtifacts.from(
+            parsed_blocks: loaded_draft.parsed_blocks,
+            references: loaded_draft.references,
+            draft_id: loaded_draft.draft_id,
+            damus_state: damus_state
+        )
+        switch loaded_draft.slot {
+        case .post: self.post = draft_artifacts
+        case .reply(let replied_to_note_id): self.replies[replied_to_note_id] = draft_artifacts
+        case .quote(let quoted_note_id): self.quotes[quoted_note_id] = draft_artifacts
+        case .highlight(let highlight): self.highlights[highlight] = draft_artifacts
         }
     }
-    
+
     /// Saves the drafts tracked by this class persistently using NostrDB + UserDefaults
     func save(damus_state: DamusState) async {
+        // This rewrites `draft_event_ids` from what we have in memory, so the startup load has
+        // to have landed first — otherwise we would drop the IDs of drafts we never read back.
+        await MainActor.run { self.finish_loading(with: damus_state) }
+
         var draft_events: [NdbNote] = []
         post_artifact_block: if let post_artifacts = self.post {
             let nip37_draft = try? await post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state)
