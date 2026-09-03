@@ -39,6 +39,16 @@ enum NostrKind: UInt32, Codable {
     case live_chat = 1311
     case mute_list = 10000
     case relay_list = 10002
+    /// A NIP-17 DM inbox relay list: the relays a user wants their private messages delivered to.
+    ///
+    /// This is *not* the NIP-65 ``relay_list``. A NIP-17 giftwrap has to reach the relays the
+    /// recipient actually reads DMs from, which may be a small, private set they never publish as
+    /// write relays — so publishing to our own write relays instead is valid but, for anyone whose
+    /// inbox relays we do not happen to be connected to, undeliverable.
+    ///
+    /// The tags are a flat list of `["relay", "<url>"]`, with no read/write markers: every relay in
+    /// the list is an inbox.
+    case dm_relay_list = 10050
     case interest_list = 10015
     case list_deprecated = 30000
     case draft = 31234

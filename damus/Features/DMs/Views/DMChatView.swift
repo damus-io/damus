@@ -135,6 +135,10 @@ struct DMChatView: View, KeyboardReadable {
     ///
     /// It also means we do not have to wait for the relay to echo our own wrap back to us, which is
     /// the only other way our sent messages would ever reach the database.
+    ///
+    /// The two wraps are published to different relays — each addressee's own NIP-17 DM inbox relays
+    /// (kind 10050), which is the only place either of us is guaranteed to look for a message meant
+    /// for us. See ``NostrNetworkManager/publishGiftWrap(_:to:)``.
     func send_message() async {
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return
@@ -158,10 +162,6 @@ struct DMChatView: View, KeyboardReadable {
 
         dms.draft = ""
 
-        for giftWrap in dm.giftWraps {
-            await damus_state.nostrNetwork.postbox.send(giftWrap)
-        }
-
         do { try damus_state.ndb.add(event: dm.giftWrapToSelf) }
         catch {
             // The message is on its way regardless; it will show up once a relay echoes our own wrap
@@ -170,6 +170,25 @@ struct DMChatView: View, KeyboardReadable {
         }
 
         end_editing()
+
+        // Each wrap goes to its own addressee's DM inbox relays, which is what makes a NIP-17 message
+        // reachable rather than merely valid: theirs to the relays they told the world they read DMs
+        // from, ours to the ones we read. Sending both to our own write relays — what phase 6 did —
+        // lands their copy somewhere they have no reason to look.
+        //
+        // Our own inbox goes first, and only then theirs: this half is a local read, while looking up
+        // their kind-10050 may have to go ask the network for it, and the message should not sit
+        // unsent on our side for the length of someone else's relay round trip.
+        let userRelayList = damus_state.nostrNetwork.userRelayList
+        let ourInboxRelays = userRelayList.ourBestEffortDMInboxRelays()
+        await damus_state.nostrNetwork.publishGiftWrap(dm.giftWrapToSelf, to: ourInboxRelays)
+
+        if let wrapToReceiver = dm.giftWrapToReceiver {
+            // `nil` when they have published no kind-10050, which is still the common case; the publish
+            // path falls back to our own write relays for it.
+            let theirInboxRelays = await userRelayList.fetchDMInboxRelays(for: pubkey)
+            await damus_state.nostrNetwork.publishGiftWrap(wrapToReceiver, to: theirInboxRelays)
+        }
     }
 
     var body: some View {

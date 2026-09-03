@@ -38,6 +38,15 @@ extension NIP17 {
         /// be ingested, because we cannot decrypt it, so it would sit in the database forever as an
         /// un-openable kind 1059 that every giftwrap backfill retries at every launch.
         let giftWrapToSelf: NostrEvent
+
+        /// The wrap addressed to the person we are talking to, or `nil` for a note to self.
+        ///
+        /// The two wraps go to different places — theirs to their kind-10050 DM inbox relays, ours to
+        /// our own — so the send path has to tell them apart. They are distinguishable only by
+        /// identity, since every other field of a wrap is deliberately unlinkable noise.
+        var giftWrapToReceiver: NostrEvent? {
+            return giftWraps.first(where: { $0.id != giftWrapToSelf.id })
+        }
     }
 
     /// Builds a 1:1 NIP-17 direct message: a kind-14 rumor, sealed and wrapped once for `receiver`
@@ -85,5 +94,71 @@ extension NIP17 {
         return DirectMessage(rumor: rumor,
                              giftWraps: [wrapToReceiver, wrapToSelf],
                              giftWrapToSelf: wrapToSelf)
+    }
+}
+
+extension NIP17 {
+    /// A NIP-17 DM inbox relay list: the kind-10050 event naming the relays a user reads private
+    /// messages from.
+    ///
+    /// This is the NIP-17 counterpart to ``NIP65/RelayList``, and deliberately a separate type rather
+    /// than a reuse of it. A NIP-65 entry carries a read/write marker and describes where a user's
+    /// *public* notes flow; a kind-10050 entry is an unmarked `["relay", "<url>"]` and describes the
+    /// one place a giftwrap addressed to that user has to land in order to be seen at all. Folding
+    /// the two together would let a read/write marker silently exclude an inbox.
+    struct DMRelayList: NostrEventConvertible, Sendable {
+        typealias E = DMRelayListDecodingError
+
+        /// The user's inbox relays, in the order the event lists them. Deduplicated, and possibly empty.
+        let relays: [RelayURL]
+
+        static let RELAY_TAG_KEY: String = "relay"
+
+        // MARK: - Initialization
+
+        init(event: NostrEvent) throws(DMRelayListDecodingError) {
+            guard event.known_kind == .dm_relay_list else { throw .notDMRelayList }
+            var relays: [RelayURL] = []
+            var seen: Set<RelayURL> = []
+            for tag in event.tags {
+                var i = tag.makeIterator()
+                guard tag.count >= 2,
+                      let key = i.next(),
+                      key.string() == Self.RELAY_TAG_KEY,
+                      let value = i.next()
+                else { continue }
+                // A single unparseable URL is not a reason to throw away the rest of someone's inbox
+                // list: dropping one relay costs us one delivery target, dropping the list costs us
+                // every one of them and silently falls back to relays they may never read.
+                guard let url = RelayURL(value.string()) else { continue }
+                guard !seen.contains(url) else { continue }
+                seen.insert(url)
+                relays.append(url)
+            }
+            self.relays = relays
+        }
+
+        init(relays: [RelayURL]) {
+            var seen: Set<RelayURL> = []
+            self.relays = relays.filter({ seen.insert($0).inserted })
+        }
+
+        // MARK: - Conversion to a Nostr Event
+
+        func toNostrEvent(keypair: FullKeypair, timestamp: UInt32? = nil) -> NostrEvent? {
+            return NdbNote(
+                content: "",
+                keypair: keypair.to_keypair(),
+                kind: NostrKind.dm_relay_list.rawValue,
+                tags: self.relays.map({ [Self.RELAY_TAG_KEY, $0.absoluteString] }),
+                createdAt: timestamp ?? UInt32(Date.now.timeIntervalSince1970)
+            )
+        }
+    }
+
+    /// An error thrown when decoding an event into a NIP-17 DM inbox relay list
+    enum DMRelayListDecodingError: Error {
+        /// The Nostr event being converted is not a kind-10050 DM relay list
+        case notDMRelayList
     }
 }

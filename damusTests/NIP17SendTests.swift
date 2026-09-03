@@ -8,8 +8,9 @@
 import XCTest
 @testable import damus
 
-/// Covers the NIP-17 send path: ``NIP17/createDirectMessage(_:to:keypair:createdAt:)`` and the
-/// ``NIP59`` layers under it.
+/// Covers the NIP-17 send path: ``NIP17/createDirectMessage(_:to:keypair:createdAt:)``, the
+/// ``NIP59`` layers under it, and the kind-10050 DM inbox relay list that decides where the wraps it
+/// produces are published.
 ///
 /// The load-bearing test here is ``testOurOwnWrapUnwrapsInNostrdb``. nostrdb's ingester is the exact
 /// decoder our own client runs against the copy we address to ourselves, so a wrap it cannot open is
@@ -355,5 +356,121 @@ final class NIP17SendTests: XCTestCase {
         else { return nil }
 
         return try? ndb.lookup_note_by_key_and_copy(key)
+    }
+
+    // MARK: DM inbox relay lists (kind 10050)
+
+    /// The list is a flat set of `["relay", "<url>"]` tags, in the order it declares them.
+    func testADMInboxRelayListParsesItsRelayTags() throws {
+        let alice = generate_new_keypair()
+        let event = try XCTUnwrap(NostrEvent(content: "",
+                                             keypair: alice.to_keypair(),
+                                             kind: NostrKind.dm_relay_list.rawValue,
+                                             tags: [["relay", "wss://inbox.example.com"],
+                                                    ["relay", "wss://other.example.com"]]))
+
+        let list = try NIP17.DMRelayList(event: event)
+
+        XCTAssertEqual(list.relays.map({ $0.absoluteString }),
+                       ["wss://inbox.example.com", "wss://other.example.com"])
+    }
+
+    /// A NIP-65 list is not a DM inbox list, and reading one as the other would send private messages
+    /// to a user's public write relays while believing they asked for it.
+    func testANIP65ListIsNotADMInboxList() throws {
+        let alice = generate_new_keypair()
+        let nip65 = try XCTUnwrap(NostrEvent(content: "",
+                                             keypair: alice.to_keypair(),
+                                             kind: NostrKind.relay_list.rawValue,
+                                             tags: [["r", "wss://relay.example.com"]]))
+
+        XCTAssertThrowsError(try NIP17.DMRelayList(event: nip65)) { error in
+            XCTAssertEqual(error as? NIP17.DMRelayListDecodingError, .notDMRelayList)
+        }
+    }
+
+    /// One bad entry must not cost us the whole list: dropping a single relay costs one delivery
+    /// target, dropping the list silently falls back to relays the recipient may never read.
+    func testUnusableEntriesAreSkippedRatherThanFailingTheList() throws {
+        let alice = generate_new_keypair()
+        let event = try XCTUnwrap(NostrEvent(content: "",
+                                             keypair: alice.to_keypair(),
+                                             kind: NostrKind.dm_relay_list.rawValue,
+                                             tags: [["relay", "not a url at all"],
+                                                    ["r", "wss://nip65.example.com"],
+                                                    ["relay"],
+                                                    ["p", generate_new_keypair().pubkey.hex()],
+                                                    ["relay", "wss://good.example.com"]]))
+
+        let list = try NIP17.DMRelayList(event: event)
+
+        XCTAssertEqual(list.relays.map({ $0.absoluteString }), ["wss://good.example.com"],
+                       "only well-formed `relay` tags count, and a bad one does not sink the rest")
+    }
+
+    /// A relay listed twice is one relay. Publishing the same wrap to it twice is wasted, and the
+    /// duplicate would also be counted twice by the ephemeral relay lease.
+    func testDuplicateRelaysCollapse() throws {
+        let alice = generate_new_keypair()
+        let event = try XCTUnwrap(NostrEvent(content: "",
+                                             keypair: alice.to_keypair(),
+                                             kind: NostrKind.dm_relay_list.rawValue,
+                                             tags: [["relay", "wss://inbox.example.com"],
+                                                    ["relay", "wss://inbox.example.com"]]))
+
+        XCTAssertEqual(try NIP17.DMRelayList(event: event).relays.count, 1)
+
+        let url = try XCTUnwrap(RelayURL("wss://inbox.example.com"))
+        XCTAssertEqual(NIP17.DMRelayList(relays: [url, url]).relays, [url])
+    }
+
+    /// What we publish for ourselves has to be readable as a DM inbox list by everyone else, including
+    /// us: this is the event other clients use to decide where to send us messages.
+    func testTheListWePublishRoundTrips() throws {
+        let alice = generate_new_keypair()
+        let relays = try [XCTUnwrap(RelayURL("wss://inbox.example.com")),
+                          XCTUnwrap(RelayURL("wss://other.example.com"))]
+
+        let event = try XCTUnwrap(NIP17.DMRelayList(relays: relays).toNostrEvent(keypair: alice))
+
+        XCTAssertEqual(event.kind, NostrKind.dm_relay_list.rawValue)
+        XCTAssertEqual(event.content, "")
+        XCTAssertEqual(event.pubkey, alice.pubkey)
+        XCTAssertTrue(event.verify(), "the list is an ordinary signed, replaceable event")
+        XCTAssertEqual(try NIP17.DMRelayList(event: event).relays, relays)
+    }
+
+    /// An empty list is a statement — "I have no inbox" — and has to survive the round trip as one,
+    /// because the send path treats it differently from never having published a list at all.
+    func testAnEmptyListRoundTripsAsEmpty() throws {
+        let alice = generate_new_keypair()
+        let event = try XCTUnwrap(NIP17.DMRelayList(relays: []).toNostrEvent(keypair: alice))
+
+        XCTAssertEqual(event.kind, NostrKind.dm_relay_list.rawValue)
+        XCTAssertTrue(try NIP17.DMRelayList(event: event).relays.isEmpty)
+    }
+
+    /// The two wraps go to different relays, so the send path has to be able to tell them apart. They
+    /// are distinguishable only by identity — every other field of a wrap is unlinkable noise.
+    func testTheReceiversWrapIsIdentifiableForRouting() throws {
+        let alice = generate_new_keypair()
+        let bob = generate_new_keypair()
+
+        let dm = try NIP17.createDirectMessage("route me", to: bob.pubkey, keypair: alice)
+        let toReceiver = try XCTUnwrap(dm.giftWrapToReceiver)
+
+        XCTAssertNotEqual(toReceiver.id, dm.giftWrapToSelf.id)
+        XCTAssertEqual(toReceiver.referenced_pubkeys.first, bob.pubkey,
+                       "the wrap we route to their inbox relays is the one addressed to them")
+    }
+
+    /// A note to self has exactly one wrap and no second addressee, so there is no second relay set to
+    /// resolve — and asking for one would publish our own copy twice.
+    func testANoteToSelfHasNoReceiverWrapToRoute() throws {
+        let alice = generate_new_keypair()
+
+        let dm = try NIP17.createDirectMessage("note to self", to: alice.pubkey, keypair: alice)
+
+        XCTAssertNil(dm.giftWrapToReceiver)
     }
 }

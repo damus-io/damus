@@ -284,8 +284,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             // TODO: Implement draft syncing with relays. We intentionally do not support that as of writing. See `DraftsModel.swift` for other details
             // try? damus_state.drafts.load(wrapped_draft_note: ev, with: damus_state)
             break
-        case .relay_list:
-            break   // This will be handled by `UserRelayListManager`
+        case .relay_list, .dm_relay_list:
+            break   // These are handled by `UserRelayListManager`
         case .follow_list:
             break
         case .interest_list:
@@ -680,8 +680,21 @@ class HomeModel: ContactsDelegate, ObservableObject {
         // the same hazard on the live subscription that follows reconciliation.
         self.giftwrapsHandlerTask?.cancel()
         self.giftwrapsHandlerTask = Task {
+            // Ours are the only relays anyone sending us a NIP-17 message is told to deliver to, so
+            // they are the only relays worth reconciling giftwraps against. Usually they are relays
+            // we are connected to anyway; when the user set a different inbox from another client
+            // they are not, and this is what connects us to them — otherwise our own DMs would be
+            // sitting on relays we never ask.
+            let inboxRelays = await damus_state.nostrNetwork.userRelayList.leaseOurDMInboxRelays()
+            defer {
+                Task { await damus_state.nostrNetwork.userRelayList.releaseDMInboxRelays(inboxRelays.leased) }
+            }
+
             for await _ in damus_state.nostrNetwork.reader.streamIndefinitely(
                 filters: giftwraps_filters,
+                // `nil` rather than an empty list, which would mean "no relays" instead of "all of
+                // them": if we could not reach a single inbox relay, a wider net beats no net.
+                to: inboxRelays.connected.isEmpty ? nil : inboxRelays.connected,
                 streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: NostrKind.giftwrapCreatedAtFuzzWindow)),
                 // A wrap is signed by a throwaway key and references nobody, so there is no profile
                 // worth preloading — the default `.preload` would just chase thousands of dead pubkeys.
@@ -1072,13 +1085,41 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var giftwraps_filter = NostrFilter(kinds: [.giftwrap])
         giftwraps_filter.pubkeys = [damus_state.pubkey]
 
-        let filters = [dms_filter, our_dms_filter, giftwraps_filter]
+        let filters = [dms_filter, our_dms_filter]
         let timeoutSeconds: UInt64 = 20
-        
+
+        // The giftwrap half of the pull runs against our own DM inbox relays rather than whatever the
+        // pool is connected to, for the same reason the live subscription does: those are the relays a
+        // NIP-17 sender was told to deliver to, so they are the only ones our history is on. It is a
+        // separate stream because it needs a different relay set, and it runs alongside the legacy
+        // pull rather than after it because nothing is read out of it — reconciling the wraps into
+        // nostrdb is the entire point, and the ingester unwraps them into the kind-14 rumors the DM
+        // models are already streaming.
+        let giftwrapPull = Task { [damus_state] in
+            let inboxRelays = await damus_state.nostrNetwork.userRelayList.leaseOurDMInboxRelays()
+            defer {
+                Task { await damus_state.nostrNetwork.userRelayList.releaseDMInboxRelays(inboxRelays.leased) }
+            }
+            for await _ in damus_state.nostrNetwork.reader.streamExistingEvents(
+                filters: [giftwraps_filter],
+                to: inboxRelays.connected.isEmpty ? nil : inboxRelays.connected,
+                timeout: .seconds(timeoutSeconds),
+                streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
+                preloadStrategy: .noPreloading
+            ) {
+                // Deliberately empty, as in `giftwrapsHandlerTask`.
+            }
+        }
+
         for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0))) {
-            if Task.isCancelled { return }
+            if Task.isCancelled {
+                giftwrapPull.cancel()
+                return
+            }
             lender.justUseACopy({ self.process_event(ev: $0, context: .other) })
         }
+
+        await giftwrapPull.value
     }
 
     /// Handles an inbound or outbound NIP-17 direct message, read locally as a plaintext kind-14 rumor.
