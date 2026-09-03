@@ -19,13 +19,19 @@ struct NotificationExtensionState: HeadlessDamusState {
     let lnurls: LNUrls
     
     init?() {
+        guard let keypair = get_saved_keypair() else { return nil }
+
+        // dumb stuff needed for property wrappers.
+        //
+        // Done before opening nostrdb so that the pubkey-scoped settings keys resolve even on the
+        // path where the db fails to open and `didReceive` falls back to the plain formatter — which
+        // reads `UserSettingsStore.legacy_nip04_dms_enabled` to decide whether a kind-4 DM is
+        // something this account still wants notifications for.
+        UserSettingsStore.pubkey = keypair.pubkey
+
         guard let ndb = Ndb(owns_db_file: false) else { return nil }
         self.ndb = ndb
-        
-        guard let keypair = get_saved_keypair() else { return nil }
-        
-        // dumb stuff needed for property wrappers
-        UserSettingsStore.pubkey = keypair.pubkey
+
         self.settings = UserSettingsStore()
         
         self.contacts = Contacts(our_pubkey: keypair.pubkey)

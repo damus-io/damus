@@ -265,6 +265,10 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .like:
             handle_like_event(ev)
         case .dm:
+            // Legacy NIP-04. With `enable_legacy_nip04_dms` off — the default — nothing subscribes to
+            // kind 4 in the first place, so this is belt and braces for a kind-4 note that reaches
+            // `process_event` by some other route (a thread query, a backfill of an old local db).
+            guard damus_state.settings.enable_legacy_nip04_dms else { break }
             handle_dm(ev)
         case .delete:
             handle_delete_event(ev)
@@ -556,15 +560,26 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var our_blocklist_filter = NostrFilter(kinds: [.mute_list])
         our_blocklist_filter.authors = [damus_state.pubkey]
 
-        var dms_filter = NostrFilter(kinds: [.dm])
+        // Legacy NIP-04 kind-4 DMs, which are opt-in and off by default. When they are off we do not
+        // ask a relay for them at all: `legacy_dms_filters` stays empty and the stream below is never
+        // started, so a user on the default settings pays nothing — no subscription slot, no ciphertext
+        // arriving to be dispatched, and above all no NIP-04 decrypt anywhere downstream of it.
+        let legacy_dms_filters: [NostrFilter]
+        if damus_state.settings.enable_legacy_nip04_dms {
+            var dms_filter = NostrFilter(kinds: [.dm])
+            var our_dms_filter = NostrFilter(kinds: [.dm])
 
-        var our_dms_filter = NostrFilter(kinds: [.dm])
+            // friends only?...
+            //dms_filter.authors = friends
+            dms_filter.limit = 500
+            dms_filter.pubkeys = [ damus_state.pubkey ]
+            our_dms_filter.authors = [ damus_state.pubkey ]
 
-        // friends only?...
-        //dms_filter.authors = friends
-        dms_filter.limit = 500
-        dms_filter.pubkeys = [ damus_state.pubkey ]
-        our_dms_filter.authors = [ damus_state.pubkey ]
+            legacy_dms_filters = [dms_filter, our_dms_filter]
+        }
+        else {
+            legacy_dms_filters = []
+        }
 
         // NIP-17 DMs arrive as NIP-59 giftwraps addressed to us. There is no companion filter for the
         // DMs we sent, the way `our_dms_filter` pairs with `dms_filter` for legacy NIP-04: a NIP-17
@@ -611,7 +626,6 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let contacts_filter_chunks = contacts_filter.chunked(on: .authors, into: MAX_CONTACTS_ON_FILTER)
         let low_volume_important_filters = [our_contacts_filter, our_blocklist_filter, our_old_blocklist_filter, contact_cards_filter]
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
-        let dms_filters = [dms_filter, our_dms_filter]
         let giftwraps_filters = [giftwraps_filter]
         let private_dms_filters = [private_dms_filter, our_private_dms_filter]
 
@@ -646,18 +660,21 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
         }
         self.dmsHandlerTask?.cancel()
-        self.dmsHandlerTask = Task {
-            for await item in damus_state.nostrNetwork.reader.advancedStream(filters: dms_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
-                switch item {
-                case .event(let lender):
-                    await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
-                case .eose:
-                    var dms = dms.dms.flatMap { $0.events }
-                    dms.append(contentsOf: incoming_dms)
-                case .ndbEose:
-                    var dms = dms.dms.flatMap { $0.events }
-                    dms.append(contentsOf: incoming_dms)
-                case .networkEose: break
+        self.dmsHandlerTask = nil
+        if !legacy_dms_filters.isEmpty {
+            self.dmsHandlerTask = Task {
+                for await item in damus_state.nostrNetwork.reader.advancedStream(filters: legacy_dms_filters, streamMode: .ndbAndNetworkParallel(networkOptimization: .sinceOptimization)) {
+                    switch item {
+                    case .event(let lender):
+                        await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
+                    case .eose:
+                        var dms = dms.dms.flatMap { $0.events }
+                        dms.append(contentsOf: incoming_dms)
+                    case .ndbEose:
+                        var dms = dms.dms.flatMap { $0.events }
+                        dms.append(contentsOf: incoming_dms)
+                    case .networkEose: break
+                    }
                 }
             }
         }
@@ -1080,15 +1097,22 @@ class HomeModel: ContactsDelegate, ObservableObject {
     ///
     /// This method requests full DM history with negentropy.
     func fetchFullDMHistory() async {
-        // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
-        var dms_filter = NostrFilter(kinds: [.dm])
-        dms_filter.pubkeys = [damus_state.pubkey]
-        dms_filter.limit = 500
+        // Legacy NIP-04 history, only if the user opted back into kind 4. Off by default, in which
+        // case this pull is giftwraps and nothing else.
+        var legacy_filters: [NostrFilter] = []
+        if damus_state.settings.enable_legacy_nip04_dms {
+            // DMs sent to us (limit to prevent runaway pulls; user can pull again for more)
+            var dms_filter = NostrFilter(kinds: [.dm])
+            dms_filter.pubkeys = [damus_state.pubkey]
+            dms_filter.limit = 500
 
-        // DMs we sent
-        var our_dms_filter = NostrFilter(kinds: [.dm])
-        our_dms_filter.authors = [damus_state.pubkey]
-        our_dms_filter.limit = 500
+            // DMs we sent
+            var our_dms_filter = NostrFilter(kinds: [.dm])
+            our_dms_filter.authors = [damus_state.pubkey]
+            our_dms_filter.limit = 500
+
+            legacy_filters = [dms_filter, our_dms_filter]
+        }
 
         // NIP-17 conversations, which live in the giftwraps addressed to us in both directions. There
         // is nothing to read here in Swift — reconciling the wraps into nostrdb is the point, and the
@@ -1098,13 +1122,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var giftwraps_filter = NostrFilter(kinds: [.giftwrap])
         giftwraps_filter.pubkeys = [damus_state.pubkey]
 
-        let filters = [dms_filter, our_dms_filter]
         let timeoutSeconds: UInt64 = 20
 
         // The giftwrap half of the pull adds our own DM inbox relays to the relay set, for the same
         // reason the live subscription does: a NIP-17 sender was told to deliver there, so history we
         // have never seen may exist only on those relays. It is a separate stream because it needs a
-        // different relay set, and it runs alongside the legacy pull rather than after it because
+        // different relay set, and it runs alongside any legacy pull rather than after it because
         // nothing is read out of it — reconciling the wraps into nostrdb is the entire point, and the
         // ingester unwraps them into the kind-14 rumors the DM models are already streaming.
         let giftwrapPull = Task { [damus_state] in
@@ -1123,12 +1146,14 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
         }
 
-        for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0))) {
-            if Task.isCancelled {
-                giftwrapPull.cancel()
-                return
+        if !legacy_filters.isEmpty {
+            for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: legacy_filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0))) {
+                if Task.isCancelled {
+                    giftwrapPull.cancel()
+                    return
+                }
+                lender.justUseACopy({ self.process_event(ev: $0, context: .other) })
             }
-            lender.justUseACopy({ self.process_event(ev: $0, context: .other) })
         }
 
         await giftwrapPull.value
@@ -1353,6 +1378,11 @@ func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
 }
 
 /// Routes a legacy NIP-04 kind-4 direct message into the DM list.
+///
+/// Only reachable when ``UserSettingsStore/enable_legacy_nip04_dms`` is on; the content is still
+/// ciphertext at this point and gets decrypted at render time, which is exactly the cost the default
+/// (off) avoids. A legacy conversation is keyed on the counterparty's pubkey, the same as a NIP-17
+/// one, so the two interleave in a single thread per person rather than showing up twice.
 @discardableResult
 func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
     let ours = ev.pubkey == our_pubkey
@@ -1464,9 +1494,12 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     var new_events: NewEventsBits? = nil
     
     for ev in evs {
-        let res = switch ev.known_kind {
+        let res: (Bool, NewEventsBits?) = switch ev.known_kind {
         case .private_dm: handle_incoming_private_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
-        default: handle_incoming_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+        case .dm: handle_incoming_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+        // Only the two DM kinds belong in a conversation. This used to be a `default:` onto the
+        // legacy path, which would key anything else as a kind-4 DM.
+        default: (false, nil)
         }
         inserted = res.0 || inserted
         if let new = res.1 {

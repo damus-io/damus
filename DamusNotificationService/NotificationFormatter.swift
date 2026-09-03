@@ -27,6 +27,10 @@ struct NotificationFormatter {
                 content.body = event.content
                 break
             case .dm:
+                // Legacy NIP-04. Suppressed unless the user opted back into kind 4, so that the
+                // default experience does not announce a message the app will not render. NIP-17
+                // giftwraps get their own path in phase 8 of the NIP-17 work.
+                guard UserSettingsStore.legacy_nip04_dms_enabled else { return nil }
                 content.title = NSLocalizedString("New message", comment: "Title label for push notifications where a direct message was sent to the user")
                 content.body = NSLocalizedString("(Contents are encrypted)", comment: "Label on push notification indicating that the contents of the message are encrypted")
                 break

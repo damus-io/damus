@@ -195,6 +195,60 @@ final class DMTests: XCTestCase {
         XCTAssertEqual(model.dms.map({ $0.pubkey }), [charlie.pubkey, dave.pubkey, bob.pubkey])
     }
 
+    /// Sets ``UserSettingsStore/enable_legacy_nip04_dms`` for the duration of `body`.
+    ///
+    /// Writes the pubkey-scoped defaults key directly, which is the same key the `Setting` wrapper
+    /// writes and `UserSettingsStore.legacy_nip04_dms_enabled` reads.
+    private func withLegacyDMs(_ enabled: Bool, _ body: () throws -> Void) rethrows {
+        let key = setting_property_key(key: UserSettingsStore.legacy_nip04_dms_key)
+        let previous = DamusUserDefaults.standard.object(forKey: key)
+        DamusUserDefaults.standard.set(enabled, forKey: key)
+        defer {
+            if let previous { DamusUserDefaults.standard.set(previous, forKey: key) }
+            else { DamusUserDefaults.standard.removeObject(forKey: key) }
+        }
+        try body()
+    }
+
+    /// The point of the whole phase: with legacy NIP-04 off, nothing about reading a kind-4 note's
+    /// content performs an ECDH. `MutelistManager` runs `maybe_get_content` over *every* event that
+    /// arrives, so a decrypt here is a decrypt on the timeline's hot path.
+    func testLegacyDmIsNotDecryptedWhenDisabled() throws {
+        try withLegacyDMs(false) {
+            let dm = NIP04.create_dm("hi bob", to_pk: bob.pubkey, tags: [bob.pubkey.tag], keypair: alice)!
+
+            XCTAssertFalse(dm.is_content_encrypted(), "kind 4 must not be treated as decryptable while legacy DMs are off")
+            // The ciphertext, verbatim — not the plaintext, and not the "*failed to decrypt*" filler
+            // that a failed decrypt attempt would produce.
+            XCTAssertEqual(dm.maybe_get_content(bob), dm.content)
+            XCTAssertNotEqual(dm.maybe_get_content(bob), "hi bob")
+        }
+    }
+
+    /// ...and with the setting on, the legacy read path works exactly as it used to. This is the
+    /// escape hatch, so it has to actually restore readable messages.
+    func testLegacyDmIsDecryptedWhenEnabled() throws {
+        try withLegacyDMs(true) {
+            let dm = NIP04.create_dm("hi bob", to_pk: bob.pubkey, tags: [bob.pubkey.tag], keypair: alice)!
+
+            XCTAssertTrue(dm.is_content_encrypted(), "kind 4 must be decryptable once legacy DMs are switched on")
+            XCTAssertEqual(dm.maybe_get_content(bob), "hi bob")
+        }
+    }
+
+    /// A NIP-17 rumor is plaintext however the legacy setting is set — nostrdb unwrapped it before
+    /// Swift ever saw it, so the setting has no business affecting it in either direction.
+    func testPrivateDmIsNeverEncryptedRegardlessOfSetting() throws {
+        for enabled in [false, true] {
+            try withLegacyDMs(enabled) {
+                let rumor = NostrEvent(content: "hi bob", keypair: alice, kind: NostrKind.private_dm.rawValue, tags: [bob.pubkey.tag])!
+
+                XCTAssertFalse(rumor.is_content_encrypted(), "a kind 14 is never encrypted (legacy setting: \(enabled))")
+                XCTAssertEqual(rumor.maybe_get_content(bob), "hi bob")
+            }
+        }
+    }
+
     /// Legacy kind-4 DMs keep their own keying, which the shared insert path must not have changed.
     func testLegacyDmKeyingIsUnchanged() throws {
         let inbound = NostrEvent(content: "encrypted", keypair: bob, kind: NostrKind.dm.rawValue, tags: [alice.pubkey.tag], createdAt: 1000)!

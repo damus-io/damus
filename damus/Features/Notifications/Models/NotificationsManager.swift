@@ -138,7 +138,11 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         })
     }
     else if type == .dm,
-            state.settings.dm_notification {
+            state.settings.dm_notification,
+            // A kind-4 DM is only ours to notify about when legacy NIP-04 is switched on. This is
+            // also the one notification path that decrypts, so with the setting off we fall through
+            // and post nothing rather than announcing a message the app will not render.
+            state.settings.enable_legacy_nip04_dms {
         let convo = ev.decrypted(keypair: state.keypair) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
         return LocalNotification(type: .dm, event: ev, target: .note(ev), content: convo)
     }

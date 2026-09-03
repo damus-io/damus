@@ -130,7 +130,12 @@ class NotificationService: UNNotificationServiceExtension {
             let kind = nostr_event.known_kind
 
             // these aren't supported yet
-            if !(kind == .text || kind == .dm) {
+            //
+            // Legacy kind-4 only counts as supported while the user has opted back into it — see
+            // `enable_legacy_nip04_dms`. Phase 8 of the NIP-17 work adds the kind-1059 path that
+            // replaces it.
+            let dm_supported = kind == .dm && state.settings.enable_legacy_nip04_dms
+            if !(kind == .text || dm_supported) {
                 contentHandler(improvedContent)
                 return
             }

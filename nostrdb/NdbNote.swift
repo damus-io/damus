@@ -559,8 +559,16 @@ extension NdbNote {
     /// reaches the database as a rumor nostrdb already unwrapped out of its giftwrap, so its content
     /// is plaintext by the time anything in Swift can see it — which is the whole point of letting
     /// the ingester do the peeling.
+    ///
+    /// Legacy NIP-04 kind-4 DMs are the only encrypted kind left, and they are opt-in
+    /// (``UserSettingsStore/enable_legacy_nip04_dms``, off by default). This is the single gate that
+    /// keeps NIP-04 off the read path: with the setting off no caller can provoke a decrypt, however
+    /// it reaches a note's content. The kind test comes first on purpose, so that the settings read
+    /// only happens for the rare kind-4 note and never for the ordinary events streaming past the
+    /// muted-word check.
     func is_content_encrypted() -> Bool {
-        return known_kind == .dm    // Probably other kinds should be listed here
+        guard known_kind == .dm else { return false }    // Probably other kinds should be listed here
+        return UserSettingsStore.legacy_nip04_dms_enabled
     }
 
     func get_content(_ keypair: Keypair) -> String {
