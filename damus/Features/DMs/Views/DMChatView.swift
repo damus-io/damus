@@ -123,25 +123,72 @@ struct DMChatView: View, KeyboardReadable {
          */
     }
 
+    /// Sends the draft as a NIP-17 private direct message.
+    ///
+    /// What goes on the relay is a pair of NIP-59 giftwraps, never the message. The copy addressed to
+    /// us is also handed straight to the local database, which is what makes the message appear in
+    /// this view: nostrdb peels it into a kind-14 rumor and the subscription the DM list already
+    /// reads delivers it, through the very same path an inbound message arrives by. That is
+    /// deliberately *not* an optimistic insert of a locally-built event — going through the real read
+    /// path means a sent message that shows up here is a message our own reader could open, so a
+    /// wrap we somehow built wrong fails visibly here instead of quietly becoming unreadable history.
+    ///
+    /// It also means we do not have to wait for the relay to echo our own wrap back to us, which is
+    /// the only other way our sent messages would ever reach the database.
+    ///
+    /// The two wraps are published to different relays — each addressee's own NIP-17 DM inbox relays
+    /// (kind 10050), which is the only place either of us is guaranteed to look for a message meant
+    /// for us. See ``NostrNetworkManager/publishGiftWrap(_:to:)``.
     func send_message() async {
-        let tags = [["p", pubkey.hex()]]
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return
         }
         let content = post_blocks.map({ pb in pb.asString }).joined(separator: "")
 
-        guard let dm = NIP04.create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
-            print("error creating dm")
+        // The seal has to be signed by us, so a pubkey-only login cannot send.
+        guard let keypair = damus_state.keypair.to_full() else {
+            Log.error("Cannot send a NIP-17 DM without a private key", for: .networking)
+            return
+        }
+
+        let dm: NIP17.DirectMessage
+        do {
+            dm = try NIP17.createDirectMessage(content, to: pubkey, keypair: keypair)
+        }
+        catch {
+            Log.error("Failed to build a NIP-17 DM: %s", for: .networking, error.localizedDescription)
             return
         }
 
         dms.draft = ""
 
-        await damus_state.nostrNetwork.postbox.send(dm)
-        
-        handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
+        do { try damus_state.ndb.add(event: dm.giftWrapToSelf) }
+        catch {
+            // The message is on its way regardless; it will show up once a relay echoes our own wrap
+            // back to the giftwrap subscription. Losing the local copy only costs us the immediate echo.
+            Log.error("Failed to ingest our own NIP-17 giftwrap locally: %s", for: .ndb, error.localizedDescription)
+        }
 
         end_editing()
+
+        // Each wrap goes to its own addressee's DM inbox relays, which is what makes a NIP-17 message
+        // reachable rather than merely valid: theirs to the relays they told the world they read DMs
+        // from, ours to the ones we read. Sending both to our own write relays — what phase 6 did —
+        // lands their copy somewhere they have no reason to look.
+        //
+        // Our own inbox goes first, and only then theirs: this half is a local read, while looking up
+        // their kind-10050 may have to go ask the network for it, and the message should not sit
+        // unsent on our side for the length of someone else's relay round trip.
+        let userRelayList = damus_state.nostrNetwork.userRelayList
+        let ourInboxRelays = userRelayList.ourBestEffortDMInboxRelays()
+        await damus_state.nostrNetwork.publishGiftWrap(dm.giftWrapToSelf, to: ourInboxRelays)
+
+        if let wrapToReceiver = dm.giftWrapToReceiver {
+            // `nil` when they have published no kind-10050, which is still the common case; the publish
+            // path falls back to our own write relays for it.
+            let theirInboxRelays = await userRelayList.fetchDMInboxRelays(for: pubkey)
+            await damus_state.nostrNetwork.publishGiftWrap(wrapToReceiver, to: theirInboxRelays)
+        }
     }
 
     var body: some View {

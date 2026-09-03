@@ -206,7 +206,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         runAdvancedStream(
             networkManager: networkManager,
             filters: [NostrFilter(kinds: [.text])],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [noteA.id: getsNoteAFromNdb],
             negentropyEventExpectations: [noteB.id: getsNoteBFromNegentropy],
             ndbEoseExpectation: ndbEose,
@@ -244,7 +244,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         runAdvancedStream(
             networkManager: networkManager,
             filters: [NostrFilter(kinds: [.text])],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [:],
             negentropyEventExpectations: [noteA.id: getsNoteAFromNegentropy, noteB.id: getsNoteBFromNegentropy],
             ndbEoseExpectation: ndbEose,
@@ -283,7 +283,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         runAdvancedStream(
             networkManager: networkManager,
             filters: [NostrFilter(kinds: [.text])],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [noteA.id: getsNoteAFromNdb, noteB.id: getsNoteBFromNdb],
             negentropyEventExpectations: [:],
             ndbEoseExpectation: ndbEose,
@@ -333,7 +333,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         runAdvancedStream(
             networkManager: networkManager,
             filters: [NostrFilter(kinds: [.text])],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [noteB.id: getsNoteBFromNdb],
             negentropyEventExpectations: [noteA.id: getsNoteAFromNegentropy, noteC.id: getsNoteCFromNegentropy],
             ndbEoseExpectation: ndbEose,
@@ -391,7 +391,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         runAdvancedStream(
             networkManager: networkManager,
             filters: [NostrFilter(kinds: [.text])],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [noteA.id: getsNoteAFromNdb, noteC.id: getsNoteCFromNdb],
             negentropyEventExpectations: [noteB.id: getsNoteBFromNegentropy, noteD.id: getsNoteDFromNegentropy],
             ndbEoseExpectation: ndbEose,
@@ -456,7 +456,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
                 NostrFilter(kinds: [.text]),           // kind 1
                 NostrFilter(kinds: [.dm])              // kind 4
             ],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [noteA.id: getsNoteAFromNdb, noteC.id: getsNoteCFromNdb],
             negentropyEventExpectations: [noteB.id: getsNoteBFromNegentropy, noteD.id: getsNoteDFromNegentropy],
             ndbEoseExpectation: ndbEose,
@@ -501,7 +501,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         runAdvancedStream(
             networkManager: networkManager,
             filters: [NostrFilter(kinds: [.text])],
-            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+            streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
             ndbEventExpectations: [noteB.id: getsNoteBFromNdb],
             negentropyEventExpectations: [noteA.id: getsNoteAFromNegentropy],
             ndbEoseExpectation: ndbEose,

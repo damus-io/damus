@@ -97,6 +97,20 @@ class UserSettingsStore: ObservableObject {
     static var pubkey: Pubkey? = nil
     static var shared: UserSettingsStore? = nil
     static var bool_options = Set<String>()
+
+    static let legacy_nip04_dms_key = "enable_legacy_nip04_dms"
+
+    /// ``enable_legacy_nip04_dms``, readable without a `UserSettingsStore` in hand.
+    ///
+    /// ``NdbNote/is_content_encrypted()`` is a method on a bare note — it has no account state to
+    /// consult, and it is reached from every target that compiles `NdbNote`, the notification
+    /// extension included. So it reads the setting out of the same pubkey-scoped defaults key the
+    /// ``Setting`` wrapper writes, rather than a cached copy that could go stale when the user
+    /// toggles the setting or switches accounts. An absent key means `false`, which is the same
+    /// default the wrapper declares.
+    static var legacy_nip04_dms_enabled: Bool {
+        DamusUserDefaults.standard.object(forKey: setting_property_key(key: legacy_nip04_dms_key)) as? Bool ?? false
+    }
     
     static func globally_load_for(pubkey: Pubkey) -> UserSettingsStore {
         // dumb stuff needed for property wrappers
@@ -198,6 +212,21 @@ class UserSettingsStore: ObservableObject {
 
     @Setting(key: "translate_dms", default_value: false)
     var translate_dms: Bool
+
+    /// Whether to take part in legacy NIP-04 (kind 4) direct messages.
+    ///
+    /// Off by default, and the default is the point: damus speaks NIP-17, whose messages nostrdb
+    /// hands us already unwrapped, so with this off there is no kind-4 filter on the wire, no kind-4
+    /// dispatch, and — the reason the setting is read as deep as ``NdbNote/is_content_encrypted()`` —
+    /// not a single NIP-04 decrypt on the read path. Every consumer of a note's content (the muted
+    /// word check most of all, which touches *every* event) used to pay one ECDH per kind-4 note for
+    /// the privilege of finding out it was a DM.
+    ///
+    /// Turning it on restores the legacy read path: kind-4 history renders again and a kind-4-only
+    /// client can reach us. It does not restore a kind-4 *send* path — replies always go out as
+    /// NIP-17, into the same per-counterparty conversation the legacy messages are keyed into.
+    @Setting(key: UserSettingsStore.legacy_nip04_dms_key, default_value: false)
+    var enable_legacy_nip04_dms: Bool
     
     @Setting(key: "truncate_timeline_text", default_value: false)
     var truncate_timeline_text: Bool

@@ -236,6 +236,59 @@ class NostrNetworkManager {
     func send(event: NostrEvent, to targetRelays: [RelayURL]? = nil, skipEphemeralRelays: Bool = true) async {
         await self.pool.send(.event(event), to: targetRelays, skip_ephemeral: skipEphemeralRelays)
     }
+
+    /// How long we hold a connection to someone else's DM inbox relay open after handing a giftwrap
+    /// to the postbox.
+    ///
+    /// The postbox retries with backoff until a relay answers `OK`, and a relay we connected to just
+    /// for this delivery disappears from the pool the moment its lease is released — so this is how
+    /// many retries the delivery actually gets. Long enough for a handful, short enough that a
+    /// conversation does not accumulate connections to relays we have no other business with.
+    static let giftWrapDeliveryWindow: Duration = .seconds(120)
+
+    /// Publishes a NIP-59 giftwrap to a specific set of NIP-17 DM inbox relays.
+    ///
+    /// This is the piece that makes a NIP-17 message deliverable rather than merely valid. A wrap is
+    /// addressed to one person, and the only relays that person will ever look at for it are the ones
+    /// in their kind-10050 list — which are usually *not* the relays we happen to be connected to, so
+    /// we connect to them for the delivery.
+    ///
+    /// - Parameters:
+    ///   - giftWrap: the kind-1059 wrap to publish. Never a rumor or a seal; `PostBox.send` refuses
+    ///     the former outright.
+    ///   - inboxRelays: the addressee's inbox relays. Pass `nil` (or an empty list) when they have not
+    ///     published one, which is the common case today: we then fall back to our own write relays,
+    ///     which is where a NIP-17-aware client looking for messages addressed to them would look
+    ///     next, and is what phase 6 did unconditionally.
+    func publishGiftWrap(_ giftWrap: NostrEvent, to inboxRelays: [RelayURL]?) async {
+        guard let targetRelays = inboxRelays, !targetRelays.isEmpty else {
+            await self.postbox.send(giftWrap)
+            return
+        }
+
+        await self.pool.acquireEphemeralRelays(targetRelays)
+        let connectedRelays = await self.pool.ensureConnected(to: targetRelays)
+
+        guard !connectedRelays.isEmpty else {
+            // Every one of their inbox relays is unreachable. Our own write relays will not reach them
+            // either, but publishing there at least leaves the message somewhere it can be picked up
+            // later, and keeps our own copy of the conversation consistent with what we sent.
+            await self.pool.releaseEphemeralRelays(targetRelays)
+            await self.postbox.send(giftWrap)
+            return
+        }
+
+        // `skipEphemeralRelays` has to be off here: the relays we just connected to are, by
+        // construction, the ephemeral ones, so the default would skip every relay we went to the
+        // trouble of adding and silently deliver nothing.
+        await self.postbox.send(giftWrap, to: connectedRelays, skip_ephemeral: false)
+
+        let deliveryWindow = Self.giftWrapDeliveryWindow
+        Task.detached { [pool] in
+            try? await Task.sleep(for: deliveryWindow)
+            await pool.releaseEphemeralRelays(targetRelays)
+        }
+    }
     
     @MainActor
     func getRelay(_ id: RelayURL) -> RelayPool.Relay? {

@@ -453,7 +453,7 @@ final class EntityPreloaderTests: XCTestCase {
             var noteReceived = false
             for await _ in networkManager.reader.streamIndefinitely(
                 filters: [NostrFilter(kinds: [.text])],
-                streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy),
+                streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
                 preloadStrategy: .preload
             ) {
                 if !noteReceived {

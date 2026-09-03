@@ -65,7 +65,7 @@ struct ConfigView: View {
                     }
                     // Privacy
                     if showSettingsButton(title: privacyTitle){
-                        NavigationLink(value: Route.PrivacySettings){
+                        NavigationLink(value: Route.PrivacySettings(settings: settings)){
                             IconLabel(privacyTitle, img_name: "eye-off.fill", color:.blue)
                         }
                     }

@@ -10,11 +10,20 @@ import SwiftUI
 import Sentry
 
 struct PrivacySettingsView: View {
+    @ObservedObject var settings: UserSettingsStore
     @ObservedObject var globalSettings = GlobalSettingsStore.shared
     @State private var isShowingPrivacyDetails = false
     
     var body: some View {
         Form {
+            Section(
+                header: Text("Direct Messages", comment: "Section header for direct message privacy settings"),
+                footer: Text("Damus sends and receives direct messages with NIP-17, which hides who you are talking to as well as what you say. Legacy messages (NIP-04) leak that metadata to every relay, so they are off by default. Turn this on to read your old conversations again and to be reachable from apps that only speak the old protocol. Replies are always sent with NIP-17. Restart Damus for changes to take effect.", comment: "Footer explaining the legacy NIP-04 direct message setting")
+            ) {
+                Toggle(NSLocalizedString("Show legacy encrypted messages", comment: "Setting to re-enable legacy NIP-04 direct messages"), isOn: $settings.enable_legacy_nip04_dms)
+                    .toggleStyle(.switch)
+            }
+
             Section(
                 header: Text("Error & Diagnostics Reporting", comment: "Section header for error and diagnostics reporting settings"),
                 footer: VStack(alignment: .leading, spacing: 8) {
@@ -159,7 +168,7 @@ struct CollectedDataRow: View {
 struct PrivacySettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            PrivacySettingsView()
+            PrivacySettingsView(settings: UserSettingsStore())
         }
     }
 }

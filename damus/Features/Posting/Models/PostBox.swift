@@ -167,6 +167,16 @@ actor PostBox {
     }
 
     func send(_ event: NostrEvent, to: [RelayURL]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil, on_flush: OnFlush? = nil) async {
+        // Never queue a rumor. A rumor is an unsigned note nostrdb unwrapped out of a NIP-59
+        // giftwrap (see `NdbNote.is_rumor`), so its JSON carries a bogus signature and its
+        // content is the plaintext of a private message. `make_nostr_push_event` refuses to
+        // encode one too, but a rejection there would leave the event queued and retrying
+        // forever — so keep it out of the queue in the first place.
+        if event.is_rumor {
+            Log.error("PostBox: refusing to queue rumor %s", for: .networking, event.id.hex())
+            return
+        }
+
         // Don't add event if we already have it
         if events[event.id] != nil {
             return

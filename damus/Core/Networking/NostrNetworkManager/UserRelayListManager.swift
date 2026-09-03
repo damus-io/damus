@@ -26,6 +26,14 @@ extension NostrNetworkManager {
         /// Bridges the gap between sending an event to nostrdb (async write) and it being queryable.
         @MainActor
         private var lastSetRelayList: NIP65.RelayList?
+
+        /// In-memory cache of the DM inbox relay list we most recently published.
+        /// Same purpose as `lastSetRelayList`: nostrdb's write is async, so without this a read taken
+        /// right after publishing would still say we have no list and publish a second one.
+        @MainActor
+        private var lastSetDMInboxRelayList: NIP17.DMRelayList?
+
+        private var dmInboxRelayListPublishTask: Task<Void, Never>? = nil
         
         init(delegate: Delegate, pool: RelayPool, reader: SubscriptionManager) {
             self.delegate = delegate
@@ -142,6 +150,12 @@ extension NostrNetworkManager {
             self.relayListObserverTask = Task { await self.listenAndHandleRelayUpdates() }
             self.walletUpdatesObserverTask?.cancel()
             self.walletUpdatesObserverTask = handle_notify(.attached_wallet).sink { _ in Task { await self.load() } }
+
+            // Detached, because this waits on the network to tell us whether we already have a DM
+            // inbox list before it publishes one, and nothing else about connecting should block on
+            // that answer.
+            self.dmInboxRelayListPublishTask?.cancel()
+            self.dmInboxRelayListPublishTask = Task { await self.publishOurDMInboxRelayListIfMissing() }
         }
         
         func listenAndHandleRelayUpdates() async {
@@ -192,6 +206,165 @@ extension NostrNetworkManager {
             await self.pool.send(.event(relayListEvent))   // This will send to NostrDB as well, which will locally save that NIP-65 event
         }
         
+        // MARK: - DM inbox relay lists (NIP-17, kind 10050)
+        //
+        // A NIP-17 giftwrap has to reach the relays its recipient actually reads DMs from, which is
+        // what kind 10050 declares. This is a separate list from the NIP-65 one above and is handled
+        // separately on purpose: NIP-65 says where someone's public notes flow, kind 10050 says the
+        // one place a private message can be delivered to them at all. Publishing a wrap to our own
+        // write relays instead is valid but, for anyone whose inbox relays we are not on, invisible.
+
+        /// Gets the latest kind-10050 DM inbox relay list event for a user, from the local database only.
+        ///
+        /// This is `private` because it is part of internal logic. Callers should use the higher level functions.
+        private func getLatestDMInboxRelayListEvent(for pubkey: Pubkey) -> NdbNote? {
+            let filter = NostrFilter(kinds: [.dm_relay_list], limit: 1, authors: [pubkey])
+            guard let ndbFilter = try? NdbFilter(from: filter) else { return nil }
+            guard let noteKey = try? delegate.ndb.query(filters: [ndbFilter], maxResults: 1).first else { return nil }
+            return try? delegate.ndb.lookup_note_by_key_and_copy(noteKey)
+        }
+
+        /// Gets a user's DM inbox relay list from the local database.
+        ///
+        /// - Returns: the user's list, or `nil` if we have not seen a kind-10050 event from them. An
+        ///   empty list is *not* the same as `nil`: it means they published one saying they have no
+        ///   inbox, which is a statement, whereas `nil` only means we have not looked hard enough yet.
+        @MainActor
+        func getDMInboxRelayList(for pubkey: Pubkey) -> NIP17.DMRelayList? {
+            if pubkey == delegate.keypair.pubkey, let lastSetDMInboxRelayList { return lastSetDMInboxRelayList }
+            guard let event = self.getLatestDMInboxRelayListEvent(for: pubkey) else { return nil }
+            return try? NIP17.DMRelayList(event: event)
+        }
+
+        /// Gets a user's DM inbox relays, going to the network if the local database has nothing for them.
+        ///
+        /// The network step is bounded and best effort. Coming back with `nil` is a normal outcome —
+        /// most people have no kind-10050 yet — and callers are expected to fall back to our own write
+        /// relays rather than refuse to send.
+        ///
+        /// - Parameters:
+        ///   - pubkey: whose inbox to look up
+        ///   - timeout: how long to give the network before giving up
+        /// - Returns: their inbox relays, or `nil` if they have no published list
+        func fetchDMInboxRelays(for pubkey: Pubkey, timeout: Duration = .seconds(5)) async -> [RelayURL]? {
+            if let local = await self.getDMInboxRelayList(for: pubkey) { return local.relays }
+
+            let filter = NostrFilter(kinds: [.dm_relay_list], limit: 1, authors: [pubkey])
+            let events = await self.reader.query(filters: [filter], timeout: timeout)
+            // A kind-10050 is replaceable, so several relays may hand us different revisions of it.
+            // Take the newest rather than whichever answered first.
+            guard let newest = events.max(by: { $0.created_at < $1.created_at }) else { return nil }
+            guard let list = try? NIP17.DMRelayList(event: newest) else { return nil }
+            return list.relays
+        }
+
+        /// The DM inbox relay list we have actually published for ourselves, if any.
+        ///
+        /// Deliberately *not* best-effort, and deliberately not the default we would publish. A relay
+        /// set we merely guessed at is not something to narrow a subscription to: guessing wrong there
+        /// does not degrade delivery, it silently stops us pulling our own DMs. Callers treat `nil` as
+        /// "no opinion" and keep using every relay they have.
+        @MainActor
+        func ourPublishedDMInboxRelays() -> [RelayURL]? {
+            guard let ours = self.getDMInboxRelayList(for: delegate.keypair.pubkey), !ours.relays.isEmpty else { return nil }
+            return ours.relays
+        }
+
+        /// The inbox relays we would publish for ourselves if we have not published a list yet.
+        ///
+        /// Our read/write relays, because a DM inbox has to work in both directions from where we
+        /// stand: other people write giftwraps into it, we read them back out, and our own copy of
+        /// every message we send is published there too. A relay we marked read-only would silently
+        /// swallow that last part, so prefer relays that are both, and only widen the net if there
+        /// are none.
+        ///
+        /// Returns `nil` when the user has no relay list of their own yet. `getBestEffortRelayList()`
+        /// would happily hand back the bootstrap list here, and publishing *that* as our DM inbox
+        /// would be durable and wrong: every sender would then be told to deliver our private messages
+        /// to a set of default relays the user may never read, and we would key our own giftwrap
+        /// subscription off the same mistake. A missing list is a reason to wait, not to guess.
+        @MainActor
+        private func defaultDMInboxRelays() -> [RelayURL]? {
+            guard let relayList = self.getUserCurrentRelayList() else { return nil }
+            let readWrite = relayList.relays.values.filter({ $0.rwConfiguration.canRead && $0.rwConfiguration.canWrite })
+            if !readWrite.isEmpty { return readWrite.map({ $0.url }) }
+            let readable = relayList.relays.values.filter({ $0.rwConfiguration.canRead }).map({ $0.url })
+            return readable.isEmpty ? nil : readable
+        }
+
+        /// Our own DM inbox relays for *sending* our own copy of a message: what we published, else
+        /// the default we would publish, else `nil` to mean "use our write relays".
+        @MainActor
+        func ourBestEffortDMInboxRelays() -> [RelayURL]? {
+            return self.ourPublishedDMInboxRelays() ?? self.defaultDMInboxRelays()
+        }
+
+        /// Publishes a kind-10050 DM inbox relay list for us, but only if we do not already have one.
+        ///
+        /// Deliberately never overwrites. A user may have set a deliberately small, private inbox from
+        /// another client, and replacing that with "all our write relays" would quietly widen who can
+        /// see that they received a message — the one thing the list exists to control. So we only
+        /// ever fill in the gap, and we ask the network before deciding the gap is real, because at
+        /// startup the local database has not necessarily caught up with our own published events yet.
+        func publishOurDMInboxRelayListIfMissing() async {
+            guard let fullKeypair = delegate.keypair.to_full() else { return }   // Pubkey-only logins cannot publish
+            if let existing = await self.fetchDMInboxRelays(for: fullKeypair.pubkey, timeout: .seconds(10)), !existing.isEmpty {
+                return
+            }
+
+            // Nothing worth advertising yet — most likely the user's own relay list has not loaded, and
+            // the bootstrap defaults are not an inbox anyone chose. Try again on the next connect.
+            guard let relays = await self.defaultDMInboxRelays(), !relays.isEmpty else { return }
+
+            let list = NIP17.DMRelayList(relays: relays)
+            guard let event = list.toNostrEvent(keypair: fullKeypair) else {
+                Log.error("Failed to build our NIP-17 DM inbox relay list event", for: .networking)
+                return
+            }
+
+            await MainActor.run { self.lastSetDMInboxRelayList = list }
+            await self.pool.send(.event(event))  // Also writes a local copy into nostrdb
+        }
+
+        /// Makes sure we are connected to our own DM inbox relays, and reports the relays a giftwrap
+        /// subscription should run on.
+        ///
+        /// The job here is to *add* our inbox relays to what we already listen to, never to subtract.
+        /// Our own DMs are the one thing we cannot re-fetch from somewhere else later, so the target
+        /// is the union of our inbox relays and every relay we normally use — and it is empty, meaning
+        /// "no opinion, use them all", whenever we have not published a list of our own.
+        ///
+        /// Narrowing to just the inbox list would be the tidier reading of NIP-17, but it makes the
+        /// subscription hostage to two things that are wrong often enough to matter: a relay set
+        /// computed once, from whichever connections happened to be up at that moment, and a published
+        /// list that may be stale or may have been written by a client with a different idea of our
+        /// relays. Neither is worth losing a conversation over.
+        ///
+        /// Connections made here are ephemeral and leased, so they do not show up in the user's relay
+        /// settings as relays they never added. The caller owns the lease and must hand the returned
+        /// `leased` list back to ``releaseDMInboxRelays(_:)`` when it stops listening.
+        ///
+        /// - Returns: `leased`, every relay we took a lease on, and `target`, the relays to subscribe
+        ///   on — empty meaning "every relay".
+        func leaseOurDMInboxRelays() async -> (leased: [RelayURL], target: [RelayURL]) {
+            guard let inboxRelays = await self.ourPublishedDMInboxRelays(), !inboxRelays.isEmpty else {
+                return (leased: [], target: [])
+            }
+            await self.pool.acquireEphemeralRelays(inboxRelays)
+            let connected = await self.pool.ensureConnected(to: inboxRelays)
+            let ourUsualRelays = await self.pool.our_descriptors.map({ $0.url })
+
+            var seen: Set<RelayURL> = []
+            let target = (connected + ourUsualRelays).filter({ seen.insert($0).inserted })
+            return (leased: inboxRelays, target: target)
+        }
+
+        /// Releases the leases taken by ``leaseOurDMInboxRelays()``.
+        func releaseDMInboxRelays(_ relays: [RelayURL]) async {
+            guard !relays.isEmpty else { return }
+            await self.pool.releaseEphemeralRelays(relays)
+        }
+
         // MARK: - Syncing our saved user relay list with the active `RelayPool`
         
         /// Loads the current user relay list

@@ -350,7 +350,18 @@ class Ndb {
         self.registeredKeysLock.unlock()
 
         guard !alreadyRegistered else { return true }
-        return self.dispatchKeyToIngesters(privkey)
+
+        let registered = self.dispatchKeyToIngesters(privkey)
+        if registered {
+            Log.info("NIP-17: registered a giftwrap unwrapping key with the nostrdb ingesters", for: .storage)
+        }
+        else {
+            // Silent until now, and the most total failure this feature has: without a key in the
+            // ingesters every kind-1059 is stored still wrapped and no kind-14 rumor is ever produced,
+            // so the DM list is simply empty with nothing anywhere saying why.
+            Log.error("NIP-17: nostrdb rejected our giftwrap unwrapping key — no DMs will be unwrapped", for: .storage)
+        }
+        return registered
     }
 
     /// Hands every key from ``add_key`` back to a freshly started set of ingester threads.
@@ -423,13 +434,19 @@ class Ndb {
     /// synchronous and can be long, and parking a cooperative-pool thread on it is
     /// exactly what that pool is not for.
     func backfillGiftwrapsInBackground() {
-        guard self.hasRegisteredKeys else { return }
+        guard self.hasRegisteredKeys else {
+            // Normal for a pubkey-only login, and a dead end for any other: worth saying out loud,
+            // because the symptom either way is a DM list that stays empty for no visible reason.
+            Log.info("NIP-17: skipping giftwrap backfill, no unwrapping key is registered", for: .storage)
+            return
+        }
 
         DispatchQueue.global(qos: .utility).async {
             do {
                 let dispatched = try self.process_giftwraps()
                 // Expected to be zero on every launch after the first one that had a key.
-                Log.info("Dispatched %d stored giftwraps for unwrapping", for: .storage, dispatched)
+                Log.info("NIP-17: dispatched %d stored giftwraps for unwrapping", for: .storage, dispatched)
+                self.logGiftwrapCensus()
             }
             catch {
                 Log.error("Failed to backfill giftwraps: %{public}@", for: .storage, error.localizedDescription)
@@ -437,6 +454,40 @@ class Ndb {
         }
     }
     
+    /// Logs how many giftwraps and unwrapped rumors the database actually holds.
+    ///
+    /// A dispatch count of zero from ``process_giftwraps()`` is ambiguous in the one way that matters
+    /// when no DMs are showing up: it means either that no kind-1059 ever reached us, or that every
+    /// one we have was already peeled successfully. Those call for opposite investigations — a
+    /// networking problem versus a decryption one — and nothing else in the path distinguishes them.
+    ///
+    /// Counting is capped, because the point is to tell zero from non-zero, not to be exact.
+    private func logGiftwrapCensus() {
+        let cap = 1000
+        guard let wraps = self.noteCount(kind: .giftwrap, limit: cap),
+              let rumors = self.noteCount(kind: .private_dm, limit: cap)
+        else {
+            Log.error("NIP-17: could not count giftwraps in the database", for: .storage)
+            return
+        }
+
+        Log.info("NIP-17: database holds %d giftwrap(s) and %d unwrapped rumor(s) (capped at %d)",
+                 for: .storage, wraps, rumors, cap)
+
+        if wraps == 0 {
+            Log.info("NIP-17: no giftwraps stored at all — they are not arriving from relays, so look at the subscription rather than the unwrapping", for: .storage)
+        }
+        else if rumors == 0 {
+            Log.error("NIP-17: %d giftwrap(s) stored but not one unwrapped — the ingester is not peeling them", for: .storage, wraps)
+        }
+    }
+
+    /// Counts notes of a kind currently in the database, up to `limit`.
+    private func noteCount(kind: NostrKind, limit: Int) -> Int? {
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [kind])) else { return nil }
+        return try? self.query(filters: [filter], maxResults: limit).count
+    }
+
     /// Makes a copy of the database in a separate location
     ///
     /// This uses `mdb_env_copy2` which creates a consistent snapshot without blocking writers for long periods.

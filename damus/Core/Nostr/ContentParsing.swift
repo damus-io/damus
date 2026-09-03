@@ -12,7 +12,11 @@ enum NoteContent {
     case content(String, TagsSequence?)
 
     init(note: NostrEvent, keypair: Keypair) {
-        if note.known_kind == .dm || note.known_kind == .highlight {
+        // A note whose content is not literally its `content` field has to be resolved up front:
+        // an opt-in legacy NIP-04 DM, which needs decrypting, or a highlight, which lives in a tag.
+        // A NIP-17 kind 14 is not in this set — nostrdb already unwrapped it, so it is an ordinary
+        // plaintext note here.
+        if note.is_content_encrypted() || note.known_kind == .highlight {
             self = .content(note.get_content(keypair), note.tags)
         } else {
             self = .note(note)

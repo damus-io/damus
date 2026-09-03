@@ -117,7 +117,9 @@ struct MenuItems: View {
                 Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
             }
             // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
-            if event.known_kind != .dm {
+            // Not offered on a direct message of either protocol: muting a thread publishes the note
+            // id in our mutelist, which for a NIP-17 rumor would leak the id of a private message.
+            if event.known_kind != .dm && event.known_kind != .private_dm {
                 MuteDurationMenu { duration in
                     if let full_keypair = self.damus_state.keypair.to_full(),
                        let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {

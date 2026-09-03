@@ -221,40 +221,10 @@ extension NostrEventOld {
     }
 
 
-    func decrypted(privkey: String?) -> String? {
-        if let decrypted_content = decrypted_content {
-            return decrypted_content
-        }
-
-        guard let key = privkey else {
-            return nil
-        }
-
-        guard let our_pubkey = privkey_to_pubkey(privkey: key) else {
-            return nil
-        }
-
-        var pubkey = self.pubkey
-        // This is our DM, we need to use the pubkey of the person we're talking to instead
-        if our_pubkey == pubkey {
-            guard let refkey = self.referenced_pubkeys.first else {
-                return nil
-            }
-
-            pubkey = refkey.ref_id
-        }
-
-        let dec = decrypt_dm(key, pubkey: pubkey, content: self.content, encoding: .base64)
-        self.decrypted_content = dec
-
-        return dec
-    }
-
+    /// Legacy NIP-04 decryption used to live here. `NostrEventOld` is dead weight kept only for the
+    /// old JSON decoding path, and the live read path is ``NdbNote`` — which gates NIP-04 behind
+    /// ``UserSettingsStore/enable_legacy_nip04_dms``. Nothing should decrypt through this type.
     func get_content(_ privkey: String?) -> String {
-        if known_kind == .dm {
-            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
-        }
-
         return content
     }
 
@@ -833,6 +803,13 @@ func aes_operation(operation: CCOperation, data: [UInt8], iv: [UInt8], shared_se
 
 
 
+/// Recomputes `ev`'s id and checks its signature.
+///
+/// - Warning: A rumor cannot pass this — it has no signature (see ``NdbNote/is_rumor``), so it
+///   comes back `.bad_sig`. That is the safe direction, and no caller currently reaches here
+///   with a note read out of nostrdb: the two live call sites validate JSON parsed out of a
+///   repost's content and out of a zap receipt's description tag. Anything new that validates
+///   an ndb-sourced note has to check ``NdbNote/is_rumor`` first.
 func validate_event(ev: NostrEvent) -> ValidationResult {
     let id = calculate_event_id(pubkey: ev.pubkey, created_at: ev.created_at, kind: ev.kind, tags: ev.tags.strings(), content: ev.content)
 

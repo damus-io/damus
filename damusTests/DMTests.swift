@@ -104,4 +104,160 @@ final class DMTests: XCTestCase {
     }
  */
 
+    // MARK: - NIP-17 kind-14 conversation keying
+
+    /// Builds a kind-14 note shaped like the rumors nostrdb hands us after peeling a giftwrap:
+    /// plaintext content, the sender as author, and one `p` tag per receiver.
+    ///
+    /// A real rumor is unsigned; this one is signed, because the only way to build a note in a test
+    /// is to sign it. That difference does not reach the functions under test — the rumor flag is
+    /// checked one level up, in `HomeModel.handle_private_dm`, which needs a live `DamusState` and a
+    /// nostrdb that actually unwrapped something.
+    private func rumor(_ content: String, from: Keypair, to: [Pubkey], created_at: UInt32) -> NostrEvent {
+        return NostrEvent(
+            content: content,
+            keypair: from,
+            kind: NostrKind.private_dm.rawValue,
+            tags: to.map({ $0.tag }),
+            createdAt: created_at
+        )!
+    }
+
+    func testInboundRumorIsKeyedOnItsSender() throws {
+        let ev = rumor("hi alice", from: bob, to: [alice.pubkey], created_at: 1000)
+        XCTAssertEqual(nip17_conversation_pubkey(rumor: ev, our_pubkey: alice.pubkey), bob.pubkey)
+    }
+
+    func testOutboundRumorIsKeyedOnItsRecipient() throws {
+        // The rumor inside the giftwrap we address to ourselves on send: we are the author, and the
+        // counterparty is only in the `p` tag.
+        let ev = rumor("hi bob", from: alice, to: [bob.pubkey], created_at: 1000)
+        XCTAssertEqual(nip17_conversation_pubkey(rumor: ev, our_pubkey: alice.pubkey), bob.pubkey)
+    }
+
+    func testRumorTaggingBothPartiesIsStillOneToOne() throws {
+        // Some clients tag the sender alongside the receiver. Two `p` tags, but still two people.
+        let ev = rumor("hi alice", from: bob, to: [alice.pubkey, bob.pubkey], created_at: 1000)
+        XCTAssertEqual(nip17_conversation_pubkey(rumor: ev, our_pubkey: alice.pubkey), bob.pubkey)
+    }
+
+    func testNoteToSelfIsKeyedOnUs() throws {
+        let ev = rumor("remember the milk", from: alice, to: [alice.pubkey], created_at: 1000)
+        XCTAssertEqual(nip17_conversation_pubkey(rumor: ev, our_pubkey: alice.pubkey), alice.pubkey)
+    }
+
+    /// A group chat has no home in the DM list, so it must not land in one.
+    func testGroupRumorIsDropped() throws {
+        let ev = rumor("hi both", from: bob, to: [alice.pubkey, charlie.pubkey], created_at: 1000)
+        XCTAssertNil(nip17_conversation_pubkey(rumor: ev, our_pubkey: alice.pubkey))
+
+        let notif = NewEventsBits()
+        let model = DirectMessagesModel(our_pubkey: alice.pubkey)
+        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [ev])
+
+        // Specifically: no conversation with bob, and no conversation with charlie either.
+        XCTAssertEqual(model.dms.count, 0)
+    }
+
+    func testRumorWeAreNotAPartyToIsDropped() throws {
+        let ev = rumor("hi charlie", from: bob, to: [charlie.pubkey], created_at: 1000)
+        XCTAssertNil(nip17_conversation_pubkey(rumor: ev, our_pubkey: alice.pubkey))
+    }
+
+    func testRumorsBuildBothDirectionsOfOneConversation() throws {
+        let notif = NewEventsBits()
+        let model = DirectMessagesModel(our_pubkey: alice.pubkey)
+
+        let inbound = rumor("hi alice", from: bob, to: [alice.pubkey], created_at: 1000)
+        let outbound = rumor("hi bob", from: alice, to: [bob.pubkey], created_at: 1001)
+        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [inbound, outbound])
+
+        XCTAssertEqual(model.dms.count, 1)
+        XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
+        XCTAssertEqual(model.dms[0].events.map({ $0.content }), ["hi alice", "hi bob"])
+        // Alice has replied, so this is a conversation rather than a message request.
+        XCTAssertFalse(model.dms[0].is_request)
+    }
+
+    /// Conversations are ordered by the rumor's own `created_at`, which is the real send time. The
+    /// giftwrap's randomized timestamp never reaches this model, and this is the ordering that would
+    /// be wrong if it ever did.
+    func testConversationsAreOrderedByRumorCreatedAt() throws {
+        let notif = NewEventsBits()
+        let model = DirectMessagesModel(our_pubkey: alice.pubkey)
+
+        let from_bob = rumor("hi alice", from: bob, to: [alice.pubkey], created_at: 1000)
+        let from_charlie = rumor("hey alice", from: charlie, to: [alice.pubkey], created_at: 2000)
+        let from_dave = rumor("yo alice", from: dave, to: [alice.pubkey], created_at: 1500)
+
+        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [from_bob, from_charlie, from_dave])
+
+        XCTAssertEqual(model.dms.map({ $0.pubkey }), [charlie.pubkey, dave.pubkey, bob.pubkey])
+    }
+
+    /// Sets ``UserSettingsStore/enable_legacy_nip04_dms`` for the duration of `body`.
+    ///
+    /// Writes the pubkey-scoped defaults key directly, which is the same key the `Setting` wrapper
+    /// writes and `UserSettingsStore.legacy_nip04_dms_enabled` reads.
+    private func withLegacyDMs(_ enabled: Bool, _ body: () throws -> Void) rethrows {
+        let key = setting_property_key(key: UserSettingsStore.legacy_nip04_dms_key)
+        let previous = DamusUserDefaults.standard.object(forKey: key)
+        DamusUserDefaults.standard.set(enabled, forKey: key)
+        defer {
+            if let previous { DamusUserDefaults.standard.set(previous, forKey: key) }
+            else { DamusUserDefaults.standard.removeObject(forKey: key) }
+        }
+        try body()
+    }
+
+    /// The point of the whole phase: with legacy NIP-04 off, nothing about reading a kind-4 note's
+    /// content performs an ECDH. `MutelistManager` runs `maybe_get_content` over *every* event that
+    /// arrives, so a decrypt here is a decrypt on the timeline's hot path.
+    func testLegacyDmIsNotDecryptedWhenDisabled() throws {
+        try withLegacyDMs(false) {
+            let dm = NIP04.create_dm("hi bob", to_pk: bob.pubkey, tags: [bob.pubkey.tag], keypair: alice)!
+
+            XCTAssertFalse(dm.is_content_encrypted(), "kind 4 must not be treated as decryptable while legacy DMs are off")
+            // The ciphertext, verbatim — not the plaintext, and not the "*failed to decrypt*" filler
+            // that a failed decrypt attempt would produce.
+            XCTAssertEqual(dm.maybe_get_content(bob), dm.content)
+            XCTAssertNotEqual(dm.maybe_get_content(bob), "hi bob")
+        }
+    }
+
+    /// ...and with the setting on, the legacy read path works exactly as it used to. This is the
+    /// escape hatch, so it has to actually restore readable messages.
+    func testLegacyDmIsDecryptedWhenEnabled() throws {
+        try withLegacyDMs(true) {
+            let dm = NIP04.create_dm("hi bob", to_pk: bob.pubkey, tags: [bob.pubkey.tag], keypair: alice)!
+
+            XCTAssertTrue(dm.is_content_encrypted(), "kind 4 must be decryptable once legacy DMs are switched on")
+            XCTAssertEqual(dm.maybe_get_content(bob), "hi bob")
+        }
+    }
+
+    /// A NIP-17 rumor is plaintext however the legacy setting is set — nostrdb unwrapped it before
+    /// Swift ever saw it, so the setting has no business affecting it in either direction.
+    func testPrivateDmIsNeverEncryptedRegardlessOfSetting() throws {
+        for enabled in [false, true] {
+            try withLegacyDMs(enabled) {
+                let rumor = NostrEvent(content: "hi bob", keypair: alice, kind: NostrKind.private_dm.rawValue, tags: [bob.pubkey.tag])!
+
+                XCTAssertFalse(rumor.is_content_encrypted(), "a kind 14 is never encrypted (legacy setting: \(enabled))")
+                XCTAssertEqual(rumor.maybe_get_content(bob), "hi bob")
+            }
+        }
+    }
+
+    /// Legacy kind-4 DMs keep their own keying, which the shared insert path must not have changed.
+    func testLegacyDmKeyingIsUnchanged() throws {
+        let inbound = NostrEvent(content: "encrypted", keypair: bob, kind: NostrKind.dm.rawValue, tags: [alice.pubkey.tag], createdAt: 1000)!
+
+        let notif = NewEventsBits()
+        let model = DirectMessagesModel(our_pubkey: alice.pubkey)
+        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [inbound])
+
+        XCTAssertEqual(model.dms.count, 1)
+        XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
+    }
 }

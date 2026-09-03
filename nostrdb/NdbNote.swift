@@ -119,8 +119,50 @@ class NdbNote: Codable, Equatable, Hashable {
         memcmp(self.raw_note_id, other.raw_note_id, 32) == 0
     }
 
+    /// The note's signature.
+    ///
+    /// - Warning: Meaningless on a rumor — see ``is_rumor``, which repurposes this field.
+    ///   Read ``rumor_receiver_pubkey`` and ``rumor_giftwrap_id`` instead.
     var sig: Signature {
         .init(Data(bytes: ndb_note_sig(note.ptr), count: 64))
+    }
+
+    // MARK: Rumors
+
+    /// Whether this note is a NIP-59 rumor that nostrdb unwrapped out of a giftwrap.
+    ///
+    /// Rumors are **unsigned by construction**: nostrdb peels the 1059 giftwrap and the
+    /// kind-13 seal in its ingester threads and stores the plaintext inner note as an
+    /// ordinary note flagged `NDB_NOTE_FLAG_RUMOR`. The sender's pubkey is copied from the
+    /// seal onto the rumor, the id is recalculated, and the 64-byte signature field is
+    /// repurposed to carry the receiver pubkey and the giftwrap id
+    /// (``rumor_receiver_pubkey`` / ``rumor_giftwrap_id``).
+    ///
+    /// So a rumor's ``sig`` is not a signature, and re-verifying one will fail. Two rules
+    /// follow, and both are enforced further down the stack:
+    ///
+    /// - Never re-verify a rumor (``verify()`` returns `false` for one).
+    /// - Never send a rumor to a relay — its JSON would carry a bogus signature and would
+    ///   leak the plaintext of a private message. ``make_nostr_push_event(ev:)`` and
+    ///   `PostBox.send` both refuse.
+    var is_rumor: Bool {
+        ndb_note_is_rumor(note.ptr) == 1
+    }
+
+    /// The pubkey the rumor's giftwrap was addressed to — i.e. whose key unwrapped it.
+    ///
+    /// `nil` unless ``is_rumor``.
+    var rumor_receiver_pubkey: Pubkey? {
+        guard let bytes = ndb_note_rumor_receiver_pubkey(note.ptr) else { return nil }
+        return Pubkey(Data(bytes: bytes, count: 32))
+    }
+
+    /// The id of the kind-1059 giftwrap this rumor was unwrapped from.
+    ///
+    /// `nil` unless ``is_rumor``.
+    var rumor_giftwrap_id: NoteId? {
+        guard let bytes = ndb_note_rumor_giftwrap_id(note.ptr) else { return nil }
+        return NoteId(Data(bytes: bytes, count: 32))
     }
     
     /// NDBTODO: make this into data
@@ -350,7 +392,15 @@ class NdbNote: Codable, Equatable, Hashable {
         }
     }
     
+    /// Verifies the note's signature against its pubkey and computed id.
+    ///
+    /// Returns `false` for a rumor: it has no signature to check (see ``is_rumor``). Callers
+    /// wanting to distinguish "not verifiable" from "forged" should test ``is_rumor`` first.
     func verify() -> Bool {
+        // A rumor's sig field holds the receiver pubkey and giftwrap id, not a signature.
+        // `ndb_note_verify` would reject it anyway; bail out rather than burn a secp context.
+        if self.is_rumor { return false }
+
         let scratch_buf_len = MAX_NOTE_SIZE
         let scratch_buf = malloc(scratch_buf_len)
         defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
@@ -503,8 +553,22 @@ extension NdbNote {
         })
     }
     
+    /// Whether ``content`` has to be decrypted before it can be read.
+    ///
+    /// Note that ``NostrKind/private_dm`` is deliberately **not** listed. A NIP-17 DM only ever
+    /// reaches the database as a rumor nostrdb already unwrapped out of its giftwrap, so its content
+    /// is plaintext by the time anything in Swift can see it — which is the whole point of letting
+    /// the ingester do the peeling.
+    ///
+    /// Legacy NIP-04 kind-4 DMs are the only encrypted kind left, and they are opt-in
+    /// (``UserSettingsStore/enable_legacy_nip04_dms``, off by default). This is the single gate that
+    /// keeps NIP-04 off the read path: with the setting off no caller can provoke a decrypt, however
+    /// it reaches a note's content. The kind test comes first on purpose, so that the settings read
+    /// only happens for the rare kind-4 note and never for the ordinary events streaming past the
+    /// muted-word check.
     func is_content_encrypted() -> Bool {
-        return known_kind == .dm    // Probably other kinds should be listed here
+        guard known_kind == .dm else { return false }    // Probably other kinds should be listed here
+        return UserSettingsStore.legacy_nip04_dms_enabled
     }
 
     func get_content(_ keypair: Keypair) -> String {

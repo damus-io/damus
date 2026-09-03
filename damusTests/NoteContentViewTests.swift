@@ -347,7 +347,10 @@ class NoteContentViewTests: XCTestCase {
     @MainActor
     func testDirectBlockParsing() {
         let kp = test_keypair_full
-        let dm: NdbNote = NIP04.create_dm("Test", to_pk: kp.pubkey, tags: [], keypair: kp.to_keypair())!
+        // A NIP-17 DM rather than the legacy kind-4 this used to build: kind 4 is opt-in now, and
+        // with it off `maybe_get_content` hands back ciphertext instead of decrypting, which is not
+        // the content this is meant to be parsing.
+        let dm = NostrEvent(content: "Test", keypair: kp.to_keypair(), kind: NostrKind.private_dm.rawValue, tags: [kp.pubkey.tag])!
         try! NdbBlockGroup.borrowBlockGroup(event: dm, using: test_damus_state.ndb, and: kp.to_keypair(), borrow: { blocks in
             let blockCount = blocks.withList({ $0.count })
             XCTAssertEqual(blockCount, 1)
