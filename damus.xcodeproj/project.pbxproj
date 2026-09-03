@@ -1915,6 +1915,7 @@
 		D7CBD1D42B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */; };
 		D7CBD1D62B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */; };
 		D7CCDB8A2F034FBC00218972 /* DatabaseSnapshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CCDB882F034FBB00218972 /* DatabaseSnapshotManager.swift */; };
+		D7A1B2C30004A6DFB8259EC1 /* NdbPruneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C30003A6DFB8259EC1 /* NdbPruneManager.swift */; };
 		D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90548A2A6AEDEE00811EEC /* NdbNote.swift */; };
 		D7CCFC082B05834500323D86 /* NoteId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC14FF42A740BB7007AEB17 /* NoteId.swift */; };
 		D7CCFC0F2B0587F600323D86 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8B28398BC6008A31F1 /* Keys.swift */; };
@@ -1994,6 +1995,7 @@
 		1AEE4F35FB8A376DC488E66B /* Ndb+Prune.swift in Sources */ = {isa = PBXBuildFile; fileRef = A79A2486CFF78DDCC79DC060 /* Ndb+Prune.swift */; };
 		D7E14B932F68B22D00BF84B7 /* NdbCompactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */; };
 		1BFBA61D4A015A6DFB8259EC /* NdbPruneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0557D6B7D15979C722594E6F /* NdbPruneTests.swift */; };
+		D7A1B2C30008A6DFB8259EC1 /* NdbPruneManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C30007A6DFB8259EC1 /* NdbPruneManagerTests.swift */; };
 		D7A1B2C30002A6DFB8259EC1 /* NdbFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C30001A6DFB8259EC1 /* NdbFilterTests.swift */; };
 		D7E14C022F68B22D00BF84B8 /* NdbIngesterKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */; };
 		D7E5B2D32EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
@@ -2039,7 +2041,9 @@
 		D7F4F0B92F03689300B61683 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */; };
 		D7F4F0BA2F03689300B61683 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */; };
 		D7F4F0BB2F0371D500B61683 /* DatabaseSnapshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CCDB882F034FBB00218972 /* DatabaseSnapshotManager.swift */; };
+		D7A1B2C30005A6DFB8259EC1 /* NdbPruneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C30003A6DFB8259EC1 /* NdbPruneManager.swift */; };
 		D7F4F0BC2F0371D500B61683 /* DatabaseSnapshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CCDB882F034FBB00218972 /* DatabaseSnapshotManager.swift */; };
+		D7A1B2C30006A6DFB8259EC1 /* NdbPruneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C30003A6DFB8259EC1 /* NdbPruneManager.swift */; };
 		D7F563102DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
 		D7F563112DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
 		D7F563122DEE71C0008509DE /* NdbFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5630F2DEE71BB008509DE /* NdbFilter.swift */; };
@@ -3030,6 +3034,7 @@
 		D7CBD1D32B8D21DC00BFD889 /* DamusPurpleNotificationManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleNotificationManagement.swift; sourceTree = "<group>"; };
 		D7CBD1D52B8D509800BFD889 /* DamusPurpleImpendingExpirationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusPurpleImpendingExpirationTests.swift; sourceTree = "<group>"; };
 		D7CCDB882F034FBB00218972 /* DatabaseSnapshotManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseSnapshotManager.swift; sourceTree = "<group>"; };
+		D7A1B2C30003A6DFB8259EC1 /* NdbPruneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbPruneManager.swift; sourceTree = "<group>"; };
 		D7D09AB42DADCA5600AB170D /* CoinosDeterministicAccountClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinosDeterministicAccountClient.swift; sourceTree = "<group>"; };
 		D7D2A3802BF815D000E4B42B /* PushNotificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationClient.swift; sourceTree = "<group>"; };
 		D7D68FF82C9E01B60015A515 /* KFClickable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFClickable.swift; sourceTree = "<group>"; };
@@ -3045,6 +3050,7 @@
 		A79A2486CFF78DDCC79DC060 /* Ndb+Prune.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Ndb+Prune.swift"; sourceTree = "<group>"; };
 		D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbCompactionTests.swift; sourceTree = "<group>"; };
 		0557D6B7D15979C722594E6F /* NdbPruneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbPruneTests.swift; sourceTree = "<group>"; };
+		D7A1B2C30007A6DFB8259EC1 /* NdbPruneManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbPruneManagerTests.swift; sourceTree = "<group>"; };
 		D7A1B2C30001A6DFB8259EC1 /* NdbFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbFilterTests.swift; sourceTree = "<group>"; };
 		D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbIngesterKeyTests.swift; sourceTree = "<group>"; };
 		D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPipelineDiagnostics.swift; sourceTree = "<group>"; };
@@ -4052,6 +4058,7 @@
 				D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */,
 				D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */,
 				0557D6B7D15979C722594E6F /* NdbPruneTests.swift */,
+				D7A1B2C30007A6DFB8259EC1 /* NdbPruneManagerTests.swift */,
 				D7A1B2C30001A6DFB8259EC1 /* NdbFilterTests.swift */,
 				D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
@@ -5203,6 +5210,7 @@
 				D774A5C72F4F93F5006A4D64 /* StorageStatsViewHelper.swift */,
 				D78778212F49476700DA73E4 /* StorageStatsManager.swift */,
 				D7CCDB882F034FBB00218972 /* DatabaseSnapshotManager.swift */,
+				D7A1B2C30003A6DFB8259EC1 /* NdbPruneManager.swift */,
 				D7EDED322B12ACAE0018B19C /* DamusUserDefaults.swift */,
 				D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */,
 				501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */,
@@ -6468,6 +6476,7 @@
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
 				4C1253582A76C9060004F4B8 /* PresentSheetNotify.swift in Sources */,
 				D7CCDB8A2F034FBC00218972 /* DatabaseSnapshotManager.swift in Sources */,
+				D7A1B2C30004A6DFB8259EC1 /* NdbPruneManager.swift in Sources */,
 				D7D09AB52DADCA5C00AB170D /* CoinosDeterministicAccountClient.swift in Sources */,
 				D773BC5F2C6D538500349F0A /* CommentItem.swift in Sources */,
 				4CA9275F2A2902B20098A105 /* LongformPreview.swift in Sources */,
@@ -6638,6 +6647,7 @@
 				B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */,
 				D7E14B932F68B22D00BF84B7 /* NdbCompactionTests.swift in Sources */,
 				1BFBA61D4A015A6DFB8259EC /* NdbPruneTests.swift in Sources */,
+				D7A1B2C30008A6DFB8259EC1 /* NdbPruneManagerTests.swift in Sources */,
 				D7A1B2C30002A6DFB8259EC1 /* NdbFilterTests.swift in Sources */,
 				D7E14C022F68B22D00BF84B8 /* NdbIngesterKeyTests.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
@@ -7233,6 +7243,7 @@
 				82D6FC562CD99F7900C925F4 /* EventDetailView.swift in Sources */,
 				82D6FC572CD99F7900C925F4 /* FollowButtonView.swift in Sources */,
 				D7F4F0BC2F0371D500B61683 /* DatabaseSnapshotManager.swift in Sources */,
+				D7A1B2C30006A6DFB8259EC1 /* NdbPruneManager.swift in Sources */,
 				82D6FC582CD99F7900C925F4 /* FollowingView.swift in Sources */,
 				82D6FC592CD99F7900C925F4 /* LoginView.swift in Sources */,
 				82D6FC5A2CD99F7900C925F4 /* QRScanNSECView.swift in Sources */,
@@ -7760,6 +7771,7 @@
 				D703D74D2C6709D400A400EA /* Zap.swift in Sources */,
 				D73E5E1C2C6A9677007EB227 /* DirectMessagesModel.swift in Sources */,
 				D7F4F0BB2F0371D500B61683 /* DatabaseSnapshotManager.swift in Sources */,
+				D7A1B2C30005A6DFB8259EC1 /* NdbPruneManager.swift in Sources */,
 				D703D7762C670BCA00A400EA /* Verifier.swift in Sources */,
 				D703D75A2C670A7900A400EA /* LNUrls.swift in Sources */,
 				D703D74B2C6709C900A400EA /* NoteId.swift in Sources */,

@@ -547,3 +547,57 @@ extension Ndb {
         UserDefaults.standard.set(budget.rawValue, forKey: space_budget_key)
     }
 }
+
+// MARK: - The staged prune marker
+
+/// A pruned copy of the database that finished successfully and is waiting for
+/// the next launch to be swapped into place.
+///
+/// The prune runs while the app is live and never touches the database in use,
+/// so the swap is a file move at the next launch, before nostrdb opens. Notes
+/// ingested between the prune finishing and that swap are lost — accepted and
+/// deliberate, see headway:damus-ios/spike-inspire-glide.
+struct NdbPendingPrune: Equatable {
+    /// The directory holding the pruned database. It contains a complete,
+    /// closed, standalone `data.mdb`.
+    let path: String
+
+    /// When the prune finished. How stale a staged copy may be before it is
+    /// thrown away rather than swapped in is the swapping side's call.
+    let completedAt: Date
+}
+
+extension Ndb {
+    /// The `UserDefaults` key holding the staged prune's directory.
+    static let pending_prune_path_key = "ndb_pending_prune_path"
+
+    /// The `UserDefaults` key holding when the staged prune finished.
+    static let pending_prune_completed_at_key = "ndb_pending_prune_completed_at"
+
+    /// The staged prune waiting to be swapped in, if there is one.
+    ///
+    /// The marker is only written after `ndb_prune` reports success and the
+    /// output has been checked, so its presence means the directory held a
+    /// complete database at the time it was written. Whoever swaps it in should
+    /// still confirm the file is there — the marker outlives a reinstall of the
+    /// app's container, and iOS can delete files underneath us.
+    static func get_pending_prune() -> NdbPendingPrune? {
+        guard let path = UserDefaults.standard.string(forKey: pending_prune_path_key),
+              let completedAt = UserDefaults.standard.object(forKey: pending_prune_completed_at_key) as? Date else {
+            return nil
+        }
+        return NdbPendingPrune(path: path, completedAt: completedAt)
+    }
+
+    /// Records a staged prune for the next launch to pick up.
+    static func set_pending_prune(_ pending: NdbPendingPrune) {
+        UserDefaults.standard.set(pending.path, forKey: pending_prune_path_key)
+        UserDefaults.standard.set(pending.completedAt, forKey: pending_prune_completed_at_key)
+    }
+
+    /// Forgets any staged prune. Does not delete the directory it named.
+    static func clear_pending_prune() {
+        UserDefaults.standard.removeObject(forKey: pending_prune_path_key)
+        UserDefaults.standard.removeObject(forKey: pending_prune_completed_at_key)
+    }
+}

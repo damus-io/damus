@@ -528,6 +528,7 @@ struct ContentView: View {
                     
                     // Stop periodic snapshots
                     await damus_state.snapshotManager.stopPeriodicSnapshots()
+                    await damus_state.pruneManager.stopPeriodicChecks()
                     
                     await damus_state.nostrNetwork.handleAppBackgroundRequest()  // Close ndb streaming tasks before closing ndb to avoid memory errors
                     
@@ -548,6 +549,11 @@ struct ContentView: View {
                     
                     // Restart periodic snapshots when returning to foreground
                     await damus_state.snapshotManager.startPeriodicSnapshots()
+
+                    // And re-check the database against its space budget. The
+                    // database only grows while the app is running, so this is
+                    // the only time worth watching it.
+                    await damus_state.pruneManager.startPeriodicChecks()
                 }
             @unknown default:
                 break
@@ -759,6 +765,7 @@ struct ContentView: View {
         home.damus_state = self.damus_state!
         
         await damus_state.snapshotManager.startPeriodicSnapshots()
+        await damus_state.pruneManager.startPeriodicChecks()
         
         if let damus_state, damus_state.purple.enable_purple {
             // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases
