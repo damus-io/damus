@@ -28,9 +28,20 @@ struct NotificationFormatter {
                 break
             case .dm:
                 // Legacy NIP-04. Suppressed unless the user opted back into kind 4, so that the
-                // default experience does not announce a message the app will not render. NIP-17
-                // giftwraps get their own path in phase 8 of the NIP-17 work.
+                // default experience does not announce a message the app will not render.
                 guard UserSettingsStore.legacy_nip04_dms_enabled else { return nil }
+                content.title = NSLocalizedString("New message", comment: "Title label for push notifications where a direct message was sent to the user")
+                content.body = NSLocalizedString("(Contents are encrypted)", comment: "Label on push notification indicating that the contents of the message are encrypted")
+                break
+            case .giftwrap:
+                // A NIP-17 direct message we could not open. `NotificationService` unwraps giftwraps
+                // through nostrdb and formats the kind-14 rumor inside like any other note, so a wrap
+                // only reaches this formatter when that failed — either the database would not open
+                // or no rumor came out of it. All that is left to say is that a message arrived: the
+                // sender and the text are both inside the wrap.
+                //
+                // Not gated on `legacy_nip04_dms_enabled`. That setting is about kind 4; NIP-17 is the
+                // default DM experience and the app renders these conversations either way.
                 content.title = NSLocalizedString("New message", comment: "Title label for push notifications where a direct message was sent to the user")
                 content.body = NSLocalizedString("(Contents are encrypted)", comment: "Label on push notification indicating that the contents of the message are encrypted")
                 break

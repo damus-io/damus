@@ -147,7 +147,16 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         return LocalNotification(type: .dm, event: ev, target: .note(ev), content: convo)
     }
     else if type == .private_dm,
-            state.settings.dm_notification {
+            state.settings.dm_notification,
+            // A rumor is unsigned by construction, so its only provenance is the fact that *our* key
+            // unwrapped the giftwrap it came out of — which is what the rumor flag records. A signed,
+            // plaintext kind 14 arriving by any other route is a NIP-17 violation, and notifying about
+            // one would let anyone announce themselves into someone's lock screen.
+            ev.is_rumor,
+            // Only conversations damus can actually show. A group-chat rumor has no 1:1 thread to
+            // open, and the DM list drops it, so announcing it would promise a message the app cannot
+            // render — the same mistake as notifying about a kind-4 DM with legacy NIP-04 switched off.
+            nip17_conversation_pubkey(rumor: ev, our_pubkey: state.keypair.pubkey) != nil {
         // A NIP-17 DM reaches us as a kind-14 rumor that nostrdb already unwrapped, so its content is
         // plaintext: nothing to decrypt, and no "failed to decrypt" case to render.
         return LocalNotification(type: .dm, event: ev, target: .note(ev), content: ev.content)

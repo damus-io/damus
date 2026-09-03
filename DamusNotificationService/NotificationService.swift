@@ -60,19 +60,45 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
 
+            // A NIP-17 direct message reaches us as a kind-1059 giftwrap, which says nothing we could
+            // put in a notification: it is signed by a throwaway key, references nobody but us, and
+            // the message, its sender and its real send time are all sealed inside. So peel it first
+            // and let everything below work on the kind-14 rumor that comes out. That rumor is a
+            // plaintext note like any other, which is what lets the mute check, the age check and the
+            // formatter treat a DM exactly like a mention.
+            let note: NdbNote
+            if nostr_event.known_kind == .giftwrap {
+                guard let rumor = await state.ndb.unwrapGiftwrap(nostr_event) else {
+                    Log.info("NIP-17: could not unwrap the giftwrap we were pushed, falling back to a contentless notification", for: .push_notifications)
+                    // A wrap we cannot open has no displayable content, but it is still evidence that
+                    // somebody sent us a message, so fall back to saying that much and no more.
+                    guard let generic_content = NotificationFormatter.shared.format_message(event: nostr_event) else {
+                        contentHandler(request.content)
+                        return
+                    }
+                    contentHandler(generic_content)
+                    return
+                }
+                Log.info("NIP-17: unwrapped a pushed giftwrap into rumor %s from %s", for: .push_notifications, rumor.id.hex(), rumor.pubkey.hex())
+                note = rumor
+            }
+            else {
+                note = nostr_event
+            }
+
             let sender_profile = {
-                let profile = try? state.profiles.lookup(id: nostr_event.pubkey)
-                let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(nostr_event.pubkey)))!
+                let profile = try? state.profiles.lookup(id: note.pubkey)
+                let picture = ((profile?.picture.map { URL(string: $0) }) ?? URL(string: robohash(note.pubkey)))!
                 return ProfileBuf(picture: picture,
                                      name: profile?.name,
                              display_name: profile?.display_name,
                                     nip05: profile?.nip05)
             }()
-            let sender_pubkey = nostr_event.pubkey
+            let sender_pubkey = note.pubkey
 
             // Don't show notification details that match mute list.
             // TODO: Remove this code block once we get notification suppression entitlement from Apple. It will be covered by the `guard should_display_notification` block
-            if await state.mutelist_manager.is_event_muted(nostr_event) {
+            if await state.mutelist_manager.is_event_muted(note) {
                 // We cannot really suppress muted notifications until we have the notification supression entitlement.
                 // The best we can do if we ever get those muted notifications (which we generally won't due to server-side processing) is to obscure the details
                 let content = UNMutableNotificationContent()
@@ -83,7 +109,7 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
 
-            guard await should_display_notification(state: state, event: nostr_event, mode: .push) else {
+            guard await should_display_notification(state: state, event: note, mode: .push) else {
                 Log.debug("should_display_notification failed", for: .push_notifications)
                 // We should not display notification for this event. Suppress notification.
                 // contentHandler(UNNotificationContent())
@@ -92,7 +118,7 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
 
-            guard let notification_object = generate_local_notification_object(ndb: state.ndb, from: nostr_event, state: state) else {
+            guard let notification_object = generate_local_notification_object(ndb: state.ndb, from: note, state: state) else {
                 Log.debug("generate_local_notification_object failed", for: .push_notifications)
                 // We could not process this notification. Probably an unsupported nostr event kind. Suppress.
                 // contentHandler(UNNotificationContent())
@@ -127,15 +153,17 @@ class NotificationService: UNNotificationServiceExtension {
                 }
             }
 
-            let kind = nostr_event.known_kind
+            let kind = note.known_kind
 
             // these aren't supported yet
             //
-            // Legacy kind-4 only counts as supported while the user has opted back into it — see
-            // `enable_legacy_nip04_dms`. Phase 8 of the NIP-17 work adds the kind-1059 path that
-            // replaces it.
+            // A NIP-17 DM is a kind-14 rumor by the time it reaches here, and is supported
+            // unconditionally: it is the default DM experience. Legacy kind-4 only counts while the
+            // user has opted back into it — see `enable_legacy_nip04_dms`. The kind-4 arm is kept
+            // rather than deleted because with the setting on the app does render those
+            // conversations, and a rendered conversation that never notifies is its own bug.
             let dm_supported = kind == .dm && state.settings.enable_legacy_nip04_dms
-            if !(kind == .text || dm_supported) {
+            if !(kind == .text || kind == .private_dm || dm_supported) {
                 contentHandler(improvedContent)
                 return
             }
@@ -145,10 +173,10 @@ class NotificationService: UNNotificationServiceExtension {
             let message_intent = await message_intent_from_note(ndb: state.ndb,
                                                                 sender_profile: sender_profile,
                                                                 content: improvedContent.body,
-                                                                note: nostr_event,
+                                                                note: note,
                                                                 our_pubkey: state.keypair.pubkey)
 
-            improvedContent.threadIdentifier = nostr_event.thread_id().hex()
+            improvedContent.threadIdentifier = notification_conversation_identifier(note: note, our_pubkey: state.keypair.pubkey)
             improvedContent.categoryIdentifier = "COMMUNICATION"
 
             let interaction = INInteraction(intent: message_intent, response: nil)
@@ -162,7 +190,7 @@ class NotificationService: UNNotificationServiceExtension {
                 DamusSentry.captureSentryError(error) { scope in
                     scope.setContext(value: [
                         "operation": "donate_notification_interaction",
-                        "note_kind": nostr_event.kind
+                        "note_kind": note.kind
                     ], key: "notification_service")
                 }
                 contentHandler(improvedContent)
@@ -196,7 +224,7 @@ func message_intent_from_note(ndb: Ndb, sender_profile: ProfileBuf, content: Str
                                          pubkey: sender_pk,
                                      our_pubkey: our_pubkey)
 
-    let conversationIdentifier = note.thread_id().hex()
+    let conversationIdentifier = notification_conversation_identifier(note: note, our_pubkey: our_pubkey)
     var recipients: [INPerson] = []
     var pks: [Pubkey] = []
     let meta = INSendMessageIntentDonationMetadata()
@@ -246,7 +274,7 @@ func message_intent_from_note(ndb: Ndb, sender_profile: ProfileBuf, content: Str
     var groupName = INSpeakableString(spokenPhrase: "")
 
     // otherwise we just say its a DM
-    if note.known_kind == .dm {
+    if note.known_kind == .dm || note.known_kind == .private_dm {
         groupName = INSpeakableString(spokenPhrase: "DM")
     }
 
@@ -266,6 +294,25 @@ func message_intent_from_note(ndb: Ndb, sender_profile: ProfileBuf, content: Str
     }
 
     return intent
+}
+
+/// The identifier iOS groups a notification's conversation by.
+///
+/// For a NIP-17 direct message that is the person on the other end of it rather than the note: a
+/// kind-14 rumor carries `p` tags and no root `e` tag, so its `thread_id()` is its own id and every
+/// message would be delivered as a fresh conversation of one. Everything else keeps the thread root
+/// it already had.
+///
+/// Falls back to the note's thread root for a rumor with no single counterparty — a group chat —
+/// though `generate_local_notification_object` declines to build a notification for one of those in
+/// the first place.
+func notification_conversation_identifier(note: NdbNote, our_pubkey: Pubkey) -> String {
+    guard note.known_kind == .private_dm,
+          let counterparty = nip17_conversation_pubkey(rumor: note, our_pubkey: our_pubkey)
+    else {
+        return note.thread_id().hex()
+    }
+    return counterparty.hex()
 }
 
 func pubkey_to_inperson(ndb: Ndb, pubkey: Pubkey, our_pubkey: Pubkey) async -> INPerson {

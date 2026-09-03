@@ -196,6 +196,75 @@ final class NdbIngesterKeyTests: XCTestCase {
         XCTAssertEqual(receivedContent.value, "live rumor")
     }
 
+    // MARK: Unwrapping a single giftwrap on demand
+
+    /// ``Ndb/unwrapGiftwrap(_:timeout:)`` is what the notification extension is built on: it is
+    /// handed one wrap by the push server and has to get the message out of it before it can
+    /// display anything.
+    func testUnwrapGiftwrapReturnsTheRumorInside() async throws {
+        let receiver = generate_new_keypair()
+        let sender = generate_new_keypair()
+
+        let dir = try XCTUnwrap(test_ndb_dir(), "could not create a temp directory")
+        let ndb = try XCTUnwrap(Ndb(path: dir))
+        defer { ndb.close() }
+        XCTAssertTrue(ndb.add_key(receiver.privkey), "the ingester should accept our key")
+
+        let wrap = try Self.giftwrap(content: "unwrap me", from: sender, to: receiver)
+        let unwrapped = await ndb.unwrapGiftwrap(wrap.wrap)
+        let rumor = try XCTUnwrap(unwrapped, "the wrap should have been peeled")
+
+        XCTAssertEqual(rumor.content, "unwrap me")
+        XCTAssertEqual(rumor.kind, 14)
+        XCTAssertTrue(rumor.is_rumor)
+        XCTAssertEqual(rumor.pubkey, sender.pubkey, "the sender pubkey is copied off the seal")
+        XCTAssertEqual(rumor.rumor_giftwrap_id, wrap.wrapId, "the rumor must point back at the wrap it was asked for")
+    }
+
+    /// The awkward case, and the reason the subscription is opened before the wrap is ingested:
+    /// nostrdb skips a note it already has rather than unwrapping it again, so a wrap the app
+    /// already peeled produces no new rumor at all. It has to come back from the replay of what
+    /// is already stored instead.
+    func testUnwrapGiftwrapFindsARumorTheDatabaseAlreadyHas() async throws {
+        let receiver = generate_new_keypair()
+        let sender = generate_new_keypair()
+
+        let wrap = try Self.giftwrap(content: "already peeled", from: sender, to: receiver)
+        let ndb = try Self.ingest(wrap, unwrappingWith: receiver)
+        defer { ndb.close() }
+        XCTAssertTrue(ndb.add_key(receiver.privkey), "the reopened database needs the key again")
+
+        let unwrapped = await ndb.unwrapGiftwrap(wrap.wrap)
+        let rumor = try XCTUnwrap(unwrapped, "an already-stored rumor should still come back")
+        XCTAssertEqual(rumor.content, "already peeled")
+        XCTAssertEqual(rumor.rumor_giftwrap_id, wrap.wrapId)
+    }
+
+    /// Without a registered key nothing peels the wrap and nothing reports that, so the only
+    /// thing standing between the caller and an indefinite wait is the timeout.
+    func testUnwrapGiftwrapGivesUpWithoutAKey() async throws {
+        let receiver = generate_new_keypair()
+        let sender = generate_new_keypair()
+
+        let dir = try XCTUnwrap(test_ndb_dir(), "could not create a temp directory")
+        let ndb = try XCTUnwrap(Ndb(path: dir))
+        defer { ndb.close() }
+
+        let wrap = try Self.giftwrap(content: "no key for this", from: sender, to: receiver)
+        let rumor = await ndb.unwrapGiftwrap(wrap.wrap, timeout: 1)
+        XCTAssertNil(rumor, "a database with no unwrapping key cannot produce a rumor")
+    }
+
+    /// Nothing but a kind 1059 should ever be handed to the ingester by this path.
+    func testUnwrapGiftwrapRejectsANoteThatIsNotAWrap() async throws {
+        let ndb = Ndb.test
+        defer { ndb.close() }
+
+        let plain = try note(kind: 1, content: "not a giftwrap")
+        let rumor = await ndb.unwrapGiftwrap(plain, timeout: 1)
+        XCTAssertNil(rumor)
+    }
+
     // MARK: Helpers
 
     private func note(kind: UInt32, content: String) throws -> NostrEvent {
@@ -233,6 +302,8 @@ final class NdbIngesterKeyTests: XCTestCase {
     private struct Giftwrap {
         /// The kind-1059 wrap as a relay `EVENT` line, ready for `Ndb.process_events`.
         let wire: String
+        /// The wrap itself, which is what `Ndb.unwrapGiftwrap` takes.
+        let wrap: NostrEvent
         /// The wrap's id, which nostrdb stashes in the rumor's signature field.
         let wrapId: NoteId
     }
@@ -288,7 +359,7 @@ final class NdbIngesterKeyTests: XCTestCase {
         let wrapJson = try XCTUnwrap(encode_json(wrap))
 
         // `ndb_process_events` only ingests up to the last newline.
-        return Giftwrap(wire: "[\"EVENT\",\"s\",\(wrapJson)]\n", wrapId: wrap.id)
+        return Giftwrap(wire: "[\"EVENT\",\"s\",\(wrapJson)]\n", wrap: wrap, wrapId: wrap.id)
     }
 
     /// Registers `receiver`'s key, ingests `wrap`, then hands back a freshly opened `Ndb`
