@@ -103,6 +103,7 @@ static const int DEFAULT_WRITER_SCRATCH_SIZE = 2097152;
 
 // increase if we need bigger filters
 #define NDB_FILTER_PAGES 64
+#define NDB_FILTER_PAGE_SIZE 4096
 
 #define ndb_flag_set(flags, f) ((flags & f) == f)
 
@@ -1057,7 +1058,7 @@ int ndb_filter_init_with(struct ndb_filter *filter, int pages)
 	struct cursor cur;
 	int page_size, elem_size, data_size, buf_size;
 
-	page_size = 4096; // assuming this, not a big deal if we're wrong
+	page_size = NDB_FILTER_PAGE_SIZE; // assuming this, not a big deal if we're wrong
 
 	buf_size = page_size * pages;
 	elem_size = buf_size / 4;
@@ -1089,6 +1090,23 @@ int ndb_filter_init_with(struct ndb_filter *filter, int pages)
 
 int ndb_filter_init(struct ndb_filter *filter) {
 	return ndb_filter_init_with(filter, NDB_FILTER_PAGES);
+}
+
+// number of 32-byte ids that fit in one page of a filter's data buffer.
+// ndb_filter_init_with hands 3/4 of each page to the data buffer, and an id
+// element costs 32 bytes there
+#define NDB_FILTER_IDS_PER_PAGE ((NDB_FILTER_PAGE_SIZE * 3 / 4) / 32)
+
+int ndb_filter_init_for_ids(struct ndb_filter *filter, int num_ids)
+{
+	int pages;
+
+	// a page of slack for the element offsets and field headers
+	pages = num_ids / NDB_FILTER_IDS_PER_PAGE + 2;
+	if (pages < NDB_FILTER_PAGES)
+		pages = NDB_FILTER_PAGES;
+
+	return ndb_filter_init_with(filter, pages);
 }
 
 void ndb_filter_destroy(struct ndb_filter *filter)
@@ -2884,6 +2902,22 @@ static int ndb_migrate_lower_user_search_indices(struct ndb_txn *txn)
 	return ndb_migrate_user_search_indices(txn);
 }
 
+static int ndb_migrate_search_key_cmp_fix(struct ndb_txn *txn)
+{
+	// ndb_search_key_cmp used to leave its right-hand MDB_val at the full
+	// struct size while narrowing the left to search+id, so mdb_cmp_memn
+	// broke every equal-prefix tie on length and returned -1. Equal keys
+	// never compared equal, so each rewrite of a profile appended another
+	// entry instead of replacing one. Drop and rebuild so existing dbs
+	// shed those duplicates and get sorted by the corrected comparator.
+	if (mdb_drop(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_PROFILE_SEARCH], 0)) {
+		fprintf(stderr, "ndb_migrate_search_key_cmp_fix: mdb_drop failed\n");
+		return 0;
+	}
+
+	return ndb_migrate_user_search_indices(txn);
+}
+
 int ndb_process_profile_note(struct ndb_note *note, struct ndb_profile_record_builder *profile);
 
 
@@ -3190,6 +3224,7 @@ static struct ndb_migration MIGRATIONS[] = {
 	{ .fn = ndb_migrate_utf8_profile_names },
 	{ .fn = ndb_migrate_profile_indices },
 	{ .fn = ndb_migrate_metadata },
+	{ .fn = ndb_migrate_search_key_cmp_fix },
 };
 
 
@@ -3597,6 +3632,14 @@ int ndb_process_profile_note(struct ndb_note *note,
 	return 1;
 }
 
+// free the json and relay copies that ndb_ingest_event handed to the queue
+static void ndb_ingester_free_event_data(char *json, const char *relay)
+{
+	free(json);
+	if (relay)
+		free((void *)relay);
+}
+
 static int ndb_ingester_queue_event(struct ndb_ingester *ingester,
 				    char *json, unsigned len,
 				    unsigned client, const char *relay)
@@ -3663,11 +3706,23 @@ static int ndb_ingest_event(struct ndb_ingester *ingester, const char *json,
 
 	if (relay != NULL) {
 		relay = strdup(meta->relay);
-		if (relay == NULL)
+		if (relay == NULL) {
+			free(json_copy);
 			return 0;
+		}
 	}
 
-	return ndb_ingester_queue_event(ingester, json_copy, len, meta->client, relay);
+	// the ingester thread owns these once queued, so they are still ours
+	// if the handoff fails. prot_queue_push is non-blocking and returns 0
+	// when the inbox is full, so this is reachable under load
+	if (!ndb_ingester_queue_event(ingester, json_copy, len, meta->client,
+				      relay))
+	{
+		ndb_ingester_free_event_data(json_copy, relay);
+		return 0;
+	}
+
+	return 1;
 }
 
 
@@ -4131,8 +4186,15 @@ static int ndb_search_key_cmp(const MDB_val *a, const MDB_val *b)
 	MDB_val a2 = *a;
 	MDB_val b2 = *b;
 
+	// compare search+id on both sides. if we left b2 at the full struct
+	// size, mdb_cmp_memn would break the tie on length and always return
+	// -1 for equal prefixes, making the timestamp compare below dead code
+	// and the comparator non-antisymmetric.
 	a2.mv_data = ska->search;
 	a2.mv_size = sizeof(ska->search) + sizeof(ska->id);
+
+	b2.mv_data = skb->search;
+	b2.mv_size = sizeof(skb->search) + sizeof(skb->id);
 
 	cmp = mdb_cmp_memn(&a2, &b2);
 	if (cmp) return cmp;
@@ -8436,7 +8498,7 @@ static void *ndb_ingester_thread(void *data)
 	struct ndb_ingester *ingester = (struct ndb_ingester *)thread->ctx;
 	struct ndb_lmdb *lmdb = ingester->lmdb;
 	struct ndb_ingester_msg msgs[THREAD_QUEUE_BATCH], *msg;
-	int i, popped, done, any_event, rc, nkeys, npns_keys, nsns_keys;
+	int i, popped, done, quitting, any_event, rc, nkeys, npns_keys, nsns_keys;
 	MDB_txn *read_txn = NULL;
 	struct keypair *keys;
 	struct pns_key *pns_keys;
@@ -8459,6 +8521,7 @@ static void *ndb_ingester_thread(void *data)
 	//ndb_debug("started ingester thread\n");
 
 	done = 0;
+	quitting = 0;
 	while (!done) {
 		any_event = 0;
 
@@ -8498,9 +8561,20 @@ static void *ndb_ingester_thread(void *data)
 
 		if (any_event && (rc = mdb_txn_begin(lmdb->env, NULL,
 						     MDB_RDONLY, &read_txn))) {
-			// this is bad
+			// this is bad. we drop the whole batch, so free what we
+			// would have consumed, and honor a quit inside it or we
+			// would wait on an empty inbox forever and the join in
+			// threadpool_destroy would never return
 			fprintf(stderr, "UNUSUAL ndb_ingester: mdb_txn_begin failed: '%s'\n",
 					mdb_strerror(rc));
+			for (i = 0; i < popped; i++) {
+				msg = &msgs[i];
+				if (msg->type == NDB_INGEST_EVENT)
+					ndb_ingester_free_event_data(msg->event.json,
+								     msg->event.relay);
+				else if (msg->type == NDB_INGEST_QUIT)
+					quitting = 1;
+			}
 			continue;
 		}
 
@@ -8508,7 +8582,7 @@ static void *ndb_ingester_thread(void *data)
 			msg = &msgs[i];
 			switch (msg->type) {
 			case NDB_INGEST_QUIT:
-				done = 1;
+				quitting = 1;
 				break;
 
 			case NDB_INGEST_PROCESS_GIFTWRAP:
@@ -8567,6 +8641,13 @@ static void *ndb_ingester_thread(void *data)
 
 		if (any_event)
 			mdb_txn_abort(read_txn);
+
+		// processing an event can queue more work on us: a kind-6
+		// repost re-ingests the note in its content. so a quit only
+		// takes effect once the inbox is actually empty, otherwise we
+		// strand those events in a queue that is about to be freed
+		if (quitting && prot_queue_empty(&thread->inbox))
+			done = 1;
 	}
 
 	ndb_debug("quitting ingester thread\n");
@@ -8927,19 +9008,87 @@ int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags) {
 	return mdb_env_copy2(ndb->lmdb.env, path, flags);
 }
 
-static int ndb_compact_is_own_pubkey(const unsigned char *pubkey,
-				     const unsigned char (*own_pubkeys)[32],
-				     int num_pubkeys)
+int ndb_prune_default_filters(const unsigned char (*pubkeys)[32],
+			      int num_pubkeys, struct ndb_filter *filters,
+			      int capacity, int *num_filters)
 {
-	for (int i = 0; i < num_pubkeys; i++) {
-		if (memcmp(pubkey, own_pubkeys[i], 32) == 0)
-			return 1;
+	struct ndb_filter *filter;
+	int i, num;
+
+	num = 0;
+	*num_filters = 0;
+
+	if (capacity < 1)
+		return 0;
+
+	// keep every kind-0 profile
+	filter = &filters[num];
+	if (!ndb_filter_init(filter))
+		return 0;
+	num++;
+
+	if (!ndb_filter_start_field(filter, NDB_FILTER_KINDS))
+		goto fail;
+	if (!ndb_filter_add_int_element(filter, 0))
+		goto fail;
+	ndb_filter_end_field(filter);
+	if (!ndb_filter_end(filter))
+		goto fail;
+
+	// keep everything authored by our pubkeys. an authors field with no
+	// elements matches nothing, so skip the filter entirely when we have
+	// no pubkeys to keep
+	if (num_pubkeys <= 0)
+		goto done;
+
+	if (num >= capacity)
+		goto fail;
+
+	filter = &filters[num];
+	if (!ndb_filter_init_for_ids(filter, num_pubkeys))
+		goto fail;
+	num++;
+
+	if (!ndb_filter_start_field(filter, NDB_FILTER_AUTHORS))
+		goto fail;
+	for (i = 0; i < num_pubkeys; i++) {
+		if (!ndb_filter_add_id_element(filter, pubkeys[i]))
+			goto fail;
 	}
+	ndb_filter_end_field(filter);
+	if (!ndb_filter_end(filter))
+		goto fail;
+
+done:
+	*num_filters = num;
+	return 1;
+
+fail:
+	for (i = 0; i < num; i++)
+		ndb_filter_destroy(&filters[i]);
 	return 0;
 }
 
-int ndb_compact(struct ndb *ndb, const char *output_path,
-		const unsigned char (*own_pubkeys)[32], int num_pubkeys)
+// decide whether `note` survives the prune. Filters are unioned: a note is
+// kept when any filter matches it, and no filters at all keeps everything
+static int ndb_prune_keeps(struct ndb_filter *filters, int num_filters,
+			   struct ndb_note *note)
+{
+	int i;
+
+	if (num_filters == 0)
+		return 1;
+
+	for (i = 0; i < num_filters; i++) {
+		if (ndb_filter_matches(&filters[i], note))
+			return 1;
+	}
+
+	return 0;
+}
+
+int ndb_prune(struct ndb *ndb, const char *output_path,
+	      struct ndb_filter *filters, int num_filters)
 {
 	int rc, ret;
 	struct ndb_lmdb dst_lmdb;
@@ -8957,27 +9106,27 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 	scratch_size = 2 * 1024 * 1024;
 	scratch = malloc(scratch_size);
 	if (!scratch) {
-		fprintf(stderr, "ndb_compact: failed to allocate scratch buffer\n");
+		fprintf(stderr, "ndb_prune: failed to allocate scratch buffer\n");
 		return 0;
 	}
 
 	// get source mapsize
 	if ((rc = mdb_env_info(ndb->lmdb.env, &info))) {
-		fprintf(stderr, "ndb_compact: mdb_env_info failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: mdb_env_info failed: %s\n", mdb_strerror(rc));
 		free(scratch);
 		return 0;
 	}
 
 	// create destination lmdb environment
 	if (!ndb_init_lmdb(output_path, &dst_lmdb, info.me_mapsize)) {
-		fprintf(stderr, "ndb_compact: failed to init destination lmdb\n");
+		fprintf(stderr, "ndb_prune: failed to init destination lmdb\n");
 		free(scratch);
 		return 0;
 	}
 
 	// open read txn on source
 	if ((rc = mdb_txn_begin(ndb->lmdb.env, NULL, MDB_RDONLY, &src_mdb_txn))) {
-		fprintf(stderr, "ndb_compact: src mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: src mdb_txn_begin failed: %s\n", mdb_strerror(rc));
 		goto cleanup_env;
 	}
 	src_txn.lmdb = &ndb->lmdb;
@@ -8985,7 +9134,7 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 
 	// open write txn on destination
 	if ((rc = mdb_txn_begin(dst_lmdb.env, NULL, 0, &dst_mdb_txn))) {
-		fprintf(stderr, "ndb_compact: dst mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: dst mdb_txn_begin failed: %s\n", mdb_strerror(rc));
 		mdb_txn_abort(src_mdb_txn);
 		goto cleanup_env;
 	}
@@ -8994,10 +9143,10 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 
 	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 
-	// Phase 1: Copy all profiles
+	// Phase 1: Copy kept profiles
 	count_profiles = 0;
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
-		fprintf(stderr, "ndb_compact: profile cursor open failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: profile cursor open failed: %s\n", mdb_strerror(rc));
 		goto cleanup_txns;
 	}
 
@@ -9015,6 +9164,10 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 		if (note == NULL)
 			continue;
 
+		// profiles are matched against the filters like any other note
+		if (!ndb_prune_keeps(filters, num_filters, note))
+			continue;
+
 		// re-process profile from JSON content
 		if (!ndb_process_profile_note(note, &profile.record))
 			continue;
@@ -9024,7 +9177,7 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 
 		if (ndb_write_note_and_profile(secp, &dst_txn, &profile,
 					       scratch, scratch_size,
-					       NDB_FLAG_NO_STATS, NULL))
+					       ndb->flags, NULL))
 		{
 			count_profiles++;
 		}
@@ -9033,12 +9186,14 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 	}
 	mdb_cursor_close(cur);
 
-	fprintf(stderr, "ndb_compact: copied %d profiles\n", count_profiles);
+	fprintf(stderr, "ndb_prune: copied %d profiles\n", count_profiles);
 
-	// Phase 2: Copy own notes (skip kind 0, already handled above)
+	// Phase 2: Copy every kept note. Kind 0 notes that phase 1 already
+	// wrote are deduped by id inside ndb_write_note, so an older kind-0
+	// note is kept as a plain note without clobbering the profile record
 	count_notes = 0;
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_NOTE], &cur))) {
-		fprintf(stderr, "ndb_compact: note cursor open failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: note cursor open failed: %s\n", mdb_strerror(rc));
 		goto cleanup_txns;
 	}
 
@@ -9048,13 +9203,8 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 
 		note = v.mv_data;
 
-		// skip kind 0 (profiles already handled)
-		if (ndb_note_kind(note) == 0)
-			continue;
-
-		// only keep notes from our own pubkeys
-		if (!ndb_compact_is_own_pubkey(ndb_note_pubkey(note),
-					       own_pubkeys, num_pubkeys))
+		// keep the note only if some filter matches it
+		if (!ndb_prune_keeps(filters, num_filters, note))
 			continue;
 
 		// note data is stable in source mmap for duration of read txn
@@ -9062,22 +9212,30 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 
 		if (ndb_write_note(secp, &dst_txn, &writer_note,
 				   scratch, scratch_size,
-				   NDB_FLAG_NO_STATS, NULL))
+				   ndb->flags, NULL))
 		{
 			count_notes++;
 		}
 	}
 	mdb_cursor_close(cur);
 
-	fprintf(stderr, "ndb_compact: copied %d own notes\n", count_notes);
+	fprintf(stderr, "ndb_prune: copied %d notes\n", count_notes);
 
-	// Phase 3: Copy profile_last_fetch entries
+	// Phase 3: Copy profile_last_fetch entries for profiles we kept. A row
+	// for a dropped profile would tell the client it was recently fetched,
+	// so it would never refetch it
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &cur))) {
-		fprintf(stderr, "ndb_compact: profile_last_fetch cursor open failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: profile_last_fetch cursor open failed: %s\n", mdb_strerror(rc));
 		goto cleanup_txns;
 	}
 
 	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		if (k.mv_size != 32)
+			continue;
+
+		if (!ndb_get_profile_by_pubkey(&dst_txn, k.mv_data, NULL, NULL))
+			continue;
+
 		mdb_put(dst_mdb_txn, dst_lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &k, &v, 0);
 	}
 	mdb_cursor_close(cur);
@@ -9087,7 +9245,7 @@ int ndb_compact(struct ndb *ndb, const char *output_path,
 
 	// Commit destination
 	if ((rc = mdb_txn_commit(dst_mdb_txn))) {
-		fprintf(stderr, "ndb_compact: dst commit failed: %s\n", mdb_strerror(rc));
+		fprintf(stderr, "ndb_prune: dst commit failed: %s\n", mdb_strerror(rc));
 		dst_mdb_txn = NULL;
 		goto cleanup_txns;
 	}

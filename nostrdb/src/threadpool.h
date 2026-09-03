@@ -10,6 +10,7 @@ struct thread
 	struct prot_queue inbox;
 	void *qmem;
 	void *ctx;
+	int quit_pushed; // did the quit message make it into the inbox?
 };
 
 struct threadpool
@@ -100,16 +101,29 @@ static inline void threadpool_destroy(struct threadpool *tp)
 {
 	struct thread *t;
 
+	// quit every thread before joining any of them, and free no queue
+	// until they have all stopped: a thread can dispatch onto another
+	// thread's inbox while it drains, so tearing them down one at a time
+	// would let a live thread push into freed queue memory
 	for (int i = 0; i < tp->num_threads; i++) {
 		t = &tp->pool[i];
-		if (!prot_queue_push(&t->inbox, tp->quit_msg)) {
-			THREAD_TERMINATE(t->thread_id);
-		} else {
+		t->quit_pushed = prot_queue_push(&t->inbox, tp->quit_msg);
+	}
+
+	for (int i = 0; i < tp->num_threads; i++) {
+		t = &tp->pool[i];
+		if (t->quit_pushed)
 			THREAD_FINISH(t->thread_id);
-		}
+		else
+			THREAD_TERMINATE(t->thread_id);
+	}
+
+	for (int i = 0; i < tp->num_threads; i++) {
+		t = &tp->pool[i];
 		prot_queue_destroy(&t->inbox);
 		free(t->qmem);
 	}
+
 	free(tp->pool);
 }
 

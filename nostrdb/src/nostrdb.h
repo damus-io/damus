@@ -602,11 +602,33 @@ int ndb_db_version(struct ndb_txn *txn);
 /// See `mdb_env_copy2` header for documentation on `path` and `flags`
 int ndb_snapshot(struct ndb *ndb, const char *path, unsigned int flags);
 
-/// Compact the database, copying only selected data to a new database at
-/// `output_path`. All profiles are kept. Only notes authored by pubkeys in
-/// the `own_pubkeys` array are kept. Returns 1 on success, 0 on failure.
-int ndb_compact(struct ndb *ndb, const char *output_path,
-		const unsigned char (*own_pubkeys)[32], int num_pubkeys);
+/// Number of filters `ndb_prune_default_filters` can emit. Use this to size
+/// the array you hand it.
+#define NDB_PRUNE_DEFAULT_FILTERS 2
+
+/// Build the default prune keep-policy: all kind-0 profiles, plus every note
+/// authored by one of `pubkeys`. Writes the filters into `filters` and
+/// reports how many in `num_filters`; size the array with
+/// NDB_PRUNE_DEFAULT_FILTERS, since too small a `capacity` is a failure
+/// rather than a truncated policy. The caller owns the filters and must
+/// `ndb_filter_destroy` each one. Returns 1 on success, 0 on failure, in
+/// which case no filter is left initialized.
+int ndb_prune_default_filters(const unsigned char (*pubkeys)[32],
+			      int num_pubkeys, struct ndb_filter *filters,
+			      int capacity, int *num_filters);
+
+/// Prune the database, copying every note matching any of `filters` to a new
+/// database at `output_path`. Filters are unioned, exactly as in `ndb_query`
+/// and `ndb_subscribe`: a note is kept when at least one filter matches it,
+/// and `num_filters == 0` keeps every note (a plain copy).
+///
+/// Note that pruning rewrites notes through the writer, so note keys in the
+/// output database are freshly assigned and will not match the source. Which
+/// relays a note was seen on is not carried over either.
+///
+/// Returns 1 on success, 0 on failure.
+int ndb_prune(struct ndb *ndb, const char *output_path,
+	      struct ndb_filter *filters, int num_filters);
 
 // NOTE PROCESSING
 
@@ -679,6 +701,11 @@ int ndb_filter_init(struct ndb_filter *);
 /// You can set pages to 1 if you know you are constructing small filters
 // TODO: replace this with passed-in buffers
 int ndb_filter_init_with(struct ndb_filter *filter, int pages);
+
+/// Like `ndb_filter_init`, but sized so a field of `num_ids` 32-byte ids
+/// (authors, ids or tag values) fits. `ndb_filter_init`'s default capacity
+/// holds roughly 6000, which a large contact list can outgrow.
+int ndb_filter_init_for_ids(struct ndb_filter *filter, int num_ids);
 
 int ndb_filter_add_id_element(struct ndb_filter *, const unsigned char *id);
 int ndb_filter_add_int_element(struct ndb_filter *, uint64_t integer);
