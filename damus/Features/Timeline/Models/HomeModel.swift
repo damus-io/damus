@@ -680,11 +680,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
         // the same hazard on the live subscription that follows reconciliation.
         self.giftwrapsHandlerTask?.cancel()
         self.giftwrapsHandlerTask = Task {
-            // Ours are the only relays anyone sending us a NIP-17 message is told to deliver to, so
-            // they are the only relays worth reconciling giftwraps against. Usually they are relays
-            // we are connected to anyway; when the user set a different inbox from another client
-            // they are not, and this is what connects us to them — otherwise our own DMs would be
-            // sitting on relays we never ask.
+            // Anyone sending us a NIP-17 message is told to deliver to our kind-10050 inbox relays, so
+            // those have to be in the set we reconcile giftwraps against — when the user set an inbox
+            // from another client they are relays we would otherwise never ask, and their DMs would
+            // just sit there. This *adds* them to the relays we already use rather than replacing
+            // them: an inbox list is a hint about where to also look, and a wrong or stale one must
+            // not be able to cut us off from our own conversations.
             let inboxRelays = await damus_state.nostrNetwork.userRelayList.leaseOurDMInboxRelays()
             defer {
                 Task { await damus_state.nostrNetwork.userRelayList.releaseDMInboxRelays(inboxRelays.leased) }
@@ -693,8 +694,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
             for await _ in damus_state.nostrNetwork.reader.streamIndefinitely(
                 filters: giftwraps_filters,
                 // `nil` rather than an empty list, which would mean "no relays" instead of "all of
-                // them": if we could not reach a single inbox relay, a wider net beats no net.
-                to: inboxRelays.connected.isEmpty ? nil : inboxRelays.connected,
+                // them": with no published inbox list there is no opinion to act on, so keep the
+                // phase-4 behaviour of reconciling against every relay we have.
+                to: inboxRelays.target.isEmpty ? nil : inboxRelays.target,
                 streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: NostrKind.giftwrapCreatedAtFuzzWindow)),
                 // A wrap is signed by a throwaway key and references nobody, so there is no profile
                 // worth preloading — the default `.preload` would just chase thousands of dead pubkeys.
@@ -1088,13 +1090,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let filters = [dms_filter, our_dms_filter]
         let timeoutSeconds: UInt64 = 20
 
-        // The giftwrap half of the pull runs against our own DM inbox relays rather than whatever the
-        // pool is connected to, for the same reason the live subscription does: those are the relays a
-        // NIP-17 sender was told to deliver to, so they are the only ones our history is on. It is a
-        // separate stream because it needs a different relay set, and it runs alongside the legacy
-        // pull rather than after it because nothing is read out of it — reconciling the wraps into
-        // nostrdb is the entire point, and the ingester unwraps them into the kind-14 rumors the DM
-        // models are already streaming.
+        // The giftwrap half of the pull adds our own DM inbox relays to the relay set, for the same
+        // reason the live subscription does: a NIP-17 sender was told to deliver there, so history we
+        // have never seen may exist only on those relays. It is a separate stream because it needs a
+        // different relay set, and it runs alongside the legacy pull rather than after it because
+        // nothing is read out of it — reconciling the wraps into nostrdb is the entire point, and the
+        // ingester unwraps them into the kind-14 rumors the DM models are already streaming.
         let giftwrapPull = Task { [damus_state] in
             let inboxRelays = await damus_state.nostrNetwork.userRelayList.leaseOurDMInboxRelays()
             defer {
@@ -1102,7 +1103,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             }
             for await _ in damus_state.nostrNetwork.reader.streamExistingEvents(
                 filters: [giftwraps_filter],
-                to: inboxRelays.connected.isEmpty ? nil : inboxRelays.connected,
+                to: inboxRelays.target.isEmpty ? nil : inboxRelays.target,
                 timeout: .seconds(timeoutSeconds),
                 streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0)),
                 preloadStrategy: .noPreloading
