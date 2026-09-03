@@ -346,11 +346,6 @@ struct PostView: View {
     }
     
     func load_draft() -> Bool {
-        // Drafts are read and decrypted off the main thread at launch, so make sure that has
-        // landed before we conclude there is no draft — otherwise we would start a fresh post
-        // on top of a saved one.
-        self.damus_state.drafts.finish_loading(with: self.damus_state)
-
         guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
             self.post = NSMutableAttributedString("")
             self.uploadedMedias = []
