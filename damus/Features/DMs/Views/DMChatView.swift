@@ -123,23 +123,51 @@ struct DMChatView: View, KeyboardReadable {
          */
     }
 
+    /// Sends the draft as a NIP-17 private direct message.
+    ///
+    /// What goes on the relay is a pair of NIP-59 giftwraps, never the message. The copy addressed to
+    /// us is also handed straight to the local database, which is what makes the message appear in
+    /// this view: nostrdb peels it into a kind-14 rumor and the subscription the DM list already
+    /// reads delivers it, through the very same path an inbound message arrives by. That is
+    /// deliberately *not* an optimistic insert of a locally-built event — going through the real read
+    /// path means a sent message that shows up here is a message our own reader could open, so a
+    /// wrap we somehow built wrong fails visibly here instead of quietly becoming unreadable history.
+    ///
+    /// It also means we do not have to wait for the relay to echo our own wrap back to us, which is
+    /// the only other way our sent messages would ever reach the database.
     func send_message() async {
-        let tags = [["p", pubkey.hex()]]
         guard let post_blocks = parse_post_blocks(content: dms.draft)?.blocks else {
             return
         }
         let content = post_blocks.map({ pb in pb.asString }).joined(separator: "")
 
-        guard let dm = NIP04.create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
-            print("error creating dm")
+        // The seal has to be signed by us, so a pubkey-only login cannot send.
+        guard let keypair = damus_state.keypair.to_full() else {
+            Log.error("Cannot send a NIP-17 DM without a private key", for: .networking)
+            return
+        }
+
+        let dm: NIP17.DirectMessage
+        do {
+            dm = try NIP17.createDirectMessage(content, to: pubkey, keypair: keypair)
+        }
+        catch {
+            Log.error("Failed to build a NIP-17 DM: %s", for: .networking, error.localizedDescription)
             return
         }
 
         dms.draft = ""
 
-        await damus_state.nostrNetwork.postbox.send(dm)
-        
-        handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
+        for giftWrap in dm.giftWraps {
+            await damus_state.nostrNetwork.postbox.send(giftWrap)
+        }
+
+        do { try damus_state.ndb.add(event: dm.giftWrapToSelf) }
+        catch {
+            // The message is on its way regardless; it will show up once a relay echoes our own wrap
+            // back to the giftwrap subscription. Losing the local copy only costs us the immediate echo.
+            Log.error("Failed to ingest our own NIP-17 giftwrap locally: %s", for: .ndb, error.localizedDescription)
+        }
 
         end_editing()
     }
