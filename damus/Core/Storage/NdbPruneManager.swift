@@ -243,6 +243,38 @@ actor NdbPruneManager {
         }
     }
 
+    /// Prunes at the user's explicit request, whether or not the database has
+    /// grown past its budget.
+    ///
+    /// Differs from ``pruneIfNeeded()`` in the two ways a person pressing a
+    /// button should: a database comfortably inside its budget is still trimmed
+    /// down to the target, and a prune that failed a few hours ago does not hold
+    /// this one off. The reasons that are not about timing — no budget to aim
+    /// at, a copy already staged, not enough room on the volume — still apply,
+    /// and are reported back so the UI can say why nothing happened.
+    ///
+    /// - Returns: What it did, or why it did nothing.
+    func pruneNow() async throws -> ManualPruneOutcome {
+        guard let dbPath else { return .noDatabase }
+        guard !isPruning else { return .alreadyRunning }
+
+        guard let budgetBytes = Ndb.get_space_budget(db_path: dbPath).bytes else { return .noBudget }
+        guard let size = Ndb.database_file_size(path: dbPath), size > 0 else { return .noDatabase }
+
+        // A staged copy is about to replace this database wholesale. Pruning
+        // again would bin it and redo minutes of work for a worse result.
+        if Ndb.get_pending_prune() != nil { return .alreadyStaged }
+
+        let target = UInt64(Double(budgetBytes) * Self.targetFraction)
+        let needed = target + Self.freeSpaceMarginBytes
+        if let available = Self.availableBytes(at: dbPath), available < needed {
+            return .notEnoughFreeSpace(neededBytes: needed, availableBytes: available)
+        }
+
+        let staged = try await prune(if: .prune(fileBudget: target))
+        return staged ? .staged : .nothingToPrune
+    }
+
     /// Writes a pruned copy into the staging directory.
     ///
     /// Does not set the pending marker — ``pruneIfNeeded()`` does that once this
@@ -347,6 +379,125 @@ actor NdbPruneManager {
     }
 
     private static let pruneQueue = DispatchQueue(label: "com.jb55.damus.ndb-prune", qos: .utility)
+
+    // MARK: - Retiring the scheduled-compaction machinery
+
+    /// The `UserDefaults` keys the old scheduled-compaction machinery left on
+    /// every install that ever ran it.
+    ///
+    /// Nothing reads these any more — the code that did was deleted along with
+    /// `Ndb+Compaction.swift` — so they are dead weight in the app's defaults,
+    /// and `ndb_compact_on_next_launch` in particular is a flag no launch will
+    /// ever act on again.
+    static let legacyCompactionDefaultsKeys = [
+        "ndb_auto_compact_schedule",
+        "ndb_last_compact_date",
+        "ndb_compact_on_next_launch",
+        "ndb_compact_on_next_launch_source",
+        "ndb_large_db_compaction_notification_pending",
+    ]
+
+    /// Removes the defaults the scheduled-compaction machinery left behind.
+    ///
+    /// Safe to call on every launch: `removeObject` on a key that is not there
+    /// does nothing, so this needs no "have I run yet" flag of its own — which
+    /// would only be one more stale key to retire later.
+    ///
+    /// An install updating with `ndb_compact_on_next_launch` still set is not
+    /// stranded by this. That flag only ever meant "the database wants
+    /// shrinking", and the size-budgeted prune answers the same question
+    /// without being asked: ``startPeriodicChecks()`` runs a check as soon as
+    /// the app reaches the foreground, and stages a pruned copy if the database
+    /// is over its budget. So the user's intent is honoured on the first
+    /// foreground rather than the next launch, and by something that actually
+    /// drops notes rather than only reclaiming free pages.
+    static func removeLegacyCompactionDefaults() {
+        let defaults = UserDefaults.standard
+        let hadPendingCompaction = defaults.bool(forKey: "ndb_compact_on_next_launch")
+
+        for key in legacyCompactionDefaultsKeys {
+            defaults.removeObject(forKey: key)
+        }
+
+        if hadPendingCompaction {
+            Log.info("Discarded a pending scheduled compaction; the space budget governs the database now", for: .storage)
+        }
+    }
+}
+
+// MARK: - Reporting the launch-time swap
+
+extension NdbPruneManager {
+    /// Reports a launch-time swap that did not go through.
+    ///
+    /// ``Ndb/swap_staged_prune_before_first_open(db_path:)`` lives in
+    /// `Ndb+PruneSwap.swift`, which is compiled into the extensions too, where
+    /// Sentry does not exist — so all it can do is leave its outcome in
+    /// ``Ndb/staged_prune_swap_outcome`` for someone in the app target to pick
+    /// up. This is that someone, and it restores the error reporting the old
+    /// `CompactionView` used to do.
+    ///
+    /// Only refusals and failures are worth a report. A refusal means the budget
+    /// quietly stopped being enforced for this user, or that the validation is
+    /// misfiring on databases we would in fact have been happy with; either way
+    /// it is invisible from the outside and needs telling.
+    @MainActor
+    static func reportStagedPruneSwapOutcome() {
+        guard !hasReportedSwapOutcome else { return }
+        hasReportedSwapOutcome = true
+
+        guard let outcome = Ndb.staged_prune_swap_outcome else { return }
+
+        switch outcome {
+        case .nothingStaged, .notForThisDatabase:
+            break
+        case .swapped(let bytes):
+            Log.info("Swapped in a staged pruned database of %d bytes", for: .storage, bytes)
+        case .refused(let rejection):
+            Log.error("Refused a staged pruned database: %@", for: .storage, String(describing: rejection))
+            DamusSentry.captureSentryMessage("Refused a staged pruned database") { scope in
+                scope.setContext(value: ["reason": String(describing: rejection)], key: "prune_swap")
+            }
+        case .failed(let description):
+            Log.error("Staged prune swap failed: %@", for: .storage, description)
+            DamusSentry.captureSentryMessage("Staged prune swap failed") { scope in
+                scope.setContext(value: ["error": description], key: "prune_swap")
+            }
+        }
+    }
+
+    /// The swap happens once per process, so its outcome is worth reporting
+    /// once — not again for every `DamusState` a logout and login builds.
+    @MainActor
+    private static var hasReportedSwapOutcome = false
+}
+
+/// What a user-initiated prune did, or why it did nothing.
+enum ManualPruneOutcome: Equatable {
+    /// A pruned copy is staged, and swaps in at the next launch.
+    case staged
+
+    /// The database is over its file budget, but its notes already fit inside
+    /// the note budget — the rest is index and page overhead a prune cannot
+    /// reach. Nothing was staged.
+    case nothingToPrune
+
+    /// A pruned copy was already staged and waiting. Restarting applies it.
+    case alreadyStaged
+
+    /// A prune is already running, so this one was not started.
+    case alreadyRunning
+
+    /// The user chose not to cap the database, so there is no size to prune
+    /// towards.
+    case noBudget
+
+    /// The volume cannot hold the source and the pruned copy at once, and they
+    /// coexist for the length of the prune.
+    case notEnoughFreeSpace(neededBytes: UInt64, availableBytes: UInt64)
+
+    /// There is no database to prune.
+    case noDatabase
 }
 
 /// A pruned copy sitting in the staging directory, ready for a marker to arm a

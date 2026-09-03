@@ -18,10 +18,31 @@ fileprivate enum CacheClearingState {
     case cleared
 }
 
-/// A simple type to keep track of the compact scheduling state
-fileprivate enum CompactSchedulingState {
-    case not_scheduled
-    case scheduled
+/// A simple type to keep track of a user-initiated prune.
+///
+/// A prune takes minutes on a real database, so the button spends most of its
+/// life in `.pruning` and the view must stay usable throughout.
+fileprivate enum ManualPruneState: Equatable {
+    case idle
+    case pruning
+    /// Finished, with what to show for it.
+    case finished(ManualPruneMessage)
+}
+
+/// What the button shows once a prune has finished.
+fileprivate struct ManualPruneMessage: Equatable {
+    let text: String
+
+    /// Whether the button stays tappable.
+    ///
+    /// `false` only once a pruned copy is staged, when the sole remaining step
+    /// is a restart. Everything else — no budget set, no room on the volume —
+    /// is something the user can go and fix, so the button has to still be
+    /// there when they come back to it.
+    let canRetry: Bool
+
+    /// Whether this wants the user's attention rather than reporting success.
+    let isProblem: Bool
 }
 
 /// Storage category for display in list and chart
@@ -52,8 +73,8 @@ struct StorageSettingsView: View {
     @State private var isPreparingExport: Bool = false
     @State fileprivate var cache_clearing_state: CacheClearingState = .not_cleared
     @State var showing_cache_clear_alert: Bool = false
-    @State fileprivate var compact_scheduling_state: CompactSchedulingState = .not_scheduled
-    @State var showing_compact_alert: Bool = false
+    @State fileprivate var manual_prune_state: ManualPruneState = .idle
+    @State var showing_prune_alert: Bool = false
     @State fileprivate var space_budget: NdbSpaceBudget = Ndb.get_space_budget()
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
@@ -173,7 +194,7 @@ struct StorageSettingsView: View {
                 // Clear Cache Section
                 Section {
                     self.ClearCacheButton
-                    self.CompactDatabaseButton
+                    self.FreeUpSpaceButton
                 }
 
                 // Space budget Section
@@ -228,9 +249,11 @@ struct StorageSettingsView: View {
             if stats == nil {
                 loadStorageStats()
             }
-            // Reflect any previously scheduled compaction in the button state.
-            if UserDefaults.standard.bool(forKey: Ndb.compact_on_next_launch_key) {
-                compact_scheduling_state = .scheduled
+            // A copy staged by an earlier session — or by this screen before the
+            // user navigated away — is waiting for the next launch, and saying
+            // so is more useful than offering to redo the work.
+            if Ndb.get_pending_prune() != nil, manual_prune_state == .idle {
+                manual_prune_state = .finished(Self.restart_to_apply_message)
             }
         }
     }
@@ -407,34 +430,138 @@ struct StorageSettingsView: View {
         return StorageStatsManager.formatBytes(size)
     }
 
-    /// Compact database button view with confirmation dialog.
+    /// Shown once a pruned copy is staged and only a restart is left.
+    fileprivate static let restart_to_apply_message = ManualPruneMessage(
+        text: NSLocalizedString(
+            "Space will be freed the next time you open Damus.",
+            comment: "Message indicating that a pruned database copy is ready and will be applied on the next app launch."
+        ),
+        canRetry: false,
+        isProblem: false
+    )
+
+    /// Whether the button can be pressed right now.
+    fileprivate var manual_prune_is_available: Bool {
+        switch manual_prune_state {
+        case .idle: return true
+        case .pruning: return false
+        case .finished(let message): return message.canRetry
+        }
+    }
+
+    /// Free-up-space button view with confirmation dialog.
     ///
-    /// Schedules a one-time database compaction to run on the next app launch.  The user
-    /// is informed that the app will need to restart to complete the operation.
-    var CompactDatabaseButton: some View {
-        Button(action: { self.showing_compact_alert = true }, label: {
+    /// Trims the database down to the size limit right now, instead of waiting
+    /// for it to grow past the limit on its own. The work happens on a
+    /// background queue against a copy — the database stays usable and this
+    /// screen stays interactive throughout — and the copy is swapped in at the
+    /// next launch, which is why the success message asks for nothing but
+    /// patience.
+    var FreeUpSpaceButton: some View {
+        Button(action: { self.showing_prune_alert = true }, label: {
             HStack(spacing: 6) {
-                switch compact_scheduling_state {
-                    case .not_scheduled:
-                        Text("Compact Database", comment: "Button to compact the NostrDB database on next launch.")
-                    case .scheduled:
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                switch manual_prune_state {
+                    case .idle:
+                        Text("Free Up Space Now", comment: "Button to trim the NostrDB database down to the size limit immediately.")
+                    case .pruning:
+                        ProgressView()
+                        Text("Freeing up space\u{2026} This can take a few minutes.", comment: "Loading message indicating that the database is being trimmed in the background.")
+                    case .finished(let message):
+                        Image(systemName: message.isProblem ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                            .foregroundColor(message.isProblem ? .orange : .green)
                             .accessibilityHidden(true)
-                        Text("Compaction scheduled. Restart app to continue.", comment: "Message indicating that a database compaction has been scheduled for the next app launch.")
+                        Text(message.text)
                 }
             }
         })
-        .disabled(self.compact_scheduling_state != .not_scheduled)
-        .alert(isPresented: $showing_compact_alert) {
+        // Left enabled without a budget on purpose: a greyed-out button explains
+        // nothing, and the outcome message says exactly what to do instead —
+        // which only helps if the user can then come back and press it.
+        .disabled(!self.manual_prune_is_available)
+        .alert(isPresented: $showing_prune_alert) {
             Alert(
-                title: Text("Compact Database", comment: "Confirmation dialog title for database compaction"),
-                message: Text("This will reclaim unused space in the database. The app will need to restart to complete the operation. Proceed?", comment: "Message explaining what database compaction does and that a restart is required."),
+                title: Text("Free Up Space", comment: "Confirmation dialog title for trimming the database"),
+                message: Text("This trims older notes until the database fits the size limit above. Your own notes and everyone\u{2019}s profiles are kept. It runs in the background and takes effect the next time you open Damus. Proceed?", comment: "Message explaining what freeing up space does and when it takes effect."),
                 primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
-                    Ndb.set_compact_on_next_launch(source: .manual)
-                    compact_scheduling_state = .scheduled
+                    self.free_up_space_button_action()
                 },
                 secondaryButton: .cancel()
+            )
+        }
+    }
+
+    /// Kicks off a user-initiated prune and reports what it did.
+    ///
+    /// Deliberately fire-and-forget: the prune outlives this screen easily, and
+    /// the actor keeps running it whether or not anyone is watching. If the user
+    /// navigates away the result is simply not shown — reopening the screen
+    /// picks up the staged copy in `onAppear`.
+    fileprivate func free_up_space_button_action() {
+        manual_prune_state = .pruning
+
+        Task {
+            let message: ManualPruneMessage
+            do {
+                message = Self.describe(outcome: try await damus_state.pruneManager.pruneNow())
+            } catch {
+                Log.error("Manual prune failed: %@", for: .storage, String(describing: error))
+                DamusSentry.captureSentryError(error) { scope in
+                    scope.setContext(value: ["operation": "manual_prune"], key: "storage")
+                }
+                message = ManualPruneMessage(
+                    text: String(
+                        format: NSLocalizedString("Could not free up space: %@", comment: "Error message shown when a user-initiated database trim fails"),
+                        error.localizedDescription
+                    ),
+                    canRetry: true,
+                    isProblem: true
+                )
+            }
+
+            await MainActor.run {
+                manual_prune_state = .finished(message)
+                loadStorageStats()
+            }
+        }
+    }
+
+    /// Turns a prune outcome into the one line the button has room for.
+    fileprivate static func describe(outcome: ManualPruneOutcome) -> ManualPruneMessage {
+        switch outcome {
+        case .staged, .alreadyStaged:
+            return restart_to_apply_message
+        case .nothingToPrune:
+            return ManualPruneMessage(
+                text: NSLocalizedString("Nothing to free up — your notes already fit the size limit.", comment: "Message shown when a database trim found no notes it could drop"),
+                canRetry: true,
+                isProblem: false
+            )
+        case .alreadyRunning:
+            return ManualPruneMessage(
+                text: NSLocalizedString("Already freeing up space in the background.", comment: "Message shown when a database trim was already running"),
+                canRetry: true,
+                isProblem: false
+            )
+        case .noBudget:
+            return ManualPruneMessage(
+                text: NSLocalizedString("Set a database size limit first.", comment: "Message shown when a database trim was requested with no size limit set"),
+                canRetry: true,
+                isProblem: true
+            )
+        case .notEnoughFreeSpace(let neededBytes, let availableBytes):
+            let format = NSLocalizedString("Not enough free space: %@ needed, %@ available.", comment: "Message shown when there is not enough disk space to trim the database")
+            return ManualPruneMessage(
+                text: String(format: format,
+                             StorageStatsManager.formatBytes(neededBytes),
+                             StorageStatsManager.formatBytes(availableBytes)),
+                canRetry: true,
+                isProblem: true
+            )
+        case .noDatabase:
+            return ManualPruneMessage(
+                text: NSLocalizedString("No database to free up space in.", comment: "Message shown when a database trim was requested but there is no database"),
+                canRetry: true,
+                isProblem: true
             )
         }
     }

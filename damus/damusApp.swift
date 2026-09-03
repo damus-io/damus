@@ -85,6 +85,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         SKPaymentQueue.default().add(StoreObserver.standard)
         registerNotificationCategories()
         ImageCacheMigrations.migrateKingfisherCacheIfNeeded()
+        NdbPruneManager.removeLegacyCompactionDefaults()
         configureKingfisherCache()
         
         return true

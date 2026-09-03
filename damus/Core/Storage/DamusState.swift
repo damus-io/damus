@@ -107,6 +107,11 @@ class DamusState: HeadlessDamusState, ObservableObject {
         let sub_id = UUID().uuidString
 
         guard let ndb = mndb else { return nil }
+
+        // Opening nostrdb is what runs the staged-prune swap, so this is the
+        // first moment there is an outcome to report.
+        NdbPruneManager.reportStagedPruneSwapOutcome()
+
         let pubkey = keypair.pubkey
 
         // Hand our secret key to nostrdb's ingester threads so inbound NIP-59 giftwraps

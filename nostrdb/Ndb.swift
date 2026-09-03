@@ -264,7 +264,35 @@ class Ndb {
     static func db_file_exists(path: String) -> Bool {
         return FileManager.default.fileExists(atPath: "\(path)/\(Self.main_db_file_name)")
     }
-    
+
+    /// Returns the size of the main LMDB file in bytes, or `nil` if it cannot be determined.
+    ///
+    /// This is the logical file size, which for a sparse LMDB file is larger than
+    /// the blocks it actually occupies. That is the number the space budget is
+    /// written against — see ``NdbSpaceBudget``.
+    /// - Parameter path: The database directory path.
+    static func database_file_size(path: String) -> UInt64? {
+        let dataPath = "\(path)/\(main_db_file_name)"
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: dataPath),
+              let sizeValue = attributes[.size] else {
+            return nil
+        }
+
+        if let number = sizeValue as? NSNumber {
+            return number.uint64Value
+        }
+
+        if let uint64 = sizeValue as? UInt64 {
+            return uint64
+        }
+
+        if let int = sizeValue as? Int {
+            return UInt64(int)
+        }
+
+        return nil
+    }
+
     /// Returns the path whose `data.mdb` file was modified most recently.
     private static func latestDatabasePath(primaryPath: String,
                                            legacyPath: String?,
