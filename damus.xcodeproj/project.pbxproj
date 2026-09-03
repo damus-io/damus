@@ -1994,6 +1994,7 @@
 		1AEE4F35FB8A376DC488E66B /* Ndb+Prune.swift in Sources */ = {isa = PBXBuildFile; fileRef = A79A2486CFF78DDCC79DC060 /* Ndb+Prune.swift */; };
 		D7E14B932F68B22D00BF84B7 /* NdbCompactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */; };
 		1BFBA61D4A015A6DFB8259EC /* NdbPruneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0557D6B7D15979C722594E6F /* NdbPruneTests.swift */; };
+		D7A1B2C30002A6DFB8259EC1 /* NdbFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A1B2C30001A6DFB8259EC1 /* NdbFilterTests.swift */; };
 		D7E14C022F68B22D00BF84B8 /* NdbIngesterKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */; };
 		D7E5B2D32EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
 		D7E5B2D42EA0188200CF47AC /* StreamPipelineDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */; };
@@ -3044,6 +3045,7 @@
 		A79A2486CFF78DDCC79DC060 /* Ndb+Prune.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Ndb+Prune.swift"; sourceTree = "<group>"; };
 		D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbCompactionTests.swift; sourceTree = "<group>"; };
 		0557D6B7D15979C722594E6F /* NdbPruneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbPruneTests.swift; sourceTree = "<group>"; };
+		D7A1B2C30001A6DFB8259EC1 /* NdbFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbFilterTests.swift; sourceTree = "<group>"; };
 		D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbIngesterKeyTests.swift; sourceTree = "<group>"; };
 		D7E5B2D22EA0187B00CF47AC /* StreamPipelineDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPipelineDiagnostics.swift; sourceTree = "<group>"; };
 		D7EB00AF2CD59C8300660C07 /* PresentFullScreenItemNotify.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentFullScreenItemNotify.swift; sourceTree = "<group>"; };
@@ -4050,6 +4052,7 @@
 				D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */,
 				D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */,
 				0557D6B7D15979C722594E6F /* NdbPruneTests.swift */,
+				D7A1B2C30001A6DFB8259EC1 /* NdbFilterTests.swift */,
 				D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
 				D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */,
@@ -6635,6 +6638,7 @@
 				B5B4D1432B37D47600844320 /* NdbExtensions.swift in Sources */,
 				D7E14B932F68B22D00BF84B7 /* NdbCompactionTests.swift in Sources */,
 				1BFBA61D4A015A6DFB8259EC /* NdbPruneTests.swift in Sources */,
+				D7A1B2C30002A6DFB8259EC1 /* NdbFilterTests.swift in Sources */,
 				D7E14C022F68B22D00BF84B8 /* NdbIngesterKeyTests.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
 				D795356B2EBD28A800AACF98 /* AppLifecycleHandlingTests.swift in Sources */,

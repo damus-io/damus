@@ -114,6 +114,22 @@ final class NdbFilterArray {
         count += 1
     }
 
+    /// Builds a filter into the next free slot with ``NdbFilterBuilder``.
+    ///
+    /// The builder destroys a filter it could not finish, so a throw here leaves
+    /// the slot free and ``count`` unchanged, exactly as the raw
+    /// ``appendFilter(_:)`` does.
+    ///
+    /// - Throws: ``NdbFilterArrayError/full(capacity:)`` if there is no free slot,
+    ///   or whatever ``NdbFilterBuilder/build(into:_:)`` throws.
+    func appendFilter(building body: (NdbFilterBuilder) throws -> Void) throws {
+        guard count < capacity else {
+            throw NdbFilterArrayError.full(capacity: capacity)
+        }
+        try NdbFilterBuilder.build(into: storage.advanced(by: count), body)
+        count += 1
+    }
+
     /// Builds nostrdb's default prune keep-policy: every kind-0 profile, plus
     /// every note authored by one of `pubkeys`.
     ///
@@ -430,19 +446,8 @@ extension NdbFilterArray {
     static func pruneFilters(keeping pubkeys: [Pubkey], since: UInt32) throws -> NdbFilterArray {
         let filters = try defaultPruneFilters(keeping: pubkeys)
 
-        try filters.appendFilter({ slot in
-            guard ndb_filter_init(slot) == 1 else { return false }
-            guard ndb_filter_start_field(slot, NDB_FILTER_SINCE) == 1,
-                  ndb_filter_add_int_element(slot, UInt64(since)) == 1 else {
-                ndb_filter_destroy(slot)
-                return false
-            }
-            ndb_filter_end_field(slot)
-            guard ndb_filter_end(slot) == 1 else {
-                ndb_filter_destroy(slot)
-                return false
-            }
-            return true
+        try filters.appendFilter(building: { filter in
+            try filter.field(.since, { try $0.add(int: UInt64(since)) })
         })
 
         return filters

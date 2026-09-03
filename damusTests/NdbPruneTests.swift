@@ -212,6 +212,30 @@ final class NdbPruneTests: XCTestCase {
         XCTAssertEqual(filters.count, 0, "an uninitialized slot must not be counted, or deinit would destroy garbage")
     }
 
+    func test_a_built_filter_that_fails_halfway_leaves_the_count_alone() throws {
+        let filters = NdbFilterArray(capacity: 2)
+
+        // Two values in a single-valued field: nostrdb takes the first and rejects
+        // the second, so this fails with a field already open.
+        XCTAssertThrowsError(try filters.appendFilter(building: { filter in
+            try filter.field(.since, { field in
+                try field.add(int: 1)
+                try field.add(int: 2)
+            })
+        })) { error in
+            guard case NdbFilterBuildError.elementRejected = error else {
+                return XCTFail("expected NdbFilterBuildError.elementRejected, got \(error)")
+            }
+        }
+        XCTAssertEqual(filters.count, 0, "the half-built filter destroyed itself, so the slot is free again")
+
+        // And the array is still usable: the freed slot takes the next filter.
+        try filters.appendFilter(building: { filter in
+            try filter.field(.since, { try $0.add(int: 1) })
+        })
+        XCTAssertEqual(filters.count, 1)
+    }
+
     // MARK: - The two together
 
     func test_prune_with_the_default_filters_keeps_profiles_and_our_own_notes() throws {
