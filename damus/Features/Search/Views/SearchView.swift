@@ -13,6 +13,11 @@ struct SearchView: View {
     @Environment(\.dismiss) var dismiss
     @State var is_hashtag_muted: Bool = false
 
+    /// The search this timeline's search button opens the filters on. Seeded with
+    /// the tag every time the button is tapped.
+    @State private var search_query = AdvancedSearchQuery()
+    @State private var search_filters_presented = false
+
     var content_filter: (NostrEvent) -> Bool {
         let filters = ContentFilters.defaults(damus_state: self.appstate)
         return ContentFilters(filters: filters).filter
@@ -53,14 +58,18 @@ struct SearchView: View {
         }
         .toolbar {
             if let hashtag = search.search.hashtag?.first {
-                // Prefilled with the tag, so narrowing a hashtag by author or date
-                // is one tap from the hashtag itself rather than a query to retype
-                // on the explore pane. Sits beside the overflow menu rather than in
-                // it, because nobody opens the overflow menu looking for search.
+                // Opens the filters with the tag already pinned, so narrowing a
+                // hashtag by word, author or date is one tap from the hashtag
+                // itself rather than a query to retype on the explore pane. It
+                // does not run the tag on its own: that would answer a timeline
+                // with a local-only copy of the same timeline — see
+                // ``AdvancedSearchScopeModifier``. Sits beside the overflow menu
+                // rather than in it, because nobody opens the overflow menu
+                // looking for search.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        let query = AdvancedSearchQuery(hashtags: [hashtag])
-                        appstate.nav.push(route: .AdvancedSearch(model: AdvancedSearchModel(damus_state: appstate, query: query)))
+                        search_query = AdvancedSearchQuery(hashtags: [hashtag])
+                        search_filters_presented = true
                     } label: {
                         Image(systemName: "magnifyingglass")
                     }
@@ -102,6 +111,7 @@ struct SearchView: View {
                 is_hashtag_muted = (appstate.mutelist_manager.event?.mute_list ?? []).contains(MuteItem.hashtag(Hashtag(hashtag: hashtag_string), nil))
             }
         }
+        .advancedSearchScope(damus_state: appstate, query: $search_query, isPresented: $search_filters_presented)
     }
 
     func mute_hashtag(hashtag_string: String, expiration_time: Date?) {

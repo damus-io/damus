@@ -8,8 +8,8 @@ are **damus-local** — upstream is C-only. Everything under `src/`, `ccan/` and
 
 ## Currently synced to
 
-Upstream `master` at **1b42298990a8** ("query: let author_kinds serve
-multi-author filters").
+Upstream `master` at **5dbd1ce80bb5** ("test: destroy what the tests
+allocate").
 
 ## damus-local divergence from that commit
 
@@ -29,8 +29,10 @@ upstreamed rather than carried here forever.
 | `src/bolt11/bolt11.c` | NULL `fail` guard in `decode_fail`; `len < 8` guard against underflow in `bech32_decode_alloc`. | `05b62c5860e8` |
 | `src/bindings/c/*.h`, `src/bindings/swift/*.swift` | Build-layout edits: the `flatcc/` prefix is stripped from includes (flatcc is flattened into `nostrdb/flatcc/` here) and `import FlatBuffers` is removed. | `copy-ndb` |
 
-Not vendored: `src/giftwrap.c` (present upstream but absent from its `SRCS` and
-does not compile) and `src/configurator.c` (`src/config.h` is checked in).
+Not built: `src/giftwrap.c` is copied in by the re-sync below but is in no
+target's Sources phase, matching upstream, which leaves it out of its own
+`SRCS` because it does not compile. `src/configurator.c` is not vendored at all
+(`src/config.h` is checked in).
 
 `src/nostrdb.c` is otherwise byte-identical to upstream, as are `ccan/` and
 `flatcc/` (both unchanged upstream since the previous sync).
@@ -65,6 +67,24 @@ git archive --remote=/tmp/ndb-sync damus-local src | tar -x -C /tmp/merged
 rm -f /tmp/merged/src/configurator.c
 rsync -a --delete /tmp/merged/src/ nostrdb/src/
 ```
+
+When only a handful of files changed upstream (`git -C "$UPSTREAM" diff --stat
+<BASE>..<TARGET> -- src/` tells you), a per-file `git merge-file` is quicker
+than the scratch-clone rebase and gives the same 3-way result:
+
+```bash
+for f in nostrdb.c nostrdb.h ...; do
+  git -C "$UPSTREAM" cat-file blob <BASE>:src/$f   > /tmp/$f.base
+  git -C "$UPSTREAM" cat-file blob <TARGET>:src/$f > /tmp/$f.theirs
+  cp nostrdb/src/$f /tmp/$f.merged
+  git merge-file -L damus -L upstream-base -L upstream-new \
+    /tmp/$f.merged /tmp/$f.base /tmp/$f.theirs
+done
+```
+
+Either way, verify the result before committing: `diff` each merged file
+against the upstream target blob and check that what is left over is exactly
+the divergence table above, no more and no less.
 
 Then add any new `src/*.c` to the four `Sources` build phases that already
 compile `nostrdb.c` (damus, damusTests, DamusNotificationService and the

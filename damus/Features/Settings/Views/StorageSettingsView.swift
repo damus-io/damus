@@ -54,22 +54,7 @@ struct StorageSettingsView: View {
     @State var showing_cache_clear_alert: Bool = false
     @State fileprivate var compact_scheduling_state: CompactSchedulingState = .not_scheduled
     @State var showing_compact_alert: Bool = false
-    @State fileprivate var auto_compact_schedule: AutoCompactSchedule = Ndb.get_auto_compact_schedule()
-    
-    /// Whether the current database is large enough that automatic compaction will be skipped.
-    private var isLargeDatabaseSkippingAutoCompact: Bool {
-        guard let dbPath = Ndb.db_path else { return false }
-        return Ndb.is_large_database(path: dbPath)
-    }
-    
-    /// The auto-compact schedule options currently available to the user.
-    private var availableAutoCompactSchedules: [AutoCompactSchedule] {
-        if settings.developer_mode {
-            return AutoCompactSchedule.allCases
-        }
-        
-        return AutoCompactSchedule.allCases.filter { $0 != .everyMinute }
-    }
+    @State fileprivate var space_budget: NdbSpaceBudget = Ndb.get_space_budget()
     
     /// Storage categories with cumulative ranges for angle selection (iOS 17+)
     private var categoryRanges: [(category: String, range: Range<Double>)] {
@@ -191,8 +176,8 @@ struct StorageSettingsView: View {
                     self.CompactDatabaseButton
                 }
 
-                // Auto-compact Section
-                self.AutoCompactSection
+                // Space budget Section
+                self.SpaceBudgetSection
             }
             
             // Loading state
@@ -368,86 +353,59 @@ struct StorageSettingsView: View {
         }
     }
 
-    /// Section that lets the user configure automatic periodic compaction.
-    /// Auto-compact schedule picker and status section.
+    /// Section that caps how much space the database may take up.
     ///
-    /// Shows a `Picker` with the available schedule options and a caption that describes the
-    /// current state: either the time remaining until the next compaction or a note
-    /// that compaction will run on the next app launch.
-    var AutoCompactSection: some View {
+    /// The budget is what triggers a background prune: once `data.mdb` grows past
+    /// it, damus trims out the oldest notes it does not have to keep. It is a
+    /// trigger rather than a hard cap, so the database lands near the budget and
+    /// not exactly on it.
+    var SpaceBudgetSection: some View {
         Section(
-            header: Text("Auto-Compact", comment: "Section header for automatic database compaction schedule"),
-            footer: AutoCompactCaption
+            header: Text("Database Size Limit", comment: "Section header for the setting capping how much space the database may use"),
+            footer: SpaceBudgetCaption
         ) {
             Picker(
-                NSLocalizedString("Automatically compact database", comment: "Setting label for choosing how often to auto-compact the database"),
-                selection: $auto_compact_schedule
+                NSLocalizedString("Maximum database size", comment: "Setting label for choosing how much space the database may use"),
+                selection: $space_budget
             ) {
-                ForEach(availableAutoCompactSchedules, id: \.self) { option in
+                ForEach(NdbSpaceBudget.allCases, id: \.self) { option in
                     Text(option.text_description()).tag(option)
                 }
             }
-            .onChange(of: auto_compact_schedule) { newSchedule in
-                Ndb.set_auto_compact_schedule(newSchedule)
+            .onChange(of: space_budget) { newBudget in
+                Ndb.set_space_budget(newBudget)
+            }
+
+            HStack {
+                Text("Current size", comment: "Label for how much space the database is using right now")
+                Spacer()
+                Text(currentDatabaseSizeDescription)
+                    .foregroundColor(.secondary)
             }
         }
     }
 
-    /// Caption displayed below the auto-compact picker.
-    ///
-    /// Shows either the time remaining until the next scheduled compaction or a message
-    /// indicating that compaction will happen on the next app launch.
-    private var AutoCompactCaption: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Group {
-                if auto_compact_schedule == .never {
-                    Text("Automatic database compaction is disabled.", comment: "Caption shown when auto-compact is set to never")
-                } else if compact_scheduling_state == .scheduled {
-                    Text("Will compact on the next app launch.", comment: "Caption shown when a compaction is already queued for the next launch")
-                }
-                else if isLargeDatabaseSkippingAutoCompact {
-                    Text("Automatic compaction is currently skipped because your database is very large. Use “Compact Database” above to request a manual compaction on the next app launch.", comment: "Caption shown when automatic compaction is skipped because the database is too large and the user must request compaction manually")
-                } else if let timeRemaining = nextCompactTimeRemaining {
-                    Text(
-                        String(
-                            format: NSLocalizedString(
-                                "Next automatic compaction %@.",
-                                comment: "Caption showing how long until the next automatic compaction. %@ is replaced with a human-readable duration like 'in 3 days'."
-                            ),
-                            timeRemaining
-                        )
-                    )
-                } else {
-                    Text("Will compact on the next app launch.", comment: "Caption shown when the scheduled compaction interval has already elapsed")
-                }
-            }
-            
-            if settings.developer_mode {
-                Text("“Every minute” is a developer-only testing option.", comment: "Caption explaining that the every-minute auto-compact schedule is only intended for developer testing")
+    /// Caption displayed below the space budget picker, describing what the
+    /// selected budget will do.
+    private var SpaceBudgetCaption: some View {
+        Group {
+            if space_budget == .unlimited {
+                Text("The database is never trimmed, and will keep growing as you use Damus.", comment: "Caption shown when the database size is not capped")
+            } else {
+                Text("When the database grows past this size, Damus trims out older notes in the background. Your own notes and everyone\u{2019}s profiles are always kept.", comment: "Caption explaining what happens when the database grows past the size limit")
             }
         }
         .font(.caption)
         .foregroundColor(.secondary)
     }
 
-    /// Human-readable string describing the time remaining until the next auto-compaction,
-    /// or `nil` if the interval has already elapsed (i.e., compaction is due now).
-    private var nextCompactTimeRemaining: String? {
-        guard let interval = auto_compact_schedule.interval else { return nil }
-        let lastDate = Ndb.get_last_compact_date() ?? .distantPast
-        let nextDate = lastDate.addingTimeInterval(interval)
-        let remaining = nextDate.timeIntervalSince(Date())
-        guard remaining > 0 else { return nil }
-
-        return Self.relativeFormatter.localizedString(fromTimeInterval: remaining)
+    /// How much space `data.mdb` takes up right now.
+    private var currentDatabaseSizeDescription: String {
+        guard let path = Ndb.db_path, let size = Ndb.database_file_size(path: path) else {
+            return NSLocalizedString("Unknown", comment: "Placeholder shown when the size of the database cannot be determined")
+        }
+        return StorageStatsManager.formatBytes(size)
     }
-
-    /// Shared formatter for human-readable relative durations (e.g. "in 3 days").
-    private static let relativeFormatter: RelativeDateTimeFormatter = {
-        let f = RelativeDateTimeFormatter()
-        f.unitsStyle = .full
-        return f
-    }()
 
     /// Compact database button view with confirmation dialog.
     ///

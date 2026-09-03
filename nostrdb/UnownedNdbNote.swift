@@ -157,6 +157,8 @@ struct UnownedNdbNote: ~Copyable {
     var id: NoteId { _ndbNote.id }
     var sig: Signature { _ndbNote.sig }
     var referenced_pubkeys: References<Pubkey> { _ndbNote.referenced_pubkeys }
+    /// The `d` tags of this note — the addressable identifier of a parameterized replaceable event.
+    var referenced_params: References<ReplaceableParam> { _ndbNote.referenced_params }
     /// Whether this is an unsigned NIP-59 rumor nostrdb unwrapped from a giftwrap.
     /// See ``NdbNote/is_rumor`` for what that means for ``sig`` and for re-broadcasting.
     var is_rumor: Bool { _ndbNote.is_rumor }

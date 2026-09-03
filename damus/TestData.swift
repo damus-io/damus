@@ -68,7 +68,16 @@ let test_following_model = FollowingModel(damus_state: test_damus_state, contact
 
 
 @MainActor
-var test_damus_state: DamusState = ({
+var test_damus_state: DamusState = make_test_damus_state()
+
+/// Builds a `DamusState` over a nostrdb on a fresh temporary directory.
+///
+/// `test_damus_state` is one of these, shared by every test that does not care. Call this
+/// directly when a test needs a database no other test has written to — anything that reads
+/// nostrdb back through a *query* rather than by note id has to, since the shared one
+/// accumulates whatever earlier tests put in it.
+@MainActor
+func make_test_damus_state() -> DamusState {
     // Create a unique temporary directory
     var tempDir: String!
     do {
@@ -109,7 +118,7 @@ var test_damus_state: DamusState = ({
                            video: .init(),
                            ndb: ndb,
                            quote_reposts: .init(our_pubkey: our_pubkey),
-                           emoji_provider: DefaultEmojiProvider(showAllVariations: true),
+                           emoji_provider: LazyEmojiProvider(showAllVariations: true),
                            favicon_cache: .init()
     )
 
@@ -119,7 +128,7 @@ var test_damus_state: DamusState = ({
     damus.profiles.add(id: test_pubkey, profile: tsprof)
      */
     return damus
-})()
+}
 
 /// Wire-format events for tests that need a seeded nostrdb: two profile/note
 /// events from jb55, then three kind-1 notes of the form

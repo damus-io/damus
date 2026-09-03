@@ -431,6 +431,195 @@ private let custom_filter_trampoline: @convention(c) (UnsafeMutableRawPointer?, 
     return predicate.matches(note)
 }
 
+// MARK: - Building a filter field by field
+
+/// The fields an `ndb_filter` can carry, mirroring `enum ndb_filter_fieldtype`.
+///
+/// Generic tag fields — the `#e`, `#p`, `#t` … of a nostr filter — are all
+/// ``tags`` on the C side, and are opened by their tag character rather than by
+/// this enum. See ``NdbFilterBuilder/tagField(_:_:)``.
+enum NdbFilterField {
+    case ids
+    case authors
+    case kinds
+    case tags
+    case since
+    case until
+    case limit
+    case search
+    case relays
+    case custom
+
+    var cValue: ndb_filter_fieldtype {
+        switch self {
+        case .ids:     return NDB_FILTER_IDS
+        case .authors: return NDB_FILTER_AUTHORS
+        case .kinds:   return NDB_FILTER_KINDS
+        case .tags:    return NDB_FILTER_TAGS
+        case .since:   return NDB_FILTER_SINCE
+        case .until:   return NDB_FILTER_UNTIL
+        case .limit:   return NDB_FILTER_LIMIT
+        case .search:  return NDB_FILTER_SEARCH
+        case .relays:  return NDB_FILTER_RELAYS
+        case .custom:  return NDB_FILTER_CUSTOM
+        }
+    }
+}
+
+/// Errors from building an `ndb_filter`.
+enum NdbFilterBuildError: Error, LocalizedError {
+    /// `ndb_filter_init` refused to initialize the filter.
+    case initializationFailed
+    /// `ndb_filter_start_field` refused to open the field.
+    case fieldStartFailed(field: NdbFilterField)
+    /// `ndb_filter_start_tag_field` refused to open the tag field.
+    case tagFieldStartFailed(tag: Character)
+    /// A tag has to be a single ASCII character to be a tag on the C side.
+    case tagNotASCII(tag: Character)
+    /// nostrdb rejected an element. Usually it is the wrong kind of element for
+    /// the open field: a string in `authors`, a second value in `since`.
+    case elementRejected
+    /// An id element was not the 32 bytes nostrdb reads from the pointer.
+    case invalidIdLength(bytes: Int)
+    /// `ndb_filter_end` refused to finalize the filter.
+    case finalizationFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .initializationFailed:
+            return "nostrdb failed to initialize the filter."
+        case .fieldStartFailed(let field):
+            return "nostrdb refused to start the \(field) field."
+        case .tagFieldStartFailed(let tag):
+            return "nostrdb refused to start the #\(tag) tag field."
+        case .tagNotASCII(let tag):
+            return "A filter tag has to be a single ASCII character, not \(tag)."
+        case .elementRejected:
+            return "nostrdb rejected a filter element."
+        case .invalidIdLength(let bytes):
+            return "Expected a 32-byte id element, got \(bytes) bytes."
+        case .finalizationFailed:
+            return "nostrdb failed to finalize the filter."
+        }
+    }
+}
+
+/// An `ndb_filter` under construction.
+///
+/// nostrdb builds filters imperatively: `ndb_filter_init`, then per field a
+/// `ndb_filter_start_field` / add elements / `ndb_filter_end_field` sequence, and
+/// finally `ndb_filter_end`. Every one of those steps can fail, and each failure
+/// leaves behind a filter somebody has to destroy — which is what makes the
+/// open-coded version so repetitive, and so easy to get wrong in the direction
+/// of a leak.
+///
+/// This wraps the sequence, so a caller describes the filter it wants and never
+/// sees a half-built one:
+///
+/// ```swift
+/// try NdbFilterBuilder.build(into: slot, { filter in
+///     try filter.field(.since, { try $0.add(int: UInt64(since)) })
+///     try filter.field(.authors, { field in
+///         for author in authors { try field.add(id: author) }
+///     })
+/// })
+/// ```
+struct NdbFilterBuilder {
+    /// The filter being built: `ndb_filter_init` has run on it, and
+    /// `ndb_filter_end` has not.
+    private let filter: UnsafeMutablePointer<ndb_filter>
+
+    /// Initializes `slot` and builds a filter into it.
+    ///
+    /// On any failure — nostrdb refusing a step, or `body` throwing — the
+    /// partially built filter is destroyed and `slot` is left uninitialized, free
+    /// for the caller to reuse or discard. That is the same contract nostrdb's own
+    /// builders follow, and it is what lets a caller treat a throw as "nothing
+    /// happened".
+    ///
+    /// - Parameters:
+    ///   - slot: Uninitialized memory for one `ndb_filter`. The caller owns the
+    ///     allocation and, once this returns successfully, owes it an
+    ///     `ndb_filter_destroy`.
+    ///   - body: Adds the fields. Fields may be added in any order.
+    static func build(into slot: UnsafeMutablePointer<ndb_filter>,
+                      _ body: (NdbFilterBuilder) throws -> Void) throws {
+        guard ndb_filter_init(slot) == 1 else {
+            throw NdbFilterBuildError.initializationFailed
+        }
+
+        do {
+            try body(NdbFilterBuilder(filter: slot))
+            guard ndb_filter_end(slot) == 1 else {
+                throw NdbFilterBuildError.finalizationFailed
+            }
+        } catch {
+            ndb_filter_destroy(slot)
+            throw error
+        }
+    }
+
+    /// Opens `field`, runs `body` to add its elements, and closes it.
+    ///
+    /// If `body` throws, the field is left open on purpose: ``build(into:_:)``
+    /// destroys the whole filter on the way out, which releases it either way, and
+    /// closing a field mid-failure would only make the wreckage look valid.
+    func field(_ field: NdbFilterField, _ body: (NdbFilterBuilder) throws -> Void) throws {
+        guard ndb_filter_start_field(filter, field.cValue) == 1 else {
+            throw NdbFilterBuildError.fieldStartFailed(field: field)
+        }
+        try body(self)
+        ndb_filter_end_field(filter)
+    }
+
+    /// Opens the generic tag field for `tag` — the `#e`, `#p`, `#t` … of a nostr
+    /// filter — runs `body` to add its elements, and closes it.
+    func tagField(_ tag: Character, _ body: (NdbFilterBuilder) throws -> Void) throws {
+        guard let ascii = tag.asciiValue else {
+            throw NdbFilterBuildError.tagNotASCII(tag: tag)
+        }
+        guard ndb_filter_start_tag_field(filter, CChar(ascii)) == 1 else {
+            throw NdbFilterBuildError.tagFieldStartFailed(tag: tag)
+        }
+        try body(self)
+        ndb_filter_end_field(filter)
+    }
+
+    /// Adds an integer element to the open field.
+    func add(int value: UInt64) throws {
+        guard ndb_filter_add_int_element(filter, value) == 1 else {
+            throw NdbFilterBuildError.elementRejected
+        }
+    }
+
+    /// Adds a 32-byte id element — a note id, a pubkey, anything nostr spells as
+    /// 32 bytes — to the open field.
+    func add(id: some IdType) throws {
+        let bytes = id.id
+        // nostrdb reads 32 bytes from the pointer with no length to check against,
+        // so a short id would have it read past the end of our buffer.
+        guard bytes.count == 32 else {
+            throw NdbFilterBuildError.invalidIdLength(bytes: bytes.count)
+        }
+        try bytes.withUnsafeBytes({ raw in
+            guard let base = raw.bindMemory(to: UInt8.self).baseAddress,
+                  ndb_filter_add_id_element(filter, base) == 1 else {
+                throw NdbFilterBuildError.elementRejected
+            }
+        })
+    }
+
+    /// Adds a string element to the open field.
+    ///
+    /// nostrdb copies the bytes into the filter's own buffer, so `value` does not
+    /// have to outlive this call.
+    func add(string value: String) throws {
+        guard ndb_filter_add_str_element(filter, value) == 1 else {
+            throw NdbFilterBuildError.elementRejected
+        }
+    }
+}
+
 /// Errors that can occur when working with NdbFilter.
 enum NdbFilterError: Error {
     /// Thrown when conversion from NostrFilter to NdbFilter fails.

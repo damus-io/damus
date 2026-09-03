@@ -77,6 +77,20 @@ static inline size_t prot_queue_capacity(struct prot_queue *q) {
 	return q->buflen / q->elem_size;
 }
 
+/*
+ * Return 1 if the queue is empty, 0 otherwise.
+ * q    - Pointer to the queue.
+ */
+static inline int prot_queue_empty(struct prot_queue *q) {
+	int empty;
+
+	pthread_mutex_lock(&q->mutex);
+	empty = q->count == 0;
+	pthread_mutex_unlock(&q->mutex);
+
+	return empty;
+}
+
 /* 
  * Push an element onto the queue.
  * Params:

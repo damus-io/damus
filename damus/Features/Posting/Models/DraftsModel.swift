@@ -57,29 +57,36 @@ class DraftArtifacts: Equatable {
     
     // MARK: Encoding and decoding functions to and from NIP-37 nostr events
     
-    /// Converts the draft artifacts into a NIP-37 draft event that can be saved into NostrDB or any Nostr relay
-    /// 
+    /// Converts the draft artifacts into a NIP-37 draft that can be saved into NostrDB
+    ///
     /// - Parameters:
     ///   - action: The post action for this draft, which provides necessary context for the draft (e.g. Is it meant to highlight something? Reply to something?)
-    ///   - damus_state: The damus state, needed for encrypting, fetching Nostr data depedencies, and forming the NIP-37 draft
-    ///   - references: references in the post?
+    ///   - damus_state: The damus state, needed for signing, fetching Nostr data depedencies, and forming the NIP-37 draft
     /// - Returns: The NIP-37 draft packaged in a way that can be easily wrapped/unwrapped.
+    ///
+    /// ## Implementation notes
+    ///
+    /// - The drafted note itself is still built and **signed** by the ordinary posting path
+    ///   (`build_post` -> `to_event`), because that path is what makes a draft round-trip into
+    ///   something postable, and because the draft event stores it as event JSON — which
+    ///   ``NdbNote/owned_from_json(json:bufsize:)`` will not parse back without an `id` and a `sig`.
+    ///   The kind-31234 draft event around it is the layer that is left unsigned.
     func to_nip37_draft(action: PostAction, damus_state: DamusState) async throws -> NIP37Draft? {
         guard let keypair = damus_state.keypair.to_full() else { return nil }
         let post = await build_post(state: damus_state, action: action, draft: self)
         guard let note = post.to_event(keypair: keypair, clientTag: damus_state.clientTagComponents) else { return nil }
-        return try NIP37Draft(unwrapped_note: note, draft_id: self.id, keypair: keypair)
+        return NIP37Draft(unwrapped_note: note, draft_id: self.id)
     }
     
     /// Instantiates a draft object from a NIP-37 draft
     /// - Parameters:
     ///   - nip37_draft: The NIP-37 draft object
-    ///   - damus_state: Damus state of the user who wants to load this draft object. Needed for pulling profiles from Ndb, and decrypting contents.
+    ///   - damus_state: Damus state of the user who wants to load this draft object. Needed for pulling profiles from Ndb.
     /// - Returns: A draft artifacts object, or `nil` if such cannot be loaded.
     static func from(nip37_draft: NIP37Draft, damus_state: DamusState) -> DraftArtifacts? {
         return Self.from(
             event: nip37_draft.unwrapped_note,
-            draft_id: nip37_draft.id ?? UUID().uuidString,  // Generate random UUID as the draft ID if none is specified. It is always better to have an ID that we can use for addressing later.
+            draft_id: nip37_draft.id,
             damus_state: damus_state
         )
     }
@@ -158,7 +165,21 @@ class DraftArtifacts: Equatable {
 }
 
 
+
+
 /// Holds and keeps track of the note post drafts throughout the app.
+///
+/// ## How drafts are stored
+///
+/// A draft is a NIP-37 kind-31234 event carrying the drafted note's JSON, sealed inside a ``PNS``
+/// envelope (kind 1080) and handed to NostrDB. NostrDB's ingester opens the envelope on its own
+/// threadpool and stores the draft event as an ordinary note, so loading drafts back is a query —
+/// ``load(from:)`` does no decryption on any thread, and there is no key material anywhere on the
+/// path. It used to NIP-44 decrypt a draft per saved draft, `secp256k1_ecdh` and all, on the main
+/// thread during launch.
+///
+/// NostrDB is also the index. There is no list of draft ids in `UserSettingsStore` any more: the
+/// drafts are whatever a `kinds: [31234], authors: [us]` query says they are.
 class Drafts: ObservableObject {
     @Published var post: DraftArtifacts? = nil
     @Published var replies: [NoteId: DraftArtifacts] = [:]
@@ -168,99 +189,177 @@ class Drafts: ObservableObject {
     /// ## Implementation notes
     /// - Although in practice we also load drafts based on the highlight source for better UX (making it easier to find a draft), we need the keys to be of type `HighlightContentDraft` because we need the selected text information to be able to construct the NIP-37 draft, as well as to load that into post view.
     @Published var highlights: [HighlightContentDraft: DraftArtifacts] = [:]
-    
-    /// Loads drafts from storage (NostrDB + UserDefaults)
+
+    /// How many stored draft events a load will look at.
+    ///
+    /// Every autosave appends a new version of every draft — NostrDB has no delete and, despite
+    /// `is_replaceable_kind`, no replaceable-event handling — so the number of kind-31234 notes grows
+    /// with editing time rather than with the number of drafts. The query returns them newest-first,
+    /// so this bounds the fold below without hiding any recently edited draft; older versions beyond
+    /// it are dead weight that `ndb_prune` reclaims along with everything else.
+    static let max_stored_draft_versions = 1000
+
+    /// The ids of the drafts NostrDB is currently holding a live version of.
+    ///
+    /// This is how a *deleted* draft is noticed: it is in here and no longer in the published
+    /// properties, which means the next ``save(damus_state:)`` has to tombstone it. Nothing removes a
+    /// note from NostrDB, so forgetting a draft in memory is not enough to forget it on disk.
+    private var stored_draft_ids: Set<String> = []
+
+    /// Loads drafts from NostrDB.
+    ///
+    /// Every saved version of every draft matches the query, so the drafts are the newest note under
+    /// each NIP-37 `d` tag. The fold that works that out only reads a tag and a timestamp off each
+    /// note without copying it, and only the winners are parsed.
+    ///
+    /// Runs synchronously on the caller's thread, which is the main thread during launch. That is
+    /// affordable now that there is no decryption in it, and it means the post composer can never
+    /// open on a half-loaded `Drafts` and start a fresh post over a saved draft.
     func load(from damus_state: DamusState) {
-        guard let note_ids = damus_state.settings.draft_event_ids?.compactMap({ NoteId(hex: $0) }) else { return }
-        for note_id in note_ids {
-            let note = try? damus_state.ndb.lookup_note(note_id, borrow: { event in
-                return event?.toOwned()
+        let author = damus_state.keypair.pubkey
+        let ndb = damus_state.ndb
+
+        guard let filter = try? NdbFilter(from: NostrFilter(kinds: [.draft], authors: [author])) else { return }
+        guard let note_keys = try? ndb.query(filters: [filter], maxResults: Self.max_stored_draft_versions) else { return }
+
+        // Newest version of each draft. `query` already sorts newest-first, but `created_at` has
+        // one-second resolution and two autosaves can land inside the same second, so break ties on
+        // the note key — NostrDB hands those out in write order, so the higher one was saved later.
+        var newest: [String: (created_at: UInt32, note_key: NoteKey)] = [:]
+        for note_key in note_keys {
+            let entry = try? ndb.lookup_note_by_key(note_key, borrow: { maybe_note -> (String, UInt32)? in
+                switch maybe_note {
+                case .none: return nil
+                case .some(let note):
+                    // A draft event only ever reaches the database as a rumor NostrDB peeled out of
+                    // one of our own PNS envelopes. Anything else carrying kind 31234 under our
+                    // pubkey — a draft saved in the old, self-encrypted format, or a draft synced
+                    // from another client, which we do not support — is not ours to read.
+                    guard note.is_rumor else { return nil }
+                    guard let draft_id = note.referenced_params.first?.param.string() else { return nil }
+                    return (draft_id, note.createdAt)
+                }
             })
-            guard let note else { continue }
+            guard let (draft_id, created_at) = entry ?? nil else { continue }
+            if let existing = newest[draft_id],
+               (existing.created_at, existing.note_key) >= (created_at, note_key) { continue }
+            newest[draft_id] = (created_at, note_key)
+        }
+
+        var loaded_ids: Set<String> = []
+        for (draft_id, entry) in newest {
+            guard let draft_note = try? ndb.lookup_note_by_key_and_copy(entry.note_key) else { continue }
             // Implementation note: This currently fails silently, because:
             // 1. Errors are unlikely and not expected
             // 2. It is not mission critical to recover from this error
             // 3. The changes that add a error view sheet with useful info is not yet merged in as of writing.
-            try? self.load(wrapped_draft_note: note, with: damus_state)
+            guard self.load(draft_note: draft_note, with: damus_state) else { continue }
+            loaded_ids.insert(draft_id)
         }
+        self.stored_draft_ids = loaded_ids
     }
-    
-    /// Loads a specific NIP-37 note into this class
-    func load(wrapped_draft_note: NdbNote, with damus_state: DamusState) throws {
-        // Extract draft info from the NIP-37 note
-        guard let full_keypair = damus_state.keypair.to_full() else { return }
-        guard let nip37_draft = try NIP37Draft(wrapped_note: wrapped_draft_note, keypair: full_keypair) else { return }
-        guard let known_kind = nip37_draft.unwrapped_note.known_kind else { return }
-        guard let draft_artifacts = DraftArtifacts.from(
-            nip37_draft: nip37_draft,
-            damus_state: damus_state
-        ) else { return }
-        
-        // Find out where to place these drafts
-        guard let blocks = parse_note_content(content: .note(nip37_draft.unwrapped_note)) else {
-            return
-        }
 
+    /// Loads a specific NIP-37 draft event into this class, and says whether it landed anywhere.
+    ///
+    /// A draft that does not land — an empty tombstone, a kind we have no composer for — is not an
+    /// error; it just means there is no draft there any more.
+    @discardableResult
+    func load(draft_note: NdbNote, with damus_state: DamusState) -> Bool {
+        guard let nip37_draft = NIP37Draft(draft_note: draft_note) else { return false }
+        let drafted_note = nip37_draft.unwrapped_note
+        guard let known_kind = drafted_note.known_kind else { return false }
+        guard let parsed_blocks = parse_note_content(content: .init(note: drafted_note, keypair: damus_state.keypair)) else { return false }
+
+        let draft_artifacts = DraftArtifacts.from(
+            parsed_blocks: parsed_blocks,
+            references: Array(drafted_note.references),
+            draft_id: nip37_draft.id,
+            damus_state: damus_state
+        )
+
+        // Find out where to place this draft
         switch known_kind {
         case .text:
-            if let replied_to_note_id = nip37_draft.unwrapped_note.direct_replies() {
+            if let replied_to_note_id = drafted_note.direct_replies() {
                 self.replies[replied_to_note_id] = draft_artifacts
             }
+            else if let quoted_note_id = Self.quoted_note_id(in: parsed_blocks) {
+                self.quotes[quoted_note_id] = draft_artifacts
+            }
             else {
-                for block in blocks.blocks {
-                    if case .mention(let mention) = block {
-                        if case .note(let note_id) = mention.ref.nip19 {
-                            self.quotes[note_id] = draft_artifacts
-                            return
-                        }
-                    }
-                }
                 self.post = draft_artifacts
             }
         case .highlight:
-            guard let highlight = HighlightContentDraft(from: nip37_draft.unwrapped_note) else { return }
+            guard let highlight = HighlightContentDraft(from: drafted_note) else { return false }
             self.highlights[highlight] = draft_artifacts
         default:
-            return
+            return false
         }
+        return true
     }
-    
-    /// Saves the drafts tracked by this class persistently using NostrDB + UserDefaults
+
+    /// The note a draft quotes, if it quotes one.
+    private static func quoted_note_id(in blocks: Blocks) -> NoteId? {
+        for block in blocks.blocks {
+            if case .mention(let mention) = block, case .note(let note_id) = mention.ref.nip19 {
+                return note_id
+            }
+        }
+        return nil
+    }
+
+    /// Saves the drafts tracked by this class persistently into NostrDB.
     func save(damus_state: DamusState) async {
-        var draft_events: [NdbNote] = []
-        post_artifact_block: if let post_artifacts = self.post {
-            let nip37_draft = try? await post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state)
-            guard let wrapped_note = nip37_draft?.wrapped_note else { break post_artifact_block }
-            draft_events.append(wrapped_note)
+        guard let keypair = damus_state.keypair.to_full() else { return }
+        guard let pns_key = try? PNS.key(for: keypair.privkey) else { return }
+
+        // What the user still has open, read before anything is serialized: a draft that fails to
+        // build is still a draft the user has, and must not be mistaken below for a deleted one.
+        var live_draft_ids: Set<String> = []
+        live_draft_ids.formUnion([self.post?.id].compactMap({ $0 }))
+        live_draft_ids.formUnion(self.replies.values.map({ $0.id }))
+        live_draft_ids.formUnion(self.quotes.values.map({ $0.id }))
+        live_draft_ids.formUnion(self.highlights.values.map({ $0.id }))
+
+        var draft_notes: [NIP59.Rumor] = []
+
+        func append(_ nip37_draft: NIP37Draft?) {
+            guard let nip37_draft else { return }
+            guard let draft_note = try? nip37_draft.draft_note(author: keypair.pubkey) else { return }
+            draft_notes.append(draft_note)
+        }
+
+        if let post_artifacts = self.post {
+            append(try? await post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state))
         }
         for (replied_to_note_id, reply_artifacts) in self.replies {
             guard let replied_to_note = try? damus_state.ndb.lookup_note_and_copy(replied_to_note_id) else { continue }
-            let nip37_draft = try? await reply_artifacts.to_nip37_draft(action: .replying_to(replied_to_note), damus_state: damus_state)
-            guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
-            draft_events.append(wrapped_note)
+            append(try? await reply_artifacts.to_nip37_draft(action: .replying_to(replied_to_note), damus_state: damus_state))
         }
         for (quoted_note_id, quote_note_artifacts) in self.quotes {
             guard let quoted_note = try? damus_state.ndb.lookup_note_and_copy(quoted_note_id) else { continue }
-            let nip37_draft = try? await quote_note_artifacts.to_nip37_draft(action: .quoting(quoted_note), damus_state: damus_state)
-            guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
-            draft_events.append(wrapped_note)
+            append(try? await quote_note_artifacts.to_nip37_draft(action: .quoting(quoted_note), damus_state: damus_state))
         }
         for (highlight, highlight_note_artifacts) in self.highlights {
-            let nip37_draft = try? await highlight_note_artifacts.to_nip37_draft(action: .highlighting(highlight), damus_state: damus_state)
-            guard let wrapped_note = nip37_draft?.wrapped_note else { continue }
-            draft_events.append(wrapped_note)
+            append(try? await highlight_note_artifacts.to_nip37_draft(action: .highlighting(highlight), damus_state: damus_state))
         }
-        
-        for draft_event in draft_events {
-            // Implementation note: We do not support draft synchronization with relays yet.
+
+        // Drafts that were stored and are no longer here have been deleted — the composer posted or
+        // discarded them. NostrDB cannot forget a note, so retract them by saving an empty version.
+        for deleted_draft_id in self.stored_draft_ids.subtracting(live_draft_ids) {
+            draft_notes.append(NIP37Draft.tombstone(draft_id: deleted_draft_id, author: keypair.pubkey))
+        }
+        self.stored_draft_ids = live_draft_ids
+
+        for draft_note in draft_notes {
+            // Implementation note: We do not support draft synchronization with relays yet. Note that
+            // the envelope below is addressed to a key derived from ours and is meaningful only to
+            // this device's NostrDB, so it is not something that could be published as-is.
             // TODO: Once it is time to implement draft syncing with relays, please consider the following:
             // - Privacy: Sending drafts to the network leaks metadata about app activity, and may break user expectations
             // - Down-sync conflict resolution: Consider how to solve conflicts for different draft versions holding the same ID (e.g. edited in Damus, then another client, then Damus again)
-            await damus_state.nostrNetwork.sendToNostrDB(event: draft_event)
-        }
-        
-        DispatchQueue.main.async {
-            damus_state.settings.draft_event_ids = draft_events.map({ $0.id.hex() })
+            guard let envelope = try? PNS.envelope(rumor: draft_note, key: pns_key) else { continue }
+            await damus_state.nostrNetwork.sendToNostrDB(event: envelope)
         }
     }
 }
