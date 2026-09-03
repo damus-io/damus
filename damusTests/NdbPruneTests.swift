@@ -23,12 +23,16 @@ final class NdbPruneTests: XCTestCase {
     override func setUpWithError() throws {
         sourceDir = try XCTUnwrap(test_ndb_dir(), "could not create a source directory")
         outputDir = try XCTUnwrap(test_ndb_dir(), "could not create an output directory")
+        // `get_space_budget` adopts and writes a default when none is set, so a
+        // leftover value from another test would decide these ones.
+        UserDefaults.standard.removeObject(forKey: Ndb.space_budget_key)
     }
 
     override func tearDownWithError() throws {
         for dir in [sourceDir, outputDir] where !dir.isEmpty {
             try? FileManager.default.removeItem(atPath: dir)
         }
+        UserDefaults.standard.removeObject(forKey: Ndb.space_budget_key)
     }
 
     // MARK: - Fixtures
@@ -434,5 +438,77 @@ final class NdbPruneTests: XCTestCase {
         // notes, so pruning with them would drop both of bob's notes even though
         // the database was comfortably under budget.
         XCTAssertNil(try ndb.pruneFilters(keeping: [], budget: 10_000_000))
+    }
+
+    // MARK: - NdbSpaceBudget
+
+    /// Gives `dir` a `data.mdb` of exactly `bytes`, without writing that many
+    /// bytes: truncating an empty file leaves a sparse one whose reported size
+    /// is the logical size, which is all `database_file_size` reads.
+    private func makeDatabaseFile(inDirectory dir: String, ofSize bytes: UInt64) throws {
+        let path = "\(dir)/\(Ndb.main_db_file_name)"
+        if !FileManager.default.fileExists(atPath: path) {
+            XCTAssertTrue(FileManager.default.createFile(atPath: path, contents: nil),
+                          "could not create a stand-in database file at \(path)")
+        }
+        let handle = try XCTUnwrap(FileHandle(forWritingAtPath: path))
+        defer { try? handle.close() }
+        try handle.truncate(atOffset: bytes)
+    }
+
+    func test_space_budget_byte_values_are_the_ones_we_agreed() {
+        XCTAssertEqual(NdbSpaceBudget.small.bytes, 512 * 1024 * 1024)
+        XCTAssertEqual(NdbSpaceBudget.medium.bytes, 2 * 1024 * 1024 * 1024)
+        XCTAssertEqual(NdbSpaceBudget.large.bytes, 8 * 1024 * 1024 * 1024)
+        XCTAssertNil(NdbSpaceBudget.unlimited.bytes, "unlimited is the opt-out, so it has no cap at all")
+    }
+
+    func test_space_budget_cases_are_ordered_smallest_first() {
+        // Load-bearing twice over: the settings picker lists them in this order,
+        // and `default_space_budget` takes the first tier that fits.
+        XCTAssertEqual(NdbSpaceBudget.allCases, [.small, .medium, .large, .unlimited])
+        let capped = NdbSpaceBudget.allCases.compactMap(\.bytes)
+        XCTAssertEqual(capped, capped.sorted())
+    }
+
+    func test_space_budget_round_trips_through_user_defaults() {
+        for budget in NdbSpaceBudget.allCases {
+            Ndb.set_space_budget(budget)
+            XCTAssertEqual(Ndb.get_space_budget(db_path: sourceDir), budget)
+        }
+    }
+
+    func test_default_space_budget_is_the_tightest_tier_the_database_already_fits() {
+        let mb = UInt64(1024 * 1024)
+        let gb = 1024 * mb
+
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 0), .small)
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 512 * mb), .small,
+                       "a database exactly at a tier still fits inside it")
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 512 * mb + 1), .medium)
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 2 * gb), .medium)
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 2 * gb + 1), .large)
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 8 * gb), .large)
+        XCTAssertEqual(Ndb.default_space_budget(forDatabaseSizeBytes: 8 * gb + 1), .unlimited,
+                       "a database bigger than every tier opts out rather than being pruned the moment its owner updates")
+    }
+
+    func test_a_fresh_install_with_no_database_starts_at_the_smallest_tier() {
+        XCTAssertEqual(Ndb.get_space_budget(db_path: sourceDir), .small)
+    }
+
+    func test_the_first_read_adopts_a_tier_from_the_database_size_and_then_sticks_to_it() throws {
+        try makeDatabaseFile(inDirectory: sourceDir, ofSize: 3 * 1024 * 1024 * 1024)
+
+        XCTAssertEqual(Ndb.get_space_budget(db_path: sourceDir), .large,
+                       "an existing 3 GB install starts on the tier it already fits, not the smallest one")
+        XCTAssertEqual(UserDefaults.standard.string(forKey: Ndb.space_budget_key),
+                       NdbSpaceBudget.large.rawValue,
+                       "the adopted default has to be written back, or it would be re-derived on every read")
+
+        // Growing past the adopted tier must not move the tier: a budget that
+        // drifted upwards with the database would never trigger a prune.
+        try makeDatabaseFile(inDirectory: sourceDir, ofSize: 9 * 1024 * 1024 * 1024)
+        XCTAssertEqual(Ndb.get_space_budget(db_path: sourceDir), .large)
     }
 }

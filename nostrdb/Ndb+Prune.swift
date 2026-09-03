@@ -453,3 +453,97 @@ extension NdbFilterArray {
         return filters
     }
 }
+
+// MARK: - The space budget
+
+/// How much space the user is willing to let nostrdb take up.
+///
+/// This is the trigger for a prune, not a hard cap: a database that crosses its
+/// budget gets pruned back down, and the prune lands *near* the budget rather
+/// than exactly on it (see ``NdbNoteSizeHistogram/sinceCutoff(keepingAtMost:)``
+/// for why).
+///
+/// - Important: The cases are ordered smallest-first, and both the settings
+///   picker and ``Ndb/default_space_budget(forDatabaseSizeBytes:)`` rely on
+///   that ordering.
+enum NdbSpaceBudget: String, CaseIterable, Equatable {
+    case small
+    case medium
+    case large
+    /// No cap at all — the opt-out. The database is never pruned.
+    case unlimited
+
+    /// The budget in bytes, or `nil` for ``unlimited``, which has none.
+    var bytes: UInt64? {
+        switch self {
+        case .small:     return 512 * 1024 * 1024
+        case .medium:    return 2 * 1024 * 1024 * 1024
+        case .large:     return 8 * 1024 * 1024 * 1024
+        case .unlimited: return nil
+        }
+    }
+
+    /// Human-readable label shown in the settings UI.
+    func text_description() -> String {
+        switch self {
+        case .small:
+            return NSLocalizedString("Small (512 MB)", comment: "Space budget option: keep the database under 512 megabytes")
+        case .medium:
+            return NSLocalizedString("Medium (2 GB)", comment: "Space budget option: keep the database under 2 gigabytes")
+        case .large:
+            return NSLocalizedString("Large (8 GB)", comment: "Space budget option: keep the database under 8 gigabytes")
+        case .unlimited:
+            return NSLocalizedString("Unlimited", comment: "Space budget option: never limit the size of the database")
+        }
+    }
+}
+
+extension Ndb {
+    /// The `UserDefaults` key holding the space budget (stored as raw string).
+    static let space_budget_key = "ndb_space_budget"
+
+    /// The budget an install with a database of `size` bytes should start on:
+    /// the tightest tier it already fits inside.
+    ///
+    /// Existing users are not all dropped into the smallest tier, because that
+    /// would prune most of them on the first launch after updating — a setting
+    /// they never chose silently deleting notes. Instead everyone starts where
+    /// they already are and only pays for growth from here.
+    ///
+    /// A database larger than every tier therefore lands on ``NdbSpaceBudget/unlimited``.
+    /// That is the deliberate cost of the rule: the biggest databases keep
+    /// growing until their owner picks a tier.
+    static func default_space_budget(forDatabaseSizeBytes size: UInt64) -> NdbSpaceBudget {
+        // `allCases` is smallest-first, and `unlimited` compares as unbounded,
+        // so the first tier that fits is both the tightest one and always found.
+        return NdbSpaceBudget.allCases.first(where: { ($0.bytes ?? .max) >= size }) ?? .unlimited
+    }
+
+    /// Reads the persisted space budget, adopting a size-derived default the
+    /// first time it is asked for.
+    ///
+    /// The derived default is **written back**, which is what makes it stable:
+    /// re-deriving it on every read would let the tier drift upwards as the
+    /// database grew, and it would never prune.
+    ///
+    /// - Parameter db_path: Override the database directory path. Pass `nil`
+    ///   (default) to use ``Ndb/db_path``.
+    static func get_space_budget(db_path: String? = nil) -> NdbSpaceBudget {
+        if let raw = UserDefaults.standard.string(forKey: space_budget_key),
+           let budget = NdbSpaceBudget(rawValue: raw) {
+            return budget
+        }
+
+        // No database yet means a fresh install, which starts at the tightest tier.
+        let size = (db_path ?? Self.db_path).flatMap({ database_file_size(path: $0) }) ?? 0
+        let budget = default_space_budget(forDatabaseSizeBytes: size)
+        Log.info("No space budget set yet; adopting %@ for a %d byte database", for: .storage, budget.rawValue, size)
+        set_space_budget(budget)
+        return budget
+    }
+
+    /// Persists the space budget to `UserDefaults`.
+    static func set_space_budget(_ budget: NdbSpaceBudget) {
+        UserDefaults.standard.set(budget.rawValue, forKey: space_budget_key)
+    }
+}
