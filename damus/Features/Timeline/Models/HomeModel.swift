@@ -72,6 +72,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
     var notificationsHandlerTask: Task<Void, Never>?
     var generalHandlerTask: Task<Void, Never>?
     var dmsHandlerTask: Task<Void, Never>?
+    var privateDmsHandlerTask: Task<Void, Never>?
     var giftwrapsHandlerTask: Task<Void, Never>?
     var ndbOnlyHandlerTask: Task<Void, Never>?
     var nwcHandlerTask: Task<Void, Never>?
@@ -294,7 +295,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         case .seal, .giftwrap:
             break   // nostrdb's ingester peels these; we only ever read the rumor inside
         case .private_dm:
-            break   // TODO: read NIP-17 DMs off the local kind-14 rumors
+            handle_private_dm(ev)
         }
     }
 
@@ -580,6 +581,20 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var giftwraps_filter = NostrFilter(kinds: [.giftwrap])
         giftwraps_filter.pubkeys = [ damus_state.pubkey ]
 
+        // The NIP-17 read path. nostrdb's ingester peels every giftwrap the filter above pulls in and
+        // stores the kind-14 rumor inside it as an ordinary note, so the DM list is just a local query
+        // for those rumors: no Swift-side decryption anywhere.
+        //
+        // The pair mirrors the legacy kind-4 pair — `#p: <us>` for the messages we received, and
+        // `authors: <us>` for the ones we sent, whose rumors carry the counterparty in `p` instead.
+        // Deliberately no `limit`: this never touches a relay, so there is no transfer to bound, and
+        // `Ndb.subscribe` already caps the initial query at `maxSimultaneousResults`.
+        var private_dms_filter = NostrFilter(kinds: [.private_dm])
+        private_dms_filter.pubkeys = [ damus_state.pubkey ]
+
+        var our_private_dms_filter = NostrFilter(kinds: [.private_dm])
+        our_private_dms_filter.authors = [ damus_state.pubkey ]
+
         var notifications_filter_kinds: [NostrKind] = [
             .text,
             .boost,
@@ -598,6 +613,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         let contacts_filters = contacts_filter_chunks + low_volume_important_filters
         let dms_filters = [dms_filter, our_dms_filter]
         let giftwraps_filters = [giftwraps_filter]
+        let private_dms_filters = [private_dms_filter, our_private_dms_filter]
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
@@ -643,6 +659,17 @@ class HomeModel: ContactsDelegate, ObservableObject {
                     dms.append(contentsOf: incoming_dms)
                 case .networkEose: break
                 }
+            }
+        }
+        // NIP-17 DMs are read locally and only locally. A relay never sees a kind 14 — it only ever
+        // holds the kind-1059 wrap around it, which `giftwrapsHandlerTask` below is responsible for
+        // fetching — so a network subscription for kind 14 would burn a relay subscription slot to
+        // receive nothing. `.ndbOnly` also means this stream keeps delivering rumors as the ingester
+        // unwraps them, including the ones `backfillGiftwrapsInBackground()` peels at startup.
+        self.privateDmsHandlerTask?.cancel()
+        self.privateDmsHandlerTask = Task {
+            for await lender in damus_state.nostrNetwork.reader.streamIndefinitely(filters: private_dms_filters, streamMode: .ndbOnly) {
+                await lender.justUseACopy({ await process_event(ev: $0, context: .other) })
             }
         }
         // Giftwraps get their own stream because they need `.negentropy` rather than the
@@ -1037,13 +1064,41 @@ class HomeModel: ContactsDelegate, ObservableObject {
         our_dms_filter.authors = [damus_state.pubkey]
         our_dms_filter.limit = 500
 
-        let filters = [dms_filter, our_dms_filter]
+        // NIP-17 conversations, which live in the giftwraps addressed to us in both directions. There
+        // is nothing to read here in Swift — reconciling the wraps into nostrdb is the point, and the
+        // ingester unwraps them into the kind-14 rumors the DM models are already streaming. No
+        // `limit`, because a limit on giftwraps truncates by the fuzzed timestamp and so drops an
+        // arbitrary subset of the history this pull is meant to recover.
+        var giftwraps_filter = NostrFilter(kinds: [.giftwrap])
+        giftwraps_filter.pubkeys = [damus_state.pubkey]
+
+        let filters = [dms_filter, our_dms_filter, giftwraps_filter]
         let timeoutSeconds: UInt64 = 20
         
         for await lender in self.damus_state.nostrNetwork.reader.streamExistingEvents(filters: filters, timeout: .seconds(timeoutSeconds), streamMode: .ndbAndNetworkParallel(networkOptimization: .negentropy(liveStreamSinceBackoff: 0))) {
             if Task.isCancelled { return }
             lender.justUseACopy({ self.process_event(ev: $0, context: .other) })
         }
+    }
+
+    /// Handles an inbound or outbound NIP-17 direct message, read locally as a plaintext kind-14 rumor.
+    ///
+    /// There is no decryption here and no key material in sight: nostrdb's ingester peeled the
+    /// giftwrap this rumor came out of before it was ever stored, so the mute check, the search index
+    /// and this handler all see the plaintext for free.
+    @MainActor
+    func handle_private_dm(_ ev: NostrEvent) {
+        // A rumor is unsigned by construction, so its only provenance is the fact that *our* key
+        // unwrapped the giftwrap it came out of — which is precisely what the rumor flag records. A
+        // signed, plaintext kind 14 arriving by any other route is a NIP-17 violation (the whole
+        // point of the kind is that it never leaves its seal), and honouring one would let anyone
+        // publish themselves into someone's DM list, so drop it.
+        guard ev.is_rumor else {
+            Log.info("Ignoring kind-14 note %s: not a rumor, so it did not come out of a giftwrap addressed to us", for: .homeModel, ev.id.hex())
+            return
+        }
+
+        self.handle_dm(ev)
     }
 
     @MainActor
@@ -1243,13 +1298,10 @@ func fetch_relay_metadata(relay_id: RelayURL) async throws -> RelayMetadata? {
     return nip11
 }
 
+/// Routes a legacy NIP-04 kind-4 direct message into the DM list.
 @discardableResult
 func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
-    var inserted = false
-    var found = false
-    
     let ours = ev.pubkey == our_pubkey
-    var i = 0
 
     var the_pk = ev.pubkey
     if ours {
@@ -1260,6 +1312,70 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesM
             print("TODO: handle self dm?")
         }
     }
+
+    return insert_dm(ev: ev, conversation_pubkey: the_pk, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+}
+
+/// Routes a NIP-17 kind-14 rumor into the DM list.
+///
+/// Unlike ``handle_incoming_dm`` there is nothing to decrypt: nostrdb's ingester already peeled the
+/// giftwrap this rumor came out of, so `ev.content` is plaintext and `ev.created_at` is the real send
+/// time rather than the wrap's randomized one.
+///
+/// Does nothing for a rumor that does not belong in a 1:1 conversation — see
+/// ``nip17_conversation_pubkey``.
+@discardableResult
+func handle_incoming_private_dm(ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
+    guard let the_pk = nip17_conversation_pubkey(rumor: ev, our_pubkey: our_pubkey) else {
+        Log.info("Ignoring kind-14 DM %s: it is not part of a 1:1 conversation we are in", for: .homeModel, ev.id.hex())
+        return (false, nil)
+    }
+
+    return insert_dm(ev: ev, conversation_pubkey: the_pk, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+}
+
+/// Which 1:1 conversation a NIP-17 kind-14 rumor belongs to, or `nil` if it belongs to none.
+///
+/// The rumor's author is the sender — nostrdb copies that off the seal — and its `p` tags are the
+/// receivers, so the conversation is keyed on whichever end of the exchange is not us. A rumor whose
+/// only participant is us is a note to self, keyed on our own pubkey.
+///
+/// Returns `nil` for a **group chat**, i.e. a rumor with more than one counterparty. We drop those
+/// rather than folding them into a 1:1 thread with the first `p` tag, because such a thread lies in
+/// both directions: it shows messages from participants the user cannot see, and a reply typed into
+/// it reaches only that one counterparty while the user believes the whole group is reading it.
+/// Damus has no group chat UI and no way to send to one, so there is nothing honest to render.
+///
+/// Also returns `nil` for a rumor we are not a party to at all, which the subscription filters
+/// should already have excluded.
+func nip17_conversation_pubkey(rumor ev: NostrEvent, our_pubkey: Pubkey) -> Pubkey? {
+    // Some clients tag every participant, including the sender, so take the union of author and
+    // `p` tags rather than trusting either alone to be the complete set.
+    var participants = Set(ev.referenced_pubkeys)
+    participants.insert(ev.pubkey)
+
+    guard participants.contains(our_pubkey) else { return nil }
+
+    let counterparties = participants.subtracting([our_pubkey])
+    switch counterparties.count {
+    case 0: return our_pubkey       // a note to self
+    case 1: return counterparties.first
+    default: return nil             // a group chat
+    }
+}
+
+/// Inserts a direct message into its conversation, creating the conversation if this is the first
+/// message in it.
+///
+/// The shared tail of ``handle_incoming_dm`` and ``handle_incoming_private_dm``: the two protocols
+/// differ only in how the conversation is keyed, not in how the model is updated.
+@discardableResult
+private func insert_dm(ev: NostrEvent, conversation_pubkey the_pk: Pubkey, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
+    var inserted = false
+    var found = false
+
+    let ours = ev.pubkey == our_pubkey
+    var i = 0
 
     for model in dms.dms {
         if model.pubkey == the_pk {
@@ -1294,7 +1410,10 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     var new_events: NewEventsBits? = nil
     
     for ev in evs {
-        let res = handle_incoming_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+        let res = switch ev.known_kind {
+        case .private_dm: handle_incoming_private_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+        default: handle_incoming_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+        }
         inserted = res.0 || inserted
         if let new = res.1 {
             new_events = new
@@ -1302,6 +1421,9 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     }
     
     if inserted {
+        // Ordered by the last message's own `created_at`. For a NIP-17 conversation that is the
+        // rumor's timestamp, which is the real send time — the giftwrap's randomized one never
+        // reaches this model, which is exactly what we want.
         let new_dms = Array(dms.dms.filter({ $0.events.count > 0 })).sorted { a, b in
             return a.events.last!.created_at > b.events.last!.created_at
         }

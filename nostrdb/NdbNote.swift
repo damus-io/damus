@@ -553,6 +553,12 @@ extension NdbNote {
         })
     }
     
+    /// Whether ``content`` has to be decrypted before it can be read.
+    ///
+    /// Note that ``NostrKind/private_dm`` is deliberately **not** listed. A NIP-17 DM only ever
+    /// reaches the database as a rumor nostrdb already unwrapped out of its giftwrap, so its content
+    /// is plaintext by the time anything in Swift can see it — which is the whole point of letting
+    /// the ingester do the peeling.
     func is_content_encrypted() -> Bool {
         return known_kind == .dm    // Probably other kinds should be listed here
     }

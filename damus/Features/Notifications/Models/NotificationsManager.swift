@@ -142,6 +142,12 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         let convo = ev.decrypted(keypair: state.keypair) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
         return LocalNotification(type: .dm, event: ev, target: .note(ev), content: convo)
     }
+    else if type == .private_dm,
+            state.settings.dm_notification {
+        // A NIP-17 DM reaches us as a kind-14 rumor that nostrdb already unwrapped, so its content is
+        // plaintext: nothing to decrypt, and no "failed to decrypt" case to render.
+        return LocalNotification(type: .dm, event: ev, target: .note(ev), content: ev.content)
+    }
     else if type == .zap,
             state.settings.zap_notification {
         return LocalNotification(type: .zap, event: ev, target: .note(ev), content: ev.content)
