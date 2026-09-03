@@ -233,4 +233,182 @@ final class NdbPruneTests: XCTestCase {
         XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .metadata).count, 2,
                        "the default policy keeps every kind-0 profile, ours or not")
     }
+
+    // MARK: - NdbNoteSizeHistogram
+
+    /// Three timestamps on three consecutive, distinct UTC days, newest first.
+    private static let day = UInt32(NdbNoteSizeHistogram.bucketSeconds)
+    private static let newest: UInt32 = 1700000000
+    private static let middle: UInt32 = newest - day
+    private static let oldest: UInt32 = newest - 2 * day
+    /// The start of each of those days, which is where a cutoff can land.
+    private static func startOfDay(_ timestamp: UInt32) -> UInt32 {
+        return (timestamp / day) * day
+    }
+
+    private func histogram(_ entries: [(UInt32, UInt64)]) -> NdbNoteSizeHistogram {
+        var histogram = NdbNoteSizeHistogram()
+        for (createdAt, bytes) in entries {
+            histogram.add(createdAt: createdAt, bytes: bytes)
+        }
+        return histogram
+    }
+
+    func test_histogram_buckets_by_utc_day() throws {
+        let day = Self.day
+        let histogram = self.histogram([
+            (Self.newest, 10),
+            (Self.newest + 5, 20),   // same day as the one above
+            (Self.middle, 30),
+        ])
+
+        XCTAssertEqual(histogram.noteCount, 3)
+        XCTAssertEqual(histogram.totalBytes, 60)
+        XCTAssertEqual(histogram.bytesPerDay, [Self.newest / day: 30, Self.middle / day: 30],
+                       "notes on the same UTC day share a bucket")
+    }
+
+    func test_since_cutoff_is_nil_when_the_whole_database_fits() throws {
+        let histogram = self.histogram([(Self.newest, 10), (Self.oldest, 10)])
+        XCTAssertNil(histogram.sinceCutoff(keepingAtMost: 20),
+                     "a budget the database already meets needs no since filter")
+        XCTAssertNil(histogram.sinceCutoff(keepingAtMost: 1000))
+    }
+
+    func test_since_cutoff_is_nil_for_an_empty_database() throws {
+        XCTAssertNil(NdbNoteSizeHistogram().sinceCutoff(keepingAtMost: 0))
+    }
+
+    func test_since_cutoff_stops_before_the_day_that_would_blow_the_budget() throws {
+        let histogram = self.histogram([
+            (Self.newest, 10),
+            (Self.middle, 10),
+            (Self.oldest, 10),
+        ])
+
+        // Room for the two newest days but not the third.
+        XCTAssertEqual(histogram.sinceCutoff(keepingAtMost: 25), Self.startOfDay(Self.middle))
+        // Exactly the two newest days.
+        XCTAssertEqual(histogram.sinceCutoff(keepingAtMost: 20), Self.startOfDay(Self.middle))
+        // Room for one day only.
+        XCTAssertEqual(histogram.sinceCutoff(keepingAtMost: 10), Self.startOfDay(Self.newest))
+    }
+
+    func test_since_cutoff_keeps_the_newest_day_even_when_it_alone_overshoots() throws {
+        let histogram = self.histogram([(Self.newest, 100), (Self.oldest, 1)])
+
+        XCTAssertEqual(histogram.sinceCutoff(keepingAtMost: 1), Self.startOfDay(Self.newest),
+                       "day granularity cannot split the newest day, and keeping nothing would be worse")
+    }
+
+    func test_since_cutoff_skips_over_days_with_no_notes() throws {
+        let histogram = self.histogram([
+            (Self.newest, 10),
+            (Self.oldest - 100 * Self.day, 10),
+        ])
+
+        XCTAssertEqual(histogram.sinceCutoff(keepingAtMost: 10), Self.startOfDay(Self.newest),
+                       "the walk visits populated days, not every day in between")
+    }
+
+    // MARK: - Ndb.noteSizeHistogram
+
+    func test_note_size_histogram_counts_every_note_in_the_database() throws {
+        let ndb = try seeded(with: [
+            try profile("alice", alice, at: Self.newest),
+            try note("alice one", alice, at: Self.newest),
+            try note("bob one", bob, at: Self.middle),
+            try note("bob two", bob, at: Self.oldest),
+        ])
+        defer { ndb.close() }
+
+        let histogram = try ndb.noteSizeHistogram()
+
+        XCTAssertEqual(histogram.noteCount, 4, "kind-0 profiles are notes too, and are counted")
+        XCTAssertEqual(Set(histogram.bytesPerDay.keys),
+                       [Self.newest / Self.day, Self.middle / Self.day, Self.oldest / Self.day])
+        XCTAssertEqual(histogram.bytesPerDay.values.reduce(0, +), histogram.totalBytes,
+                       "the buckets have to add up to the total")
+        XCTAssertGreaterThan(histogram.totalBytes, 0)
+    }
+
+    func test_note_size_histogram_of_an_empty_database_is_empty() throws {
+        let ndb = try seeded(with: [])
+        defer { ndb.close() }
+
+        let histogram = try ndb.noteSizeHistogram()
+        XCTAssertEqual(histogram.noteCount, 0)
+        XCTAssertEqual(histogram.totalBytes, 0)
+        XCTAssertTrue(histogram.bytesPerDay.isEmpty)
+    }
+
+    // MARK: - NdbFilterArray.pruneFilters
+
+    func test_prune_filters_with_a_cutoff_fills_the_spare_slot() throws {
+        let filters = try NdbFilterArray.pruneFilters(keeping: [alice.pubkey], since: Self.middle)
+        XCTAssertEqual(filters.count, Int(NDB_PRUNE_DEFAULT_FILTERS) + 1)
+        XCTAssertEqual(filters.count, filters.capacity, "the cutoff goes in the slot left spare for it")
+    }
+
+    func test_prune_filters_cutoff_drops_older_notes_but_not_our_own() throws {
+        let ndb = try seeded(with: [
+            try note("alice old", alice, at: Self.oldest),
+            try note("bob old", bob, at: Self.oldest),
+            try note("bob new", bob, at: Self.newest),
+        ])
+        defer { ndb.close() }
+
+        let filters = try NdbFilterArray.pruneFilters(keeping: [alice.pubkey],
+                                                      since: Self.startOfDay(Self.newest))
+        try ndb.prune(to: outputDir, filters: filters)
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .text),
+                       ["alice old", "bob new"],
+                       "filters are unioned, so our own notes survive the cutoff that drops everyone else's")
+    }
+
+    // MARK: - The whole thing: budget in, pruned database out
+
+    func test_a_computed_cutoff_prunes_down_to_the_budget() throws {
+        // Equal-length contents so each day weighs the same, and no notes by the
+        // pubkeys we keep, so the cutoff is the only thing deciding what stays.
+        let ndb = try seeded(with: [
+            try note("note-newest", bob, at: Self.newest),
+            try note("note-middle", bob, at: Self.middle),
+            try note("note-oldest", bob, at: Self.oldest),
+        ])
+        defer { ndb.close() }
+
+        let histogram = try ndb.noteSizeHistogram()
+        let budget = (histogram.bytesPerDay[Self.newest / Self.day] ?? 0)
+                   + (histogram.bytesPerDay[Self.middle / Self.day] ?? 0)
+
+        let cutoff = try XCTUnwrap(ndb.pruneSinceCutoff(keepingAtMost: budget))
+        XCTAssertEqual(cutoff, Self.startOfDay(Self.middle))
+
+        try ndb.prune(to: outputDir, filters: try XCTUnwrap(ndb.pruneFilters(keeping: [], budget: budget)))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .text),
+                       ["note-middle", "note-newest"],
+                       "the note from the day the budget could not afford is gone")
+
+        let pruned = try XCTUnwrap(Ndb(path: outputDir, owns_db_file: false))
+        defer { pruned.close() }
+        XCTAssertLessThanOrEqual(try pruned.noteSizeHistogram().totalBytes, budget,
+                                 "the pruned database should land at or under the budget it was sized for")
+    }
+
+    func test_a_budget_the_database_already_meets_asks_for_no_prune_at_all() throws {
+        let ndb = try seeded(with: [
+            try note("bob old", bob, at: Self.oldest),
+            try note("bob new", bob, at: Self.newest),
+        ])
+        defer { ndb.close() }
+
+        XCTAssertNil(try ndb.pruneSinceCutoff(keepingAtMost: 10_000_000))
+        // Not "prune with the defaults": those keep only profiles and our own
+        // notes, so pruning with them would drop both of bob's notes even though
+        // the database was comfortably under budget.
+        XCTAssertNil(try ndb.pruneFilters(keeping: [], budget: 10_000_000))
+    }
 }

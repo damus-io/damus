@@ -182,11 +182,15 @@ final class NdbFilterArray {
 /// Errors from ``Ndb/prune(to:filters:)``.
 enum NdbPruneError: Error, LocalizedError {
     case pruneFailed(path: String)
+    /// The read pass that sizes a prune could not be run.
+    case histogramScanFailed
 
     var errorDescription: String? {
         switch self {
         case .pruneFailed(let path):
             return "Failed to prune the database into \(path)."
+        case .histogramScanFailed:
+            return "Failed to scan the database to size a prune."
         }
     }
 }
@@ -253,5 +257,194 @@ extension Ndb {
                 }
             })
         })
+    }
+}
+
+// MARK: - Sizing a prune
+
+/// How many bytes of notes a database holds, bucketed by the UTC day each note
+/// was created on.
+///
+/// This is what turns a byte budget into something a filter can express.
+/// Filters say *what* to keep, not *how much*: `NDB_FILTER_LIMIT` exists but
+/// `ndb_filter_matches` ignores it, so the only size lever available is
+/// `NDB_FILTER_SINCE`. Bucketing note sizes by day and integrating from the
+/// newest day backwards is how we find the `since` that lands near a budget.
+///
+/// Day granularity is deliberate. The result is an estimate — see
+/// ``sinceCutoff(keepingAtMost:)`` for what it does and does not account for.
+struct NdbNoteSizeHistogram {
+    /// How wide a bucket is. Also the granularity the cutoff lands at.
+    static let bucketSeconds: UInt32 = 86_400
+
+    /// Bytes of note payload per bucket, keyed by `created_at / bucketSeconds`.
+    private(set) var bytesPerDay: [UInt32: UInt64] = [:]
+
+    /// Total note payload bytes across every bucket.
+    private(set) var totalBytes: UInt64 = 0
+
+    /// How many notes were counted.
+    private(set) var noteCount: Int = 0
+
+    /// Adds one note to its day bucket.
+    mutating func add(createdAt: UInt32, bytes: UInt64) {
+        bytesPerDay[createdAt / Self.bucketSeconds, default: 0] += bytes
+        totalBytes += bytes
+        noteCount += 1
+    }
+
+    /// The `NDB_FILTER_SINCE` cutoff that keeps roughly `budget` bytes of notes.
+    ///
+    /// Walks the populated days newest-first, taking each whole day while it
+    /// still fits, and returns the start of the oldest day taken. The newest day
+    /// is always taken even when it alone overshoots — day granularity offers
+    /// nothing finer, and returning "keep nothing" would be worse than
+    /// overshooting.
+    ///
+    /// - Returns: The cutoff, or `nil` if every note already fits in `budget`
+    ///   and so no `since` filter is needed.
+    ///
+    /// - Important: `budget` is measured in **note payload bytes**, which is
+    ///   less than the `data.mdb` the prune produces — indices, profile records
+    ///   and LMDB page overhead are not counted, and the other prune filters
+    ///   keep some notes older than the cutoff regardless. A caller working from
+    ///   a file-size budget should scale it by the ratio it observes:
+    ///   `noteBudget = fileBudget * totalBytes / currentFileSize`. This is an
+    ///   estimate on purpose: the budget is a trigger for "prune now", not a
+    ///   cap that has to be hit exactly.
+    func sinceCutoff(keepingAtMost budget: UInt64) -> UInt32? {
+        guard totalBytes > budget else { return nil }
+
+        // `totalBytes > budget >= 0` means at least one note was counted, so
+        // there is at least one populated day.
+        let days = bytesPerDay.keys.sorted(by: >)
+        var kept: UInt64 = 0
+        var cutoffDay = days[0]
+
+        for day in days {
+            let dayBytes = bytesPerDay[day] ?? 0
+            if kept > 0 && kept + dayBytes > budget { break }
+            kept += dayBytes
+            cutoffDay = day
+        }
+
+        // Safe: `day` came from `created_at / bucketSeconds` on a `uint32_t`
+        // timestamp, so the product is bounded by that timestamp.
+        return cutoffDay * Self.bucketSeconds
+    }
+}
+
+/// Carries the histogram through `ndb_query_visit`'s `void *ctx`, which cannot
+/// hold a Swift value directly.
+private final class NdbNoteSizeHistogramBox {
+    var histogram = NdbNoteSizeHistogram()
+}
+
+extension Ndb {
+    /// Measures every note in the database into a per-day size histogram.
+    ///
+    /// One read pass over `NDB_DB_NOTE`, touching only each note's `created_at`
+    /// and its stored length — nothing is parsed or copied out. That is cheap
+    /// relative to the prune it sizes, and it needs no time-ordered index, since
+    /// `NDB_DB_NOTE` is keyed by note key rather than `created_at`.
+    ///
+    /// - Important: This holds one read transaction open for the whole scan. On
+    ///   a large database that is seconds, which in a DEBUG build is long enough
+    ///   for the damus-local long-lived-query watchdog to abort the process from
+    ///   another thread's `ndb_begin_query`. Whatever schedules this has to keep
+    ///   that in mind — unlike `ndb_prune`, which opens its source transaction
+    ///   with raw LMDB and so is invisible to the watchdog.
+    func noteSizeHistogram() throws -> NdbNoteSizeHistogram {
+        return try withNdb({
+            guard let txn = NdbTxn(ndb: self) else {
+                throw NdbPruneError.histogramScanFailed
+            }
+
+            // A *zeroed* filter, not an initialized one. nostrdb picks its
+            // NDB_PLAN_ALL_NOTES plan — a plain cursor walk of NDB_DB_NOTE —
+            // only for a filter whose element buffer is still null, and
+            // `ndb_filter_init` is what allocates that buffer. So an initialized
+            // filter with no fields is not "empty" to nostrdb: it would take the
+            // created_at plan instead and merge every kind index to reach the
+            // same notes the slow way. Nothing on the plan's path reads past
+            // this filter's zero `num_elements`.
+            var allNotes = ndb_filter()
+
+            let visitor: ndb_visitor_fn = { ctx, result in
+                guard let ctx, let result, let note = result.pointee.note else {
+                    return NDB_VISITOR_CONT
+                }
+                let box = Unmanaged<NdbNoteSizeHistogramBox>.fromOpaque(ctx).takeUnretainedValue()
+                box.histogram.add(createdAt: ndb_note_created_at(note),
+                                  bytes: result.pointee.note_size)
+                return NDB_VISITOR_CONT
+            }
+
+            let box = NdbNoteSizeHistogramBox()
+            let ok = ndb_query_visit(&txn.txn, &allNotes, 1, visitor,
+                                     Unmanaged.passUnretained(box).toOpaque())
+            guard ok == 1 else { throw NdbPruneError.histogramScanFailed }
+
+            return box.histogram
+        })
+    }
+
+    /// The `NDB_FILTER_SINCE` cutoff that keeps roughly `budget` bytes of notes,
+    /// or `nil` if the database already fits.
+    ///
+    /// See ``NdbNoteSizeHistogram/sinceCutoff(keepingAtMost:)`` for what the
+    /// budget does and does not measure.
+    func pruneSinceCutoff(keepingAtMost budget: UInt64) throws -> UInt32? {
+        return try noteSizeHistogram().sinceCutoff(keepingAtMost: budget)
+    }
+
+    /// The keep-policy for a prune that should land near `budget`: nostrdb's
+    /// defaults, plus a `since` cutoff computed from this database's contents.
+    ///
+    /// Hand the result straight to ``prune(to:filters:)``.
+    ///
+    /// - Returns: The filters, or `nil` if the database already fits in `budget`
+    ///   and should not be pruned at all. `nil` is not "prune with the defaults":
+    ///   the defaults on their own keep only profiles and our own notes, so
+    ///   pruning with them would throw away the very database that was under
+    ///   budget. Callers have to skip the prune.
+    ///
+    /// - Note: Filters are unioned, so the cutoff does not evict anything the
+    ///   default filters keep — every kind-0 profile and everything authored by
+    ///   `pubkeys` survives however old it is. That is also why the pruned
+    ///   result comes out somewhat larger than `budget`.
+    func pruneFilters(keeping pubkeys: [Pubkey], budget: UInt64) throws -> NdbFilterArray? {
+        guard let since = try pruneSinceCutoff(keepingAtMost: budget) else { return nil }
+        return try NdbFilterArray.pruneFilters(keeping: pubkeys, since: since)
+    }
+}
+
+extension NdbFilterArray {
+    /// nostrdb's default prune keep-policy plus a `since` cutoff, which goes in
+    /// the slot ``defaultPruneFilters(keeping:capacity:)`` leaves spare for
+    /// exactly this.
+    ///
+    /// - Parameters:
+    ///   - pubkeys: The authors whose notes are kept regardless of age.
+    ///   - since: Keep every note created at or after this timestamp.
+    static func pruneFilters(keeping pubkeys: [Pubkey], since: UInt32) throws -> NdbFilterArray {
+        let filters = try defaultPruneFilters(keeping: pubkeys)
+
+        try filters.appendFilter({ slot in
+            guard ndb_filter_init(slot) == 1 else { return false }
+            guard ndb_filter_start_field(slot, NDB_FILTER_SINCE) == 1,
+                  ndb_filter_add_int_element(slot, UInt64(since)) == 1 else {
+                ndb_filter_destroy(slot)
+                return false
+            }
+            ndb_filter_end_field(slot)
+            guard ndb_filter_end(slot) == 1 else {
+                ndb_filter_destroy(slot)
+                return false
+            }
+            return true
+        })
+
+        return filters
     }
 }
