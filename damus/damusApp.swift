@@ -30,7 +30,7 @@ struct MainView: View {
     var body: some View {
         Group {
             if let kp = keypair, !needs_setup {
-                CompactionView(keypair: kp, appDelegate: appDelegate)
+                ContentView(keypair: kp, appDelegate: appDelegate)
                     .environmentObject(orientationTracker)
             } else {
                 SetupView()

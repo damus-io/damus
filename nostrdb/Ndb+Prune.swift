@@ -550,6 +550,70 @@ extension Ndb {
 
 // MARK: - The staged prune marker
 
+/// What a prune's keep-policy promised to carry over, read off the source
+/// database while the prune ran.
+///
+/// The swap at the next launch needs something to check the staged copy
+/// against, and "it is a valid LMDB database" is not it. `ndb_prune` is
+/// **lossy**, unlike the lossless page copy this replaced, so a bad cutoff or a
+/// bad filter produces a perfectly well-formed, nearly empty `data.mdb` that
+/// would sail through a size check and take the user's notes with it. Only the
+/// prune knows what it set out to keep, so it writes that down here.
+///
+/// Each field is something the keep-policy guarantees unconditionally — see
+/// `ndb_prune_default_filters` and ``NdbFilterArray/pruneFilters(keeping:since:)``
+/// — so a staged copy that fails one of them is broken by definition rather
+/// than merely surprising.
+struct NdbPrunePromise: Equatable {
+    /// Whether the source held any kind-0 profile. The policy keeps every one of
+    /// them however old, so profiles in the source and none in the staged copy
+    /// can only mean the prune went wrong.
+    let hasProfiles: Bool
+
+    /// Which of the authors the policy keeps in full — ours — the source held a
+    /// kind-1 text note from.
+    ///
+    /// Recorded rather than assumed, because a lurker who has never posted has
+    /// none, and demanding their own notes survive would refuse every prune they
+    /// ever stage and quietly stop enforcing their budget.
+    ///
+    /// Text notes specifically, not any note by them: their kind-0 profile is
+    /// kept by the profiles filter regardless, so a copy that dropped every post
+    /// they ever wrote would still answer an unrestricted author query. Their
+    /// posts are also the thing a user would actually notice losing.
+    let authorsWithPosts: [Pubkey]
+
+    /// The `NDB_FILTER_SINCE` cutoff. Everything at or after it survives, and
+    /// the cutoff always lands on the start of a day the source had notes in
+    /// (see ``NdbNoteSizeHistogram/sinceCutoff(keepingAtMost:)``), so at least
+    /// one note at or after it has to be there.
+    let since: UInt32
+
+    /// Reads the promises a prune of `source` keeping `keepAuthors` since
+    /// `since` makes.
+    ///
+    /// Call with the source open and the prune about to run. These are indexed
+    /// existence checks rather than scans, but they are still nostrdb work and
+    /// belong on the prune's own queue.
+    init(source: Ndb, keepAuthors: [Pubkey], since: UInt32) throws {
+        self.since = since
+        self.hasProfiles = try source.containsNote(matching: NostrFilter(kinds: [.metadata]))
+        // One query per author: nostrdb plans a single-author filter through the
+        // author index and falls back to walking the whole database for several
+        // at once.
+        self.authorsWithPosts = try keepAuthors.filter({
+            try source.containsNote(matching: NostrFilter(kinds: [.text], authors: [$0]))
+        })
+    }
+
+    /// Memberwise, for the swap's validation tests and for reading a marker back.
+    init(hasProfiles: Bool, authorsWithPosts: [Pubkey], since: UInt32) {
+        self.hasProfiles = hasProfiles
+        self.authorsWithPosts = authorsWithPosts
+        self.since = since
+    }
+}
+
 /// A pruned copy of the database that finished successfully and is waiting for
 /// the next launch to be swapped into place.
 ///
@@ -562,17 +626,37 @@ struct NdbPendingPrune: Equatable {
     /// closed, standalone `data.mdb`.
     let path: String
 
-    /// When the prune finished. How stale a staged copy may be before it is
-    /// thrown away rather than swapped in is the swapping side's call.
+    /// When the prune finished. See ``Ndb/staged_prune_expiry`` for how stale a
+    /// staged copy may get before the swap throws it away instead.
     let completedAt: Date
+
+    /// What the prune's keep-policy promised, for the swap to check the staged
+    /// copy against.
+    let promise: NdbPrunePromise
 }
 
 extension Ndb {
+    /// The directory a prune stages its output in, a sibling of `data.mdb`
+    /// inside the database directory.
+    ///
+    /// Deliberately not the system temporary directory: a staged prune has to
+    /// survive until the next launch, and iOS is free to empty `tmp` in between.
+    static let staged_prune_directory_name = "ndb_prune_staged"
+
     /// The `UserDefaults` key holding the staged prune's directory.
     static let pending_prune_path_key = "ndb_pending_prune_path"
 
     /// The `UserDefaults` key holding when the staged prune finished.
     static let pending_prune_completed_at_key = "ndb_pending_prune_completed_at"
+
+    /// The `UserDefaults` key holding whether the source had any profile.
+    static let pending_prune_has_profiles_key = "ndb_pending_prune_has_profiles"
+
+    /// The `UserDefaults` key holding the kept authors, as hex pubkeys.
+    static let pending_prune_authors_key = "ndb_pending_prune_authors"
+
+    /// The `UserDefaults` key holding the prune's `since` cutoff.
+    static let pending_prune_since_key = "ndb_pending_prune_since"
 
     /// The staged prune waiting to be swapped in, if there is one.
     ///
@@ -581,23 +665,49 @@ extension Ndb {
     /// complete database at the time it was written. Whoever swaps it in should
     /// still confirm the file is there — the marker outlives a reinstall of the
     /// app's container, and iOS can delete files underneath us.
+    ///
+    /// A marker with no cutoff recorded is not a marker: the swap has no way to
+    /// check a keep-policy it cannot read, and refusing to see it here is what
+    /// keeps a swap from ever running unvalidated.
     static func get_pending_prune() -> NdbPendingPrune? {
         guard let path = UserDefaults.standard.string(forKey: pending_prune_path_key),
-              let completedAt = UserDefaults.standard.object(forKey: pending_prune_completed_at_key) as? Date else {
+              let completedAt = UserDefaults.standard.object(forKey: pending_prune_completed_at_key) as? Date,
+              let since = UserDefaults.standard.object(forKey: pending_prune_since_key) as? NSNumber else {
             return nil
         }
-        return NdbPendingPrune(path: path, completedAt: completedAt)
+
+        let authors = (UserDefaults.standard.stringArray(forKey: pending_prune_authors_key) ?? [])
+            .compactMap({ Pubkey(hex: $0) })
+        let promise = NdbPrunePromise(hasProfiles: UserDefaults.standard.bool(forKey: pending_prune_has_profiles_key),
+                                      authorsWithPosts: authors,
+                                      since: since.uint32Value)
+
+        return NdbPendingPrune(path: path, completedAt: completedAt, promise: promise)
     }
 
     /// Records a staged prune for the next launch to pick up.
     static func set_pending_prune(_ pending: NdbPendingPrune) {
         UserDefaults.standard.set(pending.path, forKey: pending_prune_path_key)
         UserDefaults.standard.set(pending.completedAt, forKey: pending_prune_completed_at_key)
+        UserDefaults.standard.set(pending.promise.hasProfiles, forKey: pending_prune_has_profiles_key)
+        UserDefaults.standard.set(pending.promise.authorsWithPosts.map({ $0.hex() }), forKey: pending_prune_authors_key)
+        UserDefaults.standard.set(NSNumber(value: pending.promise.since), forKey: pending_prune_since_key)
     }
 
     /// Forgets any staged prune. Does not delete the directory it named.
     static func clear_pending_prune() {
         UserDefaults.standard.removeObject(forKey: pending_prune_path_key)
         UserDefaults.standard.removeObject(forKey: pending_prune_completed_at_key)
+        UserDefaults.standard.removeObject(forKey: pending_prune_has_profiles_key)
+        UserDefaults.standard.removeObject(forKey: pending_prune_authors_key)
+        UserDefaults.standard.removeObject(forKey: pending_prune_since_key)
+    }
+
+    /// Whether any note in the database matches `filter`.
+    ///
+    /// Asks for a single result, so for any filter nostrdb can plan this costs
+    /// an index seek rather than a scan.
+    func containsNote(matching filter: NostrFilter) throws -> Bool {
+        return try !query(filters: [NdbFilter(from: filter)], maxResults: 1).isEmpty
     }
 }

@@ -135,6 +135,14 @@ class Ndb {
             return nil      // If the caller claims to not own the DB file, and the DB files do not exist, then we should not initialize Ndb
         }
 
+        // A pruned copy staged by an earlier session is moved into place here,
+        // before LMDB maps anything. It happens on the first open of an owned
+        // database and nowhere else — see `Ndb+PruneSwap.swift` for why that
+        // ordering is the whole safety property.
+        if owns_db_file {
+            Self.swap_staged_prune_before_first_open(db_path: path)
+        }
+
         let ok = path.withCString { testdir in
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {

@@ -112,7 +112,8 @@ final class NdbPruneManagerTests: XCTestCase {
     }
 
     func test_a_staged_prune_stops_another_one_starting() {
-        let pending = NdbPendingPrune(path: "/tmp/staged", completedAt: Date())
+        let pending = NdbPendingPrune(path: "/tmp/staged", completedAt: Date(),
+                                      promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [], since: 0))
         XCTAssertEqual(NdbPruneManager.decide(databaseSizeBytes: 10 * gb,
                                               budget: .small,
                                               pendingPrune: pending,
@@ -241,9 +242,9 @@ final class NdbPruneManagerTests: XCTestCase {
         // trigger and the free-space check are covered above; this is about what
         // a prune leaves behind.
         let staged = try await manager.stagePrune(fileBudget: 1)
-        let stagedPath = try XCTUnwrap(staged, "a database this far over budget should have produced a prune")
+        let stagedPath = try XCTUnwrap(staged, "a database this far over budget should have produced a prune").path
 
-        XCTAssertEqual(stagedPath, "\(dbDir)/\(NdbPruneManager.stagedDirectoryName)",
+        XCTAssertEqual(stagedPath, "\(dbDir)/\(Ndb.staged_prune_directory_name)",
                        "the staged copy lives beside the database, not in tmp, so it survives to the next launch")
         XCTAssertTrue(Ndb.db_file_exists(path: stagedPath), "the staged directory should hold a database")
         XCTAssertNil(Ndb.get_pending_prune(),
@@ -269,9 +270,12 @@ final class NdbPruneManagerTests: XCTestCase {
 
         XCTAssertTrue(didPrune)
         let marker = try XCTUnwrap(Ndb.get_pending_prune(), "a completed prune has to leave a marker behind")
-        XCTAssertEqual(marker.path, "\(dbDir)/\(NdbPruneManager.stagedDirectoryName)")
+        XCTAssertEqual(marker.path, "\(dbDir)/\(Ndb.staged_prune_directory_name)")
         XCTAssertLessThan(abs(marker.completedAt.timeIntervalSinceNow), 60)
         XCTAssertTrue(Ndb.db_file_exists(path: marker.path), "the marker has to name a database that is really there")
+        XCTAssertEqual(marker.promise.authorsWithPosts, [], "there are no keep-authors here to promise")
+        XCTAssertGreaterThan(marker.promise.since, 0,
+                             "the marker has to carry the cutoff, or the swap has no keep-policy to check the copy against")
 
         let count = await manager.pruneCount
         XCTAssertEqual(count, 1)
@@ -292,7 +296,7 @@ final class NdbPruneManagerTests: XCTestCase {
         }
 
         XCTAssertNil(Ndb.get_pending_prune())
-        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(NdbPruneManager.stagedDirectoryName)"))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(Ndb.staged_prune_directory_name)"))
     }
 
     func test_a_failed_prune_backs_off_before_trying_again() async throws {
@@ -336,7 +340,7 @@ final class NdbPruneManagerTests: XCTestCase {
 
         XCTAssertNil(staged)
         XCTAssertNil(Ndb.get_pending_prune())
-        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(NdbPruneManager.stagedDirectoryName)"),
+        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(Ndb.staged_prune_directory_name)"),
                        "an attempt that staged nothing must not leave a directory behind")
     }
 
@@ -350,14 +354,14 @@ final class NdbPruneManagerTests: XCTestCase {
         // A directory left by an attempt that never finished — the app was
         // backgrounded mid-prune, say. LMDB refuses a destination that is not
         // empty, so a prune that did not clear this would fail forever.
-        let stagedPath = "\(dbDir)/\(NdbPruneManager.stagedDirectoryName)"
+        let stagedPath = "\(dbDir)/\(Ndb.staged_prune_directory_name)"
         try FileManager.default.createDirectory(atPath: stagedPath, withIntermediateDirectories: true)
         FileManager.default.createFile(atPath: "\(stagedPath)/data.mdb", contents: Data("junk".utf8))
 
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
         let staged = try await manager.stagePrune(fileBudget: 1)
 
-        XCTAssertEqual(staged, stagedPath)
+        XCTAssertEqual(staged?.path, stagedPath)
         XCTAssertEqual(try contents(inDatabaseAt: stagedPath), ["bob new"],
                        "the staged database should be the new prune, not the leftovers")
     }
@@ -377,7 +381,7 @@ final class NdbPruneManagerTests: XCTestCase {
         }
 
         XCTAssertNil(Ndb.get_pending_prune(), "a failed prune must never leave a marker")
-        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(NdbPruneManager.stagedDirectoryName)"),
+        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(Ndb.staged_prune_directory_name)"),
                        "a partial copy left where the swap could find it would be swapped in")
     }
 }

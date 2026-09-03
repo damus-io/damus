@@ -48,13 +48,6 @@ actor NdbPruneManager {
     /// How long to wait after a failed prune before trying again.
     static let failureBackoff: TimeInterval = 60 * 60 * 6
 
-    /// The staging directory, a sibling of `data.mdb` inside the database
-    /// directory.
-    ///
-    /// Deliberately not the system temporary directory: a staged prune has to
-    /// survive until the next launch, and iOS is free to empty `tmp` in between.
-    static let stagedDirectoryName = "ndb_prune_staged"
-
     /// What a size check concluded.
     enum Decision: Equatable {
         /// Prune, aiming the result at `fileBudget` bytes.
@@ -238,9 +231,11 @@ actor NdbPruneManager {
         do {
             let staged = try await stagePrune(fileBudget: fileBudget)
             guard let staged else { return false }
-            Ndb.set_pending_prune(NdbPendingPrune(path: staged, completedAt: Date()))
+            Ndb.set_pending_prune(NdbPendingPrune(path: staged.path,
+                                                  completedAt: Date(),
+                                                  promise: staged.promise))
             pruneCount += 1
-            Log.info("Staged a pruned database at %@", for: .storage, staged)
+            Log.info("Staged a pruned database at %@", for: .storage, staged.path)
             return true
         } catch {
             lastFailure = Date()
@@ -251,18 +246,18 @@ actor NdbPruneManager {
     /// Writes a pruned copy into the staging directory.
     ///
     /// Does not set the pending marker — ``pruneIfNeeded()`` does that once this
-    /// returns a path, so a caller driving a prune by hand (a test, the developer
-    /// settings screen) does not arm a swap as a side effect.
+    /// returns a result, so a caller driving a prune by hand (a test, the
+    /// developer settings screen) does not arm a swap as a side effect.
     ///
-    /// - Returns: The staging path, or `nil` if the notes already fit the budget
-    ///   and there was nothing to drop.
-    func stagePrune(fileBudget: UInt64) async throws -> String? {
+    /// - Returns: The staged copy and what its keep-policy promised, or `nil` if
+    ///   the notes already fit the budget and there was nothing to drop.
+    func stagePrune(fileBudget: UInt64) async throws -> NdbStagedPrune? {
         guard let dbPath else { throw NdbPruneManagerError.missingDatabasePath }
         guard let currentSize = Ndb.database_file_size(path: dbPath), currentSize > 0 else {
             throw NdbPruneManagerError.missingDatabasePath
         }
 
-        let stagedPath = "\(dbPath)/\(Self.stagedDirectoryName)"
+        let stagedPath = "\(dbPath)/\(Ndb.staged_prune_directory_name)"
 
         // Anything already here is the wreckage of an abandoned attempt: we only
         // reach this point with no pending marker, so nothing here is wanted.
@@ -277,7 +272,7 @@ actor NdbPruneManager {
         do {
             let keepAuthors = self.keepAuthors
             let ndb = self.ndb
-            let didPrune = try await Self.offMainPool({
+            let promise = try await Self.offMainPool({ () -> NdbPrunePromise? in
                 // One scan, reused for both the total and the cutoff.
                 let histogram = try ndb.noteSizeHistogram()
                 let noteBudget = Self.noteBudget(forFileBudget: fileBudget,
@@ -286,16 +281,21 @@ actor NdbPruneManager {
 
                 guard let since = histogram.sinceCutoff(keepingAtMost: noteBudget) else {
                     Log.info("Database is over its file budget but its notes already fit; nothing to prune", for: .storage)
-                    return false
+                    return nil
                 }
 
                 Log.info("Pruning to %d note bytes, keeping notes since %d", for: .storage, noteBudget, since)
                 let filters = try NdbFilterArray.pruneFilters(keeping: keepAuthors, since: since)
+                // Read off what this keep-policy promises before pruning, while
+                // the source is still the thing to read it from. The swap has
+                // nothing else to check the copy against — see
+                // ``NdbPrunePromise``.
+                let promise = try NdbPrunePromise(source: ndb, keepAuthors: keepAuthors, since: since)
                 try ndb.prune(to: stagedPath, filters: filters)
-                return true
+                return promise
             })
 
-            guard didPrune else {
+            guard let promise else {
                 try? FileManager.default.removeItem(atPath: stagedPath)
                 return nil
             }
@@ -308,7 +308,7 @@ actor NdbPruneManager {
             }
 
             Log.info("Pruned %d bytes down to %d bytes", for: .storage, currentSize, stagedSize)
-            return stagedPath
+            return NdbStagedPrune(path: stagedPath, promise: promise)
         } catch {
             try? FileManager.default.removeItem(atPath: stagedPath)
             throw error
@@ -347,6 +347,16 @@ actor NdbPruneManager {
     }
 
     private static let pruneQueue = DispatchQueue(label: "com.jb55.damus.ndb-prune", qos: .utility)
+}
+
+/// A pruned copy sitting in the staging directory, ready for a marker to arm a
+/// swap with.
+struct NdbStagedPrune: Equatable {
+    /// The staging directory, holding a complete, closed, standalone database.
+    let path: String
+
+    /// What the keep-policy that produced it promised to carry over.
+    let promise: NdbPrunePromise
 }
 
 /// Errors from staging a prune.
