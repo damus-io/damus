@@ -7,6 +7,7 @@
 
 import Foundation
 import LinkPresentation
+import EmojiKit
 import EmojiPicker
 
 class DamusState: HeadlessDamusState, ObservableObject {
@@ -135,7 +136,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             video: DamusVideoCoordinator(),
             ndb: ndb,
             quote_reposts: .init(our_pubkey: pubkey),
-            emoji_provider: DefaultEmojiProvider(showAllVariations: true),
+            emoji_provider: LazyEmojiProvider(showAllVariations: true),
             favicon_cache: FaviconCache()
         )
     }
@@ -216,7 +217,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
             video: DamusVideoCoordinator(),
             ndb: .empty,
             quote_reposts: .init(our_pubkey: empty_pub),
-            emoji_provider: DefaultEmojiProvider(showAllVariations: true),
+            emoji_provider: LazyEmojiProvider(showAllVariations: true),
             favicon_cache: FaviconCache()
         )
     }
@@ -242,5 +243,71 @@ fileprivate extension DamusState {
             guard let nwcString = self.settings.nostr_wallet_connect else { return nil }
             return WalletConnectURL(str: nwcString)
         }
+    }
+}
+
+/// An `EmojiProvider` that builds the real provider lazily, on a background queue.
+///
+/// `DefaultEmojiProvider.init` walks every emoji and every localized keyword into a
+/// trie, which costs a couple hundred milliseconds. Doing that while constructing
+/// `DamusState` put it squarely on the main thread during launch. The emoji picker is
+/// only ever shown from a sheet, so we can build the provider in the background and
+/// only block if something asks for emojis before the build finishes.
+///
+/// The built provider is shared process-wide (keyed on `showAllVariations`) so that
+/// repeatedly constructing a `DamusState` — `DamusState.empty` is a computed property —
+/// does not rebuild the trie each time. This is safe because the only mutable state a
+/// `DefaultEmojiProvider` has is skin tone preferences, which live in `UserDefaults`.
+final class LazyEmojiProvider: EmojiProvider, @unchecked Sendable {
+    /// Serializes access to `providers`, and doubles as the queue the trie is built on.
+    private static let queue = DispatchQueue(label: "com.damus.lazy-emoji-provider", qos: .utility)
+    /// Built providers, keyed on `showAllVariations`. Only touched from `queue`.
+    private static var providers: [Bool: DefaultEmojiProvider] = [:]
+
+    private let showAllVariations: Bool
+
+    init(showAllVariations: Bool) {
+        self.showAllVariations = showAllVariations
+        // Start building now so that the picker is warm by the time the user opens it.
+        Self.queue.async { _ = Self.provider(showAllVariations: showAllVariations) }
+    }
+
+    /// The underlying provider, built on first use. Blocks until the build finishes.
+    private var wrapped: DefaultEmojiProvider {
+        Self.queue.sync { Self.provider(showAllVariations: self.showAllVariations) }
+    }
+
+    /// Must only be called on `queue`.
+    private static func provider(showAllVariations: Bool) -> DefaultEmojiProvider {
+        if let provider = providers[showAllVariations] { return provider }
+        let provider = DefaultEmojiProvider(showAllVariations: showAllVariations)
+        providers[showAllVariations] = provider
+        return provider
+    }
+
+    var isShowingAllVariations: Bool { showAllVariations }
+
+    var emojiCategories: [AppleEmojiCategory] { wrapped.emojiCategories }
+
+    var variations: [String: [Emoji]] { wrapped.variations }
+
+    var frequentlyUsedEmojis: [Emoji] { wrapped.frequentlyUsedEmojis }
+
+    var skinTone1: SkinTone {
+        get { wrapped.skinTone1 }
+        set { wrapped.skinTone1 = newValue }
+    }
+
+    var skinTone2: SkinTone {
+        get { wrapped.skinTone2 }
+        set { wrapped.skinTone2 = newValue }
+    }
+
+    func removeFrequentlyUsedEmojis() { wrapped.removeFrequentlyUsedEmojis() }
+
+    func find(query: String) -> [Emoji] { wrapped.find(query: query) }
+
+    func variation(for emojiValue: String, skinTone1: SkinTone, skinTone2: SkinTone) -> Emoji? {
+        wrapped.variation(for: emojiValue, skinTone1: skinTone1, skinTone2: skinTone2)
     }
 }

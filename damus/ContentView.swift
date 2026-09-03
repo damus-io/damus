@@ -745,7 +745,7 @@ struct ContentView: View {
                                       video: DamusVideoCoordinator(),
                                       ndb: ndb,
                                       quote_reposts: .init(our_pubkey: pubkey),
-                                      emoji_provider: DefaultEmojiProvider(showAllVariations: true),
+                                      emoji_provider: LazyEmojiProvider(showAllVariations: true),
                                       favicon_cache: FaviconCache()
         )
         

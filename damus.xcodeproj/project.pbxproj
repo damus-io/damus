@@ -26,6 +26,7 @@
 		5EA2C4000000000000000015 /* AdvancedSearchQueryDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */; };
 		5EA2C4000000000000000016 /* AdvancedSearchQueryDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */; };
 		5EA2C4000000000000000012 /* AdvancedSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000011 /* AdvancedSearchTests.swift */; };
+		5EA2C400000000000000002C /* LazyEmojiProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000002B /* LazyEmojiProviderTests.swift */; };
 		5EA2C400000000000000000E /* AdvancedSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000000D /* AdvancedSearchEngine.swift */; };
 		5EA2C400000000000000000F /* AdvancedSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000000D /* AdvancedSearchEngine.swift */; };
 		5EA2C4000000000000000010 /* AdvancedSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C400000000000000000D /* AdvancedSearchEngine.swift */; };
@@ -2135,6 +2136,7 @@
 		5EA2C4000000000000000017 /* AdvancedSearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchModel.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000013 /* AdvancedSearchQueryDSL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchQueryDSL.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000011 /* AdvancedSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchTests.swift; sourceTree = "<group>"; };
+		5EA2C400000000000000002B /* LazyEmojiProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyEmojiProviderTests.swift; sourceTree = "<group>"; };
 		5EA2C400000000000000000D /* AdvancedSearchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchEngine.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000009 /* AdvancedSearchPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchPlanner.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000005 /* SearchContentMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchContentMatcher.swift; sourceTree = "<group>"; };
@@ -4037,6 +4039,7 @@
 			isa = PBXGroup;
 			children = (
 				5EA2C4000000000000000011 /* AdvancedSearchTests.swift */,
+				5EA2C400000000000000002B /* LazyEmojiProviderTests.swift */,
 				D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */,
 				D7E14B922F68B22D00BF84B7 /* NdbCompactionTests.swift */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
@@ -6599,6 +6602,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5EA2C4000000000000000012 /* AdvancedSearchTests.swift in Sources */,
+				5EA2C400000000000000002C /* LazyEmojiProviderTests.swift in Sources */,
 				4C2D34412BDAF1B300F9FB44 /* NIP10Tests.swift in Sources */,
 				4C684A572A7FFAE6005E6031 /* UrlTests.swift in Sources */,
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
