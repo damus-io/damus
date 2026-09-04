@@ -250,4 +250,46 @@ final class NdbMigrationTests: XCTestCase {
         // Legacy files should be gone (moved)
         XCTAssertTrue(verifyDatabaseFilesDoNotExist(at: legacyPath), "Legacy database files should not exist after migration")
     }
+    
+    // MARK: - iCloud Backup Exclusion Tests
+    
+    func testExcludeDbFilesFromICloudBackup_ExcludesBothFiles() throws {
+        // Given: Both data.mdb and lock.mdb exist at the path
+        try createMockDatabaseFiles(at: privatePath)
+        
+        // When: iCloud backup exclusion is applied
+        Ndb.exclude_db_files_from_icloud_backup(path: privatePath)
+        
+        // Then: Both database files should be marked as excluded from iCloud backup
+        for db_file in ["data.mdb", "lock.mdb"] {
+            let fileURL = URL(fileURLWithPath: privatePath).appendingPathComponent(db_file)
+            let resourceValues = try fileURL.resourceValues(forKeys: [.isExcludedFromBackupKey])
+            XCTAssertEqual(
+                resourceValues.isExcludedFromBackup, true,
+                "\(db_file) should be excluded from iCloud backup"
+            )
+        }
+    }
+    
+    func testExcludeDbFilesFromICloudBackup_SkipsMissingFiles() throws {
+        // Given: Only data.mdb exists; lock.mdb is absent
+        let fileManager = FileManager.default
+        try fileManager.createDirectory(atPath: privatePath, withIntermediateDirectories: true)
+        let dataMdbURL = URL(fileURLWithPath: privatePath).appendingPathComponent("data.mdb")
+        try "dummy content".data(using: .utf8)!.write(to: dataMdbURL)
+        
+        // When: iCloud backup exclusion is applied (should not crash on missing lock.mdb)
+        Ndb.exclude_db_files_from_icloud_backup(path: privatePath)
+        
+        // Then: data.mdb should be excluded and no crash should occur for the missing lock.mdb
+        let resourceValues = try dataMdbURL.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(
+            resourceValues.isExcludedFromBackup, true,
+            "data.mdb should be excluded from iCloud backup even when lock.mdb is absent"
+        )
+        XCTAssertFalse(
+            fileManager.fileExists(atPath: URL(fileURLWithPath: privatePath).appendingPathComponent("lock.mdb").path),
+            "lock.mdb should still not exist after the call"
+        )
+    }
 }
