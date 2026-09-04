@@ -15,8 +15,7 @@ final class NdbPruneSwapTests: XCTestCase {
     let alice = generate_new_keypair()
     let bob = generate_new_keypair()
 
-    /// A day wide enough apart that each note lands in its own histogram bucket.
-    static let day = UInt32(NdbNoteSizeHistogram.bucketSeconds)
+    static let day: UInt32 = 86_400
     static let newest: UInt32 = 1700000000
 
     override func setUpWithError() throws {
@@ -83,7 +82,7 @@ final class NdbPruneSwapTests: XCTestCase {
     /// A promise nothing in these fixtures can fail, for the tests that are
     /// about the swap rather than about validation.
     private var permissivePromise: NdbPrunePromise {
-        return NdbPrunePromise(hasProfiles: false, authorsWithPosts: [], since: 0)
+        return NdbPrunePromise(hasProfiles: false, authorsWithPosts: [])
     }
 
     // MARK: - Nothing to do
@@ -119,21 +118,19 @@ final class NdbPruneSwapTests: XCTestCase {
             try note("bob new", bob, at: Self.newest),
         ], into: dbDir)
 
-        // What a prune keeping alice since `newest` would have left behind.
+        // What a prune keeping alice would have left behind: her profile, her
+        // own notes, and nothing of bob's.
         try ingest([
             try profile("alice", alice, at: Self.newest),
             try note("alice old", alice, at: Self.newest - 2 * Self.day),
-            try note("bob new", bob, at: Self.newest),
         ], into: stagedPath)
 
         let stagedSize = try XCTUnwrap(Ndb.database_file_size(path: stagedPath))
-        markPending(promise: NdbPrunePromise(hasProfiles: true,
-                                             authorsWithPosts: [alice.pubkey],
-                                             since: Self.newest))
+        markPending(promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [alice.pubkey]))
 
         XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .swapped(bytes: stagedSize))
 
-        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["alice old", "bob new"],
+        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["alice old"],
                        "the live database should now be the pruned copy")
         XCTAssertNil(Ndb.get_pending_prune(), "a swapped-in copy must not be swapped in again")
         XCTAssertFalse(FileManager.default.fileExists(atPath: stagedPath),
@@ -225,22 +222,16 @@ final class NdbPruneSwapTests: XCTestCase {
                        "a copy we will not use is a copy to delete — the next prune stages a fresh one")
     }
 
-    func test_a_copy_a_fraction_of_the_size_of_the_live_database_is_refused() throws {
+    func test_a_copy_a_tiny_fraction_of_the_live_database_is_not_refused_for_that_alone() throws {
+        // The prune collapses the database to profiles and our own notes, so a
+        // copy orders of magnitude smaller than what it replaces is the normal
+        // outcome, not a suspicious one. Any size floor would refuse every
+        // healthy prune of a large database — the promise checks below are what
+        // tell a good small copy from an emptied one.
         try ingest([try note("bob new", bob, at: Self.newest)], into: stagedPath)
-        let stagedSize = try XCTUnwrap(Ndb.database_file_size(path: stagedPath))
-
-        // Standing in for the real shape of this failure: a prune of a
-        // multi-gigabyte database that produced a valid, nearly empty one.
-        let liveSize: UInt64 = 100 * 1024 * 1024 * 1024
         let pending = NdbPendingPrune(path: stagedPath, completedAt: Date(), promise: permissivePromise)
-        let floor = UInt64(Double(liveSize) * Ndb.minimum_staged_prune_fraction)
 
-        XCTAssertEqual(Ndb.evaluate_staged_prune(pending, liveSizeBytes: liveSize),
-                       .tooSmall(bytes: stagedSize, floor: floor))
-
-        // The same copy against a database its own size is perfectly fine, which
-        // is the point of expressing the floor as a ratio.
-        XCTAssertNil(Ndb.evaluate_staged_prune(pending, liveSizeBytes: stagedSize))
+        XCTAssertNil(Ndb.evaluate_staged_prune(pending))
     }
 
     func test_a_copy_missing_the_promised_profiles_is_refused() throws {
@@ -253,7 +244,7 @@ final class NdbPruneSwapTests: XCTestCase {
         // kind-0 profile in the source and this has none of them. Only the prune
         // can drop profiles, so this cannot be anything but a broken prune.
         try ingest([try note("bob new", bob, at: Self.newest)], into: stagedPath)
-        markPending(promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [], since: 0))
+        markPending(promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: []))
 
         XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .refused(.noProfiles))
         XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["bob new", "bob old"])
@@ -276,34 +267,10 @@ final class NdbPruneSwapTests: XCTestCase {
             try profile("alice", alice, at: Self.newest),
             try note("bob new", bob, at: Self.newest),
         ], into: stagedPath)
-        markPending(promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [alice.pubkey], since: 0))
+        markPending(promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [alice.pubkey]))
 
         XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .refused(.missingAuthor(alice.pubkey)))
         XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["alice says hello", "bob new"])
-        XCTAssertFalse(FileManager.default.fileExists(atPath: stagedPath))
-    }
-
-    func test_a_copy_with_nothing_after_the_cutoff_is_refused() throws {
-        try ingest([
-            try note("bob old", bob, at: Self.newest - 2 * Self.day),
-            try note("bob new", bob, at: Self.newest),
-        ], into: dbDir)
-
-        // The cutoff always lands on the start of a day the source had notes in,
-        // so a copy with nothing at or after it means the `since` filter did not
-        // take — the bad-cutoff failure, which leaves profiles and our own notes
-        // and nothing else.
-        try ingest([
-            try profile("alice", alice, at: Self.newest - 10 * Self.day),
-            try note("alice ancient", alice, at: Self.newest - 10 * Self.day),
-        ], into: stagedPath)
-        markPending(promise: NdbPrunePromise(hasProfiles: true,
-                                             authorsWithPosts: [alice.pubkey],
-                                             since: Self.newest))
-
-        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir),
-                       .refused(.nothingAfterCutoff(since: Self.newest)))
-        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["bob new", "bob old"])
         XCTAssertFalse(FileManager.default.fileExists(atPath: stagedPath))
     }
 
@@ -322,19 +289,15 @@ final class NdbPruneSwapTests: XCTestCase {
         // Alice has a profile but has never posted. Promising her posts survive
         // would refuse every prune she ever stages, and quietly stop enforcing
         // her budget — so having a profile must not be enough to be recorded.
-        let promise = try NdbPrunePromise(source: ndb,
-                                          keepAuthors: [alice.pubkey, bob.pubkey],
-                                          since: Self.newest)
+        let promise = try NdbPrunePromise(source: ndb, keepAuthors: [alice.pubkey, bob.pubkey])
 
         XCTAssertEqual(promise.authorsWithPosts, [bob.pubkey])
         XCTAssertTrue(promise.hasProfiles)
-        XCTAssertEqual(promise.since, Self.newest)
     }
 
     func test_a_promise_survives_a_round_trip_through_the_marker() throws {
         let promise = NdbPrunePromise(hasProfiles: true,
-                                      authorsWithPosts: [alice.pubkey, bob.pubkey],
-                                      since: Self.newest)
+                                      authorsWithPosts: [alice.pubkey, bob.pubkey])
         let completedAt = Date(timeIntervalSince1970: 1700000123)
         markPending(promise: promise, completedAt: completedAt)
 
@@ -342,13 +305,60 @@ final class NdbPruneSwapTests: XCTestCase {
         XCTAssertEqual(read, NdbPendingPrune(path: stagedPath, completedAt: completedAt, promise: promise))
     }
 
-    func test_a_marker_with_no_promise_recorded_is_not_a_marker() throws {
-        // A half-written marker cannot be validated, and the swap must never run
-        // against a keep-policy it cannot read.
+    func test_a_marker_with_no_version_stamp_is_not_a_marker() throws {
+        try ingest([try note("bob new", bob, at: Self.newest)], into: dbDir)
+        try ingest([try note("bob new", bob, at: Self.newest)], into: stagedPath)
+
+        // A marker interrupted before its version stamp went down cannot be
+        // validated, and the swap must never run against a keep-policy it cannot
+        // read. The staged copy goes with it — the next check stages a fresh one.
         UserDefaults.standard.set(stagedPath, forKey: Ndb.pending_prune_path_key)
         UserDefaults.standard.set(Date(), forKey: Ndb.pending_prune_completed_at_key)
 
         XCTAssertNil(Ndb.get_pending_prune())
         XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .nothingStaged)
+        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["bob new"], "the live database is untouched")
+        XCTAssertFalse(Ndb.has_pending_prune_residue(), "the unreadable marker has to be cleared, or it is retried forever")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: stagedPath))
+    }
+
+    func test_a_marker_written_before_the_keep_policy_lost_its_cutoff_is_discarded() throws {
+        try ingest([
+            try note("bob old", bob, at: Self.newest - 2 * Self.day),
+            try note("bob new", bob, at: Self.newest),
+        ], into: dbDir)
+        try ingest([try note("bob new", bob, at: Self.newest)], into: stagedPath)
+
+        // Exactly what an install updating from the version that computed a
+        // `since` cutoff carries: a marker with no version stamp and a `since`
+        // key. Its copy was staged under a keep-policy this code cannot check,
+        // so it must never be swapped in on today's weaker validation.
+        UserDefaults.standard.set(stagedPath, forKey: Ndb.pending_prune_path_key)
+        UserDefaults.standard.set(Date(), forKey: Ndb.pending_prune_completed_at_key)
+        UserDefaults.standard.set(true, forKey: Ndb.pending_prune_has_profiles_key)
+        UserDefaults.standard.set(NSNumber(value: Self.newest), forKey: "ndb_pending_prune_since")
+
+        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .nothingStaged)
+        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["bob new", "bob old"],
+                       "the live database keeps everything it had")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: stagedPath))
+        XCTAssertNil(UserDefaults.standard.object(forKey: "ndb_pending_prune_since"),
+                     "the legacy key has to be swept too, or every launch rediscovers this marker")
+    }
+
+    func test_unreadable_marker_residue_for_another_database_leaves_that_directory_alone() throws {
+        try ingest([try note("bob new", bob, at: Self.newest)], into: stagedPath)
+
+        // The marker is process-wide. A version 1 marker naming some other
+        // database's staging directory still has to stop being honoured, but
+        // deleting a directory this open knows nothing about is not ours to do.
+        let elsewhere = "\(dbDir)-other/\(Ndb.staged_prune_directory_name)"
+        UserDefaults.standard.set(elsewhere, forKey: Ndb.pending_prune_path_key)
+        UserDefaults.standard.set(Date(), forKey: Ndb.pending_prune_completed_at_key)
+
+        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .nothingStaged)
+        XCTAssertFalse(Ndb.has_pending_prune_residue())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: stagedPath),
+                      "this database's staging directory is not the one the residue named")
     }
 }

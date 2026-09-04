@@ -15,8 +15,7 @@ final class NdbPruneManagerTests: XCTestCase {
     let alice = generate_new_keypair()
     let bob = generate_new_keypair()
 
-    /// A day wide enough apart that each note lands in its own histogram bucket.
-    static let day = UInt32(NdbNoteSizeHistogram.bucketSeconds)
+    static let day: UInt32 = 86_400
     static let newest: UInt32 = 1700000000
 
     override func setUpWithError() throws {
@@ -82,38 +81,34 @@ final class NdbPruneManagerTests: XCTestCase {
         XCTAssertEqual(decision, .noBudget, "unlimited is the opt-out, however big the database gets")
     }
 
-    func test_a_database_under_the_trigger_is_left_alone() throws {
-        // The trigger sits below the budget so the database has room to grow
-        // while a prune runs.
+    func test_a_database_at_the_budget_is_left_alone() throws {
+        // The trigger is the budget itself, not a fraction below it: the prune
+        // aims at no size, so there is nothing to leave headroom for.
         let budget = try XCTUnwrap(NdbSpaceBudget.small.bytes)
-        let trigger = UInt64(Double(budget) * NdbPruneManager.triggerFraction)
 
-        XCTAssertEqual(NdbPruneManager.decide(databaseSizeBytes: trigger,
+        XCTAssertEqual(NdbPruneManager.decide(databaseSizeBytes: budget,
                                               budget: .small,
                                               pendingPrune: nil,
                                               availableBytes: plentyOfSpace,
                                               lastFailure: nil),
-                       .underBudget(sizeBytes: trigger, triggerBytes: trigger))
+                       .underBudget(sizeBytes: budget, budgetBytes: budget))
     }
 
-    func test_a_database_over_the_trigger_prunes_to_below_the_budget() throws {
+    func test_a_database_over_the_budget_prunes() throws {
         let budget = try XCTUnwrap(NdbSpaceBudget.small.bytes)
-        let expectedTarget = UInt64(Double(budget) * NdbPruneManager.targetFraction)
 
-        let decision = NdbPruneManager.decide(databaseSizeBytes: budget + 1,
+        XCTAssertEqual(NdbPruneManager.decide(databaseSizeBytes: budget + 1,
                                               budget: .small,
                                               pendingPrune: nil,
                                               availableBytes: plentyOfSpace,
-                                              lastFailure: nil)
-
-        XCTAssertEqual(decision, .prune(fileBudget: expectedTarget))
-        XCTAssertLessThan(expectedTarget, budget,
-                          "the prune aims under the budget, or it would trip the trigger again immediately")
+                                              lastFailure: nil),
+                       .prune,
+                       "the budget is purely a trigger; crossing it is the whole decision")
     }
 
     func test_a_staged_prune_stops_another_one_starting() {
         let pending = NdbPendingPrune(path: "/tmp/staged", completedAt: Date(),
-                                      promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [], since: 0))
+                                      promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: []))
         XCTAssertEqual(NdbPruneManager.decide(databaseSizeBytes: 10 * gb,
                                               budget: .small,
                                               pendingPrune: pending,
@@ -153,19 +148,29 @@ final class NdbPruneManagerTests: XCTestCase {
 
     func test_a_full_disk_stops_a_prune_that_could_not_finish() {
         // Source and pruned copy have to coexist, so there has to be room for
-        // the output plus a margin.
+        // the output. The budget does not predict how big that is, so the
+        // requirement is the flat margin and nothing else.
         let decision = NdbPruneManager.decide(databaseSizeBytes: 10 * gb,
                                               budget: .small,
                                               pendingPrune: nil,
                                               availableBytes: 1024,
                                               lastFailure: nil)
 
-        guard case .notEnoughFreeSpace(let needed, let available) = decision else {
-            return XCTFail("expected notEnoughFreeSpace, got \(decision)")
+        XCTAssertEqual(decision, .notEnoughFreeSpace(neededBytes: NdbPruneManager.freeSpaceMarginBytes,
+                                                     availableBytes: 1024))
+    }
+
+    func test_the_free_space_requirement_does_not_scale_with_the_budget() {
+        // The smallest budget used to demand the most implausible amount of free
+        // space, because the requirement was the target plus a flat margin.
+        for budget in [NdbSpaceBudget.small, .medium, .large] {
+            let decision = NdbPruneManager.decide(databaseSizeBytes: 100 * gb,
+                                                  budget: budget,
+                                                  pendingPrune: nil,
+                                                  availableBytes: NdbPruneManager.freeSpaceMarginBytes,
+                                                  lastFailure: nil)
+            XCTAssertEqual(decision, .prune, "\(budget) should need no more room than any other")
         }
-        XCTAssertEqual(available, 1024)
-        XCTAssertGreaterThan(needed, NdbPruneManager.freeSpaceMarginBytes,
-                             "the requirement is the estimated output on top of the margin")
     }
 
     func test_free_space_the_volume_will_not_report_does_not_block_a_prune() {
@@ -189,43 +194,6 @@ final class NdbPruneManagerTests: XCTestCase {
                        .noDatabase)
     }
 
-    // MARK: - Scaling the budget
-
-    func test_the_note_budget_is_the_file_budget_scaled_by_what_notes_take_up() {
-        // A database where notes are a tenth of the file: a tenth of the file
-        // budget is what the histogram — which counts only notes — should get.
-        XCTAssertEqual(NdbPruneManager.noteBudget(forFileBudget: 1000,
-                                                  databaseSizeBytes: 1000,
-                                                  noteBytes: 100),
-                       100)
-        XCTAssertEqual(NdbPruneManager.noteBudget(forFileBudget: 500,
-                                                  databaseSizeBytes: 1000,
-                                                  noteBytes: 100),
-                       50)
-    }
-
-    func test_the_note_budget_does_not_overflow_on_a_real_sized_database() {
-        // The integer form of this — fileBudget * noteBytes / size — overflows
-        // UInt64 for any real database, since both terms run to gigabytes.
-        let budget = 8 * gb
-        let size = 10 * gb
-        let notes = 4 * gb
-
-        let noteBudget = NdbPruneManager.noteBudget(forFileBudget: budget,
-                                                    databaseSizeBytes: size,
-                                                    noteBytes: notes)
-
-        XCTAssertEqual(noteBudget, UInt64((Double(budget) / Double(size) * Double(notes)).rounded()))
-        XCTAssertLessThan(noteBudget, notes, "keeping less than everything is the whole point")
-    }
-
-    func test_a_database_of_no_size_scales_to_everything_rather_than_dividing_by_zero() {
-        XCTAssertEqual(NdbPruneManager.noteBudget(forFileBudget: 1000,
-                                                  databaseSizeBytes: 0,
-                                                  noteBytes: 100),
-                       100)
-    }
-
     // MARK: - Running one
 
     func test_a_prune_stages_a_valid_database_and_marks_it_pending() async throws {
@@ -238,11 +206,10 @@ final class NdbPruneManagerTests: XCTestCase {
 
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [alice.pubkey], dbPath: dbDir)
 
-        // A budget of one byte: everything the cutoff can drop, it drops. The
-        // trigger and the free-space check are covered above; this is about what
-        // a prune leaves behind.
-        let staged = try await manager.stagePrune(fileBudget: 1)
-        let stagedPath = try XCTUnwrap(staged, "a database this far over budget should have produced a prune").path
+        // No budget goes in: staging takes no size and aims at none. The trigger
+        // and the free-space check are covered above; this is about what a prune
+        // leaves behind.
+        let stagedPath = try await manager.stagePrune().path
 
         XCTAssertEqual(stagedPath, "\(dbDir)/\(Ndb.staged_prune_directory_name)",
                        "the staged copy lives beside the database, not in tmp, so it survives to the next launch")
@@ -251,8 +218,8 @@ final class NdbPruneManagerTests: XCTestCase {
                      "staging on its own must not arm a swap — only a full pruneIfNeeded does that")
 
         // The staged database is a real one, and the keep-policy held: our own
-        // notes survived the cutoff that dropped everyone else's.
-        XCTAssertEqual(try contents(inDatabaseAt: stagedPath), ["alice old", "bob new"])
+        // notes survived, however old, and everyone else's went, however new.
+        XCTAssertEqual(try contents(inDatabaseAt: stagedPath), ["alice old"])
 
         // And the live database is untouched.
         XCTAssertEqual(try contents(of: ndb), ["alice old", "bob new", "bob old"])
@@ -266,7 +233,7 @@ final class NdbPruneManagerTests: XCTestCase {
         defer { ndb.close() }
 
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
-        let didPrune = try await manager.prune(if: .prune(fileBudget: 1))
+        let didPrune = try await manager.prune(if: .prune)
 
         XCTAssertTrue(didPrune)
         let marker = try XCTUnwrap(Ndb.get_pending_prune(), "a completed prune has to leave a marker behind")
@@ -274,8 +241,6 @@ final class NdbPruneManagerTests: XCTestCase {
         XCTAssertLessThan(abs(marker.completedAt.timeIntervalSinceNow), 60)
         XCTAssertTrue(Ndb.db_file_exists(path: marker.path), "the marker has to name a database that is really there")
         XCTAssertEqual(marker.promise.authorsWithPosts, [], "there are no keep-authors here to promise")
-        XCTAssertGreaterThan(marker.promise.since, 0,
-                             "the marker has to carry the cutoff, or the swap has no keep-policy to check the copy against")
 
         let count = await manager.pruneCount
         XCTAssertEqual(count, 1)
@@ -288,7 +253,7 @@ final class NdbPruneManagerTests: XCTestCase {
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
 
         for decision in [NdbPruneManager.Decision.noBudget,
-                         .underBudget(sizeBytes: 1, triggerBytes: 2),
+                         .underBudget(sizeBytes: 1, budgetBytes: 2),
                          .alreadyPending,
                          .noDatabase] {
             let didPrune = try await manager.prune(if: decision)
@@ -305,7 +270,7 @@ final class NdbPruneManagerTests: XCTestCase {
 
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
         do {
-            _ = try await manager.prune(if: .prune(fileBudget: 1))
+            _ = try await manager.prune(if: .prune)
             XCTFail("a prune against a closed database should not report success")
         } catch {
             // Expected.
@@ -327,21 +292,24 @@ final class NdbPruneManagerTests: XCTestCase {
         }
     }
 
-    func test_a_prune_leaves_nothing_staged_when_the_notes_already_fit() async throws {
+    func test_a_prune_of_a_database_holding_nothing_worth_keeping_still_stages_one() async throws {
+        // A lurker with no posts of their own and nobody's profile cached. The
+        // prune has nothing to carry over, and must still produce a database
+        // rather than failing or staging nothing — an empty result is a correct
+        // one here, and the promise it records is what says so.
         let ndb = try seeded(with: [try note("bob new", bob, at: Self.newest)])
         defer { ndb.close() }
 
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [alice.pubkey], dbPath: dbDir)
+        let staged = try await manager.stagePrune()
 
-        // A budget far bigger than the notes: there is no cutoff to compute, so
-        // there is nothing to stage — and nothing may be marked pending, or the
-        // swap would replace a good database with an absent one.
-        let staged = try await manager.stagePrune(fileBudget: 100 * gb)
-
-        XCTAssertNil(staged)
-        XCTAssertNil(Ndb.get_pending_prune())
-        XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(Ndb.staged_prune_directory_name)"),
-                       "an attempt that staged nothing must not leave a directory behind")
+        XCTAssertEqual(try contents(inDatabaseAt: staged.path), [])
+        XCTAssertEqual(staged.promise, NdbPrunePromise(hasProfiles: false, authorsWithPosts: []),
+                       "the promise records what was there to keep, and there was nothing")
+        XCTAssertNil(Ndb.evaluate_staged_prune(NdbPendingPrune(path: staged.path,
+                                                               completedAt: Date(),
+                                                               promise: staged.promise)),
+                     "a legitimately empty prune has to pass validation, or the budget stops being enforced")
     }
 
     func test_a_prune_clears_the_wreckage_of_an_abandoned_attempt() async throws {
@@ -358,11 +326,11 @@ final class NdbPruneManagerTests: XCTestCase {
         try FileManager.default.createDirectory(atPath: stagedPath, withIntermediateDirectories: true)
         FileManager.default.createFile(atPath: "\(stagedPath)/data.mdb", contents: Data("junk".utf8))
 
-        let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
-        let staged = try await manager.stagePrune(fileBudget: 1)
+        let manager = NdbPruneManager(ndb: ndb, keepAuthors: [bob.pubkey], dbPath: dbDir)
+        let staged = try await manager.stagePrune()
 
-        XCTAssertEqual(staged?.path, stagedPath)
-        XCTAssertEqual(try contents(inDatabaseAt: stagedPath), ["bob new"],
+        XCTAssertEqual(staged.path, stagedPath)
+        XCTAssertEqual(try contents(inDatabaseAt: stagedPath), ["bob new", "bob old"],
                        "the staged database should be the new prune, not the leftovers")
     }
 
@@ -374,7 +342,7 @@ final class NdbPruneManagerTests: XCTestCase {
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
 
         do {
-            _ = try await manager.stagePrune(fileBudget: 1)
+            _ = try await manager.stagePrune()
             XCTFail("a prune against a closed database should not report success")
         } catch {
             // Expected.

@@ -12,37 +12,31 @@ import Foundation
 /// Watches the database against the user's space budget and, when it grows past
 /// it, prunes a copy into a staging directory for the next launch.
 ///
-/// The prune itself is what makes this viable at runtime: `ndb_prune` opens its
-/// source transaction with raw LMDB rather than `ndb_begin_query`, so its
-/// multi-minute read is invisible to the DEBUG long-lived-query watchdog, and it
-/// writes somewhere else entirely, so the live database keeps taking writes
-/// throughout.
+/// The prune is deliberately all-or-nothing. It keeps what
+/// ``NdbFilterArray/defaultPruneFilters(keeping:capacity:)`` keeps — every
+/// kind-0 profile, plus everything our own pubkey authored, which is where the
+/// contact list, mutelist and bookmarks live — and drops the rest, which is
+/// cache the timeline refills from relays. So the budget is purely a trigger:
+/// nothing here computes a target size, or measures the database to decide how
+/// deep to cut.
 ///
-/// - Note: The sizing scan that precedes it — ``Ndb/noteSizeHistogram()`` — has
-///   no such exemption. It holds one `ndb_begin_query` transaction open for its
-///   whole duration, which on a large database is long enough for another
-///   thread's query to trip the 3s watchdog and abort a DEBUG build. Measured at
-///   4-9M notes/sec, so it is seconds only on a very large database, and
-///   `ndb_stat` already does a strictly larger scan from the storage settings
-///   screen. See headway:damus-ios/green-gossip-father.
+/// That is also what makes it viable at runtime. `ndb_prune` opens its source
+/// transaction with raw LMDB rather than `ndb_begin_query`, so its multi-minute
+/// read is invisible to the DEBUG long-lived-query watchdog, and it writes
+/// somewhere else entirely, so the live database keeps taking writes throughout.
+/// Deciding *whether* to prune costs one `stat`, and nothing on the path from
+/// that decision to the prune opens a query of its own.
 actor NdbPruneManager {
     /// How often to re-check the database size while the app is in the
     /// foreground. One `stat` per tick, so this is deliberately unhurried.
     static let checkInterval: TimeInterval = 60 * 30
 
-    /// Start pruning at this fraction of the budget rather than at the budget.
+    /// Free space to insist on before starting a prune, since the source and the
+    /// pruned copy coexist on disk for its duration.
     ///
-    /// A prune holds a long read transaction open on the source, which stops
-    /// LMDB reusing free pages for its duration — so the live database can grow
-    /// while the prune runs. Triggering early leaves it somewhere to grow.
-    static let triggerFraction: Double = 0.9
-
-    /// Aim the prune at this fraction of the budget, so the result has room to
-    /// grow before it trips the trigger again.
-    static let targetFraction: Double = 0.75
-
-    /// Free space to insist on beyond the estimated output, since source and
-    /// pruned copy coexist on disk for the length of the prune.
+    /// A flat figure rather than one derived from the budget: the output is
+    /// profiles plus our own notes, which the budget says nothing about and
+    /// which is typically a small fraction of a database that has outgrown one.
     static let freeSpaceMarginBytes: UInt64 = 512 * 1024 * 1024
 
     /// How long to wait after a failed prune before trying again.
@@ -50,12 +44,12 @@ actor NdbPruneManager {
 
     /// What a size check concluded.
     enum Decision: Equatable {
-        /// Prune, aiming the result at `fileBudget` bytes.
-        case prune(fileBudget: UInt64)
+        /// The database is over its budget; collapse it to the keep-filters.
+        case prune
         /// The user opted out of a budget entirely.
         case noBudget
-        /// Still comfortably inside the budget.
-        case underBudget(sizeBytes: UInt64, triggerBytes: UInt64)
+        /// Still inside the budget.
+        case underBudget(sizeBytes: UInt64, budgetBytes: UInt64)
         /// A pruned copy is already staged. Pruning again would throw it away
         /// and redo the work for a database the swap is about to replace.
         case alreadyPending
@@ -149,9 +143,12 @@ actor NdbPruneManager {
         guard let budgetBytes = budget.bytes else { return .noBudget }
         guard let size = databaseSizeBytes else { return .noDatabase }
 
-        let trigger = UInt64(Double(budgetBytes) * triggerFraction)
-        guard size > trigger else {
-            return .underBudget(sizeBytes: size, triggerBytes: trigger)
+        // At the budget itself, not some fraction below it. The old margin was
+        // there to leave the database room to grow while a prune ran, which only
+        // mattered when the prune was aiming at a size — it no longer is, and a
+        // budget that triggers before it is reached is a budget that lies.
+        guard size > budgetBytes else {
+            return .underBudget(sizeBytes: size, budgetBytes: budgetBytes)
         }
 
         // Checked before the backoff so a staged copy is reported as what it is
@@ -163,16 +160,14 @@ actor NdbPruneManager {
             if now < retryAt { return .backingOff(until: retryAt) }
         }
 
-        let target = UInt64(Double(budgetBytes) * targetFraction)
-        let needed = target + freeSpaceMarginBytes
         // Unknown free space is not a reason to refuse: the prune fails cleanly
         // if the disk fills, and this check is only here to avoid starting a
         // long job that cannot finish.
-        if let availableBytes, availableBytes < needed {
-            return .notEnoughFreeSpace(neededBytes: needed, availableBytes: availableBytes)
+        if let availableBytes, availableBytes < freeSpaceMarginBytes {
+            return .notEnoughFreeSpace(neededBytes: freeSpaceMarginBytes, availableBytes: availableBytes)
         }
 
-        return .prune(fileBudget: target)
+        return .prune
     }
 
     /// Runs ``decide(databaseSizeBytes:budget:pendingPrune:availableBytes:lastFailure:now:)``
@@ -220,7 +215,7 @@ actor NdbPruneManager {
             return false
         }
 
-        guard case .prune(let fileBudget) = decision else {
+        guard case .prune = decision else {
             Log.debug("Not pruning: %@", for: .storage, String(describing: decision))
             return false
         }
@@ -229,8 +224,7 @@ actor NdbPruneManager {
         defer { isPruning = false }
 
         do {
-            let staged = try await stagePrune(fileBudget: fileBudget)
-            guard let staged else { return false }
+            let staged = try await stagePrune()
             Ndb.set_pending_prune(NdbPendingPrune(path: staged.path,
                                                   completedAt: Date(),
                                                   promise: staged.promise))
@@ -247,32 +241,37 @@ actor NdbPruneManager {
     /// grown past its budget.
     ///
     /// Differs from ``pruneIfNeeded()`` in the two ways a person pressing a
-    /// button should: a database comfortably inside its budget is still trimmed
-    /// down to the target, and a prune that failed a few hours ago does not hold
-    /// this one off. The reasons that are not about timing — no budget to aim
-    /// at, a copy already staged, not enough room on the volume — still apply,
-    /// and are reported back so the UI can say why nothing happened.
+    /// button should: a database comfortably inside its budget is pruned anyway,
+    /// and a prune that failed a few hours ago does not hold this one off. The
+    /// reasons that are not about timing — no budget set, a copy already staged,
+    /// not enough room on the volume — still apply, and are reported back so the
+    /// UI can say why nothing happened.
+    ///
+    /// Requiring a budget is not about having a size to aim at — the prune has
+    /// none — but about consent: ``NdbSpaceBudget/unlimited`` is the user saying
+    /// they would rather keep everything than have notes dropped, and a button
+    /// press is not the place to overrule that silently.
     ///
     /// - Returns: What it did, or why it did nothing.
     func pruneNow() async throws -> ManualPruneOutcome {
         guard let dbPath else { return .noDatabase }
         guard !isPruning else { return .alreadyRunning }
 
-        guard let budgetBytes = Ndb.get_space_budget(db_path: dbPath).bytes else { return .noBudget }
+        guard Ndb.get_space_budget(db_path: dbPath).bytes != nil else { return .noBudget }
         guard let size = Ndb.database_file_size(path: dbPath), size > 0 else { return .noDatabase }
 
         // A staged copy is about to replace this database wholesale. Pruning
-        // again would bin it and redo minutes of work for a worse result.
+        // again would bin it and redo minutes of work for no gain.
         if Ndb.get_pending_prune() != nil { return .alreadyStaged }
 
-        let target = UInt64(Double(budgetBytes) * Self.targetFraction)
-        let needed = target + Self.freeSpaceMarginBytes
-        if let available = Self.availableBytes(at: dbPath), available < needed {
-            return .notEnoughFreeSpace(neededBytes: needed, availableBytes: available)
+        if let available = Self.availableBytes(at: dbPath), available < Self.freeSpaceMarginBytes {
+            return .notEnoughFreeSpace(neededBytes: Self.freeSpaceMarginBytes, availableBytes: available)
         }
 
-        let staged = try await prune(if: .prune(fileBudget: target))
-        return staged ? .staged : .nothingToPrune
+        // The only way `prune(if:)` reports false for a `.prune` decision is the
+        // in-flight guard, which the check above has already ruled out — but it
+        // is the actor's own answer, so take it rather than assuming.
+        return try await prune(if: .prune) ? .staged : .alreadyRunning
     }
 
     /// Writes a pruned copy into the staging directory.
@@ -281,9 +280,8 @@ actor NdbPruneManager {
     /// returns a result, so a caller driving a prune by hand (a test, the
     /// developer settings screen) does not arm a swap as a side effect.
     ///
-    /// - Returns: The staged copy and what its keep-policy promised, or `nil` if
-    ///   the notes already fit the budget and there was nothing to drop.
-    func stagePrune(fileBudget: UInt64) async throws -> NdbStagedPrune? {
+    /// - Returns: The staged copy and what its keep-policy promised.
+    func stagePrune() async throws -> NdbStagedPrune {
         guard let dbPath else { throw NdbPruneManagerError.missingDatabasePath }
         guard let currentSize = Ndb.database_file_size(path: dbPath), currentSize > 0 else {
             throw NdbPruneManagerError.missingDatabasePath
@@ -304,33 +302,18 @@ actor NdbPruneManager {
         do {
             let keepAuthors = self.keepAuthors
             let ndb = self.ndb
-            let promise = try await Self.offMainPool({ () -> NdbPrunePromise? in
-                // One scan, reused for both the total and the cutoff.
-                let histogram = try ndb.noteSizeHistogram()
-                let noteBudget = Self.noteBudget(forFileBudget: fileBudget,
-                                                 databaseSizeBytes: currentSize,
-                                                 noteBytes: histogram.totalBytes)
-
-                guard let since = histogram.sinceCutoff(keepingAtMost: noteBudget) else {
-                    Log.info("Database is over its file budget but its notes already fit; nothing to prune", for: .storage)
-                    return nil
-                }
-
-                Log.info("Pruning to %d note bytes, keeping notes since %d", for: .storage, noteBudget, since)
-                let filters = try NdbFilterArray.pruneFilters(keeping: keepAuthors, since: since)
+            let promise = try await Self.offMainPool({ () -> NdbPrunePromise in
+                Log.info("Pruning to profiles and the notes of %d kept author(s)",
+                         for: .storage, keepAuthors.count)
+                let filters = try NdbFilterArray.defaultPruneFilters(keeping: keepAuthors)
                 // Read off what this keep-policy promises before pruning, while
                 // the source is still the thing to read it from. The swap has
                 // nothing else to check the copy against — see
                 // ``NdbPrunePromise``.
-                let promise = try NdbPrunePromise(source: ndb, keepAuthors: keepAuthors, since: since)
+                let promise = try NdbPrunePromise(source: ndb, keepAuthors: keepAuthors)
                 try ndb.prune(to: stagedPath, filters: filters)
                 return promise
             })
-
-            guard let promise else {
-                try? FileManager.default.removeItem(atPath: stagedPath)
-                return nil
-            }
 
             // A marker must never name a database that is not there: whatever it
             // points at is what gets swapped in.
@@ -347,29 +330,11 @@ actor NdbPruneManager {
         }
     }
 
-    /// Turns a `data.mdb` budget into the note-payload budget the histogram
-    /// speaks in.
-    ///
-    /// The histogram counts note values only — no indices, no profile records,
-    /// no page overhead — so a file budget handed to it unscaled would keep far
-    /// more than it meant to. Scaling by the ratio this database happens to show
-    /// is an estimate on purpose: the budget triggers a prune, it is not a cap
-    /// that has to be hit exactly.
-    static func noteBudget(forFileBudget fileBudget: UInt64,
-                           databaseSizeBytes: UInt64,
-                           noteBytes: UInt64) -> UInt64 {
-        guard databaseSizeBytes > 0 else { return noteBytes }
-        // In Double: the integer form overflows for any real database, since the
-        // budget alone runs to gigabytes.
-        let scaled = Double(fileBudget) / Double(databaseSizeBytes) * Double(noteBytes)
-        return UInt64(scaled.rounded())
-    }
-
     /// Runs blocking nostrdb work off the cooperative thread pool.
     ///
-    /// A prune takes minutes and a scan takes seconds; both block the thread
-    /// they are on, and Swift's cooperative pool has one thread per core to
-    /// spare, so running them there would stall unrelated work.
+    /// A prune takes minutes and blocks the thread it is on, and Swift's
+    /// cooperative pool has one thread per core to spare, so running it there
+    /// would stall unrelated work.
     private static func offMainPool<T>(_ work: @escaping () throws -> T) async throws -> T {
         return try await withCheckedThrowingContinuation({ continuation in
             pruneQueue.async {
@@ -476,11 +441,6 @@ extension NdbPruneManager {
 enum ManualPruneOutcome: Equatable {
     /// A pruned copy is staged, and swaps in at the next launch.
     case staged
-
-    /// The database is over its file budget, but its notes already fit inside
-    /// the note budget — the rest is index and page overhead a prune cannot
-    /// reach. Nothing was staged.
-    case nothingToPrune
 
     /// A pruned copy was already staged and waiting. Restarting applies it.
     case alreadyStaged

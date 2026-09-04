@@ -50,10 +50,6 @@ enum NdbStagedPruneRejection: Equatable {
     /// The copy finished too long ago — see ``Ndb/staged_prune_expiry``.
     case tooStale(age: TimeInterval, limit: TimeInterval)
 
-    /// The copy is a tiny fraction of the database it would replace — see
-    /// ``Ndb/minimum_staged_prune_fraction``.
-    case tooSmall(bytes: UInt64, floor: UInt64)
-
     /// nostrdb would not open the copy at all.
     case cannotOpen(path: String)
 
@@ -67,11 +63,6 @@ enum NdbStagedPruneRejection: Equatable {
     /// The copy holds none of the text notes of an author the keep-policy keeps
     /// in full — their own posts, dropped.
     case missingAuthor(Pubkey)
-
-    /// The copy holds nothing at or after the cutoff, though the cutoff is by
-    /// construction the start of a day the source had notes in. A bad cutoff or
-    /// a filter that did not take looks exactly like this.
-    case nothingAfterCutoff(since: UInt32)
 }
 
 /// The once-per-process latch for the swap, and where its outcome is left for
@@ -127,22 +118,6 @@ extension Ndb {
     /// user notes. Those are not comparable.
     static let staged_prune_expiry: TimeInterval = 60 * 60 * 24 * 3
 
-    /// The smallest a staged pruned database may be, as a fraction of the live
-    /// database it would replace.
-    ///
-    /// A prune aims at 75% of the budget and only ever runs once the database is
-    /// past 90% of it, so a healthy staged copy is within a small factor of what
-    /// it replaces. A copy orders of magnitude smaller is the exact shape of the
-    /// failure this validation exists for. A sixty-fourth leaves generous room
-    /// for a legitimately deep prune while still catching that by two orders of
-    /// magnitude.
-    ///
-    /// A fraction rather than a byte floor on purpose: any absolute number is
-    /// either too small to catch anything on a multi-gigabyte database or too
-    /// large to let a small one through. This is the cheap pre-filter either
-    /// way — ``validate_staged_prune(at:promise:)`` is the real gate.
-    static let minimum_staged_prune_fraction: Double = 1.0 / 64.0
-
     private static let staged_prune_swap_state = NdbStagedPruneSwapState()
 
     /// What this process's swap attempt concluded, or `nil` if it has not run.
@@ -197,20 +172,22 @@ extension Ndb {
     ///   - now: The clock, for testing staleness.
     @discardableResult
     static func swap_staged_prune(db_path: String, now: Date = Date()) -> NdbPruneSwapOutcome {
-        guard let pending = get_pending_prune() else { return .nothingStaged }
-
         // The marker is process-wide but a process opens several databases: the
         // read-only snapshot for the extensions, a test's temp directory. Only
         // the staging directory belonging to *this* database may be swapped, and
         // only over the database it was pruned from.
         let stagedPath = "\(db_path)/\(staged_prune_directory_name)"
+
+        guard let pending = get_pending_prune() else {
+            discard_unreadable_prune_marker(stagedPath: stagedPath)
+            return .nothingStaged
+        }
+
         guard pending.path == stagedPath else {
             return .notForThisDatabase(stagedPath: pending.path)
         }
 
-        let liveSize = database_file_size(path: db_path)
-
-        if let rejection = evaluate_staged_prune(pending, liveSizeBytes: liveSize, now: now) {
+        if let rejection = evaluate_staged_prune(pending, now: now) {
             Log.error("Refusing the staged pruned database at %@: %@", for: .storage,
                       pending.path, String(describing: rejection))
             discard_staged_prune(at: pending.path)
@@ -265,13 +242,17 @@ extension Ndb {
     ///
     /// - Parameters:
     ///   - pending: The marker, carrying the keep-policy's promises.
-    ///   - liveSizeBytes: The size of the database this copy would replace, or
-    ///     `nil` if it cannot be measured — in which case there is no ratio to
-    ///     check and the content checks stand alone.
     ///   - now: The clock, for testing staleness.
     /// - Returns: The reason to refuse the copy, or `nil` if it may be swapped in.
+    ///
+    /// - Note: Deliberately no size floor, absolute or proportional. The prune
+    ///   collapses the database to profiles and our own notes, so a perfectly
+    ///   good staged copy is routinely orders of magnitude smaller than what it
+    ///   replaces — the shape a floor would have to reject.
+    ///   ``validate_staged_prune(at:promise:)`` is what tells that apart from an
+    ///   emptied database, by asking whether the things the policy promised to
+    ///   keep are actually there.
     static func evaluate_staged_prune(_ pending: NdbPendingPrune,
-                                      liveSizeBytes: UInt64?,
                                       now: Date = Date()) -> NdbStagedPruneRejection? {
         guard db_file_exists(path: pending.path),
               let stagedSize = database_file_size(path: pending.path), stagedSize > 0 else {
@@ -283,13 +264,6 @@ extension Ndb {
         let age = now.timeIntervalSince(pending.completedAt)
         if age > staged_prune_expiry {
             return .tooStale(age: age, limit: staged_prune_expiry)
-        }
-
-        if let liveSizeBytes {
-            let floor = UInt64(Double(liveSizeBytes) * minimum_staged_prune_fraction)
-            guard stagedSize >= floor else {
-                return .tooSmall(bytes: stagedSize, floor: floor)
-            }
         }
 
         return validate_staged_prune(at: pending.path, promise: pending.promise)
@@ -304,8 +278,13 @@ extension Ndb {
     /// database with the wrong contents, and a size check waves it straight
     /// through.
     ///
-    /// Three indexed existence checks against a database nothing else has open,
-    /// so the cost is an `ndb_init` and a handful of seeks.
+    /// It is also the *only* gate: the keep-policy drops everything it is not
+    /// asked to keep, so nothing about the size or shape of the result is
+    /// predictable enough to check. Whatever is asserted here is the whole of
+    /// what stands between a bad prune and a silently emptied database.
+    ///
+    /// A handful of indexed existence checks against a database nothing else has
+    /// open, so the cost is an `ndb_init` and a few seeks.
     ///
     /// - Returns: The reason to refuse the copy, or `nil` if it holds up.
     static func validate_staged_prune(at path: String, promise: NdbPrunePromise) -> NdbStagedPruneRejection? {
@@ -325,10 +304,6 @@ extension Ndb {
                     return .missingAuthor(author)
                 }
             }
-
-            guard try staged.containsNote(matching: NostrFilter(since: promise.since)) else {
-                return .nothingAfterCutoff(since: promise.since)
-            }
         } catch {
             // A database that cannot answer a query is not one to swap in.
             return .validationFailed(description: String(describing: error))
@@ -343,6 +318,32 @@ extension Ndb {
     /// clear, and to bin a copy we refused.
     private static func discard_staged_prune(at path: String) {
         try? FileManager.default.removeItem(atPath: path)
+        clear_pending_prune()
+    }
+
+    /// Clears marker residue that ``get_pending_prune()`` will not read.
+    ///
+    /// Two things land here. One is a marker written before the keep-policy lost
+    /// its `since` cutoff: it promises a validation this code no longer performs
+    /// — see ``Ndb/pending_prune_marker_version`` — so honouring it would swap a
+    /// copy in on weaker terms than it was staged under. The other is a marker
+    /// interrupted before its version stamp was written.
+    ///
+    /// Either way the staging directory is wreckage, and a multi-gigabyte piece
+    /// of it, so it goes with the keys. Nothing is lost: the next size check
+    /// stages a fresh copy under the current policy.
+    ///
+    /// Only ever deletes *this* database's staging directory. The residue may
+    /// name another one, and where it does, all we can safely do is drop the
+    /// keys — a version 1 marker carries no promise this code can act on
+    /// whichever database it belongs to.
+    private static func discard_unreadable_prune_marker(stagedPath: String) {
+        guard has_pending_prune_residue() else { return }
+
+        Log.info("Discarding a staged prune marker this version cannot validate", for: .storage)
+        if UserDefaults.standard.string(forKey: pending_prune_path_key) == stagedPath {
+            try? FileManager.default.removeItem(atPath: stagedPath)
+        }
         clear_pending_prune()
     }
 }

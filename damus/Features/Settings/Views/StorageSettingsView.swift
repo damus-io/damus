@@ -378,10 +378,11 @@ struct StorageSettingsView: View {
 
     /// Section that caps how much space the database may take up.
     ///
-    /// The budget is what triggers a background prune: once `data.mdb` grows past
-    /// it, damus trims out the oldest notes it does not have to keep. It is a
-    /// trigger rather than a hard cap, so the database lands near the budget and
-    /// not exactly on it.
+    /// The budget is purely what triggers a background prune: once `data.mdb`
+    /// grows past it, damus clears the cache down to the notes it cannot get
+    /// back — the user's own, and everyone's profiles — and the timeline refills
+    /// from relays. So the database lands far under the budget rather than near
+    /// it, and crossing the budget again is what triggers the next prune.
     var SpaceBudgetSection: some View {
         Section(
             header: Text("Database Size Limit", comment: "Section header for the setting capping how much space the database may use"),
@@ -415,7 +416,7 @@ struct StorageSettingsView: View {
             if space_budget == .unlimited {
                 Text("The database is never trimmed, and will keep growing as you use Damus.", comment: "Caption shown when the database size is not capped")
             } else {
-                Text("When the database grows past this size, Damus trims out older notes in the background. Your own notes and everyone\u{2019}s profiles are always kept.", comment: "Caption explaining what happens when the database grows past the size limit")
+                Text("When the database grows past this size, Damus clears out cached notes in the background and downloads them again as you browse. Your own notes and everyone\u{2019}s profiles are always kept.", comment: "Caption explaining what happens when the database grows past the size limit")
             }
         }
         .font(.caption)
@@ -451,12 +452,11 @@ struct StorageSettingsView: View {
 
     /// Free-up-space button view with confirmation dialog.
     ///
-    /// Trims the database down to the size limit right now, instead of waiting
-    /// for it to grow past the limit on its own. The work happens on a
-    /// background queue against a copy — the database stays usable and this
-    /// screen stays interactive throughout — and the copy is swapped in at the
-    /// next launch, which is why the success message asks for nothing but
-    /// patience.
+    /// Clears the cache right now, instead of waiting for the database to grow
+    /// past the size limit on its own. The work happens on a background queue
+    /// against a copy — the database stays usable and this screen stays
+    /// interactive throughout — and the copy is swapped in at the next launch,
+    /// which is why the success message asks for nothing but patience.
     var FreeUpSpaceButton: some View {
         Button(action: { self.showing_prune_alert = true }, label: {
             HStack(spacing: 6) {
@@ -481,7 +481,7 @@ struct StorageSettingsView: View {
         .alert(isPresented: $showing_prune_alert) {
             Alert(
                 title: Text("Free Up Space", comment: "Confirmation dialog title for trimming the database"),
-                message: Text("This trims older notes until the database fits the size limit above. Your own notes and everyone\u{2019}s profiles are kept. It runs in the background and takes effect the next time you open Damus. Proceed?", comment: "Message explaining what freeing up space does and when it takes effect."),
+                message: Text("This clears out cached notes, keeping your own notes and everyone\u{2019}s profiles. The rest is downloaded again as you browse. It runs in the background and takes effect the next time you open Damus. Proceed?", comment: "Message explaining what freeing up space does and when it takes effect."),
                 primaryButton: .default(Text("OK", comment: "Button label indicating user wants to proceed.")) {
                     self.free_up_space_button_action()
                 },
@@ -530,12 +530,6 @@ struct StorageSettingsView: View {
         switch outcome {
         case .staged, .alreadyStaged:
             return restart_to_apply_message
-        case .nothingToPrune:
-            return ManualPruneMessage(
-                text: NSLocalizedString("Nothing to free up — your notes already fit the size limit.", comment: "Message shown when a database trim found no notes it could drop"),
-                canRetry: true,
-                isProblem: false
-            )
         case .alreadyRunning:
             return ManualPruneMessage(
                 text: NSLocalizedString("Already freeing up space in the background.", comment: "Message shown when a database trim was already running"),

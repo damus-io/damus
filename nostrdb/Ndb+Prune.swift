@@ -70,13 +70,12 @@ final class NdbFilterArray {
     /// only these are destroyed.
     private(set) var count: Int = 0
 
-    /// Room for the default keep-policy plus one filter the caller appends
-    /// (a `since` cutoff, say).
+    /// Room for exactly the default keep-policy.
     ///
     /// `ndb_prune_default_filters` treats a capacity below
     /// `NDB_PRUNE_DEFAULT_FILTERS` as a failure rather than a truncated policy,
     /// and ignores any capacity beyond what it uses.
-    static let defaultPruneFilterCapacity = Int(NDB_PRUNE_DEFAULT_FILTERS) + 1
+    static let defaultPruneFilterCapacity = Int(NDB_PRUNE_DEFAULT_FILTERS)
 
     /// Allocates room for `capacity` filters, none of them initialized yet.
     init(capacity: Int) {
@@ -133,6 +132,12 @@ final class NdbFilterArray {
     /// Builds nostrdb's default prune keep-policy: every kind-0 profile, plus
     /// every note authored by one of `pubkeys`.
     ///
+    /// This is the whole keep-policy a prune runs with. It carries no kind
+    /// restriction on the author filter, so the things a user cannot get back
+    /// from a relay on demand — their contact list, their mutelist, their
+    /// bookmarks, their own posts — are kept by virtue of being theirs.
+    /// Everything else is cache, and refills from relays.
+    ///
     /// With no pubkeys this is just the profiles filter — nostrdb skips the
     /// authors filter entirely rather than emitting one with an empty `authors`
     /// field, which would match nothing.
@@ -140,8 +145,8 @@ final class NdbFilterArray {
     /// - Parameters:
     ///   - pubkeys: The authors whose notes are kept.
     ///   - capacity: How many slots to allocate. Defaults to
-    ///     ``defaultPruneFilterCapacity``, which leaves one spare for a filter
-    ///     the caller appends afterwards.
+    ///     ``defaultPruneFilterCapacity``, which is exactly what the policy
+    ///     needs.
     /// - Returns: An array owning the filters, which are destroyed when it is
     ///   released.
     /// - Throws: ``NdbFilterArrayError`` if `capacity` is too small, a pubkey is
@@ -198,15 +203,11 @@ final class NdbFilterArray {
 /// Errors from ``Ndb/prune(to:filters:)``.
 enum NdbPruneError: Error, LocalizedError {
     case pruneFailed(path: String)
-    /// The read pass that sizes a prune could not be run.
-    case histogramScanFailed
 
     var errorDescription: String? {
         switch self {
         case .pruneFailed(let path):
             return "Failed to prune the database into \(path)."
-        case .histogramScanFailed:
-            return "Failed to scan the database to size a prune."
         }
     }
 }
@@ -276,192 +277,16 @@ extension Ndb {
     }
 }
 
-// MARK: - Sizing a prune
-
-/// How many bytes of notes a database holds, bucketed by the UTC day each note
-/// was created on.
-///
-/// This is what turns a byte budget into something a filter can express.
-/// Filters say *what* to keep, not *how much*: `NDB_FILTER_LIMIT` exists but
-/// `ndb_filter_matches` ignores it, so the only size lever available is
-/// `NDB_FILTER_SINCE`. Bucketing note sizes by day and integrating from the
-/// newest day backwards is how we find the `since` that lands near a budget.
-///
-/// Day granularity is deliberate. The result is an estimate — see
-/// ``sinceCutoff(keepingAtMost:)`` for what it does and does not account for.
-struct NdbNoteSizeHistogram {
-    /// How wide a bucket is. Also the granularity the cutoff lands at.
-    static let bucketSeconds: UInt32 = 86_400
-
-    /// Bytes of note payload per bucket, keyed by `created_at / bucketSeconds`.
-    private(set) var bytesPerDay: [UInt32: UInt64] = [:]
-
-    /// Total note payload bytes across every bucket.
-    private(set) var totalBytes: UInt64 = 0
-
-    /// How many notes were counted.
-    private(set) var noteCount: Int = 0
-
-    /// Adds one note to its day bucket.
-    mutating func add(createdAt: UInt32, bytes: UInt64) {
-        bytesPerDay[createdAt / Self.bucketSeconds, default: 0] += bytes
-        totalBytes += bytes
-        noteCount += 1
-    }
-
-    /// The `NDB_FILTER_SINCE` cutoff that keeps roughly `budget` bytes of notes.
-    ///
-    /// Walks the populated days newest-first, taking each whole day while it
-    /// still fits, and returns the start of the oldest day taken. The newest day
-    /// is always taken even when it alone overshoots — day granularity offers
-    /// nothing finer, and returning "keep nothing" would be worse than
-    /// overshooting.
-    ///
-    /// - Returns: The cutoff, or `nil` if every note already fits in `budget`
-    ///   and so no `since` filter is needed.
-    ///
-    /// - Important: `budget` is measured in **note payload bytes**, which is
-    ///   less than the `data.mdb` the prune produces — indices, profile records
-    ///   and LMDB page overhead are not counted, and the other prune filters
-    ///   keep some notes older than the cutoff regardless. A caller working from
-    ///   a file-size budget should scale it by the ratio it observes:
-    ///   `noteBudget = fileBudget * totalBytes / currentFileSize`. This is an
-    ///   estimate on purpose: the budget is a trigger for "prune now", not a
-    ///   cap that has to be hit exactly.
-    func sinceCutoff(keepingAtMost budget: UInt64) -> UInt32? {
-        guard totalBytes > budget else { return nil }
-
-        // `totalBytes > budget >= 0` means at least one note was counted, so
-        // there is at least one populated day.
-        let days = bytesPerDay.keys.sorted(by: >)
-        var kept: UInt64 = 0
-        var cutoffDay = days[0]
-
-        for day in days {
-            let dayBytes = bytesPerDay[day] ?? 0
-            if kept > 0 && kept + dayBytes > budget { break }
-            kept += dayBytes
-            cutoffDay = day
-        }
-
-        // Safe: `day` came from `created_at / bucketSeconds` on a `uint32_t`
-        // timestamp, so the product is bounded by that timestamp.
-        return cutoffDay * Self.bucketSeconds
-    }
-}
-
-/// Carries the histogram through `ndb_query_visit`'s `void *ctx`, which cannot
-/// hold a Swift value directly.
-private final class NdbNoteSizeHistogramBox {
-    var histogram = NdbNoteSizeHistogram()
-}
-
-extension Ndb {
-    /// Measures every note in the database into a per-day size histogram.
-    ///
-    /// One read pass over `NDB_DB_NOTE`, touching only each note's `created_at`
-    /// and its stored length — nothing is parsed or copied out. That is cheap
-    /// relative to the prune it sizes, and it needs no time-ordered index, since
-    /// `NDB_DB_NOTE` is keyed by note key rather than `created_at`.
-    ///
-    /// - Important: This holds one read transaction open for the whole scan. On
-    ///   a large database that is seconds, which in a DEBUG build is long enough
-    ///   for the damus-local long-lived-query watchdog to abort the process from
-    ///   another thread's `ndb_begin_query`. Whatever schedules this has to keep
-    ///   that in mind — unlike `ndb_prune`, which opens its source transaction
-    ///   with raw LMDB and so is invisible to the watchdog.
-    func noteSizeHistogram() throws -> NdbNoteSizeHistogram {
-        return try withNdb({
-            guard let txn = NdbTxn(ndb: self) else {
-                throw NdbPruneError.histogramScanFailed
-            }
-
-            // A *zeroed* filter, not an initialized one. nostrdb picks its
-            // NDB_PLAN_ALL_NOTES plan — a plain cursor walk of NDB_DB_NOTE —
-            // only for a filter whose element buffer is still null, and
-            // `ndb_filter_init` is what allocates that buffer. So an initialized
-            // filter with no fields is not "empty" to nostrdb: it would take the
-            // created_at plan instead and merge every kind index to reach the
-            // same notes the slow way. Nothing on the plan's path reads past
-            // this filter's zero `num_elements`.
-            var allNotes = ndb_filter()
-
-            let visitor: ndb_visitor_fn = { ctx, result in
-                guard let ctx, let result, let note = result.pointee.note else {
-                    return NDB_VISITOR_CONT
-                }
-                let box = Unmanaged<NdbNoteSizeHistogramBox>.fromOpaque(ctx).takeUnretainedValue()
-                box.histogram.add(createdAt: ndb_note_created_at(note),
-                                  bytes: result.pointee.note_size)
-                return NDB_VISITOR_CONT
-            }
-
-            let box = NdbNoteSizeHistogramBox()
-            let ok = ndb_query_visit(&txn.txn, &allNotes, 1, visitor,
-                                     Unmanaged.passUnretained(box).toOpaque())
-            guard ok == 1 else { throw NdbPruneError.histogramScanFailed }
-
-            return box.histogram
-        })
-    }
-
-    /// The `NDB_FILTER_SINCE` cutoff that keeps roughly `budget` bytes of notes,
-    /// or `nil` if the database already fits.
-    ///
-    /// See ``NdbNoteSizeHistogram/sinceCutoff(keepingAtMost:)`` for what the
-    /// budget does and does not measure.
-    func pruneSinceCutoff(keepingAtMost budget: UInt64) throws -> UInt32? {
-        return try noteSizeHistogram().sinceCutoff(keepingAtMost: budget)
-    }
-
-    /// The keep-policy for a prune that should land near `budget`: nostrdb's
-    /// defaults, plus a `since` cutoff computed from this database's contents.
-    ///
-    /// Hand the result straight to ``prune(to:filters:)``.
-    ///
-    /// - Returns: The filters, or `nil` if the database already fits in `budget`
-    ///   and should not be pruned at all. `nil` is not "prune with the defaults":
-    ///   the defaults on their own keep only profiles and our own notes, so
-    ///   pruning with them would throw away the very database that was under
-    ///   budget. Callers have to skip the prune.
-    ///
-    /// - Note: Filters are unioned, so the cutoff does not evict anything the
-    ///   default filters keep — every kind-0 profile and everything authored by
-    ///   `pubkeys` survives however old it is. That is also why the pruned
-    ///   result comes out somewhat larger than `budget`.
-    func pruneFilters(keeping pubkeys: [Pubkey], budget: UInt64) throws -> NdbFilterArray? {
-        guard let since = try pruneSinceCutoff(keepingAtMost: budget) else { return nil }
-        return try NdbFilterArray.pruneFilters(keeping: pubkeys, since: since)
-    }
-}
-
-extension NdbFilterArray {
-    /// nostrdb's default prune keep-policy plus a `since` cutoff, which goes in
-    /// the slot ``defaultPruneFilters(keeping:capacity:)`` leaves spare for
-    /// exactly this.
-    ///
-    /// - Parameters:
-    ///   - pubkeys: The authors whose notes are kept regardless of age.
-    ///   - since: Keep every note created at or after this timestamp.
-    static func pruneFilters(keeping pubkeys: [Pubkey], since: UInt32) throws -> NdbFilterArray {
-        let filters = try defaultPruneFilters(keeping: pubkeys)
-
-        try filters.appendFilter(building: { filter in
-            try filter.field(.since, { try $0.add(int: UInt64(since)) })
-        })
-
-        return filters
-    }
-}
-
 // MARK: - The space budget
 
 /// How much space the user is willing to let nostrdb take up.
 ///
-/// This is the trigger for a prune, not a hard cap: a database that crosses its
-/// budget gets pruned back down, and the prune lands *near* the budget rather
-/// than exactly on it (see ``NdbNoteSizeHistogram/sinceCutoff(keepingAtMost:)``
-/// for why).
+/// This is purely the trigger for a prune, not a size the prune aims at. A
+/// database that crosses its budget is collapsed to what
+/// ``NdbFilterArray/defaultPruneFilters(keeping:capacity:)`` keeps — profiles
+/// and our own notes — and the timeline refills from relays from there. So the
+/// result lands far *under* the budget rather than near it, which is why
+/// nothing here computes a target.
 ///
 /// - Important: The cases are ordered smallest-first, and both the settings
 ///   picker and ``Ndb/default_space_budget(forDatabaseSizeBytes:)`` rely on
@@ -561,9 +386,9 @@ extension Ndb {
 /// prune knows what it set out to keep, so it writes that down here.
 ///
 /// Each field is something the keep-policy guarantees unconditionally — see
-/// `ndb_prune_default_filters` and ``NdbFilterArray/pruneFilters(keeping:since:)``
-/// — so a staged copy that fails one of them is broken by definition rather
-/// than merely surprising.
+/// ``NdbFilterArray/defaultPruneFilters(keeping:capacity:)`` — so a staged copy
+/// that fails one of them is broken by definition rather than merely
+/// surprising.
 struct NdbPrunePromise: Equatable {
     /// Whether the source held any kind-0 profile. The policy keeps every one of
     /// them however old, so profiles in the source and none in the staged copy
@@ -583,20 +408,12 @@ struct NdbPrunePromise: Equatable {
     /// posts are also the thing a user would actually notice losing.
     let authorsWithPosts: [Pubkey]
 
-    /// The `NDB_FILTER_SINCE` cutoff. Everything at or after it survives, and
-    /// the cutoff always lands on the start of a day the source had notes in
-    /// (see ``NdbNoteSizeHistogram/sinceCutoff(keepingAtMost:)``), so at least
-    /// one note at or after it has to be there.
-    let since: UInt32
-
-    /// Reads the promises a prune of `source` keeping `keepAuthors` since
-    /// `since` makes.
+    /// Reads the promises a prune of `source` keeping `keepAuthors` makes.
     ///
     /// Call with the source open and the prune about to run. These are indexed
     /// existence checks rather than scans, but they are still nostrdb work and
     /// belong on the prune's own queue.
-    init(source: Ndb, keepAuthors: [Pubkey], since: UInt32) throws {
-        self.since = since
+    init(source: Ndb, keepAuthors: [Pubkey]) throws {
         self.hasProfiles = try source.containsNote(matching: NostrFilter(kinds: [.metadata]))
         // One query per author: nostrdb plans a single-author filter through the
         // author index and falls back to walking the whole database for several
@@ -607,10 +424,9 @@ struct NdbPrunePromise: Equatable {
     }
 
     /// Memberwise, for the swap's validation tests and for reading a marker back.
-    init(hasProfiles: Bool, authorsWithPosts: [Pubkey], since: UInt32) {
+    init(hasProfiles: Bool, authorsWithPosts: [Pubkey]) {
         self.hasProfiles = hasProfiles
         self.authorsWithPosts = authorsWithPosts
-        self.since = since
     }
 }
 
@@ -655,8 +471,28 @@ extension Ndb {
     /// The `UserDefaults` key holding the kept authors, as hex pubkeys.
     static let pending_prune_authors_key = "ndb_pending_prune_authors"
 
-    /// The `UserDefaults` key holding the prune's `since` cutoff.
-    static let pending_prune_since_key = "ndb_pending_prune_since"
+    /// The `UserDefaults` key holding the marker's format version.
+    static let pending_prune_version_key = "ndb_pending_prune_version"
+
+    /// Marker keys no version of this code writes any more.
+    ///
+    /// Kept only so ``clear_pending_prune()`` can sweep them off an install that
+    /// updated with one still set.
+    static let legacy_pending_prune_keys = [
+        // Version 1's `NDB_FILTER_SINCE` cutoff, from the keep-policy that
+        // computed one. Its absence is also what identifies a version 1 marker,
+        // since that format had no version of its own.
+        "ndb_pending_prune_since",
+    ]
+
+    /// The marker format this code writes, and the only one it will read.
+    ///
+    /// Version 1 markers carried a `since` cutoff and promised
+    /// ``NdbStagedPruneRejection`` coverage that no longer exists: their staged
+    /// copy was produced by a keep-policy this code cannot check, so honouring
+    /// one would swap a database in on weaker terms than it was staged under.
+    /// Bump this whenever what the promise means changes.
+    static let pending_prune_marker_version = 2
 
     /// The staged prune waiting to be swapped in, if there is one.
     ///
@@ -666,23 +502,38 @@ extension Ndb {
     /// still confirm the file is there — the marker outlives a reinstall of the
     /// app's container, and iOS can delete files underneath us.
     ///
-    /// A marker with no cutoff recorded is not a marker: the swap has no way to
-    /// check a keep-policy it cannot read, and refusing to see it here is what
-    /// keeps a swap from ever running unvalidated.
+    /// A marker without the current version stamp is not a marker. That covers
+    /// both a format we can no longer validate and a marker only half written
+    /// before the process died — in either case the swap has no keep-policy it
+    /// can check the copy against, and refusing to see it here is what keeps a
+    /// swap from ever running unvalidated. The stamp is written last for exactly
+    /// that reason.
+    ///
+    /// A pure read: whoever wants the residue cleaned up has to do it, because
+    /// only they know which database's staging directory goes with it.
     static func get_pending_prune() -> NdbPendingPrune? {
         guard let path = UserDefaults.standard.string(forKey: pending_prune_path_key),
               let completedAt = UserDefaults.standard.object(forKey: pending_prune_completed_at_key) as? Date,
-              let since = UserDefaults.standard.object(forKey: pending_prune_since_key) as? NSNumber else {
+              let version = UserDefaults.standard.object(forKey: pending_prune_version_key) as? NSNumber,
+              version.intValue == pending_prune_marker_version else {
             return nil
         }
 
         let authors = (UserDefaults.standard.stringArray(forKey: pending_prune_authors_key) ?? [])
             .compactMap({ Pubkey(hex: $0) })
         let promise = NdbPrunePromise(hasProfiles: UserDefaults.standard.bool(forKey: pending_prune_has_profiles_key),
-                                      authorsWithPosts: authors,
-                                      since: since.uint32Value)
+                                      authorsWithPosts: authors)
 
         return NdbPendingPrune(path: path, completedAt: completedAt, promise: promise)
+    }
+
+    /// Whether anything marker-shaped is recorded, readable or not.
+    ///
+    /// The swap uses this to tell "nothing was ever staged" from "a marker is
+    /// there that ``get_pending_prune()`` refuses to read", which leaves a
+    /// staging directory to clear.
+    static func has_pending_prune_residue() -> Bool {
+        return UserDefaults.standard.string(forKey: pending_prune_path_key) != nil
     }
 
     /// Records a staged prune for the next launch to pick up.
@@ -691,16 +542,22 @@ extension Ndb {
         UserDefaults.standard.set(pending.completedAt, forKey: pending_prune_completed_at_key)
         UserDefaults.standard.set(pending.promise.hasProfiles, forKey: pending_prune_has_profiles_key)
         UserDefaults.standard.set(pending.promise.authorsWithPosts.map({ $0.hex() }), forKey: pending_prune_authors_key)
-        UserDefaults.standard.set(NSNumber(value: pending.promise.since), forKey: pending_prune_since_key)
+        // Last, so a marker interrupted halfway through is unreadable rather
+        // than readable and wrong.
+        UserDefaults.standard.set(NSNumber(value: pending_prune_marker_version), forKey: pending_prune_version_key)
     }
 
     /// Forgets any staged prune. Does not delete the directory it named.
     static func clear_pending_prune() {
-        UserDefaults.standard.removeObject(forKey: pending_prune_path_key)
-        UserDefaults.standard.removeObject(forKey: pending_prune_completed_at_key)
-        UserDefaults.standard.removeObject(forKey: pending_prune_has_profiles_key)
-        UserDefaults.standard.removeObject(forKey: pending_prune_authors_key)
-        UserDefaults.standard.removeObject(forKey: pending_prune_since_key)
+        // The version stamp first: the marker stops being readable the moment it
+        // goes, so an interrupted clear leaves nothing a swap would act on.
+        for key in [pending_prune_version_key,
+                    pending_prune_path_key,
+                    pending_prune_completed_at_key,
+                    pending_prune_has_profiles_key,
+                    pending_prune_authors_key] + legacy_pending_prune_keys {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
     }
 
     /// Whether any note in the database matches `filter`.
