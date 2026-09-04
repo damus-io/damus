@@ -507,6 +507,14 @@ struct StorageSettingsView: View {
                 Log.error("Manual prune failed: %@", for: .storage, String(describing: error))
                 DamusSentry.captureSentryError(error) { scope in
                     scope.setContext(value: ["operation": "manual_prune"], key: "storage")
+                    // `ndb_prune` writes the real cause to stderr, which is gone
+                    // by the time anyone reads the report. `NdbPruneError`
+                    // carries it instead — the failing phase, the LMDB rc and
+                    // how far the copy got — so a field failure is diagnosable
+                    // from the report alone.
+                    if let pruneError = error as? NdbPruneError {
+                        scope.setContext(value: pruneError.reportContext, key: "ndb_prune")
+                    }
                 }
                 message = ManualPruneMessage(
                     text: String(

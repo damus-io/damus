@@ -109,6 +109,57 @@ final class NdbPruneSwapTests: XCTestCase {
         XCTAssertNotNil(Ndb.get_pending_prune(), "the marker belongs to another database, so it must survive")
     }
 
+    // MARK: - Pruning a database that is itself a prune output
+
+    func test_a_second_prune_after_a_swap_succeeds() throws {
+        // The field sequence from headway:damus-ios/mansion-grow-kite: prune
+        // once, restart so the swap applies, then press the button again. Every
+        // other test here fakes the staged copy with `ingest`, so nothing
+        // covered a prune whose *source* is a database `ndb_prune` produced —
+        // which is the one thing demonstrably different on a second run.
+        try ingest([
+            try profile("alice", alice, at: Self.newest),
+            try profile("bob", bob, at: Self.newest),
+            try note("alice one", alice, at: Self.newest - 2 * Self.day),
+            try note("bob one", bob, at: Self.newest),
+        ], into: dbDir)
+
+        let promise = try stageRealPrune(from: dbDir, into: stagedPath, keeping: [alice.pubkey])
+        markPending(promise: promise)
+        guard case .swapped = Ndb.swap_staged_prune(db_path: dbDir) else {
+            return XCTFail("the first prune should have been swapped in")
+        }
+        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["alice one"],
+                       "the live database should now be a database ndb_prune wrote")
+
+        // Second press. This is the one that failed on device with nothing but
+        // a path to go on.
+        _ = try stageRealPrune(from: dbDir, into: stagedPath, keeping: [alice.pubkey])
+
+        XCTAssertEqual(try contents(inDatabaseAt: stagedPath), ["alice one"],
+                       "pruning a prune output should keep what the policy keeps, not empty it")
+    }
+
+    /// Runs a real `ndb_prune` from `source` into `destination`, the way
+    /// `NdbPruneManager.stagePrune` does, and hands back the promise it made.
+    ///
+    /// Unlike the `ingest`-based fixtures above, this exercises nostrdb itself,
+    /// which is the only way to have a source database that `ndb_prune` wrote.
+    @discardableResult
+    private func stageRealPrune(from source: String, into destination: String,
+                                keeping authors: [Pubkey]) throws -> NdbPrunePromise {
+        let ndb = try XCTUnwrap(Ndb(path: source))
+        defer { ndb.close() }
+
+        try? FileManager.default.removeItem(atPath: destination)
+        try FileManager.default.createDirectory(atPath: destination, withIntermediateDirectories: true)
+
+        let filters = try NdbFilterArray.defaultPruneFilters(keeping: authors)
+        let promise = try NdbPrunePromise(source: ndb, keepAuthors: authors)
+        try ndb.prune(to: destination, filters: filters)
+        return promise
+    }
+
     // MARK: - The happy path
 
     func test_a_staged_prune_is_swapped_in_and_the_marker_cleared() throws {

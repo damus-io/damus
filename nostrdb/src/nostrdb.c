@@ -466,9 +466,12 @@ struct ndb_lmdb {
  * automatically after process termination.
  *
  * @param[in] env The LMDB environment to inspect.
+ * @param[out] out_rc When non-NULL, receives the failing LMDB return code, so
+ *   a caller that has to explain the failure rather than only detect it has
+ *   something to explain it with. Untouched on success.
  * @return 1 when the check succeeds, 0 when LMDB reports an error.
  */
-static int ndb_lmdb_reader_check(MDB_env *env)
+static int ndb_lmdb_reader_check(MDB_env *env, int *out_rc)
 {
 	int rc;
 	int dead = 0;
@@ -476,6 +479,8 @@ static int ndb_lmdb_reader_check(MDB_env *env)
 	rc = mdb_reader_check(env, &dead);
 	if (rc != MDB_SUCCESS) {
 		fprintf(stderr, "mdb_reader_check failed: %s\n", mdb_strerror(rc));
+		if (out_rc)
+			*out_rc = rc;
 		return 0;
 	}
 
@@ -8752,92 +8757,123 @@ static int ndb_ingester_destroy(struct ndb_ingester *ingester)
 	return 1;
 }
 
-static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t mapsize)
+// Opens `filename` as an lmdb environment with every ndb database created and
+// its comparator set.
+//
+// Reports where it failed through `out_phase` and `out_rc` when they are
+// non-NULL. Those are spelled in the prune vocabulary because `ndb_prune` is
+// the only caller that surfaces them to anyone; `ndb_init` passes NULL.
+//
+// On failure the environment is closed and `lmdb->env` left NULL, so a caller
+// that retries with a different mapsize — as damus does — does not strand the
+// previous attempt's mapping for the life of the process.
+static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb,
+			 size_t mapsize, enum ndb_prune_phase *out_phase,
+			 int *out_rc)
 {
 	int rc;
+	enum ndb_prune_phase phase;
 	MDB_txn *txn;
+
+	rc = 0;
+	txn = NULL;
 
 	if ((rc = mdb_env_create(&lmdb->env))) {
 		fprintf(stderr, "mdb_env_create failed, error %d\n", rc);
-		return 0;
+		// Nothing to close: on failure mdb_env_create leaves no env.
+		lmdb->env = NULL;
+		phase = NDB_PRUNE_DST_ENV_CREATE;
+		goto fail_no_env;
 	}
 
 	if ((rc = mdb_env_set_mapsize(lmdb->env, mapsize))) {
 		fprintf(stderr, "mdb_env_set_mapsize failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_SET_MAPSIZE;
+		goto fail;
 	}
 
 	if ((rc = mdb_env_set_maxdbs(lmdb->env, NDB_DBS))) {
 		fprintf(stderr, "mdb_env_set_maxdbs failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_SET_MAXDBS;
+		goto fail;
 	}
 
 	if ((rc = mdb_env_open(lmdb->env, filename, 0, 0664))) {
 		fprintf(stderr, "mdb_env_open failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_ENV_OPEN;
+		goto fail;
 	}
 
-	if (!ndb_lmdb_reader_check(lmdb->env)) {
-		mdb_env_close(lmdb->env);
-		lmdb->env = NULL;
-		return 0;
+	if (!ndb_lmdb_reader_check(lmdb->env, &rc)) {
+		phase = NDB_PRUNE_DST_READER_CHECK;
+		goto fail;
 	}
 
 	// Initialize DBs
 	if ((rc = mdb_txn_begin(lmdb->env, NULL, 0, &txn))) {
 		fprintf(stderr, "mdb_txn_begin failed, error %d\n", rc);
-		return 0;
+		txn = NULL;
+		phase = NDB_PRUNE_DST_INIT_TXN;
+		goto fail;
 	}
 
 	// note flatbuffer db
 	if ((rc = mdb_dbi_open(txn, "note", MDB_CREATE | MDB_INTEGERKEY, &lmdb->dbs[NDB_DB_NOTE]))) {
 		fprintf(stderr, "mdb_dbi_open event failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	// note metadata db
 	if ((rc = mdb_dbi_open(txn, "meta", MDB_CREATE, &lmdb->dbs[NDB_DB_META]))) {
 		fprintf(stderr, "mdb_dbi_open meta failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	// profile flatbuffer db
 	if ((rc = mdb_dbi_open(txn, "profile", MDB_CREATE | MDB_INTEGERKEY, &lmdb->dbs[NDB_DB_PROFILE]))) {
 		fprintf(stderr, "mdb_dbi_open profile failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	// profile search db
 	if ((rc = mdb_dbi_open(txn, "profile_search", MDB_CREATE, &lmdb->dbs[NDB_DB_PROFILE_SEARCH]))) {
 		fprintf(stderr, "mdb_dbi_open profile_search failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_PROFILE_SEARCH], ndb_search_key_cmp);
 
 	// ndb metadata (db version, etc)
 	if ((rc = mdb_dbi_open(txn, "ndb_meta", MDB_CREATE | MDB_INTEGERKEY, &lmdb->dbs[NDB_DB_NDB_META]))) {
 		fprintf(stderr, "mdb_dbi_open ndb_meta failed, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	// profile last fetches
 	if ((rc = mdb_dbi_open(txn, "profile_last_fetch", MDB_CREATE, &lmdb->dbs[NDB_DB_PROFILE_LAST_FETCH]))) {
 		fprintf(stderr, "mdb_dbi_open profile last fetch, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	// relay kind index. maps <relay_url><kind><created><note_id> primary keys to relay records
 	// see ndb_relay_kind_cmp function for more details on the key format
 	if ((rc = mdb_dbi_open(txn, "relay_kind", MDB_CREATE, &lmdb->dbs[NDB_DB_NOTE_RELAY_KIND]))) {
 		fprintf(stderr, "mdb_dbi_open profile last fetch, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_RELAY_KIND], ndb_relay_kind_cmp);
 
 	// note_id -> relay index
 	if ((rc = mdb_dbi_open(txn, "note_relays", MDB_CREATE | MDB_DUPSORT, &lmdb->dbs[NDB_DB_NOTE_RELAYS]))) {
 		fprintf(stderr, "mdb_dbi_open profile last fetch, error %d\n", rc);
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	// id+ts index flags
@@ -8846,13 +8882,15 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	// index dbs
 	if ((rc = mdb_dbi_open(txn, "note_id", tsid_flags, &lmdb->dbs[NDB_DB_NOTE_ID]))) {
 		fprintf(stderr, "mdb_dbi_open id failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_ID], ndb_tsid_compare);
 
 	if ((rc = mdb_dbi_open(txn, "profile_pk", tsid_flags, &lmdb->dbs[NDB_DB_PROFILE_PK]))) {
 		fprintf(stderr, "mdb_dbi_open profile_pk failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_PROFILE_PK], ndb_tsid_compare);
 
@@ -8860,7 +8898,8 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 			       MDB_CREATE | MDB_DUPSORT | MDB_INTEGERDUP | MDB_DUPFIXED,
 			       &lmdb->dbs[NDB_DB_NOTE_KIND]))) {
 		fprintf(stderr, "mdb_dbi_open note_kind failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_KIND], ndb_u64_ts_compare);
 
@@ -8868,7 +8907,8 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 			       MDB_CREATE | MDB_DUPSORT | MDB_INTEGERDUP | MDB_DUPFIXED,
 			       &lmdb->dbs[NDB_DB_NOTE_PUBKEY]))) {
 		fprintf(stderr, "mdb_dbi_open note_pubkey failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_PUBKEY], ndb_tsid_compare);
 
@@ -8876,37 +8916,58 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 			       MDB_CREATE | MDB_DUPSORT | MDB_INTEGERDUP | MDB_DUPFIXED,
 			       &lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND]))) {
 		fprintf(stderr, "mdb_dbi_open note_pubkey_kind failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_PUBKEY_KIND], ndb_id_u64_ts_compare);
 
 	if ((rc = mdb_dbi_open(txn, "note_text", MDB_CREATE | MDB_DUPSORT,
 			       &lmdb->dbs[NDB_DB_NOTE_TEXT]))) {
 		fprintf(stderr, "mdb_dbi_open note_text failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_TEXT], ndb_text_search_key_compare);
 
 	if ((rc = mdb_dbi_open(txn, "note_blocks", MDB_CREATE | MDB_INTEGERKEY,
 			       &lmdb->dbs[NDB_DB_NOTE_BLOCKS]))) {
 		fprintf(stderr, "mdb_dbi_open note_blocks failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 
 	if ((rc = mdb_dbi_open(txn, "note_tags", MDB_CREATE | MDB_DUPSORT | MDB_DUPFIXED,
 			       &lmdb->dbs[NDB_DB_NOTE_TAGS]))) {
 		fprintf(stderr, "mdb_dbi_open note_tags failed: %s\n", mdb_strerror(rc));
-		return 0;
+		phase = NDB_PRUNE_DST_DBI_OPEN;
+		goto fail;
 	}
 	mdb_set_compare(txn, lmdb->dbs[NDB_DB_NOTE_TAGS], ndb_tag_key_compare);
 
 	// Commit the transaction
 	if ((rc = mdb_txn_commit(txn))) {
 		fprintf(stderr, "mdb_txn_commit failed, error %d\n", rc);
-		return 0;
+		// mdb_txn_commit frees the transaction whether or not it
+		// succeeded, so there is nothing left to abort.
+		txn = NULL;
+		phase = NDB_PRUNE_DST_INIT_COMMIT;
+		goto fail;
 	}
 
 	return 1;
+
+fail:
+	if (txn)
+		mdb_txn_abort(txn);
+	mdb_env_close(lmdb->env);
+	lmdb->env = NULL;
+
+fail_no_env:
+	if (out_phase)
+		*out_phase = phase;
+	if (out_rc)
+		*out_rc = rc;
+	return 0;
 }
 
 static int ndb_queue_write_version(struct ndb *ndb, uint64_t version)
@@ -8977,8 +9038,13 @@ int ndb_init(struct ndb **pndb, const char *filename, const struct ndb_config *c
 		return 0;
 	}
 
-	if (!ndb_init_lmdb(filename, &ndb->lmdb, config->mapsize))
+	if (!ndb_init_lmdb(filename, &ndb->lmdb, config->mapsize, NULL, NULL)) {
+		// The env is already closed, so free the rest rather than
+		// stranding it: callers retry ndb_init with a smaller mapsize.
+		free(ndb);
+		*pndb = NULL;
 		return 0;
+	}
 
 	ndb_monitor_init(&ndb->monitor, config->sub_cb, config->sub_cb_ctx);
 
@@ -9087,8 +9153,34 @@ static int ndb_prune_keeps(struct ndb_filter *filters, int num_filters,
 	return 0;
 }
 
+const char *ndb_prune_phase_name(enum ndb_prune_phase phase)
+{
+	switch (phase) {
+	case NDB_PRUNE_OK:			return "ok";
+	case NDB_PRUNE_SCRATCH_ALLOC:		return "scratch_alloc";
+	case NDB_PRUNE_SRC_ENV_INFO:		return "src_env_info";
+	case NDB_PRUNE_SRC_TXN_BEGIN:		return "src_txn_begin";
+	case NDB_PRUNE_DST_TXN_BEGIN:		return "dst_txn_begin";
+	case NDB_PRUNE_PROFILE_CURSOR:		return "profile_cursor";
+	case NDB_PRUNE_NOTE_CURSOR:		return "note_cursor";
+	case NDB_PRUNE_LAST_FETCH_CURSOR:	return "last_fetch_cursor";
+	case NDB_PRUNE_DST_COMMIT:		return "dst_commit";
+	case NDB_PRUNE_DST_ENV_CREATE:		return "dst_env_create";
+	case NDB_PRUNE_DST_SET_MAPSIZE:		return "dst_set_mapsize";
+	case NDB_PRUNE_DST_SET_MAXDBS:		return "dst_set_maxdbs";
+	case NDB_PRUNE_DST_ENV_OPEN:		return "dst_env_open";
+	case NDB_PRUNE_DST_READER_CHECK:	return "dst_reader_check";
+	case NDB_PRUNE_DST_INIT_TXN:		return "dst_init_txn";
+	case NDB_PRUNE_DST_DBI_OPEN:		return "dst_dbi_open";
+	case NDB_PRUNE_DST_INIT_COMMIT:		return "dst_init_commit";
+	}
+
+	return "unknown";
+}
+
 int ndb_prune(struct ndb *ndb, const char *output_path,
-	      struct ndb_filter *filters, int num_filters)
+	      struct ndb_filter *filters, int num_filters,
+	      struct ndb_prune_error *err)
 {
 	int rc, ret;
 	struct ndb_lmdb dst_lmdb;
@@ -9101,25 +9193,46 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	size_t scratch_size;
 	unsigned char *scratch;
 	int count_profiles, count_notes;
+	struct ndb_prune_error local_err;
+
+	// One local to write through, so every failure path below can report
+	// without checking whether the caller wanted a report.
+	if (err == NULL)
+		err = &local_err;
+	memset(err, 0, sizeof(*err));
+	err->phase = NDB_PRUNE_OK;
 
 	ret = 0;
+	rc = 0;
+	count_profiles = 0;
+	count_notes = 0;
 	scratch_size = 2 * 1024 * 1024;
 	scratch = malloc(scratch_size);
 	if (!scratch) {
 		fprintf(stderr, "ndb_prune: failed to allocate scratch buffer\n");
+		err->phase = NDB_PRUNE_SCRATCH_ALLOC;
 		return 0;
 	}
 
 	// get source mapsize
 	if ((rc = mdb_env_info(ndb->lmdb.env, &info))) {
 		fprintf(stderr, "ndb_prune: mdb_env_info failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_SRC_ENV_INFO;
+		err->rc = rc;
 		free(scratch);
 		return 0;
 	}
 
+	// The destination is created with the source's mapsize, so it is worth
+	// reporting: it is not a number the caller chose or can otherwise see.
+	err->dst_mapsize = (uint64_t)info.me_mapsize;
+
 	// create destination lmdb environment
-	if (!ndb_init_lmdb(output_path, &dst_lmdb, info.me_mapsize)) {
+	if (!ndb_init_lmdb(output_path, &dst_lmdb, info.me_mapsize, &err->phase,
+			   &err->rc)) {
 		fprintf(stderr, "ndb_prune: failed to init destination lmdb\n");
+		// ndb_init_lmdb closed its own env, so there is nothing here to
+		// clean up beyond the scratch buffer.
 		free(scratch);
 		return 0;
 	}
@@ -9127,6 +9240,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	// open read txn on source
 	if ((rc = mdb_txn_begin(ndb->lmdb.env, NULL, MDB_RDONLY, &src_mdb_txn))) {
 		fprintf(stderr, "ndb_prune: src mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_SRC_TXN_BEGIN;
+		err->rc = rc;
 		goto cleanup_env;
 	}
 	src_txn.lmdb = &ndb->lmdb;
@@ -9135,6 +9250,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	// open write txn on destination
 	if ((rc = mdb_txn_begin(dst_lmdb.env, NULL, 0, &dst_mdb_txn))) {
 		fprintf(stderr, "ndb_prune: dst mdb_txn_begin failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_DST_TXN_BEGIN;
+		err->rc = rc;
 		mdb_txn_abort(src_mdb_txn);
 		goto cleanup_env;
 	}
@@ -9144,9 +9261,10 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 
 	// Phase 1: Copy kept profiles
-	count_profiles = 0;
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
 		fprintf(stderr, "ndb_prune: profile cursor open failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_PROFILE_CURSOR;
+		err->rc = rc;
 		goto cleanup_txns;
 	}
 
@@ -9191,9 +9309,10 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	// Phase 2: Copy every kept note. Kind 0 notes that phase 1 already
 	// wrote are deduped by id inside ndb_write_note, so an older kind-0
 	// note is kept as a plain note without clobbering the profile record
-	count_notes = 0;
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_NOTE], &cur))) {
 		fprintf(stderr, "ndb_prune: note cursor open failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_NOTE_CURSOR;
+		err->rc = rc;
 		goto cleanup_txns;
 	}
 
@@ -9226,6 +9345,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	// so it would never refetch it
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE_LAST_FETCH], &cur))) {
 		fprintf(stderr, "ndb_prune: profile_last_fetch cursor open failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_LAST_FETCH_CURSOR;
+		err->rc = rc;
 		goto cleanup_txns;
 	}
 
@@ -9246,6 +9367,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	// Commit destination
 	if ((rc = mdb_txn_commit(dst_mdb_txn))) {
 		fprintf(stderr, "ndb_prune: dst commit failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_DST_COMMIT;
+		err->rc = rc;
 		dst_mdb_txn = NULL;
 		goto cleanup_txns;
 	}
@@ -9262,6 +9385,10 @@ cleanup_txns:
 cleanup_env:
 	mdb_env_close(dst_lmdb.env);
 	free(scratch);
+
+	// How far it got, reported whether or not it got all the way.
+	err->profiles = count_profiles;
+	err->notes = count_notes;
 
 	return ret;
 }

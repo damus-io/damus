@@ -200,14 +200,105 @@ final class NdbFilterArray {
     }
 }
 
+/// What `ndb_prune` reported about a failure, beyond the fact of it.
+///
+/// `ndb_prune` answers 0 or 1 and writes the real cause to stderr, which is
+/// gone by the time anyone reads a crash report — so a prune that fails in the
+/// field used to be undiagnosable without reproducing it with a console
+/// attached. This is that cause in a form that survives into a Sentry report:
+/// which of the function's failure sites fired, what LMDB said about it, and
+/// how far the copy had got.
+struct NdbPruneFailure: Equatable {
+    /// The failure site, e.g. `"dst_env_open"`.
+    ///
+    /// Taken from `ndb_prune_phase_name` rather than mirrored into Swift, so
+    /// adding a phase in C cannot leave a stale name here.
+    let phase: String
+
+    /// The raw phase value, for grouping reports without depending on the
+    /// spelling of ``phase``.
+    let phaseCode: UInt32
+
+    /// The LMDB return code from the call that failed, or `0` where that call
+    /// had none to give.
+    let rc: Int32
+
+    /// The mapsize `ndb_prune` asked of the destination environment.
+    ///
+    /// Worth carrying because it is the one input to the destination open that
+    /// nothing on our side chooses: `ndb_prune` takes it from the source's
+    /// `mdb_env_info`, so this is the only place it is visible at all.
+    let destinationMapsizeBytes: UInt64
+
+    /// How far the copy got before it stopped.
+    let profilesCopied: Int
+    let notesCopied: Int
+
+    init(_ err: ndb_prune_error) {
+        self.phase = String(cString: ndb_prune_phase_name(err.phase))
+        self.phaseCode = err.phase.rawValue
+        self.rc = err.rc
+        self.destinationMapsizeBytes = err.dst_mapsize
+        self.profilesCopied = Int(err.profiles)
+        self.notesCopied = Int(err.notes)
+    }
+
+    /// LMDB's own text for ``rc``, or `nil` where there is no code to explain.
+    var rcDescription: String? {
+        guard rc != 0, let text = mdb_strerror(rc) else { return nil }
+        return String(cString: text)
+    }
+
+    /// One line naming the site and the code — what a developer needs to tell
+    /// which `fprintf` in `ndb_prune` fired, without the log it went to.
+    var summary: String {
+        var line = "failed at \(phase)"
+        if let rcDescription {
+            line += " (LMDB error \(rc): \(rcDescription))"
+        }
+        line += ", destination mapsize \(destinationMapsizeBytes) bytes"
+        line += ", after copying \(profilesCopied) profiles and \(notesCopied) notes"
+        return line
+    }
+
+    /// Flat and string-valued, for attaching to a crash report.
+    ///
+    /// Kept plain `String` on both sides because this type compiles into the
+    /// extensions, where Sentry does not exist — the app target is what turns
+    /// this into a scope context.
+    var reportContext: [String: String] {
+        var context = [
+            "phase": phase,
+            "phase_code": String(phaseCode),
+            "rc": String(rc),
+            "destination_mapsize_bytes": String(destinationMapsizeBytes),
+            "profiles_copied": String(profilesCopied),
+            "notes_copied": String(notesCopied),
+        ]
+        if let rcDescription {
+            context["rc_description"] = rcDescription
+        }
+        return context
+    }
+}
+
 /// Errors from ``Ndb/prune(to:filters:)``.
 enum NdbPruneError: Error, LocalizedError {
-    case pruneFailed(path: String)
+    case pruneFailed(path: String, failure: NdbPruneFailure)
 
     var errorDescription: String? {
         switch self {
-        case .pruneFailed(let path):
-            return "Failed to prune the database into \(path)."
+        case .pruneFailed(let path, let failure):
+            return "Failed to prune the database into \(path): \(failure.summary)."
+        }
+    }
+
+    /// The diagnostics to attach to a crash report, for whichever target can
+    /// reach one.
+    var reportContext: [String: String] {
+        switch self {
+        case .pruneFailed(let path, let failure):
+            return failure.reportContext.merging(["path": path], uniquingKeysWith: { current, _ in current })
         }
     }
 }
@@ -269,9 +360,16 @@ extension Ndb {
     private func prune(to path: String, filterStorage: UnsafeMutablePointer<ndb_filter>?, count: Int) throws {
         try withNdb({
             try path.withCString({ pathCString in
-                guard ndb_prune(self.ndb.ndb, pathCString, filterStorage, Int32(count)) == 1 else {
-                    throw NdbPruneError.pruneFailed(path: path)
+                // `ndb_prune` fills this in either way, so the copied counts are
+                // readable on the success path too.
+                var err = ndb_prune_error()
+                guard ndb_prune(self.ndb.ndb, pathCString, filterStorage, Int32(count), &err) == 1 else {
+                    let failure = NdbPruneFailure(err)
+                    Log.error("ndb_prune failed: %@", for: .storage, failure.summary)
+                    throw NdbPruneError.pruneFailed(path: path, failure: failure)
                 }
+                Log.info("ndb_prune copied %d profiles and %d notes", for: .storage,
+                         Int(err.profiles), Int(err.notes))
             })
         })
     }

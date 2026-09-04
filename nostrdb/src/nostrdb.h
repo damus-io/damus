@@ -617,6 +617,62 @@ int ndb_prune_default_filters(const unsigned char (*pubkeys)[32],
 			      int num_pubkeys, struct ndb_filter *filters,
 			      int capacity, int *num_filters);
 
+/// Where a prune stopped. Every value other than `NDB_PRUNE_OK` names exactly
+/// one failure site, so a caller holding only the enum knows which line fired
+/// without having the stderr log.
+///
+/// The `NDB_PRUNE_DST_ENV_CREATE`..`NDB_PRUNE_DST_INIT_COMMIT` values come from
+/// opening the destination environment, which is `ndb_init_lmdb` — the same
+/// helper `ndb_init` uses.
+enum ndb_prune_phase {
+	NDB_PRUNE_OK = 0,
+
+	/* ndb_prune itself */
+	NDB_PRUNE_SCRATCH_ALLOC,
+	NDB_PRUNE_SRC_ENV_INFO,
+	NDB_PRUNE_SRC_TXN_BEGIN,
+	NDB_PRUNE_DST_TXN_BEGIN,
+	NDB_PRUNE_PROFILE_CURSOR,
+	NDB_PRUNE_NOTE_CURSOR,
+	NDB_PRUNE_LAST_FETCH_CURSOR,
+	NDB_PRUNE_DST_COMMIT,
+
+	/* opening the destination environment */
+	NDB_PRUNE_DST_ENV_CREATE,
+	NDB_PRUNE_DST_SET_MAPSIZE,
+	NDB_PRUNE_DST_SET_MAXDBS,
+	NDB_PRUNE_DST_ENV_OPEN,
+	NDB_PRUNE_DST_READER_CHECK,
+	NDB_PRUNE_DST_INIT_TXN,
+	NDB_PRUNE_DST_DBI_OPEN,
+	NDB_PRUNE_DST_INIT_COMMIT,
+};
+
+/// Why a prune failed, for a caller that has to *report* a failure rather than
+/// only detect one. `ndb_prune` fills this in on success and failure alike.
+struct ndb_prune_error {
+	/// Where it stopped, or `NDB_PRUNE_OK` if it did not.
+	enum ndb_prune_phase phase;
+
+	/// The LMDB return code from the call that failed. Zero where that call
+	/// has none to give — `NDB_PRUNE_SCRATCH_ALLOC` — and on success.
+	int rc;
+
+	/// The mapsize asked of the destination environment. Worth reporting
+	/// because `ndb_prune` takes it from the source rather than from the
+	/// caller, so it is a number nothing outside this function can see.
+	uint64_t dst_mapsize;
+
+	/// How far it got: profiles and notes written to the destination before
+	/// it stopped. Both are final counts on success.
+	int profiles;
+	int notes;
+};
+
+/// A short stable name for a phase, e.g. `"dst_env_open"`. Never NULL, so it is
+/// safe to log unconditionally; an unrecognised phase gives `"unknown"`.
+const char *ndb_prune_phase_name(enum ndb_prune_phase phase);
+
 /// Prune the database, copying every note matching any of `filters` to a new
 /// database at `output_path`. Filters are unioned, exactly as in `ndb_query`
 /// and `ndb_subscribe`: a note is kept when at least one filter matches it,
@@ -626,9 +682,13 @@ int ndb_prune_default_filters(const unsigned char (*pubkeys)[32],
 /// output database are freshly assigned and will not match the source. Which
 /// relays a note was seen on is not carried over either.
 ///
+/// `err` receives where it stopped and why; pass NULL if you do not want it.
+/// It is written on success too, so the copied counts are readable either way.
+///
 /// Returns 1 on success, 0 on failure.
 int ndb_prune(struct ndb *ndb, const char *output_path,
-	      struct ndb_filter *filters, int num_filters);
+	      struct ndb_filter *filters, int num_filters,
+	      struct ndb_prune_error *err);
 
 // NOTE PROCESSING
 

@@ -119,9 +119,35 @@ final class NdbPruneTests: XCTestCase {
         let missing = outputDir + "/does-not-exist"
         XCTAssertThrowsError(try ndb.prune(to: missing, filters: [NdbFilter]()),
                              "LMDB does not create the destination directory, so this must fail rather than silently succeed") { error in
-            guard case NdbPruneError.pruneFailed = error else {
+            guard case NdbPruneError.pruneFailed(let path, let failure) = error else {
                 return XCTFail("expected NdbPruneError.pruneFailed, got \(error)")
             }
+
+            XCTAssertEqual(path, missing)
+
+            // The whole point of the diagnostics: a failed prune has to say
+            // *where* it failed and what LMDB said, because in the field the
+            // stderr this used to be the only record of is long gone by the
+            // time anyone reads the report. A missing directory is the one
+            // failure we can provoke deterministically, and it goes through
+            // exactly the same reporting path as the ones we cannot.
+            XCTAssertEqual(failure.phase, "dst_env_open",
+                           "a missing destination directory fails at mdb_env_open")
+            XCTAssertEqual(failure.rc, Int32(ENOENT),
+                           "and LMDB passes ENOENT straight through")
+            XCTAssertNotNil(failure.rcDescription, "an rc we have must come with LMDB's text for it")
+            XCTAssertEqual(failure.profilesCopied, 0)
+            XCTAssertEqual(failure.notesCopied, 0)
+
+            // Sentry is what actually reads this, and it only takes flat
+            // strings — so the report has to be assembled here rather than in
+            // the app target, which is where the error type cannot reach.
+            let context = (error as! NdbPruneError).reportContext
+            XCTAssertEqual(context["phase"], "dst_env_open")
+            XCTAssertEqual(context["rc"], String(ENOENT))
+            XCTAssertEqual(context["path"], missing)
+            XCTAssertNotNil(context["destination_mapsize_bytes"],
+                            "the destination mapsize is the one input to the open that nothing on our side picks")
         }
     }
 
