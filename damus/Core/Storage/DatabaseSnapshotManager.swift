@@ -141,19 +141,37 @@ actor DatabaseSnapshotManager {
     /// Creates a selective snapshot containing only profiles, mute lists, and contact lists.
     ///
     /// This method:
-    /// 1. Creates a temporary Ndb instance in a temp directory
-    /// 2. Queries the source database for relevant notes
-    /// 3. Writes each note to the temporary database
-    /// 4. Promotes the temporary database to the final destination
+    /// 1. Prunes the live database into a temporary directory, keeping only the
+    ///    kinds the extensions read
+    /// 2. Promotes the temporary database to the final destination
+    ///
+    /// `ndb_prune` rather than a re-ingest, because the size of this file is the
+    /// entire point of it. The snapshot used to be built by opening a second
+    /// read-write `Ndb` on a temp directory and pushing every matched note
+    /// through `add(event:)`. That hands the ingester tens of thousands of notes
+    /// in one burst, and the writer thread commits them in transactions of up to
+    /// `THREAD_QUEUE_BATCH` (4096, `nostrdb/src/nostrdb.c:47`). Pages freed
+    /// inside a transaction cannot be recycled until it commits, so a burst
+    /// ingest sets a high-water mark LMDB never gives back to the filesystem —
+    /// measured at 114x file-to-content in headway:damus-ios/jump-glance-orphan,
+    /// and on a real phone it turned ~43 MiB of profiles and contact lists into a
+    /// 2 GB snapshot.
+    ///
+    /// `ndb_prune` writes its whole output under a single destination write
+    /// transaction (`nostrdb/src/nostrdb.c:9515`), which is why the same
+    /// measurement puts it at 1.49x. It also needs no second `Ndb` instance, so
+    /// the snapshot no longer depends on an ingester queue draining before the
+    /// database it is writing to gets closed.
     private func createSelectiveSnapshot(to snapshotPath: String) async throws {
         let fileManager = FileManager.default
-        
+
         // Create a temporary directory for the snapshot
         let tempDir = FileManager.default.temporaryDirectory
         let tempSnapshotPath = tempDir.appendingPathComponent("\(Self.temporarySnapshotDirectoryPrefix)\(UUID().uuidString)")
         var didPromoteSnapshot = false
-        
+
         do {
+            // LMDB will not create the destination, and insists on it being empty.
             try fileManager.createDirectory(atPath: tempSnapshotPath.path, withIntermediateDirectories: true)
         } catch {
             DamusSentry.captureSentryError(error) { scope in
@@ -164,7 +182,7 @@ actor DatabaseSnapshotManager {
             }
             throw SnapshotError.directoryCreationFailed(error)
         }
-        
+
         // Ensure cleanup on error
         defer {
             if !didPromoteSnapshot && fileManager.fileExists(atPath: tempSnapshotPath.path) {
@@ -181,81 +199,66 @@ actor DatabaseSnapshotManager {
                 }
             }
         }
-        
+
         Log.debug("Created temporary snapshot directory at %{public}@", for: .storage, tempSnapshotPath.path)
-        
-        // Create a new Ndb instance in the temporary directory
-        guard let snapshotNdb = Ndb(path: tempSnapshotPath.path, owns_db_file: true) else {
-            let error = SnapshotError.failedToCreateSnapshotDatabase
-            DamusSentry.captureSentryError(error) { scope in
-                scope.setContext(value: [
-                    "operation": "create_snapshot_ndb",
-                    "path": tempSnapshotPath.path
-                ], key: "snapshot")
-            }
-            throw error
-        }
-        
-        defer {
-            snapshotNdb.close()
-        }
-        
-        Log.debug("Created temporary Ndb instance for snapshot", for: .storage)
-        
-        // Query and copy notes to snapshot database
-        try await copyNotesToSnapshot(snapshotNdb: snapshotNdb)
-        
-        Log.debug("Copied notes to snapshot database", for: .storage)
-        
-        // Close the snapshot database before moving files
-        snapshotNdb.close()
-        
+
+        let report = try await self.pruneIntoSnapshot(at: tempSnapshotPath.path)
+
+        Log.info("Snapshot prune %{public}@", for: .storage, report.summary)
+
         // Promote the temporary database to the final destination
         try await moveSnapshotToFinalDestination(from: tempSnapshotPath.path, to: snapshotPath)
         didPromoteSnapshot = true
-        
+
         Log.debug("Moved snapshot to final destination", for: .storage)
     }
-    
-    /// Queries the source database and copies relevant notes to the snapshot database.
-    private func copyNotesToSnapshot(snapshotNdb: Ndb) async throws {
+
+    /// Prunes the live database into `path`, keeping only what the extensions read.
+    ///
+    /// `dedupeReplaceable` is left on: every kind the snapshot keeps is a
+    /// replaceable event, and nostrdb stores each version it has ever seen as its
+    /// own note. Without it a snapshot carries every historical profile and every
+    /// superseded contact list — on one real database, 51,226 kind-0 notes for
+    /// 39,499 pubkeys, and 181 contact lists for a single author. An extension
+    /// only ever wants the current version of any of them.
+    private func pruneIntoSnapshot(at path: String) async throws -> NdbPruneReport {
         let filters = try createSnapshotFilters()
-        
-        Log.debug("Querying source database with %d filters", for: .storage, filters.count)
-        
-        var totalNotesCopied = 0
-        
-        for filter in filters {
-            let noteKeys = try ndb.query(filters: [filter], maxResults: 100_000)
-            
-            Log.debug("Found %d notes for filter", for: .storage, noteKeys.count)
-            
-            for noteKey in noteKeys {
-                // Get the note from source database and copy to snapshot
-                try ndb.lookup_note_by_key(noteKey, borrow: { unownedNote in
-                    // Convert the note to owned, encode to JSON, and process into snapshot database
-                    guard let ownedNote = unownedNote?.toOwned() else {
-                        Log.error("Failed to get unowned note", for: .storage)
-                        return
-                    }
-                    
-                    // Process the note into the snapshot database
-                    
-                    // Implementation note: This does not _immediately_ add the event to the new Ndb.
-                    // It goes into the ingester queue first for later processing.
-                    // This raises the question: How to guarantee that all notes will be saved to the new
-                    // snapshot Ndb before we close it?
-                    //
-                    // The answer is that when `Ndb.close` is called, it actually waits for the ingester task
-                    // to finish processing its queue — unless the queue is full (an edge case).
-                    try snapshotNdb.add(event: ownedNote)
-                    totalNotesCopied += 1
+        let ndb = self.ndb
+
+        do {
+            return try await Self.offCooperativePool({
+                // `filters` owns the allocations the C structs point into, so it
+                // has to outlive the prune rather than just its last use.
+                try withExtendedLifetime(filters, {
+                    try ndb.prune(to: path, filters: filters)
                 })
+            })
+        } catch {
+            DamusSentry.captureSentryError(error) { scope in
+                var context: [String: String] = ["operation": "prune_snapshot", "path": path]
+                if let pruneError = error as? NdbPruneError {
+                    context.merge(pruneError.reportContext, uniquingKeysWith: { current, _ in current })
+                }
+                scope.setContext(value: context, key: "snapshot")
             }
+            throw error
         }
-        
-        Log.info("Copied %d notes to snapshot database", for: .storage, totalNotesCopied)
     }
+
+    /// Runs blocking nostrdb work off the cooperative thread pool.
+    ///
+    /// A prune blocks the thread it runs on, and Swift's cooperative pool has one
+    /// thread per core to spare, so running it there would stall unrelated work.
+    /// The same reasoning, and the same shape, as `NdbPruneManager.offMainPool`.
+    private static func offCooperativePool<T>(_ work: @escaping () throws -> T) async throws -> T {
+        return try await withCheckedThrowingContinuation({ continuation in
+            snapshotQueue.async {
+                continuation.resume(with: Result(catching: work))
+            }
+        })
+    }
+
+    private static let snapshotQueue = DispatchQueue(label: "com.jb55.damus.ndb-snapshot", qos: .utility)
     
     /// Creates filters for querying profiles, mute lists, and contact lists.
     private func createSnapshotFilters() throws -> [NdbFilter] {

@@ -612,6 +612,82 @@ class DatabaseSnapshotManagerTests: XCTestCase {
 
         XCTAssertTrue(fileManager.fileExists(atPath: recentTempSnapshotURL.path), "Recent temporary snapshot directory should not be cleaned up")
     }
+
+    // MARK: - Size Tests
+
+    /// The snapshot must not cost wildly more on disk than the notes in it.
+    ///
+    /// This is the regression test for headway:damus-ios/burger-cupboard-spray. The
+    /// snapshot used to be built by re-ingesting every matched note into a second
+    /// `Ndb` through `add(event:)`. Doing that in a tight loop hands the ingester
+    /// the whole batch at once, and the writer commits in transactions of up to
+    /// `THREAD_QUEUE_BATCH` — pages freed inside a transaction cannot be recycled
+    /// until it commits, so the file grows to a high-water mark LMDB never returns.
+    /// Measured on this very fixture at 5,000 profiles: 273,580,032 bytes the old
+    /// way against 6,356,992 through `ndb_prune`, a 43x difference. On a real phone
+    /// with 51,226 profiles that was a 2 GB snapshot.
+    ///
+    /// The budget below is deliberately generous — six times what a prune actually
+    /// costs per note here, and still seven times under what the re-ingest cost.
+    /// It is there to catch a return of order-of-magnitude bloat, not to pin the
+    /// exact byte count of an LMDB layout.
+    func testPerformSnapshot_DoesNotBloatTheDatabaseFile() async throws {
+        let profileCount = 2000
+        let maximumBytesPerNote: UInt64 = 8 * 1024
+
+        var profileNotes: [NostrEvent] = []
+        for i in 0..<profileCount {
+            let profileNote = NostrEvent(
+                content: "{\"name\":\"User \(i)\",\"about\":\"a fairly ordinary profile blurb, long enough to be realistic\",\"picture\":\"https://example.com/\(i).jpg\"}",
+                keypair: generate_new_keypair().to_keypair(),
+                kind: 0
+            )!
+            profileNotes.append(profileNote)
+        }
+
+        let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
+        let expectedNoteIds = Set(profileNotes.map { $0.id })
+        let allNotesIngested = XCTestExpectation(description: "All \(profileCount) profile notes are ingested")
+
+        let ingestTask = collectNoteIds(
+            from: testNdb,
+            filters: [profileFilter],
+            expectedNoteIds: expectedNoteIds,
+            expectation: allNotesIngested,
+            timeout: 60
+        )
+
+        for profileNote in profileNotes {
+            try testNdb.add(event: profileNote)
+        }
+
+        await fulfillment(of: [allNotesIngested], timeout: 90)
+        let ingestedNoteIds = await ingestTask.value
+        XCTAssertEqual(expectedNoteIds, ingestedNoteIds, "All \(profileCount) profile notes should be ingested")
+
+        let snapshotPath = try XCTUnwrap(Ndb.snapshot_db_path, "Snapshot path should be available")
+
+        try await manager.performSnapshot()
+
+        let attributes = try FileManager.default.attributesOfItem(atPath: "\(snapshotPath)/\(Ndb.main_db_file_name)")
+        let snapshotSize = try XCTUnwrap(attributes[.size] as? UInt64, "Snapshot database should report a size")
+
+        let budget = maximumBytesPerNote * UInt64(profileCount)
+        XCTAssertLessThan(
+            snapshotSize, budget,
+            "A snapshot of \(profileCount) profiles took \(snapshotSize) bytes, over the \(budget) byte budget. "
+            + "That is the write-batch bloat this snapshot switched to ndb_prune to avoid."
+        )
+
+        // And the snapshot is still usable — a budget met by writing nothing would
+        // not be a fix.
+        let snapshotNdb = try XCTUnwrap(Ndb(path: snapshotPath, owns_db_file: false), "Should be able to open snapshot database")
+        defer { snapshotNdb.close() }
+
+        let profileKeys = try snapshotNdb.query(filters: [profileFilter], maxResults: 100_000)
+        XCTAssertEqual(profileKeys.count, profileCount, "Snapshot should still contain every profile note")
+    }
+
 }
 
 
