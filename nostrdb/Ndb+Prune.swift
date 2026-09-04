@@ -614,7 +614,12 @@ extension Ndb {
     /// output has been checked, so its presence means the directory held a
     /// complete database at the time it was written. Whoever swaps it in should
     /// still confirm the file is there — the marker outlives a reinstall of the
-    /// app's container, and iOS can delete files underneath us.
+    /// app's container, and iOS can delete files underneath us. It records an
+    /// absolute path, so a data container migrated to a new UUID leaves it
+    /// naming a directory that no longer exists;
+    /// ``Ndb/swap_staged_prune(db_path:now:)`` is what clears one, and has to,
+    /// because everything in the prune path treats a marker that exists as a
+    /// reason to do nothing.
     ///
     /// A marker without the current version stamp is not a marker. That covers
     /// both a format we can no longer validate and a marker only half written

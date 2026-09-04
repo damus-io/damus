@@ -19,6 +19,11 @@ enum NdbPruneSwapOutcome: Equatable {
     /// The marker names a staging directory that does not belong to the database
     /// being opened — a test's temp directory, the read-only snapshot in the
     /// shared container. Left completely alone, marker included.
+    ///
+    /// Only reached while that other staging directory is still on disk. A
+    /// marker naming one that is gone belongs to nobody and can never be swapped
+    /// in by anyone, so it is refused as ``NdbStagedPruneRejection/missingOrEmpty``
+    /// rather than left to wedge the prune path forever.
     case notForThisDatabase(stagedPath: String)
 
     /// The staged database was moved into place, and was `bytes` big.
@@ -45,6 +50,12 @@ enum NdbStagedPruneRejection: Equatable {
     /// underneath us, and a swap interrupted after the move but before the
     /// marker was cleared lands here too, which is what makes that crash
     /// window self-healing.
+    ///
+    /// The path recorded here is not necessarily this database's staging
+    /// directory. A marker records an absolute path, and iOS may move the app's
+    /// data container to a new UUID underneath it — see
+    /// ``Ndb/swap_staged_prune(db_path:now:)`` — so it can name a directory
+    /// under a container that no longer exists.
     case missingOrEmpty(path: String)
 
     /// The copy finished too long ago — see ``Ndb/staged_prune_expiry``.
@@ -167,6 +178,13 @@ extension Ndb {
     /// Nothing here touches the live database until the staged copy has passed
     /// validation, and a copy that fails it is deleted along with its marker.
     ///
+    /// This is also the one place a marker that has gone stale gets cleared, so
+    /// it is what makes the prune path recover on its own. A marker records an
+    /// absolute path and iOS may migrate the app's data container to a new UUID,
+    /// carrying `UserDefaults` across and leaving the marker naming a container
+    /// that is gone — and every gate in the prune path keys off the marker
+    /// existing, so one that is never cleared wedges the whole subsystem.
+    ///
     /// - Parameters:
     ///   - db_path: The database directory about to be opened.
     ///   - now: The clock, for testing staleness.
@@ -183,8 +201,36 @@ extension Ndb {
             return .nothingStaged
         }
 
-        guard pending.path == stagedPath else {
-            return .notForThisDatabase(stagedPath: pending.path)
+        guard names_same_directory(pending.path, stagedPath) else {
+            // A marker still naming a database that is on disk belongs to one
+            // this open must not touch, and is left exactly as it is.
+            guard !db_file_exists(path: pending.path) else {
+                Log.info("Leaving a staged prune marker for another database alone: %@",
+                         for: .storage, pending.path)
+                return .notForThisDatabase(stagedPath: pending.path)
+            }
+
+            // Otherwise the marker names nothing, and no launch of any process
+            // can ever swap it in. Left alone it is permanent: every gate in the
+            // prune path keys off the marker merely existing, so the background
+            // budget check reports `.alreadyPending`, the Free Up Space button
+            // reports `.alreadyStaged` and does nothing, and the Storage screen
+            // promises space at the next launch on every single launch.
+            //
+            // The way it gets here is the marker's absolute path. On device that
+            // runs through the app's data container UUID, and iOS is free to
+            // migrate the container to a new UUID — `UserDefaults` moves across
+            // with everything else, so the marker survives pointing at a
+            // container that is gone. See headway:damus-ios/toward-raven-cruel.
+            Log.error("Discarding a staged prune marker naming a database that is gone: %@ (this database stages into %@)",
+                      for: .storage, pending.path, stagedPath)
+
+            // This database's own staging directory is then wreckage with
+            // nothing pointing at it — after a container migration it is the
+            // very copy the marker meant, carried over under the new path — and
+            // it is as big as a pruned database, so it goes with the marker.
+            discard_staged_prune(at: stagedPath)
+            return .refused(.missingOrEmpty(path: pending.path))
         }
 
         if let rejection = evaluate_staged_prune(pending, now: now) {
@@ -233,6 +279,33 @@ extension Ndb {
 
         Log.info("Swapped in a pruned database of %d bytes", for: .storage, stagedSize)
         return .swapped(bytes: stagedSize)
+    }
+
+    /// Whether two paths name the same directory.
+    ///
+    /// Compared as normalized paths rather than as strings. The two sides are
+    /// built independently — the swap from the path
+    /// ``Ndb/open(path:owns_db_file:callbackHandler:)`` was handed, the marker
+    /// from ``NdbPruneManager``'s own copy — and they only have to *spell* a
+    /// path differently for the marker to look like another database's and
+    /// wedge the prune path exactly as a stale one does. There is already one
+    /// such spelling in play: ``Ndb/db_path`` keeps the trailing slash
+    /// `FileManager` puts on a directory URL, so the marker records
+    /// `Documents//ndb_prune_staged`. `/var` against `/private/var` is the same
+    /// hazard, and iOS hands out both.
+    ///
+    /// A difference in spelling is not a difference in database, and string
+    /// equality cannot tell those apart. This can.
+    private static func names_same_directory(_ lhs: String, _ rhs: String) -> Bool {
+        return normalized_directory(lhs) == normalized_directory(rhs)
+    }
+
+    /// A path with `//`, `.`, `..` and symlinked prefixes resolved away.
+    ///
+    /// Works on a path that does not exist, which matters: the whole point is to
+    /// compare a marker naming a directory that may be long gone.
+    private static func normalized_directory(_ path: String) -> String {
+        return URL(fileURLWithPath: path).resolvingSymlinksInPath().standardizedFileURL.path
     }
 
     /// Checks a staged pruned database against what its prune promised.

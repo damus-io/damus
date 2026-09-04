@@ -488,9 +488,18 @@ struct StorageSettingsView: View {
     /// copy usually outlives the screen, and often the process.
     fileprivate static func pending_prune_message() -> ManualPruneMessage? {
         guard let pending = Ndb.get_pending_prune() else { return nil }
-        let saving = Ndb.db_path
+
+        // Nothing to measure means no staged copy at the path the marker names,
+        // and the swap at the next launch will refuse it rather than free
+        // anything — so there is no space to promise. Saying it anyway is what
+        // put headway:damus-ios/toward-raven-cruel in front of a user, on every
+        // single launch. A marker that has gone stale is cleared by the swap
+        // itself; this is only about not making a promise in the meantime.
+        guard let saving = Ndb.db_path
             .flatMap({ Ndb.database_file_size(path: $0) })
-            .flatMap({ NdbPruneSaving(sizeBefore: $0, stagedPath: pending.path) })
+            .flatMap({ NdbPruneSaving(sizeBefore: $0, stagedPath: pending.path) }) else {
+            return nil
+        }
         return staged_message(saving: saving)
     }
 
