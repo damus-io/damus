@@ -198,7 +198,7 @@ actor NdbPruneManager {
     /// - Returns: Whether a prune ran and staged a database.
     @discardableResult
     func pruneIfNeeded() async throws -> Bool {
-        return try await prune(if: currentDecision())
+        return try await prune(if: currentDecision()) != nil
     }
 
     /// Acts on a decision that has already been made.
@@ -207,17 +207,17 @@ actor NdbPruneManager {
     /// the caller supplies — which is the only way to exercise the whole path
     /// without a database of several gigabytes.
     ///
-    /// - Returns: Whether a prune ran and staged a database.
+    /// - Returns: The staged copy, or `nil` if no prune ran.
     @discardableResult
-    func prune(if decision: Decision) async throws -> Bool {
+    func prune(if decision: Decision) async throws -> NdbStagedPrune? {
         guard !isPruning else {
             Log.debug("Prune already in progress", for: .storage)
-            return false
+            return nil
         }
 
         guard case .prune = decision else {
             Log.debug("Not pruning: %@", for: .storage, String(describing: decision))
-            return false
+            return nil
         }
 
         isPruning = true
@@ -230,7 +230,7 @@ actor NdbPruneManager {
                                                   promise: staged.promise))
             pruneCount += 1
             Log.info("Staged a pruned database at %@", for: .storage, staged.path)
-            return true
+            return staged
         } catch {
             lastFailure = Date()
             throw error
@@ -261,17 +261,23 @@ actor NdbPruneManager {
         guard let size = Ndb.database_file_size(path: dbPath), size > 0 else { return .noDatabase }
 
         // A staged copy is about to replace this database wholesale. Pruning
-        // again would bin it and redo minutes of work for no gain.
-        if Ndb.get_pending_prune() != nil { return .alreadyStaged }
+        // again would bin it and redo minutes of work for no gain — but it is
+        // still on disk, so the saving it will make is still there to measure,
+        // and a second press deserves the same answer as the first.
+        if let pending = Ndb.get_pending_prune() {
+            return .alreadyStaged(saving: NdbPruneSaving(sizeBefore: size,
+                                                         stagedPath: pending.path))
+        }
 
         if let available = Self.availableBytes(at: dbPath), available < Self.freeSpaceMarginBytes {
             return .notEnoughFreeSpace(neededBytes: Self.freeSpaceMarginBytes, availableBytes: available)
         }
 
-        // The only way `prune(if:)` reports false for a `.prune` decision is the
-        // in-flight guard, which the check above has already ruled out — but it
-        // is the actor's own answer, so take it rather than assuming.
-        return try await prune(if: .prune) ? .staged : .alreadyRunning
+        // The only way `prune(if:)` stages nothing for a `.prune` decision is
+        // the in-flight guard, which the check above has already ruled out — but
+        // it is the actor's own answer, so take it rather than assuming.
+        guard let staged = try await prune(if: .prune) else { return .alreadyRunning }
+        return .staged(saving: staged.saving)
     }
 
     /// Writes a pruned copy into the staging directory.
@@ -323,7 +329,9 @@ actor NdbPruneManager {
             }
 
             Log.info("Pruned %d bytes down to %d bytes", for: .storage, currentSize, stagedSize)
-            return NdbStagedPrune(path: stagedPath, promise: promise)
+            return NdbStagedPrune(path: stagedPath,
+                                  promise: promise,
+                                  saving: NdbPruneSaving(sizeBefore: currentSize, sizeAfter: stagedSize))
         } catch {
             try? FileManager.default.removeItem(atPath: stagedPath)
             throw error
@@ -440,10 +448,14 @@ extension NdbPruneManager {
 /// What a user-initiated prune did, or why it did nothing.
 enum ManualPruneOutcome: Equatable {
     /// A pruned copy is staged, and swaps in at the next launch.
-    case staged
+    case staged(saving: NdbPruneSaving)
 
     /// A pruned copy was already staged and waiting. Restarting applies it.
-    case alreadyStaged
+    ///
+    /// The saving is optional here where it is not for ``staged``: this copy was
+    /// measured by whoever staged it, and all this can do is stat it again —
+    /// which says nothing if it has since gone missing.
+    case alreadyStaged(saving: NdbPruneSaving?)
 
     /// A prune is already running, so this one was not started.
     case alreadyRunning
@@ -468,6 +480,57 @@ struct NdbStagedPrune: Equatable {
 
     /// What the keep-policy that produced it promised to carry over.
     let promise: NdbPrunePromise
+
+    /// How much smaller this copy is than the database it will replace.
+    let saving: NdbPruneSaving
+}
+
+/// How much smaller a staged pruned copy is than the live database.
+///
+/// Note the tense this is written in: nothing has been freed when one of these
+/// is made. The prune writes a second database beside the live one and leaves
+/// the live one alone until the swap at the next launch, so until then the
+/// volume has *less* free space, not more. Anything putting these numbers in
+/// front of a user has to say what the swap will do, never what has been done.
+struct NdbPruneSaving: Equatable {
+    /// The live database's size when the staged copy was measured against it.
+    let sizeBefore: UInt64
+
+    /// The staged copy's size.
+    let sizeAfter: UInt64
+
+    /// Measures a staged copy on disk against a live database of `sizeBefore`.
+    ///
+    /// `nil` if the staged database cannot be measured — it has been cleared
+    /// out from under the marker, say.
+    init?(sizeBefore: UInt64, stagedPath: String) {
+        guard let sizeAfter = Ndb.database_file_size(path: stagedPath) else { return nil }
+        self.init(sizeBefore: sizeBefore, sizeAfter: sizeAfter)
+    }
+
+    init(sizeBefore: UInt64, sizeAfter: UInt64) {
+        self.sizeBefore = sizeBefore
+        self.sizeAfter = sizeAfter
+    }
+
+    /// Bytes the swap will hand back, floored at zero.
+    ///
+    /// A prune can legitimately come out no smaller: a database already down to
+    /// profiles and the user's own notes prunes to roughly itself, and a small
+    /// one can even grow by a page or two of fresh LMDB metadata. That is a
+    /// correct outcome rather than a failure, so it is reported as nothing
+    /// saved, not as a negative number.
+    var savedBytes: UInt64 {
+        return sizeBefore > sizeAfter ? sizeBefore - sizeAfter : 0
+    }
+
+    /// Savings this small are not worth a figure: "frees up 4 KB" reads as
+    /// something having gone wrong, when what it really means is that there was
+    /// nothing to free.
+    static let negligibleBytes: UInt64 = 1024 * 1024
+
+    /// Whether there is a saving worth quoting a number for.
+    var isNegligible: Bool { savedBytes < Self.negligibleBytes }
 }
 
 /// Errors from staging a prune.

@@ -252,8 +252,8 @@ struct StorageSettingsView: View {
             // A copy staged by an earlier session — or by this screen before the
             // user navigated away — is waiting for the next launch, and saying
             // so is more useful than offering to redo the work.
-            if Ndb.get_pending_prune() != nil, manual_prune_state == .idle {
-                manual_prune_state = .finished(Self.restart_to_apply_message)
+            if let message = Self.pending_prune_message(), manual_prune_state == .idle {
+                manual_prune_state = .finished(message)
             }
         }
     }
@@ -431,7 +431,8 @@ struct StorageSettingsView: View {
         return StorageStatsManager.formatBytes(size)
     }
 
-    /// Shown once a pruned copy is staged and only a restart is left.
+    /// Shown once a pruned copy is staged and only a restart is left, when there
+    /// is no measuring how much smaller it is.
     fileprivate static let restart_to_apply_message = ManualPruneMessage(
         text: NSLocalizedString(
             "Space will be freed the next time you open Damus.",
@@ -440,6 +441,58 @@ struct StorageSettingsView: View {
         canRetry: false,
         isProblem: false
     )
+
+    /// Shown when a prune staged a copy no smaller than the database it came
+    /// from.
+    ///
+    /// Not a failure: a database already down to profiles and the user's own
+    /// notes prunes to roughly itself, and there is genuinely nothing left to
+    /// free. Quoting the figure anyway — "Frees up 0 bytes" — would read as one.
+    fileprivate static let nothing_to_free_message = ManualPruneMessage(
+        text: NSLocalizedString(
+            "Your database is already as small as it can get.",
+            comment: "Message shown when trimming the database would not free up any meaningful amount of space."
+        ),
+        canRetry: false,
+        isProblem: false
+    )
+
+    /// Says how much smaller a staged copy is than the database in use.
+    ///
+    /// Future tense throughout, and deliberately so. The prune wrote a second
+    /// database beside the live one and has not touched the live one, so nothing
+    /// is free yet — the volume has *less* room until the swap at the next
+    /// launch. A message in the past tense would be contradicted by the very
+    /// storage figures on this screen.
+    ///
+    /// - Parameter saving: What the swap will save, or `nil` if the staged copy
+    ///   could not be measured.
+    fileprivate static func staged_message(saving: NdbPruneSaving?) -> ManualPruneMessage {
+        guard let saving else { return restart_to_apply_message }
+        guard !saving.isNegligible else { return nothing_to_free_message }
+
+        let format = NSLocalizedString(
+            "Frees up %@ the next time you open Damus.",
+            comment: "Message saying how much space a staged pruned database copy will free up once it is applied at the next app launch."
+        )
+        return ManualPruneMessage(
+            text: String(format: format, StorageStatsManager.formatBytes(saving.savedBytes)),
+            canRetry: false,
+            isProblem: false
+        )
+    }
+
+    /// The message for a copy already staged and waiting, if there is one.
+    ///
+    /// Measured here rather than remembered from the prune that staged it: the
+    /// copy usually outlives the screen, and often the process.
+    fileprivate static func pending_prune_message() -> ManualPruneMessage? {
+        guard let pending = Ndb.get_pending_prune() else { return nil }
+        let saving = Ndb.db_path
+            .flatMap({ Ndb.database_file_size(path: $0) })
+            .flatMap({ NdbPruneSaving(sizeBefore: $0, stagedPath: pending.path) })
+        return staged_message(saving: saving)
+    }
 
     /// Whether the button can be pressed right now.
     fileprivate var manual_prune_is_available: Bool {
@@ -536,8 +589,10 @@ struct StorageSettingsView: View {
     /// Turns a prune outcome into the one line the button has room for.
     fileprivate static func describe(outcome: ManualPruneOutcome) -> ManualPruneMessage {
         switch outcome {
-        case .staged, .alreadyStaged:
-            return restart_to_apply_message
+        case .staged(let saving):
+            return staged_message(saving: saving)
+        case .alreadyStaged(let saving):
+            return staged_message(saving: saving)
         case .alreadyRunning:
             return ManualPruneMessage(
                 text: NSLocalizedString("Already freeing up space in the background.", comment: "Message shown when a database trim was already running"),

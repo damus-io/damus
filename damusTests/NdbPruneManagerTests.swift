@@ -233,9 +233,9 @@ final class NdbPruneManagerTests: XCTestCase {
         defer { ndb.close() }
 
         let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
-        let didPrune = try await manager.prune(if: .prune)
+        let staged = try await manager.prune(if: .prune)
 
-        XCTAssertTrue(didPrune)
+        XCTAssertNotNil(staged)
         let marker = try XCTUnwrap(Ndb.get_pending_prune(), "a completed prune has to leave a marker behind")
         XCTAssertEqual(marker.path, "\(dbDir)/\(Ndb.staged_prune_directory_name)")
         XCTAssertLessThan(abs(marker.completedAt.timeIntervalSinceNow), 60)
@@ -256,8 +256,8 @@ final class NdbPruneManagerTests: XCTestCase {
                          .underBudget(sizeBytes: 1, budgetBytes: 2),
                          .alreadyPending,
                          .noDatabase] {
-            let didPrune = try await manager.prune(if: decision)
-            XCTAssertFalse(didPrune, "\(decision) should not have started a prune")
+            let staged = try await manager.prune(if: decision)
+            XCTAssertNil(staged, "\(decision) should not have started a prune")
         }
 
         XCTAssertNil(Ndb.get_pending_prune())
@@ -351,5 +351,76 @@ final class NdbPruneManagerTests: XCTestCase {
         XCTAssertNil(Ndb.get_pending_prune(), "a failed prune must never leave a marker")
         XCTAssertFalse(FileManager.default.fileExists(atPath: "\(dbDir)/\(Ndb.staged_prune_directory_name)"),
                        "a partial copy left where the swap could find it would be swapped in")
+    }
+
+    // MARK: - Reporting the saving
+
+    func test_a_staged_prune_reports_the_two_sizes_it_measured() async throws {
+        let ndb = try seeded(with: [
+            try note("alice old", alice, at: Self.newest - 2 * Self.day),
+            try note("bob old", bob, at: Self.newest - 2 * Self.day),
+            try note("bob new", bob, at: Self.newest),
+        ])
+        defer { ndb.close() }
+
+        let manager = NdbPruneManager(ndb: ndb, keepAuthors: [alice.pubkey], dbPath: dbDir)
+        let staged = try await manager.stagePrune()
+
+        // The figures the button quotes have to be the files on disk, not
+        // anything the prune reported about itself.
+        XCTAssertEqual(staged.saving.sizeBefore, Ndb.database_file_size(path: dbDir),
+                       "the before size has to be the live database as it stands")
+        XCTAssertEqual(staged.saving.sizeAfter, Ndb.database_file_size(path: staged.path),
+                       "the after size has to be the staged copy as it stands")
+    }
+
+    func test_pressing_free_up_space_again_still_gets_a_figure() async throws {
+        let ndb = try seeded(with: [
+            try note("bob old", bob, at: Self.newest - 2 * Self.day),
+            try note("bob new", bob, at: Self.newest),
+        ])
+        defer { ndb.close() }
+        Ndb.set_space_budget(.small)
+
+        let manager = NdbPruneManager(ndb: ndb, keepAuthors: [], dbPath: dbDir)
+        let firstPress = try await manager.prune(if: .prune)
+        let staged = try XCTUnwrap(firstPress, "the first press has to stage a copy for the second to find")
+
+        // The second press has nothing to do — the copy from the first is still
+        // waiting — but it must not answer with less than the first did.
+        let outcome = try await manager.pruneNow()
+        guard case .alreadyStaged(let saving) = outcome else {
+            return XCTFail("expected the staged copy to be reported as already staged, got \(outcome)")
+        }
+        let measured = try XCTUnwrap(saving, "the staged copy is still on disk, so it is still measurable")
+        XCTAssertEqual(measured.sizeAfter, Ndb.database_file_size(path: staged.path))
+        XCTAssertEqual(measured.sizeBefore, Ndb.database_file_size(path: dbDir))
+    }
+
+    func test_a_staged_copy_that_has_gone_missing_cannot_be_measured() throws {
+        XCTAssertNil(NdbPruneSaving(sizeBefore: 4 * gb, stagedPath: "\(dbDir)/no_such_directory"),
+                     "nothing on disk to stat means no figure to quote, not a figure of zero")
+    }
+
+    func test_a_prune_that_saves_nothing_reports_nothing_rather_than_a_negative() throws {
+        // A database already down to profiles and our own notes prunes to
+        // roughly itself, and a small one can come back a page or two bigger.
+        // Neither is a failure, and neither may underflow.
+        let grew = NdbPruneSaving(sizeBefore: 1024, sizeAfter: 8192)
+        XCTAssertEqual(grew.savedBytes, 0)
+        XCTAssertTrue(grew.isNegligible)
+
+        let unchanged = NdbPruneSaving(sizeBefore: 4 * gb, sizeAfter: 4 * gb)
+        XCTAssertEqual(unchanged.savedBytes, 0)
+        XCTAssertTrue(unchanged.isNegligible)
+
+        // A saving too small to be worth a figure is still not worth a figure.
+        let trivial = NdbPruneSaving(sizeBefore: 4 * gb, sizeAfter: 4 * gb - 4096)
+        XCTAssertEqual(trivial.savedBytes, 4096)
+        XCTAssertTrue(trivial.isNegligible)
+
+        let real = NdbPruneSaving(sizeBefore: 4 * gb, sizeAfter: 1 * gb)
+        XCTAssertEqual(real.savedBytes, 3 * gb)
+        XCTAssertFalse(real.isNegligible)
     }
 }
