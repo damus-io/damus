@@ -637,6 +637,8 @@ enum ndb_prune_phase {
 	NDB_PRUNE_NOTE_CURSOR,
 	NDB_PRUNE_LAST_FETCH_CURSOR,
 	NDB_PRUNE_DST_COMMIT,
+	NDB_PRUNE_WINNERS_ALLOC,
+	NDB_PRUNE_WINNERS_SCAN,
 
 	/* opening the destination environment */
 	NDB_PRUNE_DST_ENV_CREATE,
@@ -672,6 +674,15 @@ struct ndb_prune_error {
 	/// it stopped. Both are final counts on success.
 	int profiles;
 	int notes;
+
+	/// Superseded versions of replaceable events dropped, split by which
+	/// database they would have landed in. Both stay zero unless
+	/// `NDB_PRUNE_DEDUPE_REPLACEABLE` was asked for. Worth reporting
+	/// separately from `notes` because a caller showing a user how much a
+	/// prune saved cannot otherwise tell a note that no filter matched from
+	/// one that lost to a newer version of itself.
+	int superseded_notes;
+	int superseded_profiles;
 };
 
 /// A short stable name for a phase, e.g. `"dst_env_open"`. Never NULL, so it is
@@ -687,10 +698,34 @@ const char *ndb_prune_phase_name(enum ndb_prune_phase phase);
 /// means changing it there.
 #define NDB_PRUNE_MIN_DST_MAPSIZE (256 * 1024 * 1024)
 
+/// Keep only the live version of each replaceable event, instead of every
+/// version the source happens to hold.
+///
+/// nostrdb has no replaceable-event semantics: it stores every version of
+/// everything it is given, and only moves the pubkey index to the newest. A
+/// prune has no way to express "newest per (kind, pubkey)" through `filters`,
+/// because a filter is matched against one note at a time — so without this
+/// flag a prune copies every historical profile, contact list, mutelist and
+/// relay list forward, and that becomes a floor the prune can never get below.
+///
+/// With the flag, the winner is chosen as NIP-01 defines it: the greatest
+/// `created_at`, ties broken on the lowest id. Kinds 0, 3 and 10000-19999 are
+/// keyed on `(kind, pubkey)`; addressable kinds 30000-39999 are keyed on
+/// `(kind, pubkey, d tag)`, treating a missing `d` tag as an empty one.
+/// Superseded `NDB_DB_PROFILE` records go too, along with the `profile_pk` and
+/// `profile_search` rows that would have pointed at them — the destination is
+/// rebuilt through the writer, so those are simply never created.
+///
+/// Costs one extra pass over `NDB_DB_NOTE` before anything is copied, and
+/// about 32 bytes of memory per distinct replaceable event in the source.
+#define NDB_PRUNE_DEDUPE_REPLACEABLE (1 << 0)
+
 /// Prune the database, copying every note matching any of `filters` to a new
 /// database at `output_path`. Filters are unioned, exactly as in `ndb_query`
 /// and `ndb_subscribe`: a note is kept when at least one filter matches it,
 /// and `num_filters == 0` keeps every note (a plain copy).
+///
+/// `flags` is a bitmask of the `NDB_PRUNE_*` options above, or 0 for none.
 ///
 /// Note that pruning rewrites notes through the writer, so note keys in the
 /// output database are freshly assigned and will not match the source. Which
@@ -701,7 +736,7 @@ const char *ndb_prune_phase_name(enum ndb_prune_phase phase);
 ///
 /// Returns 1 on success, 0 on failure.
 int ndb_prune(struct ndb *ndb, const char *output_path,
-	      struct ndb_filter *filters, int num_filters,
+	      struct ndb_filter *filters, int num_filters, int flags,
 	      struct ndb_prune_error *err);
 
 // NOTE PROCESSING

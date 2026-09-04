@@ -9153,6 +9153,337 @@ static int ndb_prune_keeps(struct ndb_filter *filters, int num_filters,
 	return 0;
 }
 
+// One live version of a replaceable event, as NIP-01 defines it.
+//
+// nostrdb stores every version of everything it is ever given: a second kind-0
+// from the same pubkey is a second note *and* a second NDB_DB_PROFILE record,
+// with only the pubkey index moved to the newest. A prune that copies whatever
+// its filters match therefore carries every historical version forward, and no
+// filter can prevent that — ndb_prune_keeps sees one note at a time, so
+// "newest per (kind, pubkey)" is not something a filter can say.
+//
+// Deciding it needs a pass of its own over NDB_DB_NOTE before anything is
+// copied, which is what ndb_prune_build_winners does.
+//
+// Keyed by a 128-bit hash of the group rather than by the group itself, so a
+// slot costs 32 bytes whatever the length of the `d` tag. A pubkey is already
+// uniformly distributed, so the hash is just a mix of it with the kind and the
+// `d` tag.
+struct ndb_prune_winner {
+	uint64_t h0, h1;	// group hash; (0,0) means an empty slot
+	uint64_t created_at;
+	uint64_t note_key;	// winner's key in the *source* NDB_DB_NOTE
+};
+
+struct ndb_prune_winners {
+	struct ndb_prune_winner *slots;
+	size_t cap;		// always a power of two
+	size_t used;
+};
+
+#define NDB_PRUNE_WINNERS_MIN_CAP 1024
+
+static uint64_t ndb_prune_mix(uint64_t x)
+{
+	x ^= x >> 30;
+	x *= 0xbf58476d1ce4e5b9ULL;
+	x ^= x >> 27;
+	x *= 0x94d049bb133111ebULL;
+	x ^= x >> 31;
+	return x;
+}
+
+// The `d` tag value of an addressable event, as raw bytes.
+//
+// Handed back as bytes rather than as a string because nostrdb packs a 32-byte
+// hex value into an id: a `d` tag holding an event id or pubkey arrives with
+// NDB_PACKED_ID and has no NUL to stop at. Treating those as absent would put
+// every one of them in the same group and drop events that are not versions of
+// each other at all.
+static int ndb_prune_d_tag(struct ndb_note *note, const unsigned char **data,
+			   int *len, unsigned char *flag)
+{
+	struct ndb_iterator iter;
+	struct ndb_str key, val;
+
+	ndb_tags_iterate_start(note, &iter);
+	while (ndb_tags_iterate_next(&iter)) {
+		if (ndb_tag_count(iter.tag) < 2)
+			continue;
+
+		key = ndb_iter_tag_str(&iter, 0);
+		if (key.flag != NDB_PACKED_STR)
+			continue;
+		if (key.str[0] != 'd' || key.str[1] != '\0')
+			continue;
+
+		val = ndb_iter_tag_str(&iter, 1);
+		*flag = val.flag;
+		if (val.flag == NDB_PACKED_ID) {
+			*data = val.id;
+			*len = 32;
+		} else {
+			*data = (const unsigned char *)val.str;
+			*len = (int)strlen(val.str);
+		}
+		return 1;
+	}
+
+	return 0;
+}
+
+// Hash the (kind, pubkey[, d tag]) a replaceable event is keyed on. Kinds 0, 3
+// and 10000-19999 are keyed on (kind, pubkey); addressable kinds 30000-39999
+// add the `d` tag, where a missing tag means an empty one.
+static void ndb_prune_group_hash(struct ndb_note *note, uint64_t *h0,
+				 uint64_t *h1)
+{
+	const unsigned char *pk, *d;
+	uint64_t kind, a, b;
+	unsigned char flag;
+	int i, len;
+
+	kind = ndb_note_kind(note);
+	pk = ndb_note_pubkey(note);
+
+	memcpy(&a, pk, sizeof(a));
+	memcpy(&b, pk + 8, sizeof(b));
+	a ^= kind * 0x9e3779b97f4a7c15ULL;
+	b ^= ndb_prune_mix(kind);
+
+	if (kind >= 30000 && kind < 40000) {
+		uint64_t dh = 0xcbf29ce484222325ULL;
+
+		if (ndb_prune_d_tag(note, &d, &len, &flag)) {
+			// mix the flag in so a 32-byte id and a 32-character
+			// string with the same bytes stay distinct
+			dh = (dh ^ flag) * 0x100000001b3ULL;
+			for (i = 0; i < len; i++)
+				dh = (dh ^ d[i]) * 0x100000001b3ULL;
+		}
+
+		a ^= ndb_prune_mix(dh);
+		b ^= dh;
+	}
+
+	*h0 = ndb_prune_mix(a);
+	*h1 = ndb_prune_mix(b ^ 0x9e3779b97f4a7c15ULL);
+
+	// (0,0) marks an empty slot, so never hand it back as a real hash
+	if (*h0 == 0 && *h1 == 0)
+		*h0 = 1;
+}
+
+static void ndb_prune_winners_destroy(struct ndb_prune_winners *winners)
+{
+	free(winners->slots);
+	winners->slots = NULL;
+	winners->cap = 0;
+	winners->used = 0;
+}
+
+static int ndb_prune_winners_init(struct ndb_prune_winners *winners)
+{
+	winners->cap = NDB_PRUNE_WINNERS_MIN_CAP;
+	winners->used = 0;
+	winners->slots = calloc(winners->cap, sizeof(*winners->slots));
+
+	return winners->slots != NULL;
+}
+
+// Find the slot for a group, without inserting. NULL when the group is absent.
+static struct ndb_prune_winner *
+ndb_prune_winners_lookup(struct ndb_prune_winners *winners, uint64_t h0,
+			 uint64_t h1)
+{
+	struct ndb_prune_winner *slot;
+	size_t i;
+
+	i = (size_t)h0 & (winners->cap - 1);
+	for (;;) {
+		slot = &winners->slots[i];
+		if (slot->h0 == 0 && slot->h1 == 0)
+			return NULL;
+		if (slot->h0 == h0 && slot->h1 == h1)
+			return slot;
+		i = (i + 1) & (winners->cap - 1);
+	}
+}
+
+static int ndb_prune_winners_grow(struct ndb_prune_winners *winners)
+{
+	struct ndb_prune_winner *old_slots, *slot;
+	size_t old_cap, i, j;
+
+	old_slots = winners->slots;
+	old_cap = winners->cap;
+
+	// the table is only ever grown, so this cannot wrap in practice: it
+	// would need more distinct replaceable events than the database can hold
+	winners->cap = old_cap * 2;
+	winners->slots = calloc(winners->cap, sizeof(*winners->slots));
+	if (winners->slots == NULL) {
+		winners->slots = old_slots;
+		winners->cap = old_cap;
+		return 0;
+	}
+
+	for (i = 0; i < old_cap; i++) {
+		if (old_slots[i].h0 == 0 && old_slots[i].h1 == 0)
+			continue;
+		j = (size_t)old_slots[i].h0 & (winners->cap - 1);
+		for (;;) {
+			slot = &winners->slots[j];
+			if (slot->h0 == 0 && slot->h1 == 0)
+				break;
+			j = (j + 1) & (winners->cap - 1);
+		}
+		*slot = old_slots[i];
+	}
+
+	free(old_slots);
+	return 1;
+}
+
+// Find or insert the slot for a group. `*inserted` says which happened, since
+// a fresh slot has no incumbent to compare against. NULL only on allocation
+// failure.
+static struct ndb_prune_winner *
+ndb_prune_winners_slot(struct ndb_prune_winners *winners, uint64_t h0,
+		       uint64_t h1, int *inserted)
+{
+	struct ndb_prune_winner *slot;
+	size_t i;
+
+	// keep the load factor under 0.7 so the linear probe stays short
+	if ((winners->used + 1) * 10 >= winners->cap * 7) {
+		if (!ndb_prune_winners_grow(winners))
+			return NULL;
+	}
+
+	i = (size_t)h0 & (winners->cap - 1);
+	for (;;) {
+		slot = &winners->slots[i];
+		if (slot->h0 == 0 && slot->h1 == 0) {
+			slot->h0 = h0;
+			slot->h1 = h1;
+			winners->used++;
+			*inserted = 1;
+			return slot;
+		}
+		if (slot->h0 == h0 && slot->h1 == h1) {
+			*inserted = 0;
+			return slot;
+		}
+		i = (i + 1) & (winners->cap - 1);
+	}
+}
+
+// Does `note` beat the version currently recorded for its group? Newest
+// created_at wins; NIP-01 breaks a tie on the lowest id.
+static int ndb_prune_beats(struct ndb_txn *txn, struct ndb_note *note,
+			   struct ndb_prune_winner *slot)
+{
+	struct ndb_note *incumbent;
+	uint64_t created_at;
+	size_t len;
+
+	created_at = ndb_note_created_at(note);
+	if (created_at != slot->created_at)
+		return created_at > slot->created_at;
+
+	// A tie means the same author published the same kind twice in the same
+	// second, which is rare enough that fetching the incumbent here is
+	// cheaper than keeping 32 bytes of id for every group in the table.
+	incumbent = ndb_get_note_by_key(txn, slot->note_key, &len);
+	if (incumbent == NULL)
+		return 1;
+
+	return memcmp(ndb_note_id(note), ndb_note_id(incumbent), 32) < 0;
+}
+
+// Walk every note in the source and record the winning version of each
+// replaceable event. Returns an LMDB return code, 0 on success.
+//
+// The winner is chosen from the notes the *filters keep*, not from every note
+// in the source. Picking it from everything would let a filter that matches an
+// old version but not the newest one leave a group whose winner is dropped by
+// the filter and whose every other member is dropped as superseded, taking the
+// whole event with it. With the default keep-policy the two are the same set —
+// its filters are keyed on kind and author, which every version of a group
+// shares — but nothing stops a caller passing a filter that is not.
+static int ndb_prune_build_winners(struct ndb_txn *txn,
+				   struct ndb_filter *filters, int num_filters,
+				   struct ndb_prune_winners *winners)
+{
+	MDB_cursor *cur;
+	MDB_val k, v;
+	int rc;
+
+	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE],
+				  &cur)))
+		return rc;
+
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		struct ndb_prune_winner *slot;
+		struct ndb_note *note;
+		uint64_t h0, h1, note_key;
+		int inserted;
+
+		if (v.mv_size < sizeof(struct ndb_note))
+			continue;
+		if (k.mv_size != sizeof(note_key))
+			continue;
+
+		note = v.mv_data;
+		if (!is_replaceable_kind(ndb_note_kind(note)))
+			continue;
+		if (!ndb_prune_keeps(filters, num_filters, note))
+			continue;
+
+		memcpy(&note_key, k.mv_data, sizeof(note_key));
+		ndb_prune_group_hash(note, &h0, &h1);
+
+		slot = ndb_prune_winners_slot(winners, h0, h1, &inserted);
+		if (slot == NULL) {
+			mdb_cursor_close(cur);
+			return MDB_PANIC;
+		}
+
+		if (inserted || ndb_prune_beats(txn, note, slot)) {
+			slot->created_at = ndb_note_created_at(note);
+			slot->note_key = note_key;
+		}
+	}
+
+	mdb_cursor_close(cur);
+	return 0;
+}
+
+// Is this note an old version of a replaceable event the prune has a newer
+// version of? Everything that is not a replaceable event survives this.
+static int ndb_prune_superseded(struct ndb_prune_winners *winners,
+				struct ndb_note *note, uint64_t note_key)
+{
+	struct ndb_prune_winner *slot;
+	uint64_t h0, h1;
+
+	if (winners == NULL || winners->slots == NULL)
+		return 0;
+
+	if (!is_replaceable_kind(ndb_note_kind(note)))
+		return 0;
+
+	ndb_prune_group_hash(note, &h0, &h1);
+	slot = ndb_prune_winners_lookup(winners, h0, h1);
+
+	// a group the winner pass never saw is not something to guess about
+	if (slot == NULL)
+		return 0;
+
+	return slot->note_key != note_key;
+}
+
 const char *ndb_prune_phase_name(enum ndb_prune_phase phase)
 {
 	switch (phase) {
@@ -9174,13 +9505,15 @@ const char *ndb_prune_phase_name(enum ndb_prune_phase phase)
 	case NDB_PRUNE_DST_INIT_TXN:		return "dst_init_txn";
 	case NDB_PRUNE_DST_DBI_OPEN:		return "dst_dbi_open";
 	case NDB_PRUNE_DST_INIT_COMMIT:		return "dst_init_commit";
+	case NDB_PRUNE_WINNERS_ALLOC:		return "winners_alloc";
+	case NDB_PRUNE_WINNERS_SCAN:		return "winners_scan";
 	}
 
 	return "unknown";
 }
 
 int ndb_prune(struct ndb *ndb, const char *output_path,
-	      struct ndb_filter *filters, int num_filters,
+	      struct ndb_filter *filters, int num_filters, int flags,
 	      struct ndb_prune_error *err)
 {
 	int rc, ret;
@@ -9196,6 +9529,9 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	size_t scratch_size;
 	unsigned char *scratch;
 	int count_profiles, count_notes;
+	int count_superseded_notes, count_superseded_profiles;
+	int dedupe;
+	struct ndb_prune_winners winners, *winners_p;
 	struct ndb_prune_error local_err;
 
 	// One local to write through, so every failure path below can report
@@ -9209,6 +9545,11 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	rc = 0;
 	count_profiles = 0;
 	count_notes = 0;
+	count_superseded_notes = 0;
+	count_superseded_profiles = 0;
+	dedupe = (flags & NDB_PRUNE_DEDUPE_REPLACEABLE) != 0;
+	winners_p = NULL;
+	memset(&winners, 0, sizeof(winners));
 	scratch_size = 2 * 1024 * 1024;
 	scratch = malloc(scratch_size);
 	if (!scratch) {
@@ -9298,6 +9639,28 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 
 	secp = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
 
+	// Phase 0: work out the live version of every replaceable event, so the
+	// copy below can drop the rest. This has to happen before anything is
+	// written, because "newest per (kind, pubkey)" is not a question that can
+	// be answered from the one note the copy is looking at.
+	if (dedupe) {
+		if (!ndb_prune_winners_init(&winners)) {
+			fprintf(stderr, "ndb_prune: failed to allocate winner table\n");
+			err->phase = NDB_PRUNE_WINNERS_ALLOC;
+			goto cleanup_txns;
+		}
+		winners_p = &winners;
+
+		if ((rc = ndb_prune_build_winners(&src_txn, filters, num_filters,
+						  winners_p))) {
+			fprintf(stderr, "ndb_prune: winner scan failed: %s\n",
+				mdb_strerror(rc));
+			err->phase = NDB_PRUNE_WINNERS_SCAN;
+			err->rc = rc;
+			goto cleanup_txns;
+		}
+	}
+
 	// Phase 1: Copy kept profiles
 	if ((rc = mdb_cursor_open(src_mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
 		fprintf(stderr, "ndb_prune: profile cursor open failed: %s\n", mdb_strerror(rc));
@@ -9324,6 +9687,15 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 		if (!ndb_prune_keeps(filters, num_filters, note))
 			continue;
 
+		// an older kind-0 than one we are already keeping. Skipping it
+		// here is what keeps NDB_DB_PROFILE consistent: the destination
+		// is rebuilt through the writer, so its profile record, its
+		// profile_pk entry and its profile_search rows are never created
+		if (ndb_prune_superseded(winners_p, note, note_key)) {
+			count_superseded_profiles++;
+			continue;
+		}
+
 		// re-process profile from JSON content
 		if (!ndb_process_profile_note(note, &profile.record))
 			continue;
@@ -9342,7 +9714,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	}
 	mdb_cursor_close(cur);
 
-	fprintf(stderr, "ndb_prune: copied %d profiles\n", count_profiles);
+	fprintf(stderr, "ndb_prune: copied %d profiles, dropped %d superseded\n",
+		count_profiles, count_superseded_profiles);
 
 	// Phase 2: Copy every kept note. Kind 0 notes that phase 1 already
 	// wrote are deduped by id inside ndb_write_note, so an older kind-0
@@ -9364,6 +9737,19 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 		if (!ndb_prune_keeps(filters, num_filters, note))
 			continue;
 
+		// a superseded version of a replaceable event. Without this the
+		// prune keeps every version it has ever seen, and that becomes a
+		// floor no amount of pruning can get below
+		if (k.mv_size == sizeof(uint64_t)) {
+			uint64_t note_key;
+
+			memcpy(&note_key, k.mv_data, sizeof(note_key));
+			if (ndb_prune_superseded(winners_p, note, note_key)) {
+				count_superseded_notes++;
+				continue;
+			}
+		}
+
 		// note data is stable in source mmap for duration of read txn
 		ndb_writer_note_init(&writer_note, note, v.mv_size, NULL, 0);
 
@@ -9376,7 +9762,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	}
 	mdb_cursor_close(cur);
 
-	fprintf(stderr, "ndb_prune: copied %d notes\n", count_notes);
+	fprintf(stderr, "ndb_prune: copied %d notes, dropped %d superseded\n",
+		count_notes, count_superseded_notes);
 
 	// Phase 3: Copy profile_last_fetch entries for profiles we kept. A row
 	// for a dropped profile would tell the client it was recently fetched,
@@ -9415,6 +9802,7 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	ret = 1;
 
 cleanup_txns:
+	ndb_prune_winners_destroy(&winners);
 	if (dst_mdb_txn)
 		mdb_txn_abort(dst_mdb_txn);
 	mdb_txn_abort(src_mdb_txn);
@@ -9427,6 +9815,8 @@ cleanup_env:
 	// How far it got, reported whether or not it got all the way.
 	err->profiles = count_profiles;
 	err->notes = count_notes;
+	err->superseded_notes = count_superseded_notes;
+	err->superseded_profiles = count_superseded_profiles;
 
 	return ret;
 }

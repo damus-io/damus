@@ -349,6 +349,213 @@ final class NdbPruneTests: XCTestCase {
                        "nothing but profiles and our own notes survives, whatever its timestamp")
     }
 
+    // MARK: - Superseded replaceable events
+
+    /// An addressable (30000-39999) event carrying a `d` tag, which is what
+    /// keys it apart from other events of the same kind by the same author.
+    private func addressable(_ content: String, _ keypair: FullKeypair, kind: UInt32,
+                             d: String, at timestamp: UInt32) throws -> NostrEvent {
+        return try XCTUnwrap(NostrEvent(content: content,
+                                        keypair: keypair.to_keypair(),
+                                        kind: kind,
+                                        tags: [["d", d]],
+                                        createdAt: timestamp))
+    }
+
+    func test_prune_keeps_only_the_newest_version_of_a_profile() throws {
+        let ndb = try seeded(with: [
+            try profile("alice v1", alice, at: 1700000000),
+            try profile("alice v2", alice, at: 1700000001),
+            try profile("alice v3", alice, at: 1700000002),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .metadata),
+                       ["{\"name\":\"alice v3\"}"],
+                       "only the newest kind-0 should survive, not every version ever seen")
+    }
+
+    func test_prune_keeps_only_the_newest_contact_list() throws {
+        // The case jb55 raised: kind 3 is replaceable, the keep-policy's author
+        // filter carries no kind restriction, and nostrdb stores every version.
+        let ndb = try seeded(with: [
+            try note("contacts v1", alice, kind: 3, at: 1700000000),
+            try note("contacts v2", alice, kind: 3, at: 1700000001),
+            try note("contacts v3", alice, kind: 3, at: 1700000002),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .contacts), ["contacts v3"],
+                       "181 versions of one contact list is what this is here to stop")
+    }
+
+    func test_prune_keeps_the_newest_of_each_addressable_event_separately() throws {
+        // Addressable events are keyed on (kind, pubkey, d), so two different
+        // `d` tags are two different events, not versions of each other. Getting
+        // this wrong collapses them and drops real data.
+        let ndb = try seeded(with: [
+            try addressable("draft a v1", alice, kind: 31234, d: "a", at: 1700000000),
+            try addressable("draft a v2", alice, kind: 31234, d: "a", at: 1700000001),
+            try addressable("draft b v1", alice, kind: 31234, d: "b", at: 1700000002),
+            try addressable("draft b v2", alice, kind: 31234, d: "b", at: 1700000003),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .draft),
+                       ["draft a v2", "draft b v2"],
+                       "each `d` tag keeps its own newest version")
+    }
+
+    func test_prune_does_not_treat_two_authors_versions_as_each_others() throws {
+        let ndb = try seeded(with: [
+            try profile("alice v1", alice, at: 1700000000),
+            try profile("alice v2", alice, at: 1700000001),
+            try profile("bob v1", bob, at: 1700000002),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .metadata).sorted(),
+                       ["{\"name\":\"alice v2\"}", "{\"name\":\"bob v1\"}"],
+                       "bob's only profile is not superseded by alice's newer one")
+    }
+
+    func test_prune_breaks_a_created_at_tie_on_the_lowest_id() throws {
+        // NIP-01: same created_at, the lowest id wins. Which content that is
+        // depends on the keys generated for this run, so the expectation is
+        // computed rather than hardcoded.
+        let first = try profile("tie one", alice, at: 1700000000)
+        let second = try profile("tie two", alice, at: 1700000000)
+        let winner = first.id.hex() < second.id.hex() ? first : second
+
+        let ndb = try seeded(with: [first, second])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .metadata), [winner.content],
+                       "a created_at tie should resolve to the lowest id, per NIP-01")
+    }
+
+    func test_prune_leaves_non_replaceable_kinds_alone() throws {
+        // Nothing here is replaceable, so every one of alice's notes survives.
+        // A dedupe that keyed on (kind, pubkey) without checking the kind would
+        // silently keep one of these and drop the rest.
+        let ndb = try seeded(with: [
+            try note("alice one", alice, at: 1700000000),
+            try note("alice two", alice, at: 1700000001),
+            try note("alice three", alice, at: 1700000002),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .text),
+                       ["alice one", "alice three", "alice two"],
+                       "kind 1 is not replaceable, so every note stays")
+    }
+
+    func test_prune_picks_the_winner_from_the_notes_the_filters_keep() throws {
+        // A filter that matches an old version but not the newest one must not
+        // wipe the group out: if the winner were chosen from every note in the
+        // source, the newest would be dropped by the filter and the older one
+        // dropped as superseded, taking the event with it.
+        let old = try profile("alice old", alice, at: 1700000000)
+        let new = try profile("alice new", alice, at: 1700000001)
+
+        let ndb = try seeded(with: [old, new])
+        defer { ndb.close() }
+
+        // keeps only the older version, by id
+        let onlyOld = try NdbFilter(from: NostrFilter(ids: [old.id]))
+        try ndb.prune(to: outputDir, filters: [onlyOld])
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .metadata),
+                       ["{\"name\":\"alice old\"}"],
+                       "the only version the filter kept should survive, not nothing")
+    }
+
+    func test_prune_without_dedupe_still_keeps_every_version() throws {
+        // The old shape, kept reachable so the change is opt-out rather than
+        // unconditional — and so this test says what the default is doing.
+        let ndb = try seeded(with: [
+            try profile("alice v1", alice, at: 1700000000),
+            try profile("alice v2", alice, at: 1700000001),
+            try profile("alice v3", alice, at: 1700000002),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir,
+                      filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]),
+                      dedupeReplaceable: false)
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .metadata).count, 3,
+                       "with dedupe off, every version is copied forward as before")
+    }
+
+    func test_prune_reports_the_superseded_versions_it_dropped() throws {
+        let ndb = try seeded(with: [
+            try profile("alice v1", alice, at: 1700000000),
+            try profile("alice v2", alice, at: 1700000001),
+            try note("contacts v1", alice, kind: 3, at: 1700000002),
+            try note("contacts v2", alice, kind: 3, at: 1700000003),
+            try note("contacts v3", alice, kind: 3, at: 1700000004),
+        ])
+        defer { ndb.close() }
+
+        let report = try ndb.prune(to: outputDir,
+                                   filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        XCTAssertEqual(report.supersededNotesDropped, 3,
+                       "one superseded profile and two superseded contact lists")
+        XCTAssertEqual(report.supersededProfilesDropped, 1,
+                       "the older kind-0's profile record goes too, not just its note")
+    }
+
+    func test_prune_without_dedupe_reports_no_superseded_versions() throws {
+        let ndb = try seeded(with: [
+            try profile("alice v1", alice, at: 1700000000),
+            try profile("alice v2", alice, at: 1700000001),
+        ])
+        defer { ndb.close() }
+
+        let report = try ndb.prune(to: outputDir,
+                                   filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]),
+                                   dedupeReplaceable: false)
+
+        XCTAssertEqual(report.supersededNotesDropped, 0)
+        XCTAssertEqual(report.supersededProfilesDropped, 0)
+    }
+
+    func test_prune_leaves_the_surviving_profile_reachable_by_pubkey() throws {
+        // Dropping the superseded kind-0 *notes* is not enough on its own: the
+        // NDB_DB_PROFILE records and the pubkey index have to come out
+        // consistent, or a lookup finds a record whose note is gone.
+        let ndb = try seeded(with: [
+            try profile("alice v1", alice, at: 1700000000),
+            try profile("alice v2", alice, at: 1700000001),
+            try profile("alice v3", alice, at: 1700000002),
+        ])
+        defer { ndb.close() }
+
+        try ndb.prune(to: outputDir, filters: try NdbFilterArray.defaultPruneFilters(keeping: [alice.pubkey]))
+
+        let pruned = try XCTUnwrap(Ndb(path: outputDir, owns_db_file: false))
+        defer { pruned.close() }
+
+        let found = try XCTUnwrap(try pruned.lookup_profile_and_copy(alice.pubkey),
+                                  "the surviving profile should still be reachable by pubkey")
+        XCTAssertEqual(found.name, "alice v3",
+                       "the pubkey index should point at the version that survived")
+    }
+
     // MARK: - NdbSpaceBudget
 
     /// Gives `dir` a `data.mdb` of exactly `bytes`, without writing that many

@@ -241,6 +241,15 @@ struct NdbPruneReport: Equatable {
     let profilesCopied: Int
     let notesCopied: Int
 
+    /// Superseded versions of replaceable events dropped rather than copied.
+    ///
+    /// Zero unless the prune asked for `NDB_PRUNE_DEDUPE_REPLACEABLE`. Counted
+    /// apart from ``notesCopied`` because a note that lost to a newer version
+    /// of itself is a different thing from one no filter matched, and only the
+    /// first is a measure of how much of the database was dead weight.
+    let supersededNotesDropped: Int
+    let supersededProfilesDropped: Int
+
     init(_ err: ndb_prune_error) {
         self.phase = String(cString: ndb_prune_phase_name(err.phase))
         self.phaseCode = err.phase.rawValue
@@ -249,6 +258,8 @@ struct NdbPruneReport: Equatable {
         self.sourceMapsizeBytes = err.src_mapsize
         self.profilesCopied = Int(err.profiles)
         self.notesCopied = Int(err.notes)
+        self.supersededNotesDropped = Int(err.superseded_notes)
+        self.supersededProfilesDropped = Int(err.superseded_profiles)
     }
 
     /// LMDB's own text for ``rc``, or `nil` where there is no code to explain.
@@ -268,6 +279,10 @@ struct NdbPruneReport: Equatable {
         line += " of a source mapsize of \(sourceMapsizeBytes)"
         line += succeeded ? ", copying " : ", after copying "
         line += "\(profilesCopied) profiles and \(notesCopied) notes"
+        if supersededNotesDropped > 0 || supersededProfilesDropped > 0 {
+            line += ", dropping \(supersededNotesDropped) superseded notes"
+            line += " and \(supersededProfilesDropped) superseded profiles"
+        }
         return line
     }
 
@@ -285,6 +300,8 @@ struct NdbPruneReport: Equatable {
             "source_mapsize_bytes": String(sourceMapsizeBytes),
             "profiles_copied": String(profilesCopied),
             "notes_copied": String(notesCopied),
+            "superseded_notes_dropped": String(supersededNotesDropped),
+            "superseded_profiles_dropped": String(supersededProfilesDropped),
         ]
         if let rcDescription {
             context["rc_description"] = rcDescription
@@ -339,14 +356,22 @@ extension Ndb {
     ///   - path: An **existing, empty** directory to write the pruned database
     ///     into. LMDB does not create it.
     ///   - filters: The keep-policy. Kept alive across the call.
+    ///   - dedupeReplaceable: Keep only the live version of each replaceable
+    ///     event rather than every version the source holds. On by default,
+    ///     because a filter cannot express "newest per (kind, pubkey)" and
+    ///     without it every historical profile, contact list and draft the
+    ///     keep-policy matches survives the prune — a floor no second prune can
+    ///     get below. Pass `false` to reproduce the old copy-everything shape.
     /// - Returns: What the prune did — the counts it copied and the mapsizes it
     ///   used. Discardable; the failure case is a throw, not a return value.
     @discardableResult
-    func prune(to path: String, filters: NdbFilterArray) throws -> NdbPruneReport {
+    func prune(to path: String, filters: NdbFilterArray,
+               dedupeReplaceable: Bool = true) throws -> NdbPruneReport {
         // `filters` owns the allocation `filters.unsafePointer` points into, so
         // it has to outlive the call rather than just its last use.
         return try withExtendedLifetime(filters, {
-            try prune(to: path, filterStorage: filters.unsafePointer, count: filters.count)
+            try prune(to: path, filterStorage: filters.unsafePointer,
+                      count: filters.count, dedupeReplaceable: dedupeReplaceable)
         })
     }
 
@@ -356,7 +381,8 @@ extension Ndb {
     /// See the `NdbFilterArray` overload for the details; this one exists for
     /// callers that already hold ``NdbFilter`` objects.
     @discardableResult
-    func prune(to path: String, filters: [NdbFilter]) throws -> NdbPruneReport {
+    func prune(to path: String, filters: [NdbFilter],
+               dedupeReplaceable: Bool = true) throws -> NdbPruneReport {
         // `NdbFilter.ndbFilter` copies the struct out, which gives us the
         // contiguous array C wants — but the copy is shallow, its `elem_buf`
         // still pointing into the originating NdbFilter's own allocation. So
@@ -367,18 +393,23 @@ extension Ndb {
             return try filterStructs.withUnsafeMutableBufferPointer({ buffer in
                 // A nil base address only happens when there are no filters, and
                 // nostrdb never dereferences the array in that case.
-                try prune(to: path, filterStorage: buffer.baseAddress, count: buffer.count)
+                try prune(to: path, filterStorage: buffer.baseAddress,
+                          count: buffer.count, dedupeReplaceable: dedupeReplaceable)
             })
         })
     }
 
-    private func prune(to path: String, filterStorage: UnsafeMutablePointer<ndb_filter>?, count: Int) throws -> NdbPruneReport {
+    private func prune(to path: String, filterStorage: UnsafeMutablePointer<ndb_filter>?,
+                       count: Int, dedupeReplaceable: Bool) throws -> NdbPruneReport {
+        // NDB_PRUNE_DEDUPE_REPLACEABLE is a macro, so the Clang importer does
+        // not carry it into Swift — spell the bit out here.
+        let flags: Int32 = dedupeReplaceable ? 1 : 0
         return try withNdb({
             try path.withCString({ pathCString in
                 // `ndb_prune` fills this in either way, so the same report
                 // covers the success path.
                 var err = ndb_prune_error()
-                let ok = ndb_prune(self.ndb.ndb, pathCString, filterStorage, Int32(count), &err) == 1
+                let ok = ndb_prune(self.ndb.ndb, pathCString, filterStorage, Int32(count), flags, &err) == 1
                 let report = NdbPruneReport(err)
                 guard ok else {
                     Log.error("ndb_prune failed: %@", for: .storage, report.summary)
