@@ -6,12 +6,25 @@
 
 import Foundation
 
+/// A summary of universe note counts used to explain when pubkey deduplication is hiding many notes.
+struct SearchHomeHintState {
+    let displayedNotes: Int
+    let totalNotesWithoutPubkeyFilter: Int
+    
+    /// Whether the UI should show a hint explaining that the current universe view is deduplicating by pubkey.
+    var shouldSuggestMultipleEventsPerUser: Bool {
+        displayedNotes > 0 &&
+        displayedNotes < 20 &&
+        totalNotesWithoutPubkeyFilter >= displayedNotes * 2
+    }
+}
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
     var events: EventHolder
     var followPackEvents: EventHolder
     @Published var loading: Bool = false
+    @Published var totalNotesWithoutPubkeyFilter: Int = 0
 
     var seen_pubkey: Set<Pubkey> = Set()
     var follow_pack_seen_pubkey: Set<Pubkey> = Set()
@@ -21,6 +34,14 @@ class SearchHomeModel: ObservableObject {
     let profiles_subid = UUID().description
     let limit: UInt32 = 200
     //let multiple_events_per_pubkey: Bool = false
+    
+    /// A snapshot of the current universe note counts used by the UI to decide whether to show a deduplication hint.
+    var hintState: SearchHomeHintState {
+        SearchHomeHintState(
+            displayedNotes: events.events.count,
+            totalNotesWithoutPubkeyFilter: totalNotesWithoutPubkeyFilter
+        )
+    }
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
@@ -48,6 +69,10 @@ class SearchHomeModel: ObservableObject {
     @MainActor
     func reload() async {
         self.events.reset()
+        self.followPackEvents.reset()
+        self.seen_pubkey.removeAll()
+        self.follow_pack_seen_pubkey.removeAll()
+        self.totalNotesWithoutPubkeyFilter = 0
         await self.load()
     }
     
@@ -85,29 +110,53 @@ class SearchHomeModel: ObservableObject {
     
     @MainActor
     func handleEvent(_ ev: NostrEvent) {
-        if ev.is_textlike && should_show_event(state: damus_state, ev: ev) && !ev.is_reply() {
-            if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
-                return
-            }
-            seen_pubkey.insert(ev.pubkey)
-            
-            if self.events.insert(ev) {
-                self.objectWillChange.send()
-            }
+        guard ev.is_textlike else {
+            return
+        }
+        
+        guard should_show_event(state: damus_state, ev: ev) else {
+            return
+        }
+        
+        guard !ev.is_reply() else {
+            return
+        }
+        
+        totalNotesWithoutPubkeyFilter += 1
+        
+        if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
+            return
+        }
+        
+        seen_pubkey.insert(ev.pubkey)
+        
+        if self.events.insert(ev) {
+            self.objectWillChange.send()
         }
     }
     
     @MainActor
     func handleFollowPackEvent(_ ev: NostrEvent) {
-        if ev.known_kind == .follow_list && should_show_event(state: damus_state, ev: ev) && !ev.is_reply() {
-            if !damus_state.settings.multiple_events_per_pubkey && follow_pack_seen_pubkey.contains(ev.pubkey) {
-                return
-            }
-            follow_pack_seen_pubkey.insert(ev.pubkey)
-            
-            if self.followPackEvents.insert(ev) {
-                self.objectWillChange.send()
-            }
+        guard ev.known_kind == .follow_list else {
+            return
+        }
+        
+        guard should_show_event(state: damus_state, ev: ev) else {
+            return
+        }
+        
+        guard !ev.is_reply() else {
+            return
+        }
+        
+        if !damus_state.settings.multiple_events_per_pubkey && follow_pack_seen_pubkey.contains(ev.pubkey) {
+            return
+        }
+        
+        follow_pack_seen_pubkey.insert(ev.pubkey)
+        
+        if self.followPackEvents.insert(ev) {
+            self.objectWillChange.send()
         }
     }
 }
