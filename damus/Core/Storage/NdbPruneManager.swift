@@ -422,8 +422,16 @@ extension NdbPruneManager {
         guard let outcome = Ndb.staged_prune_swap_outcome else { return }
 
         switch outcome {
-        case .nothingStaged, .notForThisDatabase:
+        case .nothingStaged:
             break
+        case .notForThisDatabase(let stagedPath):
+            // Worth seeing rather than passing over in silence: it means a
+            // staged copy is on disk for a database this process did not open,
+            // and the budget it was staged under is not being enforced by this
+            // launch. Not a Sentry report — it is a legitimate state, and the
+            // pathological version of it, a marker whose database is gone,
+            // arrives as `.refused` instead.
+            Log.info("A staged prune marker names another database: %@", for: .storage, stagedPath)
         case .swapped(let bytes):
             Log.info("Swapped in a staged pruned database of %d bytes", for: .storage, bytes)
         case .refused(let rejection):

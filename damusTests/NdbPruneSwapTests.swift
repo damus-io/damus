@@ -25,7 +25,10 @@ final class NdbPruneSwapTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        if !dbDir.isEmpty { try? FileManager.default.removeItem(atPath: dbDir) }
+        if !dbDir.isEmpty {
+            try? FileManager.default.removeItem(atPath: dbDir)
+            try? FileManager.default.removeItem(atPath: otherDbDir)
+        }
         UserDefaults.standard.removeObject(forKey: Ndb.space_budget_key)
         Ndb.clear_pending_prune()
     }
@@ -33,6 +36,12 @@ final class NdbPruneSwapTests: XCTestCase {
     // MARK: - Fixtures
 
     private var stagedPath: String { return "\(dbDir)/\(Ndb.staged_prune_directory_name)" }
+
+    /// A second database directory beside ``dbDir``, for the markers that belong
+    /// to a database this one's swap must not touch.
+    private var otherDbDir: String { return "\(dbDir)-other" }
+
+    private var otherStagedPath: String { return "\(otherDbDir)/\(Ndb.staged_prune_directory_name)" }
 
     private func wire(_ events: [NostrEvent]) -> String {
         return events.compactMap({ encode_json($0) }).map({ "[\"EVENT\",\"s\",\($0)]\n" }).joined()
@@ -101,12 +110,82 @@ final class NdbPruneSwapTests: XCTestCase {
         // process opens several databases — the read-only snapshot, a test's
         // temp directory. Swapping a copy over the wrong one would be the worst
         // kind of bug this code could have.
-        let elsewhere = "\(dbDir)-other/\(Ndb.staged_prune_directory_name)"
-        markPending(promise: permissivePromise, path: elsewhere)
+        //
+        // The staged copy has to actually be on disk for this to be the case it
+        // describes: a marker naming a database that is *gone* belongs to nobody
+        // and is cleared instead — see
+        // `test_a_marker_whose_database_is_gone_is_cleared_rather_than_left_to_wedge_the_prune_path`.
+        try ingest([try note("someone else's staged copy", alice, at: Self.newest)], into: otherStagedPath)
+        markPending(promise: permissivePromise, path: otherStagedPath)
 
-        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .notForThisDatabase(stagedPath: elsewhere))
+        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .notForThisDatabase(stagedPath: otherStagedPath))
         XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["bob new"])
         XCTAssertNotNil(Ndb.get_pending_prune(), "the marker belongs to another database, so it must survive")
+        XCTAssertTrue(Ndb.db_file_exists(path: otherStagedPath),
+                      "the other database's staged copy must not be binned either")
+    }
+
+    func test_a_marker_spelling_this_databases_path_differently_still_belongs_to_it() throws {
+        try ingest([
+            try note("alice old", alice, at: Self.newest - 2 * Self.day),
+            try note("bob new", bob, at: Self.newest),
+        ], into: dbDir)
+        try ingest([
+            try profile("alice", alice, at: Self.newest),
+            try note("alice old", alice, at: Self.newest - 2 * Self.day),
+        ], into: stagedPath)
+
+        // Not hypothetical: `Ndb.db_path` hands back the trailing slash
+        // `FileManager` puts on a directory URL, so the marker on a real device
+        // reads `.../Documents//ndb_prune_staged`. The swap builds its own copy
+        // of that path from whatever `Ndb.open` was given, and comparing the two
+        // as strings makes a difference in spelling look like a difference in
+        // database — which wedges the prune path exactly as a stale marker does,
+        // and would not even be cleared as one, because the path is right there
+        // on disk.
+        let stagedSize = try XCTUnwrap(Ndb.database_file_size(path: stagedPath))
+        markPending(promise: NdbPrunePromise(hasProfiles: true, authorsWithPosts: [alice.pubkey]),
+                    path: "\(dbDir)//\(Ndb.staged_prune_directory_name)")
+
+        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir), .swapped(bytes: stagedSize))
+        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["alice old"],
+                       "the copy is this database's however its path is spelled")
+        XCTAssertNil(Ndb.get_pending_prune())
+    }
+
+    func test_a_marker_whose_database_is_gone_is_cleared_rather_than_left_to_wedge_the_prune_path() throws {
+        try ingest([try note("bob new", bob, at: Self.newest)], into: dbDir)
+
+        // headway:damus-ios/toward-raven-cruel. The marker records an absolute
+        // path running through the app's data container UUID, and iOS may
+        // migrate the container to a new UUID — carrying UserDefaults across, so
+        // the marker survives naming a container that no longer exists. The
+        // staged copy comes across with everything else, which is why there is
+        // one at this database's staging path and none at the marker's.
+        try ingest([try note("bob new", bob, at: Self.newest)], into: stagedPath)
+        let vanishedContainer = "/var/mobile/Containers/Data/Application/\(UUID().uuidString)/Documents/\(Ndb.staged_prune_directory_name)"
+        XCTAssertFalse(Ndb.db_file_exists(path: vanishedContainer), "the premise of this test")
+        markPending(promise: permissivePromise, path: vanishedContainer)
+
+        XCTAssertEqual(Ndb.swap_staged_prune(db_path: dbDir),
+                       .refused(.missingOrEmpty(path: vanishedContainer)))
+
+        // The live database is untouched: nothing was swapped in, because there
+        // was nothing the marker vouched for to swap.
+        XCTAssertEqual(try contents(inDatabaseAt: dbDir), ["bob new"])
+
+        // The part that matters. Every gate in the prune path treats a marker
+        // that merely exists as a reason to do nothing, so a marker left here
+        // stops the background budget check, the Free Up Space button and the
+        // Storage screen's message from ever working again — silently, and for
+        // good.
+        XCTAssertNil(Ndb.get_pending_prune(),
+                     "a marker naming a database that is gone has to be forgotten, or it wedges the prune path forever")
+
+        // And the orphaned copy goes with it: nothing points at it any more, and
+        // it is as big as a pruned database.
+        XCTAssertFalse(Ndb.db_file_exists(path: stagedPath),
+                       "the staged copy nothing points at any more has to be reclaimed")
     }
 
     // MARK: - Pruning a database that is itself a prune output
