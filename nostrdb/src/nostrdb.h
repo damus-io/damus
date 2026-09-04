@@ -630,6 +630,7 @@ enum ndb_prune_phase {
 	/* ndb_prune itself */
 	NDB_PRUNE_SCRATCH_ALLOC,
 	NDB_PRUNE_SRC_ENV_INFO,
+	NDB_PRUNE_SRC_ENV_STAT,
 	NDB_PRUNE_SRC_TXN_BEGIN,
 	NDB_PRUNE_DST_TXN_BEGIN,
 	NDB_PRUNE_PROFILE_CURSOR,
@@ -658,10 +659,14 @@ struct ndb_prune_error {
 	/// has none to give — `NDB_PRUNE_SCRATCH_ALLOC` — and on success.
 	int rc;
 
-	/// The mapsize asked of the destination environment. Worth reporting
-	/// because `ndb_prune` takes it from the source rather than from the
-	/// caller, so it is a number nothing outside this function can see.
+	/// The mapsize asked of the destination environment, and the source's own
+	/// for comparison. Worth reporting because `ndb_prune` derives the first
+	/// from the second rather than taking either from the caller, so they are
+	/// numbers nothing outside this function can see — and because asking for
+	/// too large a destination map is itself a way to fail (see
+	/// `NDB_PRUNE_MIN_DST_MAPSIZE`).
 	uint64_t dst_mapsize;
+	uint64_t src_mapsize;
 
 	/// How far it got: profiles and notes written to the destination before
 	/// it stopped. Both are final counts on success.
@@ -672,6 +677,15 @@ struct ndb_prune_error {
 /// A short stable name for a phase, e.g. `"dst_env_open"`. Never NULL, so it is
 /// safe to log unconditionally; an unrecognised phase gives `"unknown"`.
 const char *ndb_prune_phase_name(enum ndb_prune_phase phase);
+
+/// Floor for the destination mapsize `ndb_prune` derives from the source, so a
+/// nearly empty source still leaves LMDB room for the write transaction's
+/// dirty pages. Address space is the scarce resource here, not this.
+///
+/// `NdbPruneTests` pins this value with a literal of its own — the Clang
+/// importer will not carry a macro like this into Swift — so changing it here
+/// means changing it there.
+#define NDB_PRUNE_MIN_DST_MAPSIZE (256 * 1024 * 1024)
 
 /// Prune the database, copying every note matching any of `filters` to a new
 /// database at `output_path`. Filters are unioned, exactly as in `ndb_query`

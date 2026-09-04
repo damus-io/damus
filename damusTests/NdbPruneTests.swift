@@ -112,6 +112,43 @@ final class NdbPruneTests: XCTestCase {
                        "an empty filter array should keep every note")
     }
 
+    func test_prune_does_not_ask_for_a_destination_map_the_size_of_the_source() throws {
+        let ndb = try seeded(with: [
+            try profile("alice", alice, at: 1700000000),
+            try note("alice one", alice, at: 1700000000),
+            try note("bob one", bob, at: 1700000001),
+        ])
+        defer { ndb.close() }
+
+        let report = try ndb.prune(to: outputDir, filters: [NdbFilter]())
+
+        // The field failure this pins: `ndb_prune` used to create its
+        // destination with the *source's* mapsize. `Ndb.open` asks for 32 GiB,
+        // so a prune reserved a second 32 GiB map alongside the live one, and
+        // on a device that is at the per-process address space ceiling —
+        // mdb_env_open returns ENOMEM and the prune dies having copied nothing.
+        // It survived one prune on jb55's phone and not the next.
+        //
+        // The destination only ever receives a subset of the source, so it is
+        // sized from what the source uses instead. This database holds three
+        // notes, so anything remotely close to the source mapsize is the old
+        // behaviour back again.
+        XCTAssertEqual(report.sourceMapsizeBytes, 32 * 1024 * 1024 * 1024,
+                       "Ndb.open asks for 32 GiB, so that is what the source reports")
+        XCTAssertLessThan(report.destinationMapsizeBytes, report.sourceMapsizeBytes,
+                          "a prune must not reserve a second map as large as the live database's")
+        // `NDB_PRUNE_MIN_DST_MAPSIZE`, spelled out because the Clang importer
+        // will not carry that macro into Swift.
+        XCTAssertEqual(report.destinationMapsizeBytes, 256 * 1024 * 1024,
+                       "a database this small lands on the floor rather than on anything derived from it")
+
+        XCTAssertTrue(report.succeeded)
+        XCTAssertEqual(report.notesCopied, 2, "and it still copied everything, which is the point")
+
+        XCTAssertEqual(try contents(inDatabaseAt: outputDir, kind: .text),
+                       ["alice one", "bob one"])
+    }
+
     func test_prune_fails_when_the_output_directory_does_not_exist() throws {
         let ndb = try seeded(with: [try note("alice one", alice, at: 1700000000)])
         defer { ndb.close() }
@@ -147,7 +184,9 @@ final class NdbPruneTests: XCTestCase {
             XCTAssertEqual(context["rc"], String(ENOENT))
             XCTAssertEqual(context["path"], missing)
             XCTAssertNotNil(context["destination_mapsize_bytes"],
-                            "the destination mapsize is the one input to the open that nothing on our side picks")
+                            "the destination mapsize is not an input anything on our side picks")
+            XCTAssertNotNil(context["source_mapsize_bytes"],
+                            "and it is only meaningful next to the source's")
         }
     }
 

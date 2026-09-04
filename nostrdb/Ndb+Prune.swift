@@ -200,16 +200,15 @@ final class NdbFilterArray {
     }
 }
 
-/// What `ndb_prune` reported about a failure, beyond the fact of it.
+/// What `ndb_prune` reported about a run, whether or not it finished.
 ///
-/// `ndb_prune` answers 0 or 1 and writes the real cause to stderr, which is
-/// gone by the time anyone reads a crash report — so a prune that fails in the
+/// `ndb_prune` answers 0 or 1 and writes everything else to stderr, which is
+/// gone by the time anyone reads a crash report — so a prune that failed in the
 /// field used to be undiagnosable without reproducing it with a console
-/// attached. This is that cause in a form that survives into a Sentry report:
-/// which of the function's failure sites fired, what LMDB said about it, and
-/// how far the copy had got.
-struct NdbPruneFailure: Equatable {
-    /// The failure site, e.g. `"dst_env_open"`.
+/// attached. This is the rest of what it knows: where it stopped if it did,
+/// what LMDB said about that, how far the copy got, and the two mapsizes.
+struct NdbPruneReport: Equatable {
+    /// Where it stopped, e.g. `"dst_env_open"`, or `"ok"` if it did not.
     ///
     /// Taken from `ndb_prune_phase_name` rather than mirrored into Swift, so
     /// adding a phase in C cannot leave a stale name here.
@@ -219,16 +218,24 @@ struct NdbPruneFailure: Equatable {
     /// spelling of ``phase``.
     let phaseCode: UInt32
 
+    /// Whether the run finished.
+    var succeeded: Bool { return phaseCode == NDB_PRUNE_OK.rawValue }
+
     /// The LMDB return code from the call that failed, or `0` where that call
     /// had none to give.
     let rc: Int32
 
-    /// The mapsize `ndb_prune` asked of the destination environment.
+    /// The mapsize `ndb_prune` asked of the destination environment, and the
+    /// source's own.
     ///
-    /// Worth carrying because it is the one input to the destination open that
-    /// nothing on our side chooses: `ndb_prune` takes it from the source's
-    /// `mdb_env_info`, so this is the only place it is visible at all.
+    /// Worth carrying because neither is an input anything on our side
+    /// chooses: `ndb_prune` derives the first from the source's own usage, so
+    /// this is the only place either is visible. A destination map as large as
+    /// the source's is how the second prune failed in the field — two 32 GiB
+    /// reservations in one process is at the iOS address space ceiling — so
+    /// these two numbers are the evidence that fix is holding.
     let destinationMapsizeBytes: UInt64
+    let sourceMapsizeBytes: UInt64
 
     /// How far the copy got before it stopped.
     let profilesCopied: Int
@@ -239,6 +246,7 @@ struct NdbPruneFailure: Equatable {
         self.phaseCode = err.phase.rawValue
         self.rc = err.rc
         self.destinationMapsizeBytes = err.dst_mapsize
+        self.sourceMapsizeBytes = err.src_mapsize
         self.profilesCopied = Int(err.profiles)
         self.notesCopied = Int(err.notes)
     }
@@ -252,12 +260,14 @@ struct NdbPruneFailure: Equatable {
     /// One line naming the site and the code — what a developer needs to tell
     /// which `fprintf` in `ndb_prune` fired, without the log it went to.
     var summary: String {
-        var line = "failed at \(phase)"
+        var line = succeeded ? "copied" : "failed at \(phase)"
         if let rcDescription {
             line += " (LMDB error \(rc): \(rcDescription))"
         }
         line += ", destination mapsize \(destinationMapsizeBytes) bytes"
-        line += ", after copying \(profilesCopied) profiles and \(notesCopied) notes"
+        line += " of a source mapsize of \(sourceMapsizeBytes)"
+        line += succeeded ? ", copying " : ", after copying "
+        line += "\(profilesCopied) profiles and \(notesCopied) notes"
         return line
     }
 
@@ -272,6 +282,7 @@ struct NdbPruneFailure: Equatable {
             "phase_code": String(phaseCode),
             "rc": String(rc),
             "destination_mapsize_bytes": String(destinationMapsizeBytes),
+            "source_mapsize_bytes": String(sourceMapsizeBytes),
             "profiles_copied": String(profilesCopied),
             "notes_copied": String(notesCopied),
         ]
@@ -284,12 +295,12 @@ struct NdbPruneFailure: Equatable {
 
 /// Errors from ``Ndb/prune(to:filters:)``.
 enum NdbPruneError: Error, LocalizedError {
-    case pruneFailed(path: String, failure: NdbPruneFailure)
+    case pruneFailed(path: String, report: NdbPruneReport)
 
     var errorDescription: String? {
         switch self {
-        case .pruneFailed(let path, let failure):
-            return "Failed to prune the database into \(path): \(failure.summary)."
+        case .pruneFailed(let path, let report):
+            return "Failed to prune the database into \(path): \(report.summary)."
         }
     }
 
@@ -297,8 +308,8 @@ enum NdbPruneError: Error, LocalizedError {
     /// reach one.
     var reportContext: [String: String] {
         switch self {
-        case .pruneFailed(let path, let failure):
-            return failure.reportContext.merging(["path": path], uniquingKeysWith: { current, _ in current })
+        case .pruneFailed(let path, let report):
+            return report.reportContext.merging(["path": path], uniquingKeysWith: { current, _ in current })
         }
     }
 }
@@ -328,10 +339,13 @@ extension Ndb {
     ///   - path: An **existing, empty** directory to write the pruned database
     ///     into. LMDB does not create it.
     ///   - filters: The keep-policy. Kept alive across the call.
-    func prune(to path: String, filters: NdbFilterArray) throws {
+    /// - Returns: What the prune did — the counts it copied and the mapsizes it
+    ///   used. Discardable; the failure case is a throw, not a return value.
+    @discardableResult
+    func prune(to path: String, filters: NdbFilterArray) throws -> NdbPruneReport {
         // `filters` owns the allocation `filters.unsafePointer` points into, so
         // it has to outlive the call rather than just its last use.
-        try withExtendedLifetime(filters, {
+        return try withExtendedLifetime(filters, {
             try prune(to: path, filterStorage: filters.unsafePointer, count: filters.count)
         })
     }
@@ -341,13 +355,14 @@ extension Ndb {
     ///
     /// See the `NdbFilterArray` overload for the details; this one exists for
     /// callers that already hold ``NdbFilter`` objects.
-    func prune(to path: String, filters: [NdbFilter]) throws {
+    @discardableResult
+    func prune(to path: String, filters: [NdbFilter]) throws -> NdbPruneReport {
         // `NdbFilter.ndbFilter` copies the struct out, which gives us the
         // contiguous array C wants — but the copy is shallow, its `elem_buf`
         // still pointing into the originating NdbFilter's own allocation. So
         // every NdbFilter has to stay alive for the whole prune, not just until
         // its struct has been copied.
-        try withExtendedLifetime(filters, {
+        return try withExtendedLifetime(filters, {
             var filterStructs = filters.map(\.ndbFilter)
             return try filterStructs.withUnsafeMutableBufferPointer({ buffer in
                 // A nil base address only happens when there are no filters, and
@@ -357,19 +372,20 @@ extension Ndb {
         })
     }
 
-    private func prune(to path: String, filterStorage: UnsafeMutablePointer<ndb_filter>?, count: Int) throws {
-        try withNdb({
+    private func prune(to path: String, filterStorage: UnsafeMutablePointer<ndb_filter>?, count: Int) throws -> NdbPruneReport {
+        return try withNdb({
             try path.withCString({ pathCString in
-                // `ndb_prune` fills this in either way, so the copied counts are
-                // readable on the success path too.
+                // `ndb_prune` fills this in either way, so the same report
+                // covers the success path.
                 var err = ndb_prune_error()
-                guard ndb_prune(self.ndb.ndb, pathCString, filterStorage, Int32(count), &err) == 1 else {
-                    let failure = NdbPruneFailure(err)
-                    Log.error("ndb_prune failed: %@", for: .storage, failure.summary)
-                    throw NdbPruneError.pruneFailed(path: path, failure: failure)
+                let ok = ndb_prune(self.ndb.ndb, pathCString, filterStorage, Int32(count), &err) == 1
+                let report = NdbPruneReport(err)
+                guard ok else {
+                    Log.error("ndb_prune failed: %@", for: .storage, report.summary)
+                    throw NdbPruneError.pruneFailed(path: path, report: report)
                 }
-                Log.info("ndb_prune copied %d profiles and %d notes", for: .storage,
-                         Int(err.profiles), Int(err.notes))
+                Log.info("ndb_prune %@", for: .storage, report.summary)
+                return report
             })
         })
     }

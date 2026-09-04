@@ -9159,6 +9159,7 @@ const char *ndb_prune_phase_name(enum ndb_prune_phase phase)
 	case NDB_PRUNE_OK:			return "ok";
 	case NDB_PRUNE_SCRATCH_ALLOC:		return "scratch_alloc";
 	case NDB_PRUNE_SRC_ENV_INFO:		return "src_env_info";
+	case NDB_PRUNE_SRC_ENV_STAT:		return "src_env_stat";
 	case NDB_PRUNE_SRC_TXN_BEGIN:		return "src_txn_begin";
 	case NDB_PRUNE_DST_TXN_BEGIN:		return "dst_txn_begin";
 	case NDB_PRUNE_PROFILE_CURSOR:		return "profile_cursor";
@@ -9188,6 +9189,8 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 	MDB_cursor *cur;
 	MDB_val k, v;
 	MDB_envinfo info;
+	MDB_stat src_stat;
+	size_t dst_mapsize, src_used;
 	struct ndb_txn src_txn, dst_txn;
 	secp256k1_context *secp;
 	size_t scratch_size;
@@ -9223,12 +9226,47 @@ int ndb_prune(struct ndb *ndb, const char *output_path,
 		return 0;
 	}
 
-	// The destination is created with the source's mapsize, so it is worth
-	// reporting: it is not a number the caller chose or can otherwise see.
-	err->dst_mapsize = (uint64_t)info.me_mapsize;
+	err->src_mapsize = (uint64_t)info.me_mapsize;
+
+	if ((rc = mdb_env_stat(ndb->lmdb.env, &src_stat))) {
+		fprintf(stderr, "ndb_prune: mdb_env_stat failed: %s\n", mdb_strerror(rc));
+		err->phase = NDB_PRUNE_SRC_ENV_STAT;
+		err->rc = rc;
+		free(scratch);
+		return 0;
+	}
+
+	// Size the destination map from what the source actually *uses*, not from
+	// the source's mapsize.
+	//
+	// Taking the mapsize — as this used to — asks the process for a second
+	// reservation as large as the live database's. On iOS that is a 32 GiB
+	// map on top of the 32 GiB already mapped, which sits right at the
+	// per-process address space ceiling: it succeeds until it does not, and
+	// then mdb_env_open fails with ENOMEM and the prune dies having copied
+	// nothing. That is exactly what a second prune did in the field, once the
+	// live database was itself a prune output.
+	//
+	// Every note the destination receives is one the source already holds, so
+	// the source's pages in use bound the output, and the half again on top
+	// covers the rewrite re-indexing them differently. Capped at the source's
+	// mapsize, which is the most LMDB could ever have needed for this data,
+	// and floored so a nearly empty source still leaves room to write.
+	//
+	// This does not cap what the pruned database may later grow to: whoever
+	// opens it next sets its mapsize, and LMDB takes the larger of that and
+	// what the file already commits.
+	src_used = (info.me_last_pgno + 1) * (size_t)src_stat.ms_psize;
+	dst_mapsize = src_used + src_used / 2;
+	if (dst_mapsize < (size_t)NDB_PRUNE_MIN_DST_MAPSIZE)
+		dst_mapsize = NDB_PRUNE_MIN_DST_MAPSIZE;
+	if (dst_mapsize > info.me_mapsize)
+		dst_mapsize = info.me_mapsize;
+
+	err->dst_mapsize = (uint64_t)dst_mapsize;
 
 	// create destination lmdb environment
-	if (!ndb_init_lmdb(output_path, &dst_lmdb, info.me_mapsize, &err->phase,
+	if (!ndb_init_lmdb(output_path, &dst_lmdb, dst_mapsize, &err->phase,
 			   &err->rc)) {
 		fprintf(stderr, "ndb_prune: failed to init destination lmdb\n");
 		// ndb_init_lmdb closed its own env, so there is nothing here to
