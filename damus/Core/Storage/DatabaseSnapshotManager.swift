@@ -32,14 +32,24 @@ actor DatabaseSnapshotManager {
     private static let lastSnapshotDateKey = "lastDatabaseSnapshotDate"
     
     private let ndb: Ndb
+
+    /// The logged-in user's pubkey.
+    ///
+    /// Used to scope the personal lists we snapshot to the ones that belong to us. See
+    /// `createSnapshotFilters`.
+    private let our_pubkey: Pubkey
+
     private var snapshotTimerTask: Task<Void, Never>? = nil
     var snapshotTimerTickCount: Int = 0
     var snapshotCount: Int = 0
     
     /// Initialize the snapshot manager with a NostrDB instance
-    /// - Parameter ndb: The NostrDB instance to snapshot
-    init(ndb: Ndb) {
+    /// - Parameters:
+    ///   - ndb: The NostrDB instance to snapshot
+    ///   - our_pubkey: The logged-in user's pubkey, used to scope the personal lists we copy
+    init(ndb: Ndb, our_pubkey: Pubkey) {
         self.ndb = ndb
+        self.our_pubkey = our_pubkey
     }
     
     // MARK: - Periodic tasks management
@@ -257,16 +267,21 @@ actor DatabaseSnapshotManager {
         Log.info("Copied %d notes to snapshot database", for: .storage, totalNotesCopied)
     }
     
-    /// Creates filters for querying profiles, mute lists, and contact lists.
+    /// Creates filters for querying profiles, and our own mute list and contact list.
     private func createSnapshotFilters() throws -> [NdbFilter] {
-        // Filter for profile metadata (kind 0)
+        // Filter for profile metadata (kind 0). Any pubkey's profile can turn up as the sender of
+        // a push notification or as a mention being rendered, so these are not scoped to us.
         let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
         
-        // Filter for contact lists (kind 3)
-        let contactsFilter = try NdbFilter(from: NostrFilter(kinds: [.contacts]))
+        // Contact lists (kind 3) and mute lists (kind 10000) are only ever consulted for the
+        // logged-in user — "is this note from someone I follow" and "is this note muted". Other
+        // people's lists are dead weight in the snapshot, and expensive dead weight: a contact
+        // list costs roughly 90 bytes per follow once the tag index is counted, so a database
+        // that has cached a few hundred of them contributes tens of megabytes that nothing in
+        // any extension reads. Scope both to our own pubkey.
+        let contactsFilter = try NdbFilter(from: NostrFilter(kinds: [.contacts], authors: [our_pubkey]))
         
-        // Filter for mute lists (kind 10000)
-        let muteListFilter = try NdbFilter(from: NostrFilter(kinds: [.mute_list]))
+        let muteListFilter = try NdbFilter(from: NostrFilter(kinds: [.mute_list], authors: [our_pubkey]))
         
         return [profileFilter, contactsFilter, muteListFilter]
     }

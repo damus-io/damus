@@ -79,7 +79,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
         let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
-        self.snapshotManager = .init(ndb: ndb)
+        self.snapshotManager = .init(ndb: ndb, our_pubkey: keypair.pubkey)
     }
     
     @MainActor

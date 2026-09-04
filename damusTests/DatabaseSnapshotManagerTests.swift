@@ -91,7 +91,7 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         self.testNdb = Ndb(path: test_ndb_dir(), owns_db_file: true)!
         
         // Create the manager
-        manager = DatabaseSnapshotManager(ndb: self.testNdb)
+        manager = DatabaseSnapshotManager(ndb: self.testNdb, our_pubkey: test_keypair.pubkey)
         
         // Clear UserDefaults for consistent testing
         UserDefaults.standard.removeObject(forKey: "lastDatabaseSnapshotDate")
@@ -408,6 +408,79 @@ class DatabaseSnapshotManagerTests: XCTestCase {
         await fulfillment(of: [allNotesAreSnapshottedToSnapshotDB], timeout: 5)
         let snapshottedNoteIds = await snapshotTask.value
         XCTAssertEqual(expectedSnapshottedNoteIds, snapshottedNoteIds)
+    }
+
+    /// Contact lists and mute lists are only ever consulted for the logged-in user, so the
+    /// snapshot must not carry other people's copies — on a real database those are the single
+    /// largest contributor to snapshot size, and nothing reads them.
+    func testPerformSnapshot_ExcludesOtherPeoplesContactAndMuteLists() async throws {
+        // Given: our own lists, plus a stranger's lists and profile
+        let stranger = generate_new_keypair()
+
+        let ourContactsNote = NostrEvent(content: "", keypair: test_keypair, kind: NostrKind.contacts.rawValue)!
+        let ourMuteListNote = NostrEvent(content: "", keypair: test_keypair, kind: NostrKind.mute_list.rawValue)!
+        let strangerProfileNote = NostrEvent(content: "{\"name\":\"Stranger\"}", keypair: stranger.to_keypair(), kind: NostrKind.metadata.rawValue)!
+        let strangerContactsNote = NostrEvent(content: "", keypair: stranger.to_keypair(), kind: NostrKind.contacts.rawValue)!
+        let strangerMuteListNote = NostrEvent(content: "", keypair: stranger.to_keypair(), kind: NostrKind.mute_list.rawValue)!
+
+        let profileFilter = try NdbFilter(from: NostrFilter(kinds: [.metadata]))
+        let contactsFilter = try NdbFilter(from: NostrFilter(kinds: [.contacts]))
+        let muteListFilter = try NdbFilter(from: NostrFilter(kinds: [.mute_list]))
+        let allFilters = [profileFilter, contactsFilter, muteListFilter]
+
+        let ingestedNotes = [ourContactsNote, ourMuteListNote, strangerProfileNote, strangerContactsNote, strangerMuteListNote]
+
+        // The stranger's profile is still expected: any pubkey can be the sender of a push
+        // notification, so kind 0 stays unscoped. Only their personal lists are dropped.
+        let expectedSnapshottedNotes = [ourContactsNote, ourMuteListNote, strangerProfileNote]
+
+        let expectedIngestedNoteIds = Set(ingestedNotes.map { $0.id })
+        let expectedSnapshottedNoteIds = Set(expectedSnapshottedNotes.map { $0.id })
+
+        let allNotesAreIngestedInSourceDB = XCTestExpectation(description: "All notes are ingested in source DB")
+        let ingestTask = collectNoteIds(
+            from: testNdb,
+            filters: allFilters,
+            expectedNoteIds: expectedIngestedNoteIds,
+            expectation: allNotesAreIngestedInSourceDB
+        )
+
+        for note in ingestedNotes {
+            try testNdb.add(event: note)
+        }
+
+        await fulfillment(of: [allNotesAreIngestedInSourceDB], timeout: 5)
+        let ingestedNoteIds = await ingestTask.value
+        XCTAssertEqual(expectedIngestedNoteIds, ingestedNoteIds)
+
+        guard let snapshotPath = Ndb.snapshot_db_path else {
+            XCTFail("Snapshot path should be available")
+            return
+        }
+
+        // When: Creating a snapshot
+        try await manager.performSnapshot()
+
+        guard let snapshotNdb = Ndb(path: snapshotPath, owns_db_file: false) else {
+            XCTFail("Should be able to open snapshot database")
+            return
+        }
+        defer { snapshotNdb.close() }
+
+        // Then: the snapshot holds our lists and every profile, but neither of the stranger's lists
+        let allNotesAreSnapshotted = XCTestExpectation(description: "Expected notes are snapshotted")
+        let snapshotTask = collectNoteIds(
+            from: snapshotNdb,
+            filters: allFilters,
+            expectedNoteIds: expectedSnapshottedNoteIds,
+            expectation: allNotesAreSnapshotted
+        )
+
+        await fulfillment(of: [allNotesAreSnapshotted], timeout: 5)
+        let snapshottedNoteIds = await snapshotTask.value
+        XCTAssertEqual(expectedSnapshottedNoteIds, snapshottedNoteIds)
+        XCTAssertFalse(snapshottedNoteIds.contains(strangerContactsNote.id), "Another user's contact list must not be snapshotted")
+        XCTAssertFalse(snapshottedNoteIds.contains(strangerMuteListNote.id), "Another user's mute list must not be snapshotted")
     }
     
     func testPerformSnapshot_HandlesEmptyDatabase() async throws {
