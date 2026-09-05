@@ -19,24 +19,39 @@ struct NostrPost {
     }
     
     func to_event(keypair: FullKeypair, clientTag: [String]? = nil) -> NostrEvent? {
+        let rendered = self.rendered(clientTag: clientTag)
+        return NostrEvent(content: rendered.content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: rendered.tags)
+    }
+
+    /// The content and tags this post would carry once it became an event, without building one.
+    ///
+    /// Split out of ``to_event(keypair:clientTag:)`` because a private reply
+    /// (``NIP59/createPrivateReply(_:replyingTo:keypair:createdAt:)``) needs exactly this — the same
+    /// parsed content, the same NIP-10 reply tags, the same hashtag and url tags a public reply would
+    /// have had — while deliberately never becoming a ``NostrEvent`` at all. Sharing the rendering is
+    /// what makes "a private reply is the reply it could have been" true by construction rather than
+    /// by a second implementation that drifts.
+    func rendered(clientTag: [String]? = nil) -> (content: String, tags: [[String]]) {
         let post_blocks = self.parse_blocks()
         let post_tags = self.make_post_tags(post_blocks: post_blocks, tags: self.tags)
         let content = post_tags.blocks
             .map(\.asString)
             .joined(separator: "")
-        
+
         if self.kind == .highlight {
             var new_tags = post_tags.tags.filter({ $0[safe: 0] != "comment" })
             if content.count > 0 {
                 new_tags.append(["comment", content])
             }
             addClientTagIfNeeded(clientTag, to: &new_tags)
-            return NostrEvent(content: self.content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: new_tags)
+            // A highlight's content is the quoted passage verbatim; the parsed content became the
+            // `comment` tag just above.
+            return (self.content, new_tags)
         }
-        
+
         var final_tags = post_tags.tags
         addClientTagIfNeeded(clientTag, to: &final_tags)
-        return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: self.kind.rawValue, tags: final_tags)
+        return (content, final_tags)
     }
     
     func parse_blocks() -> [Block] {
