@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-TARGET="${1:-origin/master}"
+TARGET="${1:-github/master}"
 
 # --- fetch the remote if the target is a remote-tracking ref -----------------
 # A target of the form <remote>/<branch> where <remote> is a configured remote
