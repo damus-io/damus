@@ -18,8 +18,9 @@ library, transcoded to a 4-rendition H.264 HLS ladder, and played back
 adaptively and right-way-up in `AVPlayer` from an unauthenticated CDN URL, with
 zero stalls. The pipe works as the epic describes it.
 
-Two things are **not** done, both flagged below: the `video.damus.io` DNS record
-(jb55 has to add it) and a captured webhook payload (needs a public ingress).
+`video.damus.io` is live on a Let's Encrypt certificate and serves it publicly.
+One thing is **not** done, flagged below: a captured webhook payload, which
+needs a public ingress.
 
 ## The two API scopes
 
@@ -72,32 +73,33 @@ that iOS (embedding a player with a referrer) might not.
 `PlayerTokenAuthenticationEnabled` is `false` by default, which is what we want
 — that is the separate token-auth feature the epic explicitly rejected.
 
-## Pull zone and DNS — **action required**
+## Pull zone and DNS
 
 Creating a Stream library **auto-creates its own pull zone**; you do not create
 one. Ours is type `1` (Stream), bound to the library, with a system hostname
 `{PULL_ZONE}.b-cdn.net`. The existing unrelated `badnerds-media` zone was not
 touched.
 
-`video.damus.io` was added to the pull zone's hostnames (`HTTP 204`). The
-certificate request then failed, correctly:
+`video.damus.io` was added to that pull zone's hostnames (`HTTP 204`). Before
+DNS existed the certificate request failed exactly as it should:
 
 ```
 HTTP 400 {"ErrorKey":"pullzone.certificate_request_failed",
           "Message":"The domain video.damus.io is not pointing to our servers."}
 ```
 
-**jb55 needs to add one DNS record**, after which the free certificate can be
-requested and `video.damus.io` goes live:
+jb55 then added the record:
 
 ```
 video.damus.io.  CNAME  {PULL_ZONE}.b-cdn.net.
 ```
 
-(The real hostname is in the headway comment on the card, not in this repo.)
-`video.damus.io` currently resolves to nothing, so everything below was verified
-against the `.b-cdn.net` hostname on the same pull zone — same zone, same
-config, same cache. The URL shape in the epic is confirmed:
+after which `loadFreeCertificate` succeeded. The hostname now carries a Let's
+Encrypt certificate (`CN=video.damus.io`, valid to 2026-12-04) and `ForceSSL` is
+on, so plain `http://` answers `301` to `https://`. **`video.damus.io` is live**
+and serves the spike video publicly and unauthenticated.
+
+The URL shape in the epic is confirmed:
 
 ```
 https://{pull-zone}/{video-id}/playlist.m3u8
@@ -260,22 +262,25 @@ phase is a spike.
 ## Playback in AVPlayer
 
 Driven headlessly through `AVPlayerItem` + `AVPlayerItemVideoOutput` against the
-public URL (HLS exposes no asset tracks and `AVAssetImageGenerator` refuses HLS,
-so orientation has to come from `presentationSize` and real decoded buffers):
+public `https://video.damus.io/{video-id}/playlist.m3u8` URL (HLS exposes no
+asset tracks and `AVAssetImageGenerator` refuses HLS, so orientation has to come
+from `presentationSize` and real decoded buffers):
 
 ```
-item.status=readyToPlay after 1.25s
+item.status=readyToPlay after 1.5s
 presentationSize=360x640  -> PORTRAIT
 duration=93.133s
 -- preferredPeakBitRate=800000 --   currentTime=13.9s, decoded 360x640 PORTRAIT
--- cap lifted --                    currentTime=34.1s, decoded 1080x1920 PORTRAIT
+-- cap lifted --                    currentTime=34.0s, decoded 1080x1920 PORTRAIT
 access log indicatedBitrates: [1504884, 5078831, 8119498]
 ADAPTIVE SWITCHING: YES     stalls: 0
 ```
 
 Three distinct renditions were selected in one session (360p → 720p → 1080p),
 playback advanced in real time, every decoded buffer was portrait, and there
-were no stalls. Adaptive HLS from a public CDN URL works.
+were no stalls. Adaptive HLS from the public `video.damus.io` URL works, over
+the Let's Encrypt certificate, with no credentials of any kind on the request —
+which is the whole premise the epic rests on.
 
 ## 720p vs 1080p — the open decision
 
@@ -336,8 +341,6 @@ change that only affects future encodes.
 
 ## Not done
 
-- **`video.damus.io` DNS.** One CNAME, above. Everything else is staged and the
-  certificate can be issued the moment it resolves.
 - **A captured webhook payload.** `WebhookUrl` is still `null`. Capturing a real
   one needs a publicly reachable ingress (an ngrok tunnel was the plan) and that
   was declined by the sandbox, so rather than guess at a shape Phase 5 would be
