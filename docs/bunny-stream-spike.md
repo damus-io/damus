@@ -418,7 +418,8 @@ clock. Raw:
 [`webhook-failure-payloads.jsonl`](bunny-stream-spike/webhook-failure-payloads.jsonl) ·
 [`webhook-failure-headers.txt`](bunny-stream-spike/webhook-failure-headers.txt) ·
 [status 5 object](bunny-stream-spike/video-object-status5-error.json) ·
-[status 4 from a damaged source](bunny-stream-spike/video-object-status4-partial-source.json).
+[status 4 from a damaged source](bunny-stream-spike/video-object-status4-partial-source.json) ·
+[playable duration of that damaged encode](bunny-stream-spike/partial-encode-playable-duration.log).
 
 Synthetic files only. Six kinds of bad input were tried; between them they
 produce **three** outcomes, and the one that matters most is not the failure.
@@ -515,6 +516,9 @@ And it lies about its length:
 video object:            length = 30      (the container's claim)
 actual playable HLS:     16.7 s           (summed EXTINF, 360p rendition)
 ```
+
+Manifest, ladder and both measurements:
+[`partial-encode-playable-duration.log`](bunny-stream-spike/partial-encode-playable-duration.log).
 
 **`status == 4` does not mean the encode was clean, and `length` on a damaged
 source is the source's claim rather than what Bunny produced.** A pipeline that

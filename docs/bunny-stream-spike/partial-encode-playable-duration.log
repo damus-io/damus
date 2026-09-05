@@ -1,0 +1,55 @@
+Does a status-4 "partial" encode's reported `length` match what is actually playable?
+
+Measured on the truncated-but-structurally-valid mp4 ({GUID_PARTIAL_2}) — a 30 s
+1280x720 h264 clip written with a faststart moov, then cut off at 56% of the file,
+so the container header advertises 30 s of media that is not all present.
+
+API video object said:
+
+    length                30
+    width x height        1280 x 720
+    framerate             30
+    availableResolutions  480p,720p,360p
+    storageSize           16940354
+    encodeProgress        100
+    status                4
+
+Master playlist (https://{PULL_ZONE_HOST}/{GUID_PARTIAL_2}/playlist.m3u8) — a full,
+normal-looking ladder, no indication anything is wrong:
+
+    #EXTM3U
+    #EXT-X-VERSION:3
+
+    #EXT-X-STREAM-INF:BANDWIDTH=590857,AVERAGE-BANDWIDTH=574582,CODECS="avc1.64001e,mp4a.40.2",RESOLUTION=640x360,CLOSED-CAPTIONS=NONE
+    360p/video.m3u8
+    #EXT-X-STREAM-INF:BANDWIDTH=1003168,AVERAGE-BANDWIDTH=973097,CODECS="avc1.64001f,mp4a.40.2",RESOLUTION=854x480,CLOSED-CAPTIONS=NONE
+    480p/video.m3u8
+    #EXT-X-STREAM-INF:BANDWIDTH=2986192,AVERAGE-BANDWIDTH=2960268,CODECS="avc1.64001f,mp4a.40.2",RESOLUTION=1280x720,CLOSED-CAPTIONS=NONE
+    720p/video.m3u8
+
+Summing EXTINF over the 360p media playlist:
+
+    sum(EXTINF) = 16.70 s
+
+So `length` is 30 and the video is 16.70 s. `length` is read from the source
+container's declared duration, not from what the encoder produced, and on a damaged
+source the two disagree by the whole missing tail (here 44%).
+
+--------------------------------------------------------------------------------
+`availableResolutions` ordering is not stable
+
+Two encodes of the same truncated file, same library, minutes apart:
+
+    run 1  ->  360p,480p,720p
+    run 2  ->  480p,720p,360p
+
+Same three renditions, different order. The success-path capture
+(encode-status-progression.log) happened to fill in low-to-high, which reads like a
+guarantee; it is not one. Parse this field as a set.
+
+--------------------------------------------------------------------------------
+`transcodingMessages[].value` is truncated by Bunny
+
+The level-2 diagnostic's `value` carries raw encoder stderr and is cut mid-token at
+255 characters ("...[h264 @ 0x...] Invalid N"). Do not expect to parse a complete
+error out of it, and do not assume the last line is the significant one.
