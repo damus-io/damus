@@ -47,10 +47,10 @@ struct EventActionBar: View {
         }
     }
     
-    /// What this note may be made to do. See ``NoteActions/available(on:)`` — every button below
+    /// What this note may be made to do. See ``NoteActions/available(on:keypair:)`` — every button below
     /// except reply publishes an event of its own, so for a note that came out of a gift wrap the
     /// button is absent rather than present and refused.
-    var actions: NoteActions { NoteActions.available(on: event) }
+    var actions: NoteActions { NoteActions.available(on: event, keypair: damus_state.keypair) }
 
     var show_like: Bool {
         if damus_state.settings.onlyzaps_mode {
@@ -164,7 +164,9 @@ struct EventActionBar: View {
     
     var swipe_action_menu_content: some View {
         Group {
-            self.reply_swipe_button
+            if actions.contains(.reply) {
+                self.reply_swipe_button
+            }
             if actions.contains(.repost) {
                 self.repost_swipe_button
             }
@@ -182,7 +184,9 @@ struct EventActionBar: View {
             if actions.contains(.repost) {
                 self.repost_swipe_button
             }
-            self.reply_swipe_button
+            if actions.contains(.reply) {
+                self.reply_swipe_button
+            }
         }
     }
     
@@ -195,7 +199,7 @@ struct EventActionBar: View {
         let should_hide_zap = !actions.contains(.zap) || (hide_items_without_activity && zap_model.zap_total == 0)
         let should_hide_share_button = !actions.contains(.share) || hide_items_without_activity
         // Only render the bar if at least one action is visible; avoids empty overlays/dots.
-        let has_any_action = (!should_hide_chat_bubble && damus_state.keypair.privkey != nil)
+        let has_any_action = (!should_hide_chat_bubble && actions.contains(.reply))
             || !should_hide_repost
             || (show_like && !should_hide_reactions)
             || (!should_hide_zap && self.lnurl != nil)
@@ -204,7 +208,7 @@ struct EventActionBar: View {
         return Group {
             if has_any_action {
                 HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
-                    if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
+                    if actions.contains(.reply) && !should_hide_chat_bubble {
                         self.reply_button
                     }
                     

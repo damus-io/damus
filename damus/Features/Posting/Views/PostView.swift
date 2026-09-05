@@ -244,10 +244,15 @@ struct PostView: View {
     /// meaningless — there is no parent author to address it to — and the seal has to be signed by us,
     /// so a pubkey-only login cannot send one at all. Both conditions are answered here rather than at
     /// send time, so the toggle can never be flipped into a state that cannot send.
+    ///
+    /// Who it is, is ``NIP59/privateReplyAudience(replyingTo:as:)`` — the same rule the builder uses,
+    /// so the name in the lock row is the name the reply actually goes to. It is not simply the
+    /// parent's author: replying to a private reply of our own continues the conversation with the
+    /// person it was addressed to.
     var private_reply_recipient: Pubkey? {
         guard case .replying_to(let replying_to) = action else { return nil }
-        guard damus_state.keypair.to_full() != nil else { return nil }
-        return replying_to.pubkey
+        guard let keypair = damus_state.keypair.to_full() else { return nil }
+        return NIP59.privateReplyAudience(replyingTo: replying_to, as: keypair.pubkey)
     }
 
     /// Whether this composer offers the lock at all.
@@ -255,10 +260,27 @@ struct PostView: View {
         return private_reply_recipient != nil
     }
 
+    /// Whether the lock is on and cannot be turned off: the note being replied to is itself a private
+    /// reply.
+    ///
+    /// This is the sharpest foot-gun in the feature. The parent is a rumor whose content two people
+    /// have; a public reply to it would carry an `e` tag to an id nobody else can resolve and, in
+    /// practice, the user paraphrasing what they just read. So it is not a default the user can
+    /// change — it is a property of what they are replying to.
+    ///
+    /// Only the *direct* parent is consulted. A public note under a private ancestor is replied to
+    /// publicly, because the note being answered is already public; privacy belongs to a message, not
+    /// to a thread. See ``NIP59/privateReplyAudience(replyingTo:as:)``, which reads the audience by
+    /// the same rule.
+    var private_reply_required: Bool {
+        guard case .replying_to(let replying_to) = action else { return false }
+        return replying_to.is_private_reply
+    }
+
     /// Whether the note about to be sent is a private reply. Distinct from ``is_private_reply``, which
     /// is only the toggle's position: this is the one the send path and the button label ask.
     var sending_privately: Bool {
-        return can_reply_privately && is_private_reply
+        return can_reply_privately && (is_private_reply || private_reply_required)
     }
 
     func send_post() async {
@@ -285,6 +307,13 @@ struct PostView: View {
     }
 
     var posting_disabled: Bool {
+        // A pubkey-only login can read a private reply but cannot seal one, and there is no public
+        // reply for this composer to fall back to. The reply affordance is already absent for that
+        // case (``NoteActions/available(on:keypair:)``), so this composer should be unreachable —
+        // but `.compose` is a notification anyone can post, and the failure it would otherwise have
+        // is the one failure this feature must never have.
+        if private_reply_required && !can_reply_privately { return true }
+
         switch action {
             case .highlighting(_):
                 return false
@@ -367,53 +396,68 @@ struct PostView: View {
         
     }
 
-    /// The lock, and the audience it implies, stated in both positions.
+    /// The lock, and the audience it implies, stated in every position it can be in.
     ///
     /// Deliberately a full-width row that names *who* rather than a switch labelled "private". The
     /// worst outcome this feature can have is a user believing a note is private when it is public,
     /// and the second worst is the reverse — so the composer answers the question in words, while they
     /// are still typing, in whichever state the lock is in.
+    ///
+    /// When ``private_reply_required`` the row is not a control at all: no button, no tap target, and
+    /// a second line saying why. A switch that snapped back would teach the user that the lock is
+    /// theirs to set and that the app disagreed with them this once; a fixed statement says the
+    /// truthful thing, which is that this reply's audience was decided by the note they are answering.
     @ViewBuilder
     var PrivacyBar: some View {
         if let recipient = private_reply_recipient {
             let recipient_name = event_author_name(profiles: damus_state.profiles, pubkey: recipient)
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    is_private_reply.toggle()
-                }
-                post_changed(post: post, media: uploadedMedias)
-            }, label: {
-                HStack(spacing: 8) {
-                    Image(systemName: is_private_reply ? "lock.fill" : "lock.open")
-                    if is_private_reply {
-                        Text("Only you and \(recipient_name) can see this reply", comment: "Label in the note composer stating that a reply will be encrypted and visible only to the person being replied to.")
-                    } else {
-                        Text("Anyone can see this reply", comment: "Label in the note composer stating that a reply will be posted publicly.")
+            if private_reply_required {
+                privacy_bar_label(recipient_name: recipient_name)
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
+            } else {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        is_private_reply.toggle()
                     }
-                    Spacer()
-                }
-                .font(.footnote)
-                // The same success palette ``PrivateReplyBadge`` draws the note's own lock in, and
-                // deliberately not the purple used elsewhere: the composer is a preview of what the
-                // sent note will look like, so the locked state here and the badge there have to read
-                // as one thing rather than two features that both involve a lock.
-                .foregroundColor(is_private_reply ? DamusColors.success : .secondary)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(is_private_reply ? DamusColors.successQuaternary : Color.clear)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(is_private_reply ? DamusColors.successBorder : Color.clear, lineWidth: 1)
-                )
-                .contentShape(Rectangle())
-            })
-            .buttonStyle(PlainButtonStyle())
-            .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
-            .accessibilityAddTraits(is_private_reply ? [.isSelected] : [])
+                    post_changed(post: post, media: uploadedMedias)
+                }, label: {
+                    privacy_bar_label(recipient_name: recipient_name)
+                        .contentShape(Rectangle())
+                })
+                .buttonStyle(PlainButtonStyle())
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
+                .accessibilityAddTraits(sending_privately ? [.isSelected] : [])
+            }
         }
+    }
+
+    /// The contents of ``PrivacyBar``, drawn the same whether or not it is tappable — the state it
+    /// reports is what matters, not whether the user put it there.
+    func privacy_bar_label(recipient_name: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 8) {
+                Image(systemName: sending_privately ? "lock.fill" : "lock.open")
+                if sending_privately {
+                    Text("Only you and \(recipient_name) can see this reply", comment: "Label in the note composer stating that a reply will be encrypted and visible only to the person being replied to.")
+                } else {
+                    Text("Anyone can see this reply", comment: "Label in the note composer stating that a reply will be posted publicly.")
+                }
+                Spacer()
+            }
+            if private_reply_required {
+                Text("Replies to a private note are always private", comment: "Explanation in the note composer for why a reply cannot be made public.")
+                    .font(.caption)
+                    .opacity(0.8)
+            }
+        }
+        .font(.footnote)
+        // The same success palette ``PrivateReplyBadge`` draws the note's own lock in, and
+        // deliberately not the purple used elsewhere: the composer is a preview of what the
+        // sent note will look like, so the locked state here and the badge there have to read
+        // as one thing rather than two features that both involve a lock.
+        .foregroundColor(sending_privately ? DamusColors.success : .secondary)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
     }
     
     func isEmpty() -> Bool {

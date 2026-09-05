@@ -51,10 +51,10 @@ struct MenuItems: View {
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
 
-    /// What this note may be made to do. See ``NoteActions/available(on:)`` — for a private reply
+    /// What this note may be made to do. See ``NoteActions/available(on:keypair:)`` — for a private reply
     /// or a DM most of this menu republishes a note that must never leave its gift wrap, so the
     /// items are absent rather than present and refused.
-    var actions: NoteActions { NoteActions.available(on: event) }
+    var actions: NoteActions { NoteActions.available(on: event, keypair: damus_state.keypair) }
     
     init(damus_state: DamusState, event: NostrEvent, target_pubkey: Pubkey, profileModel: ProfileModel) {
         let bookmarked = damus_state.bookmarks.isBookmarked(event)

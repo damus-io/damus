@@ -18,7 +18,8 @@ import Foundation
 /// - Parameters:
 ///   - post: the reply as `build_post` produced it, identical to what the public path would have
 ///     signed.
-///   - parent: the note being replied to. Its author is the audience.
+///   - parent: the note being replied to. Who the reply is addressed to is read off it by
+///     ``NIP59/privateReplyAudience(replyingTo:as:)``.
 ///   - keypair: our own keys, in full — the seal has to be signed by us.
 /// - Returns: whether the reply was built and handed to the publish path. `false` means nothing was
 ///   sent and the composer should stay open with the user's text in it.
@@ -59,10 +60,12 @@ func send_private_reply(_ post: NostrPost,
     await damus_state.nostrNetwork.publishGiftWrap(reply.giftWrapToSelf, to: ourInboxRelays)
 
     if let wrapToReceiver = reply.giftWrapToReceiver {
-        // `nil` only when replying to ourselves, where the two copies are the same copy. Their inbox
-        // list is `nil` when they have published no kind-10050, which is still the common case; the
-        // publish path falls back to our own write relays for it.
-        let theirInboxRelays = await userRelayList.fetchDMInboxRelays(for: parent.pubkey)
+        // `nil` only when replying to ourselves, where the two copies are the same copy. The audience
+        // rather than `parent.pubkey`, because replying to a private reply of our own continues the
+        // conversation with the person it was addressed to, not with ourselves. Their inbox list is
+        // `nil` when they have published no kind-10050, which is still the common case; the publish
+        // path falls back to our own write relays for it.
+        let theirInboxRelays = await userRelayList.fetchDMInboxRelays(for: reply.audience)
         await damus_state.nostrNetwork.publishGiftWrap(wrapToReceiver, to: theirInboxRelays)
     }
 

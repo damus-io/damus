@@ -22,13 +22,13 @@ import Foundation
 /// (``PrivateReplyBadge``).
 ///
 /// This is a value rather than a set of `if`s scattered across two view files so that the decision
-/// is testable without a view: `NoteActions.available(on:)` is exactly what the menu and the action
+/// is testable without a view: `NoteActions.available(on:keypair:)` is exactly what the menu and the action
 /// bar are built from, so a test on it is a test on the built menu.
 struct NoteActions: OptionSet {
     let rawValue: UInt32
 
-    /// Reply. Always available — a reply to a private note is itself private, which is the
-    /// composer's job rather than this one's.
+    /// Reply. A reply to a private note is itself private, which is the composer's job rather than
+    /// this one's — but signing is not, see ``available(on:keypair:)``.
     static let reply = NoteActions(rawValue: 1 << 0)
     /// Boost (kind 6) and quote (a kind 1 carrying an `nevent`), the two halves of ``RepostAction``.
     static let repost = NoteActions(rawValue: 1 << 1)
@@ -52,9 +52,9 @@ struct NoteActions: OptionSet {
         .reply, .repost, .like, .zap, .share, .broadcast, .copyJSON, .report, .muteThread
     ]
 
-    /// The actions that may be offered on `event`.
+    /// The actions that may be offered on `event` by someone holding `keypair`.
     ///
-    /// Two subtractions, for two different reasons.
+    /// Three subtractions, for three different reasons.
     ///
     /// **A rumor cannot be republished, pointed at, or handed on.** ``NdbNote/is_rumor`` is set only
     /// by nostrdb's gift-wrap unwrapper, so it marks exactly the notes that reached us inside a wrap
@@ -79,11 +79,18 @@ struct NoteActions: OptionSet {
     /// only ever meant muting its public parent thread, which is reachable from the parent note
     /// sitting directly above it.
     ///
+    /// **Replying needs a key to sign with.** A pubkey-only login can *read* a private reply —
+    /// nostrdb unwrapped it, so it is plaintext — but cannot sign a seal, so it cannot answer one at
+    /// all. The affordance has to be absent rather than present and failing: unlike the public case,
+    /// where a signed-out user opening the composer is merely a dead end, here there is no fallback
+    /// a reply could quietly become. A public reply to a private note is the one thing this feature
+    /// must never produce.
+    ///
     /// What is left off this list entirely is what stays available on anything: Copy text (the
     /// reader can already read it), Copy user public key, Add bookmark (bookmarks live in
     /// `UserDefaults`, not in a published list — see ``BookmarksManager``), and Mute/Block user,
     /// which is how you deal with an abusive private reply and says nothing about this note.
-    static func available(on event: NostrEvent) -> NoteActions {
+    static func available(on event: NostrEvent, keypair: Keypair) -> NoteActions {
         var actions = NoteActions.all
 
         // Legacy kind 4 is signed rather than a rumor, so the check below does not catch it. Muting a
@@ -94,6 +101,10 @@ struct NoteActions: OptionSet {
 
         if event.is_rumor {
             actions.subtract([.repost, .like, .zap, .share, .broadcast, .copyJSON, .report, .muteThread])
+        }
+
+        if keypair.privkey == nil {
+            actions.remove(.reply)
         }
 
         return actions

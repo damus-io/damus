@@ -8,7 +8,7 @@
 import XCTest
 @testable import damus
 
-/// Covers ``NoteActions/available(on:)`` — the value the note menu and the action bar are *built
+/// Covers ``NoteActions/available(on:keypair:)`` — the value the note menu and the action bar are *built
 /// from*, so these are assertions on the built menu rather than on a guard that fires after a tap.
 ///
 /// This is the containment that survived: a private reply is drawn everywhere a public note is,
@@ -64,7 +64,7 @@ final class PrivateReplyActionTests: XCTestCase {
         let note = try XCTUnwrap(NostrEvent(content: "hello world", keypair: alice.to_keypair(),
                                             kind: NostrKind.text.rawValue, tags: []))
 
-        XCTAssertEqual(NoteActions.available(on: note), .all,
+        XCTAssertEqual(NoteActions.available(on: note, keypair: alice.to_keypair()), .all,
                        "a public note loses nothing")
     }
 
@@ -82,7 +82,7 @@ final class PrivateReplyActionTests: XCTestCase {
             tags: [["p", bob.pubkey.hex()], ["private", ""]]
         ))
 
-        XCTAssertEqual(NoteActions.available(on: impostor), .all)
+        XCTAssertEqual(NoteActions.available(on: impostor, keypair: bob.to_keypair()), .all)
     }
 
     // MARK: A private reply
@@ -90,16 +90,18 @@ final class PrivateReplyActionTests: XCTestCase {
     /// The whole card in one assertion: everything that republishes the reply or points at it is
     /// gone, and reply survives.
     func testAPrivateReplyOffersOnlyReply() throws {
-        let (reply, _) = try privateReply(from: generate_new_keypair(), toANoteBy: generate_new_keypair())
+        let alice = generate_new_keypair()
+        let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
 
-        XCTAssertEqual(NoteActions.available(on: reply), [.reply])
+        XCTAssertEqual(NoteActions.available(on: reply, keypair: alice.to_keypair()), [.reply])
     }
 
     /// Named individually, because each one is a distinct leak and a regression on any single one
     /// would otherwise show up only as an opaque set mismatch.
     func testEveryRepublishingActionIsAbsentFromAPrivateReply() throws {
-        let (reply, _) = try privateReply(from: generate_new_keypair(), toANoteBy: generate_new_keypair())
-        let actions = NoteActions.available(on: reply)
+        let alice = generate_new_keypair()
+        let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
+        let actions = NoteActions.available(on: reply, keypair: alice.to_keypair())
 
         XCTAssertFalse(actions.contains(.repost),
                        "a kind 6 embeds the rumor's JSON in its content and is itself a perfectly ordinary signed event, so no egress guard would stop it — this is the worst one")
@@ -120,9 +122,10 @@ final class PrivateReplyActionTests: XCTestCase {
     /// Reply stays. Phase 6 is what makes the reply it opens private in turn; taking the affordance
     /// away here would instead make a private reply unanswerable.
     func testReplyRemainsOnAPrivateReply() throws {
-        let (reply, _) = try privateReply(from: generate_new_keypair(), toANoteBy: generate_new_keypair())
+        let alice = generate_new_keypair()
+        let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
 
-        XCTAssertTrue(NoteActions.available(on: reply).contains(.reply))
+        XCTAssertTrue(NoteActions.available(on: reply, keypair: alice.to_keypair()).contains(.reply))
     }
 
     /// Mute conversation is gone too, and this is the case that says why it has to be.
@@ -148,7 +151,7 @@ final class PrivateReplyActionTests: XCTestCase {
         XCTAssertTrue(received.is_private_reply, "the predicate matches it, reply or not — which is the point")
         XCTAssertEqual(received.thread_id(), received.id,
                        "so its thread id is the rumor itself, and muting would publish that id")
-        XCTAssertFalse(NoteActions.available(on: received).contains(.muteThread))
+        XCTAssertFalse(NoteActions.available(on: received, keypair: alice.to_keypair()).contains(.muteThread))
     }
 
     /// And gone for an ordinary private reply as well, rather than by a case analysis of which rumors
@@ -157,9 +160,10 @@ final class PrivateReplyActionTests: XCTestCase {
     /// parent note directly above it — and a rule that holds for every rumor is worth more than one
     /// that has to be re-argued each time somebody adds a caller.
     func testMuteIsGoneForAnOrdinaryPrivateReplyToo() throws {
-        let (reply, parent) = try privateReply(from: generate_new_keypair(), toANoteBy: generate_new_keypair())
+        let alice = generate_new_keypair()
+        let (reply, parent) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
 
-        XCTAssertFalse(NoteActions.available(on: reply).contains(.muteThread))
+        XCTAssertFalse(NoteActions.available(on: reply, keypair: alice.to_keypair()).contains(.muteThread))
         XCTAssertEqual(reply.thread_id(), parent.id,
                        "even though this one's thread id is in fact the public parent")
     }
@@ -177,7 +181,7 @@ final class PrivateReplyActionTests: XCTestCase {
         let rumor = try ingestedRumor(dm.giftWrapToSelf, as: alice, kinds: [.private_dm])
 
         XCTAssertTrue(rumor.is_rumor)
-        XCTAssertEqual(NoteActions.available(on: rumor), [.reply],
+        XCTAssertEqual(NoteActions.available(on: rumor, keypair: alice.to_keypair()), [.reply],
                        "a DM keeps only reply, by the same rumor rule rather than by its kind")
         XCTAssertEqual(rumor.thread_id(), rumor.id,
                        "and here is the thread id that rule protects: the rumor itself")

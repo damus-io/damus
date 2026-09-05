@@ -121,10 +121,10 @@ struct ChatEventView: View {
         ZapTarget.note(id: event.id, author: event.pubkey)
     }
 
-    /// What this note may be made to do. See ``NoteActions/available(on:)``. The bubble's own
+    /// What this note may be made to do. See ``NoteActions/available(on:keypair:)``. The bubble's own
     /// long press is a react/zap affordance like any other, and it is the one the thread puts
     /// closest to a private reply.
-    var actions: NoteActions { NoteActions.available(on: event) }
+    var actions: NoteActions { NoteActions.available(on: event, keypair: damus_state.keypair) }
 
     // MARK: Views
 
