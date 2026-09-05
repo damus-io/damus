@@ -35,6 +35,23 @@ struct NIP37Draft {
     let unwrapped_note: NdbNote
     /// The unique ID of the draft, as per NIP-37 — the `d` tag of the kind-31234 draft event.
     let id: String
+    /// Whether the draft is of a **private reply**, and so must come back with its lock still on.
+    ///
+    /// This lives on the draft event, not on ``unwrapped_note``. A private reply's rumor is
+    /// byte-identical to the public reply it could have been (see
+    /// ``NIP59/createPrivateReply(_:replyingTo:keypair:createdAt:)``), and the drafted note is that
+    /// same rendering — so there is nothing in it that says "private", and there must not be: a
+    /// marker inside it would change the note the composer round-trips into, and the two paths would
+    /// stop producing the same bytes. The wrapper is local-only storage that never leaves the device,
+    /// which makes it the right place for a flag about how the composer should reopen.
+    let is_private_reply: Bool
+
+    /// The marker tag on the kind-31234 wrapper that says the drafted reply is a private one.
+    ///
+    /// A bare presence tag: present means private, absent means public. Absent has to mean public
+    /// because every draft saved before this feature existed is a public one, and reading those as
+    /// private would put a lock on notes the user never locked.
+    static let private_reply_tag = "private_reply"
 
 
     // MARK: Initialization
@@ -43,9 +60,11 @@ struct NIP37Draft {
     /// - Parameters:
     ///   - unwrapped_note: the note being drafted
     ///   - draft_id: the unique ID of this draft, as per NIP-37
-    init(unwrapped_note: NdbNote, draft_id: String) {
+    ///   - is_private_reply: whether the drafted reply is a private one
+    init(unwrapped_note: NdbNote, draft_id: String, is_private_reply: Bool = false) {
         self.unwrapped_note = unwrapped_note
         self.id = draft_id
+        self.is_private_reply = is_private_reply
     }
 
     /// Initializes object from a stored kind-31234 draft event, if it carries a note we can read.
@@ -55,6 +74,7 @@ struct NIP37Draft {
         guard let unwrapped_note = Self.unwrap(draft_note: draft_note) else { return nil }
         self.unwrapped_note = unwrapped_note
         self.id = draft_id
+        self.is_private_reply = draft_note.tags.contains(where: { $0.count == 1 && $0[0].string() == Self.private_reply_tag })
     }
 
 
@@ -77,6 +97,10 @@ struct NIP37Draft {
 
         if let replied_to_note = self.unwrapped_note.direct_replies() {
             tags.append(["e", replied_to_note.hex()])
+        }
+
+        if self.is_private_reply {
+            tags.append([Self.private_reply_tag])
         }
 
         return NIP59.Rumor(pubkey: author,

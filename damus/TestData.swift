@@ -76,8 +76,12 @@ var test_damus_state: DamusState = make_test_damus_state()
 /// directly when a test needs a database no other test has written to — anything that reads
 /// nostrdb back through a *query* rather than by note id has to, since the shared one
 /// accumulates whatever earlier tests put in it.
+///
+/// - Parameter keypair: who this state is logged in as. Defaults to the shared test identity, which
+///   has a private key. Pass a pubkey-only `Keypair` to exercise what the app does when it cannot
+///   sign — the affordances that require a signature must be gone, not merely inert.
 @MainActor
-func make_test_damus_state() -> DamusState {
+func make_test_damus_state(keypair: Keypair = test_keypair) -> DamusState {
     // Create a unique temporary directory
     var tempDir: String!
     do {
@@ -91,15 +95,15 @@ func make_test_damus_state() -> DamusState {
 
     print("opening \(tempDir!)")
     let ndb = Ndb(path: tempDir)!
-    let our_pubkey = test_pubkey
+    let our_pubkey = keypair.pubkey
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()
-    let damus = DamusState(keypair: test_keypair,
+    let damus = DamusState(keypair: keypair,
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey),
                            contactCards: ContactCardManagerMock(),
-                           mutelist_manager: MutelistManager(user_keypair: test_keypair),
+                           mutelist_manager: MutelistManager(user_keypair: keypair),
                            profiles: .init(ndb: ndb),
                            dms: .init(our_pubkey: our_pubkey),
                            previews: .init(),

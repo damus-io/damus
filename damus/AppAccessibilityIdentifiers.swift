@@ -70,6 +70,9 @@ enum AppAccessibilityIdentifiers: String {
     /// A user result in the mention autocomplete list
     case post_composer_mention_user_result
 
+    /// The lock that turns a reply into a private reply, and the line naming who can see it
+    case post_composer_privacy_toggle
+
 
     // MARK: Post button (FAB)
     // Prefix: `post_button`
