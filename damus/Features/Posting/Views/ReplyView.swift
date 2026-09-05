@@ -90,23 +90,16 @@ struct ReplyView: View {
         }
     }
 
-    @ViewBuilder
+    /// The same label the sent note will carry, at the size of the public line it replaces.
+    ///
+    /// Shared with ``PrivateReplyBadge`` rather than reproduced here, so the composer is a literal
+    /// preview of the note: what the user reads while typing is what they will read afterwards, in
+    /// the same words. A recipient we cannot name is not a case the composer can reach — the lock is
+    /// only offered when there is one — but the label stands up without them either way.
     var PrivatelyReplyingTo: some View {
-        HStack(spacing: 5) {
-            Image(systemName: "lock.fill")
-            // A recipient we cannot name is not a case the composer can reach — the lock is only
-            // offered when there is one — but naming nobody beats naming somebody wrong, so the
-            // sentence still stands up without them.
-            if let private_reply_recipient {
-                let name = event_author_name(profiles: damus.profiles, pubkey: private_reply_recipient)
-                Text("Replying privately to \(Text(verbatim: "@" + name))", comment: "Indicating that the user's reply will be encrypted and sent only to the named person, where the parameter is that person's username.")
-            } else {
-                Text("Replying privately", comment: "Indicating that the user's reply will be encrypted rather than posted publicly.")
-            }
-        }
-        .font(.footnote)
-        .foregroundColor(DamusColors.success)
-        .accessibilityElement(children: .combine)
+        PrivateReplyAudienceLabel(damus_state: damus,
+                                  recipient: private_reply_recipient,
+                                  font: .footnote)
     }
 
     func line(height: CGFloat) -> some View {

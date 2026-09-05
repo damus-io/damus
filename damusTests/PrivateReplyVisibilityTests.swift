@@ -229,12 +229,11 @@ final class PrivateReplyVisibilityTests: XCTestCase {
 
     /// And the marker itself: the badge is drawn from the same predicate the surfaces above ignore,
     /// so a private reply on any of them names the one other person who can read it.
-    func testAPrivateReplyOnAnySurfaceNamesItsCounterparty() throws {
+    func testAPrivateReplyOnAnySurfaceNamesItsAudience() throws {
         let f = try ingestPrivateReply()
 
-        XCTAssertEqual(private_reply_counterparty(event: f.rumor, our_pubkey: f.sender.pubkey),
-                       f.parent.pubkey)
-        XCTAssertNil(private_reply_counterparty(event: f.publicReply, our_pubkey: f.sender.pubkey),
+        XCTAssertEqual(private_reply_audience(of: f.rumor), f.parent.pubkey)
+        XCTAssertNil(private_reply_audience(of: f.publicReply),
                      "and a public reply gets no badge, however it is tagged")
     }
 }

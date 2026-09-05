@@ -8,13 +8,16 @@
 import XCTest
 @testable import damus
 
-/// Covers ``private_reply_counterparty(event:our_pubkey:)`` — the one piece of logic behind the lock
-/// treatment, and the answer to the only question a reader has about a private reply: *who else can
-/// see this*.
+/// Covers ``private_reply_audience(of:)`` — the one piece of logic behind the lock treatment, and the
+/// answer to the only question a reader has about a private reply: *who else can see this*.
 ///
 /// Getting it wrong in either direction is the whole failure mode of the feature. Naming the wrong
 /// person tells the reader their note went somewhere it did not; naming nobody leaves them to guess,
 /// and the guess a thread invites is "everyone in it".
+///
+/// The answer is deliberately not a function of who is reading. It is read off the note's single `p`
+/// tag, so the sender and the recipient are told the same thing about the same note, and the composer
+/// can say it in advance in the same words.
 @MainActor
 final class PrivateReplyTreatmentTests: XCTestCase {
 
@@ -48,7 +51,7 @@ final class PrivateReplyTreatmentTests: XCTestCase {
         return try XCTUnwrap(try ndb.lookup_note_by_key_and_copy(key))
     }
 
-    /// Reading our own sent reply: the other person is the one we addressed it to, which lives in the
+    /// Reading our own sent reply: the audience is the person we addressed it to, which lives in the
     /// single `p` tag rather than on the note's author, because the author is us.
     func testTheSenderSeesTheirRecipient() throws {
         let alice = generate_new_keypair()
@@ -56,35 +59,43 @@ final class PrivateReplyTreatmentTests: XCTestCase {
 
         let rumor = try ingestedReply(from: alice, to: bob, unwrappingWith: alice, useReceiverCopy: false)
 
-        XCTAssertEqual(private_reply_counterparty(event: rumor, our_pubkey: alice.pubkey), bob.pubkey,
+        XCTAssertEqual(private_reply_audience(of: rumor), bob.pubkey,
                        "our own reply names the person we sent it to")
     }
 
-    /// Reading a reply somebody sent us: the other person is its author.
-    func testTheRecipientSeesTheSender() throws {
+    /// The same note read from the other end gives the same answer — bob, the recipient, and not
+    /// alice, who wrote it.
+    ///
+    /// This is the property the shared label rests on. The badge says "Replying privately to @bob" to
+    /// alice and "Replying privately to you" to bob, and both are the same sentence about the same
+    /// tag; an answer that flipped with the reader would need two sentences and could not be the one
+    /// the composer shows before the note exists.
+    func testTheRecipientIsTheSameOnBothEnds() throws {
         let alice = generate_new_keypair()
         let bob = generate_new_keypair()
 
-        let rumor = try ingestedReply(from: alice, to: bob, unwrappingWith: bob, useReceiverCopy: true)
+        let ours = try ingestedReply(from: alice, to: bob, unwrappingWith: alice, useReceiverCopy: false)
+        let theirs = try ingestedReply(from: alice, to: bob, unwrappingWith: bob, useReceiverCopy: true)
 
-        XCTAssertEqual(private_reply_counterparty(event: rumor, our_pubkey: bob.pubkey), alice.pubkey,
-                       "a reply we received names whoever sent it")
+        XCTAssertEqual(private_reply_audience(of: theirs), bob.pubkey,
+                       "a reply we received names who it was addressed to, which is us")
+        XCTAssertEqual(private_reply_audience(of: ours), private_reply_audience(of: theirs),
+                       "and it is the same answer either way round")
     }
 
-    /// Replying privately to your own note: there is no third party, so there is nobody to name and
-    /// the badge falls back to "only you". Naming ourselves would be worse than saying nothing.
+    /// Replying privately to your own note: the audience is us, and the label says so as "you".
     func testASelfReplyNamesOurselvesAsTheAudience() throws {
         let alice = generate_new_keypair()
 
         let rumor = try ingestedReply(from: alice, to: alice, unwrappingWith: alice, useReceiverCopy: false)
 
-        XCTAssertEqual(private_reply_counterparty(event: rumor, our_pubkey: alice.pubkey), alice.pubkey,
+        XCTAssertEqual(private_reply_audience(of: rumor), alice.pubkey,
                        "a note to self is addressed to us, and the p tag says so")
     }
 
     /// The treatment must never appear on a public note, however it is tagged — that is what keeps the
     /// lock meaning something. `is_private_reply` is nostrdb's rumor flag, which no relay can set.
-    func testAPublicNoteHasNoCounterparty() throws {
+    func testAPublicNoteHasNoAudience() throws {
         let alice = generate_new_keypair()
         let bob = generate_new_keypair()
         let impostor = try XCTUnwrap(NostrEvent(
@@ -94,7 +105,7 @@ final class PrivateReplyTreatmentTests: XCTestCase {
             tags: [["p", bob.pubkey.hex()], ["private", ""]]
         ))
 
-        XCTAssertNil(private_reply_counterparty(event: impostor, our_pubkey: bob.pubkey),
+        XCTAssertNil(private_reply_audience(of: impostor),
                      "nobody can publish themselves a lock badge in someone else's thread")
     }
 }

@@ -7,27 +7,72 @@
 
 import SwiftUI
 
-/// The other person who can see a private reply — the one participant who is not us.
+/// The person a private reply was addressed to — its audience, and the "@a" in "Replying privately
+/// to @a".
 ///
-/// A private reply has exactly two readers: whoever wrote it, and the single pubkey it `p`-tags. So
-/// the counterparty is the author when we are the recipient, and the `p` tag when we are the author.
+/// A private reply carries exactly one `p` tag, and on a private reply a `p` tag is not a mention,
+/// it *is* the audience: ``NIP59/createPrivateReply(_:replyingTo:keypair:)`` strips the thread's `p`
+/// tags and appends the single recipient. So the answer does not depend on who is asking. Both people
+/// a private reply exists for read the same sentence off the same tag, which is the property that
+/// lets the composer and the note say the same thing — see ``PrivateReplyAudienceLabel``.
 ///
 /// Returns `nil` for anything that is not a private reply, and for a malformed one that lost its
-/// audience tag — the treatment then says "only you" rather than naming somebody wrong, which is the
-/// right way to fail on a question the reader is trusting us to answer.
+/// audience tag — the label then says "Replying privately" rather than naming somebody wrong, which
+/// is the right way to fail on a question the reader is trusting us to answer.
 @MainActor
-func private_reply_counterparty(event: NostrEvent, our_pubkey: Pubkey) -> Pubkey? {
+func private_reply_audience(of event: NostrEvent) -> Pubkey? {
     guard event.is_private_reply else { return nil }
-    if event.pubkey != our_pubkey { return event.pubkey }
     return event.referenced_pubkeys.first
 }
 
-/// The badge a private reply carries wherever it is drawn: a lock, and the answer to the only
-/// question a reader has about one — *who else can see this*.
+/// The one sentence the app has for a private reply's audience: **"Replying privately to @a"**.
 ///
-/// Naming the counterparty rather than saying "Private" is the point. "Private" leaves the reader to
+/// Drawn by the composer while the reply is being written (``ReplyView``) and by the note itself once
+/// it has been sent (``PrivateReplyBadge``), from this one view, in the same words and the same green.
+/// They are answering the same question — *who else can see this* — and a user who met two different
+/// sentences for it would be right to wonder which of them was true.
+///
+/// Naming the recipient rather than saying "Private" is the point. "Private" leaves the reader to
 /// guess at the audience, and the guess a thread invites is "everyone in it", which is wrong: a
 /// private reply reaches exactly one other person.
+///
+/// The recipient is named even when it is the reader — as "you", because a note somebody sent *us* is
+/// still a reply addressed to one person, and that person is us. Saying it from the note's point of
+/// view rather than the reader's is what keeps it one sentence instead of two.
+struct PrivateReplyAudienceLabel: View {
+    let damus_state: DamusState
+    /// Who the reply is addressed to, or `nil` when we cannot say. See ``private_reply_audience(of:)``.
+    let recipient: Pubkey?
+    /// Whether to draw the compact form — just the lock — for places with no room for a sentence.
+    var compact: Bool = false
+    /// The type size to draw at. The note badge is chrome and sits at `.caption`; the composer's line
+    /// matches the public "Replying to @a, @b" line it replaces, which is `.footnote`.
+    var font: Font = .caption
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "lock.fill")
+            if !compact {
+                if let recipient {
+                    if recipient == damus_state.pubkey {
+                        Text("Replying privately to you", comment: "Label on a private reply stating that it was sent only to the reader.")
+                    } else {
+                        let name = event_author_name(profiles: damus_state.profiles, pubkey: recipient)
+                        Text("Replying privately to \(Text(verbatim: "@" + name))", comment: "Label stating that a reply is encrypted and goes only to the named person, where the parameter is that person's username.")
+                    }
+                } else {
+                    Text("Replying privately", comment: "Label stating that a reply is encrypted rather than posted publicly, when the person it goes to cannot be named.")
+                }
+            }
+        }
+        .font(font)
+        .foregroundColor(DamusColors.success)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The badge a private reply carries wherever it is drawn: ``PrivateReplyAudienceLabel``, over the
+/// note.
 ///
 /// This badge is the *whole* treatment. It carries the information; a tint or a border around the
 /// note would only repeat, less precisely, what the lock already says, and it would say it
@@ -41,21 +86,9 @@ struct PrivateReplyBadge: View {
     var compact: Bool = false
 
     var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "lock.fill")
-                .font(.caption2)
-            if !compact {
-                if let counterparty = private_reply_counterparty(event: event, our_pubkey: damus_state.pubkey) {
-                    let name = event_author_name(profiles: damus_state.profiles, pubkey: counterparty)
-                    Text("Only you and \(name) can see this", comment: "Label on a note stating that it was sent privately and is visible only to the reader and one other person.")
-                } else {
-                    Text("Only you can see this", comment: "Label on a note stating that it was sent privately and is visible only to the reader.")
-                }
-            }
-        }
-        .font(.caption)
-        .foregroundColor(DamusColors.success)
-        .accessibilityElement(children: .combine)
+        PrivateReplyAudienceLabel(damus_state: damus_state,
+                                  recipient: private_reply_audience(of: event),
+                                  compact: compact)
     }
 }
 
