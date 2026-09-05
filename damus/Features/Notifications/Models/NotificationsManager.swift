@@ -149,7 +149,17 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         
         let content_preview = render_notification_content_preview(ndb: ndb, ev: inner_ev, profiles: state.profiles, keypair: state.keypair)
         return LocalNotification(type: .repost, event: ev, target: .note(inner_ev), content: content_preview)
-    } else if type == .like, state.settings.like_notification, let evid = ev.referenced_ids.last {
+    } else if type == .like,
+              // A private reaction is a kind-7 rumor, and it is the same class of secret as the
+              // private reply above: the note it points at is one only two people have, and the
+              // preview below is that note's plaintext. So it is governed by `dm_notification` — the
+              // setting whose owner has said yes to private messages on their lock screen — and not by
+              // `like_notification`, which was set when no reaction could be private. Our own reaction
+              // comes back through the same ingester as an inbound one, so without the author check we
+              // would announce our own reaction to ourselves.
+              ev.is_rumor ? (state.settings.dm_notification && ev.pubkey != state.keypair.pubkey)
+                          : state.settings.like_notification,
+              let evid = ev.referenced_ids.last {
         return try? state.ndb.lookup_note(evid, borrow: { liked_event in
             switch liked_event {
             case .none:

@@ -12,10 +12,15 @@ import XCTest
 /// from*, so these are assertions on the built menu rather than on a guard that fires after a tap.
 ///
 /// This is the containment that survived: a private reply is drawn everywhere a public note is,
-/// marked with a lock, and what is withheld is not the note but what can be done with it. Every
-/// action asserted absent here would have published a new, correctly signed event that embeds the
-/// rumor or points at it — none of which the relay-egress guards in `PostBox.send` and
+/// marked with a lock, and what is withheld is not the note but what can be *published* about it.
+/// Every action asserted absent here would have published a new, correctly signed event that embeds
+/// the rumor or points at it — none of which the relay-egress guards in `PostBox.send` and
 /// ``make_nostr_push_event(ev:)`` would refuse, because none of them is a rumor.
+///
+/// The line is "publishes, with no private form available", not "does anything at all". Reply and
+/// react both publish and both stay, because each becomes a rumor in its own gift wrap. An earlier
+/// version of this class asserted react absent; that was the right diagnosis of the leak and the
+/// wrong remedy.
 final class PrivateReplyActionTests: XCTestCase {
 
     // MARK: Fixtures
@@ -87,17 +92,21 @@ final class PrivateReplyActionTests: XCTestCase {
 
     // MARK: A private reply
 
-    /// The whole card in one assertion: everything that republishes the reply or points at it is
-    /// gone, and reply survives.
-    func testAPrivateReplyOffersOnlyReply() throws {
+    /// The whole rule in one assertion: everything that would republish the reply or hand out a
+    /// pointer to it is gone, and the three things that have a private form survive.
+    func testAPrivateReplyOffersOnlyWhatHasAPrivateForm() throws {
         let alice = generate_new_keypair()
         let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
 
-        XCTAssertEqual(NoteActions.available(on: reply, keypair: alice.to_keypair()), [.reply])
+        XCTAssertEqual(NoteActions.available(on: reply, keypair: alice.to_keypair()), [.reply, .like])
     }
 
     /// Named individually, because each one is a distinct leak and a regression on any single one
     /// would otherwise show up only as an opaque set mismatch.
+    ///
+    /// Every reason below is the same reason: the action *publishes*, and there is no version of it
+    /// that does not. That is what separates this list from reacting, which publishes too and is kept
+    /// — see ``testAPrivateReplyCanBeReactedToInPrivate()``.
     func testEveryRepublishingActionIsAbsentFromAPrivateReply() throws {
         let alice = generate_new_keypair()
         let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
@@ -105,10 +114,6 @@ final class PrivateReplyActionTests: XCTestCase {
 
         XCTAssertFalse(actions.contains(.repost),
                        "a kind 6 embeds the rumor's JSON in its content and is itself a perfectly ordinary signed event, so no egress guard would stop it — this is the worst one")
-        XCTAssertFalse(actions.contains(.like),
-                       "a kind 7 names the note and its author, announcing that a private reply reached us and from whom")
-        XCTAssertFalse(actions.contains(.zap),
-                       "a zap request names the note and its author for the same reason")
         XCTAssertFalse(actions.contains(.broadcast),
                        "Broadcast is refused at egress, but silently — the item has to be gone, not inert")
         XCTAssertFalse(actions.contains(.copyJSON),
@@ -117,6 +122,50 @@ final class PrivateReplyActionTests: XCTestCase {
                        "an nevent for a rumor is a link nobody else can resolve")
         XCTAssertFalse(actions.contains(.report),
                        "a NIP-56 report is a public event naming a note no moderator can fetch, and it announces the private exchange")
+        XCTAssertFalse(actions.contains(.zap),
+                       "and a zap request names the note and its author — still true, and a private form of it is separate work")
+    }
+
+    /// **React is offered, and was not.**
+    ///
+    /// It was removed for a real reason: a kind 7 publishes a *public* event naming the note and,
+    /// through its `p` tag, its author — announcing to a relay that a private note reached you and who
+    /// sent it, which is the correlation the wrap exists to prevent. That reasoning was right about
+    /// the leak and wrong about the fix. Withholding the affordance is only the right answer when the
+    /// action has no private form, and this one has: a reaction to a rumor becomes a kind-7 *rumor* in
+    /// its own gift wrap (`PrivateReactionTests`).
+    ///
+    /// So this flag now means "may react", not "may publish a kind 7". The assertion here is only that
+    /// the affordance exists; that it takes the private path when tapped is asserted in that class,
+    /// against what actually leaves the device.
+    func testAPrivateReplyCanBeReactedToInPrivate() throws {
+        let alice = generate_new_keypair()
+        let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
+        let actions = NoteActions.available(on: reply, keypair: alice.to_keypair())
+
+        XCTAssertTrue(actions.contains(.like),
+                      "the reaction has a private form — a kind-7 rumor in its own wrap — so the button stays")
+    }
+
+    /// But not without a key. A private reaction is a rumor we have to seal, exactly as a private
+    /// reply is, so a pubkey-only login cannot make one — and the button has to be absent rather than
+    /// present and failing, for the same reason reply is: there is no public fallback a private
+    /// reaction could quietly become.
+    ///
+    /// Taking the button away on a public note is not this feature's business, which is the second
+    /// assertion below.
+    func testAPubkeyOnlyLoginCannotReactToAPrivateReply() throws {
+        let alice = generate_new_keypair()
+        let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
+
+        let actions = NoteActions.available(on: reply, keypair: Keypair(pubkey: alice.pubkey, privkey: nil))
+        XCTAssertFalse(actions.contains(.like), "no key to sign the seal with")
+        XCTAssertFalse(actions.contains(.reply), "for the same reason")
+
+        let publicNote = try XCTUnwrap(NostrEvent(content: "public", keypair: alice.to_keypair(),
+                                                  kind: NostrKind.text.rawValue, tags: []))
+        XCTAssertTrue(NoteActions.available(on: publicNote, keypair: Keypair(pubkey: alice.pubkey, privkey: nil)).contains(.like),
+                      "while the public app is untouched — that is a signing sheet's job, not this one's")
     }
 
     /// Reply stays. Phase 6 is what makes the reply it opens private in turn; taking the affordance
@@ -181,8 +230,8 @@ final class PrivateReplyActionTests: XCTestCase {
         let rumor = try ingestedRumor(dm.giftWrapToSelf, as: alice, kinds: [.private_dm])
 
         XCTAssertTrue(rumor.is_rumor)
-        XCTAssertEqual(NoteActions.available(on: rumor, keypair: alice.to_keypair()), [.reply],
-                       "a DM keeps only reply, by the same rumor rule rather than by its kind")
+        XCTAssertEqual(NoteActions.available(on: rumor, keypair: alice.to_keypair()), [.reply, .like],
+                       "a DM keeps the same two, by the same rumor rule rather than by its kind")
         XCTAssertEqual(rumor.thread_id(), rumor.id,
                        "and here is the thread id that rule protects: the rumor itself")
     }

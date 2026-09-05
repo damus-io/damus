@@ -20,83 +20,16 @@ import Foundation
 ///
 /// Like ``NIP17``, this is the send side only. There is no receive side in Swift: nostrdb's ingester
 /// peels inbound wraps and stores the kind-1 rumor inside as an ordinary plaintext note, which the
-/// read side recognises with ``NdbNote/is_private_reply``.
+/// read side recognises with ``NdbNote/is_private_reply``. Reacting to one is the same construction
+/// with a different kind in the rumor — see ``NIP59/createPrivateReaction(to:content:keypair:createdAt:)``.
 extension NIP59 {
-    /// A private reply, built and ready to publish.
-    ///
-    /// The same shape as ``NIP17/DirectMessage``, and for the same reasons: a rumor that must never
-    /// be published, a list of wraps that are the only thing that may be, and a distinguished
-    /// self-wrap.
-    struct PrivateReply {
-        /// The reply itself. Never published, and not a ``NostrEvent`` — see ``NIP59/Rumor``.
-        let rumor: NIP59.Rumor
-
-        /// The gift wraps to publish, which is the *only* part of this that goes on a relay.
-        ///
-        /// Normally two: one addressed to ``audience`` and one addressed to ourselves.
-        /// The second is not a convenience — it is the only copy of our own reply that exists
-        /// anywhere we can read, since the first is encrypted to the recipient and we cannot open it.
-        let giftWraps: [NostrEvent]
-
-        /// The one person this reply was addressed to — see
-        /// ``NIP59/privateReplyAudience(replyingTo:as:)``.
-        ///
-        /// The send path needs it to look up *whose* DM inbox relays ``giftWrapToReceiver`` goes to,
-        /// and it is not always the parent's author, so it is carried here rather than re-derived.
-        let audience: Pubkey
-
-        /// The wrap addressed to us, i.e. the one whose rumor our own key can recover.
-        ///
-        /// Always one of ``giftWraps``. Ingesting *this* wrap into the local database — and only this
-        /// one — is how a sent private reply appears in the thread: nostrdb peels it and the thread's
-        /// existing `kinds: [1]` query delivers the rumor. The receiver's wrap must never be ingested,
-        /// because we cannot decrypt it, so it would sit in the database forever as an un-openable
-        /// kind 1059 that every giftwrap backfill retries at every launch.
-        let giftWrapToSelf: NostrEvent
-
-        /// The wrap addressed to ``audience``, or `nil` when that is us.
-        ///
-        /// The two wraps go to different places — theirs to their kind-10050 DM inbox relays, ours to
-        /// our own — so the send path has to tell them apart. They are distinguishable only by
-        /// identity, since every other field of a wrap is deliberately unlinkable noise.
-        var giftWrapToReceiver: NostrEvent? {
-            return giftWraps.first(where: { $0.id != giftWrapToSelf.id })
-        }
-    }
-
-    /// The single person a private reply to `parent` is addressed to.
-    ///
-    /// Almost always the parent's author. The exception is replying to a private reply of *our own*:
-    /// its author is us, so the parent-author rule would address the reply to ourselves and quietly
-    /// end a conversation the user believes they are continuing. The person on the other end of that
-    /// conversation is the one the parent was addressed to, which is its single `p` tag — a private
-    /// reply carries exactly one, because on a rumor the `p` tags are not a mention list, they are
-    /// the audience.
-    ///
-    /// So the rule is not "the parent's author" but "the parent's *counterparty*", which is the same
-    /// thing in every case but this one. It keeps a private sub-thread 1:1 for its whole length and
-    /// never adds a participant, which is what the parent-author rule was for.
-    ///
-    /// Only ever consults the direct parent. A public note that happens to sit under a private
-    /// ancestor — which our own client cannot produce, but another client could, by publicly replying
-    /// to a rumor id — is replied to publicly and addressed to its own author, with no inheritance
-    /// from the thread. That is right: the note being replied to is already public, and privacy is a
-    /// property of a message rather than of a thread.
-    static func privateReplyAudience(replyingTo parent: NostrEvent, as us: Pubkey) -> Pubkey {
-        guard parent.is_private_reply, parent.pubkey == us,
-              let counterparty = parent.referenced_pubkeys.first else {
-            return parent.pubkey
-        }
-        return counterparty
-    }
-
     /// Builds a private reply to `parent`: a kind-1 rumor, sealed and wrapped once for its audience
     /// and once for ourselves.
     ///
     /// The rumor's content and tags come straight from ``NostrPost/rendered(clientTag:)``, the same
     /// rendering ``NostrPost/to_event(keypair:clientTag:)`` uses, so a private reply's NIP-10 reply
     /// tags are byte-identical to those of the public reply it could have been. Only the `p` tags
-    /// differ, and deliberately: they are replaced by a single one naming ``PrivateReply/audience``,
+    /// differ, and deliberately: they are replaced by a single one naming ``PrivateEvent/audience``,
     /// because on a private reply the `p` tags are not a mention list, they are *the audience*.
     ///
     /// **No marker tag.** The design called for one — something a client that peels a wrap
@@ -108,14 +41,14 @@ extension NIP59 {
     /// **One person, and nobody else.** Not every participant in the thread: that fan-out grows with
     /// the thread, needs a kind-10050 lookup per recipient, and produces a conversation where
     /// different readers see different subsets of the replies. Who that one person is, is
-    /// ``privateReplyAudience(replyingTo:as:)`` — so a private sub-thread stays 1:1 for its whole
-    /// length and the audience never silently widens.
+    /// ``privateAudience(for:as:)`` — so a private sub-thread stays 1:1 for its whole length and the
+    /// audience never silently widens.
     ///
     /// - Parameters:
     ///   - post: the reply as `build_post` produced it — the same value the public path would have
     ///     handed to ``NostrPost/to_event(keypair:clientTag:)``.
     ///   - parent: the note being replied to. Its `id` is checked against the reply tags `post`
-    ///     already carries, and ``privateReplyAudience(replyingTo:as:)`` reads the audience off it.
+    ///     already carries, and ``NIP59/privateAudience(for:as:)`` reads the audience off it.
     ///     It may itself be a private reply, in which case its `pubkey` is the real sender nostrdb
     ///     copied off the seal.
     ///   - keypair: our own keys. A *full* keypair, non-optionally, because the seal has to be signed
@@ -128,8 +61,8 @@ extension NIP59 {
     static func createPrivateReply(_ post: NostrPost,
                                    replyingTo parent: NostrEvent,
                                    keypair: FullKeypair,
-                                   createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) throws -> PrivateReply {
-        let receiver = privateReplyAudience(replyingTo: parent, as: keypair.pubkey)
+                                   createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) throws -> PrivateEvent {
+        let receiver = privateAudience(for: parent, as: keypair.pubkey)
         let rendered = post.rendered()
 
         // The reply tags come from `build_post`, which needs relay hints this builder has no way to
@@ -154,24 +87,7 @@ extension NIP59 {
                                 content: rendered.content,
                                 createdAt: createdAt)
 
-        let wrapToSelf = try NIP59.giftWrap(rumor: rumor, sender: keypair, receiver: keypair.pubkey)
-
-        // Replying to your own note is the degenerate case: the copy for the recipient and the copy
-        // for ourselves are the same copy, and publishing a second would put the same message on the
-        // relay twice under two unlinkable ephemeral keys for no gain.
-        guard receiver != keypair.pubkey else {
-            return PrivateReply(rumor: rumor, giftWraps: [wrapToSelf], audience: receiver, giftWrapToSelf: wrapToSelf)
-        }
-
-        // Two independent wraps, each with its own seal and its own throwaway signing key. Reusing
-        // either across the pair would tie the two wraps together on the relay and reveal that the
-        // person who sent one sent the other — which is the correlation the wrap exists to prevent.
-        let wrapToReceiver = try NIP59.giftWrap(rumor: rumor, sender: keypair, receiver: receiver)
-
-        return PrivateReply(rumor: rumor,
-                            giftWraps: [wrapToReceiver, wrapToSelf],
-                            audience: receiver,
-                            giftWrapToSelf: wrapToSelf)
+        return try privateEvent(rumor: rumor, to: receiver, from: keypair)
     }
 
     enum PrivateReplyError: Error {

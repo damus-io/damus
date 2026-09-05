@@ -93,7 +93,7 @@ struct EventActionBar: View {
     var like_swipe_button: some View {
         SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
             Task {
-                await send_like(emoji: damus_state.settings.default_emoji_reaction)
+                await react(with: damus_state.settings.default_emoji_reaction)
                 self.swipe_context?.state.wrappedValue = .closed
             }
         }
@@ -143,7 +143,7 @@ struct EventActionBar: View {
                 if bar.liked {
                     //notify(.delete, bar.our_like)
                 } else {
-                    Task { await send_like(emoji: emoji) }
+                    Task { await react(with: emoji) }
                 }
             }
             
@@ -315,17 +315,21 @@ struct EventActionBar: View {
         }
     }
 
-    func send_like(emoji: String) async {
-        guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = await make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
+    /// Reacts to the note. ``send_reaction(to:emoji:keypair:damus_state:)`` decides whether that is a
+    /// public kind 7 or a giftwrapped one; this view does not need to know which, and deliberately
+    /// has no branch of its own to get wrong.
+    func react(with emoji: String) async {
+        guard let keypair = damus_state.keypair.to_full() else { return }
+
+        // Before the send rather than after, so the tap feels answered while the private path is
+        // still sealing and wrapping.
+        generator.impactOccurred()
+
+        guard let reaction = await send_reaction(to: event, emoji: emoji, keypair: keypair, damus_state: damus_state) else {
             return
         }
 
-        self.bar.our_like = like_ev
-
-        generator.impactOccurred()
-        
-        await damus_state.nostrNetwork.postbox.send(like_ev)
+        self.bar.our_like = reaction
     }
     
     // MARK: Helper structures

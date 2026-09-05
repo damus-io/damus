@@ -32,7 +32,9 @@ struct NoteActions: OptionSet {
     static let reply = NoteActions(rawValue: 1 << 0)
     /// Boost (kind 6) and quote (a kind 1 carrying an `nevent`), the two halves of ``RepostAction``.
     static let repost = NoteActions(rawValue: 1 << 1)
-    /// React (kind 7), from the shaka button, the swipe menu, or the chat view's long-press picker.
+    /// React, from the shaka button, the swipe menu, or the chat view's long-press picker. A public
+    /// kind 7 on a public note, and a kind-7 *rumor* in its own gift wrap on one that came out of a
+    /// wrap — see ``send_reaction(to:emoji:keypair:damus_state:)``, which is where that is decided.
     static let like = NoteActions(rawValue: 1 << 2)
     /// Zap (a kind 9734 zap request naming the note).
     static let zap = NoteActions(rawValue: 1 << 3)
@@ -58,18 +60,30 @@ struct NoteActions: OptionSet {
     ///
     /// **A rumor cannot be republished, pointed at, or handed on.** ``NdbNote/is_rumor`` is set only
     /// by nostrdb's gift-wrap unwrapper, so it marks exactly the notes that reached us inside a wrap
-    /// and exist nowhere else: private replies (``NdbNote/is_private_reply``) and NIP-17 DMs. Every
-    /// action removed here either republishes the plaintext (boost, quote, Broadcast, Copy note
-    /// JSON) or publishes a public event pointing at it (like, zap, report). The latter are not
-    /// content leaks, but they announce to a relay that you received a private note and — through
-    /// the `p` tag — who sent it, which is the correlation the wrap exists to prevent. Sharing is
-    /// removed because the `nevent` resolves for nobody: it is a link to a note no one else can
-    /// fetch.
+    /// and exist nowhere else: private replies (``NdbNote/is_private_reply``) and NIP-17 DMs. A boost
+    /// embeds the rumor's JSON in the content of a new kind 6 and Copy note JSON puts it on the system
+    /// pasteboard, so both republish the plaintext outright; Broadcast pushes the note itself;
+    /// sharing hands on an `nevent` that resolves for nobody, a link to a note no one else can fetch;
+    /// and a NIP-56 report is a public signed event naming a note no moderator can ever look at,
+    /// which announces the private exchange in return for nothing.
+    ///
+    /// **Reacting is not on that list, and was.** The objection to it was real — a kind 7 publishes a
+    /// *public* event naming the note and, through its `p` tag, its author, which announces to a relay
+    /// that a private note reached you and who sent it. But that is an argument about a public kind 7,
+    /// and the answer to it is to make the reaction private too rather than to withhold the
+    /// affordance: ``send_reaction(to:emoji:keypair:damus_state:)`` sends a kind-7 *rumor* in its own
+    /// gift wrap. So what this flag now means is "may react", not "may publish a kind 7" — and which
+    /// of the two it is gets decided at the send path rather than here, because a view that had to
+    /// pick would be a second place to get it wrong.
+    ///
+    /// ``zap`` is still gone, and for the same reason it was: a zap request is a public event naming
+    /// the note. It has a private form too, and taking it is separate work.
     ///
     /// **Muting a conversation publishes a note id**, in our public mutelist, so it is only safe when
     /// the id is one the world already has — and for a rumor it is not. ``NostrEvent/thread_id()``
     /// falls back to the note's own id when it has no root ref, so muting a rumor that is not a reply
-    /// publishes *the rumor's id*, which nobody but the two of us has ever seen.
+    /// publishes *the rumor's id*, which nobody but the two of us has ever seen. Unlike a reaction,
+    /// this one has no private form to take: a mutelist is a public record by construction.
     ///
     /// It is tempting to keep the action for a private reply on the grounds that one always carries
     /// NIP-10 tags naming a public parent. That is true only of the ones this app builds — the
@@ -84,7 +98,9 @@ struct NoteActions: OptionSet {
     /// all. The affordance has to be absent rather than present and failing: unlike the public case,
     /// where a signed-out user opening the composer is merely a dead end, here there is no fallback
     /// a reply could quietly become. A public reply to a private note is the one thing this feature
-    /// must never produce.
+    /// must never produce. Reacting to one is the same rule for the same reason — a private reaction
+    /// is sealed by us — so ``like`` goes with ``reply``; a public reaction dressed up as a private
+    /// one would be the same mistake wearing a smaller hat.
     ///
     /// What is left off this list entirely is what stays available on anything: Copy text (the
     /// reader can already read it), Copy user public key, Add bookmark (bookmarks live in
@@ -100,11 +116,19 @@ struct NoteActions: OptionSet {
         }
 
         if event.is_rumor {
-            actions.subtract([.repost, .like, .zap, .share, .broadcast, .copyJSON, .report, .muteThread])
+            actions.subtract([.repost, .zap, .share, .broadcast, .copyJSON, .report, .muteThread])
         }
 
         if keypair.privkey == nil {
             actions.remove(.reply)
+
+            // A private reaction is a rumor we have to seal, exactly as a private reply is, so a
+            // pubkey-only login cannot make one. Only for a rumor: reacting to a public note is
+            // already a dead end that the signing sheet explains, and taking the button away there
+            // would be a change to the public app that has nothing to do with this.
+            if event.is_rumor {
+                actions.remove(.like)
+            }
         }
 
         return actions

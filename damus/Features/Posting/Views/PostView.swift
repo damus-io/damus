@@ -245,14 +245,14 @@ struct PostView: View {
     /// so a pubkey-only login cannot send one at all. Both conditions are answered here rather than at
     /// send time, so the toggle can never be flipped into a state that cannot send.
     ///
-    /// Who it is, is ``NIP59/privateReplyAudience(replyingTo:as:)`` — the same rule the builder uses,
+    /// Who it is, is ``NIP59/privateAudience(for:as:)`` — the same rule the builder uses,
     /// so the name in the lock row is the name the reply actually goes to. It is not simply the
     /// parent's author: replying to a private reply of our own continues the conversation with the
     /// person it was addressed to.
     var private_reply_recipient: Pubkey? {
         guard case .replying_to(let replying_to) = action else { return nil }
         guard let keypair = damus_state.keypair.to_full() else { return nil }
-        return NIP59.privateReplyAudience(replyingTo: replying_to, as: keypair.pubkey)
+        return NIP59.privateAudience(for: replying_to, as: keypair.pubkey)
     }
 
     /// Whether this composer offers the lock at all.
@@ -270,7 +270,7 @@ struct PostView: View {
     ///
     /// Only the *direct* parent is consulted. A public note under a private ancestor is replied to
     /// publicly, because the note being answered is already public; privacy belongs to a message, not
-    /// to a thread. See ``NIP59/privateReplyAudience(replyingTo:as:)``, which reads the audience by
+    /// to a thread. See ``NIP59/privateAudience(for:as:)``, which reads the audience by
     /// the same rule.
     var private_reply_required: Bool {
         guard case .replying_to(let replying_to) = action else { return false }

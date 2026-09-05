@@ -108,7 +108,7 @@ final class PrivateReplyChainTests: XCTestCase {
         let composer = PostView(action: .replying_to(parent), damus_state: make_test_damus_state())
 
         XCTAssertEqual(composer.private_reply_recipient, bob.pubkey)
-        XCTAssertEqual(NIP59.privateReplyAudience(replyingTo: parent, as: alice.pubkey), bob.pubkey)
+        XCTAssertEqual(NIP59.privateAudience(for: parent, as: alice.pubkey), bob.pubkey)
     }
 
     /// Replying to a private reply of **our own** — which the thread shows us, and which has a reply
@@ -125,7 +125,7 @@ final class PrivateReplyChainTests: XCTestCase {
         let ours = try privateReply(from: alice, toANoteBy: bob, read: alice)
         XCTAssertEqual(ours.pubkey, alice.pubkey, "the parent is ours")
 
-        XCTAssertEqual(NIP59.privateReplyAudience(replyingTo: ours, as: alice.pubkey), bob.pubkey,
+        XCTAssertEqual(NIP59.privateAudience(for: ours, as: alice.pubkey), bob.pubkey,
                        "not ourselves — the conversation is with bob")
 
         let composer = PostView(action: .replying_to(ours), damus_state: make_test_damus_state())

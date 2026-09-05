@@ -224,7 +224,7 @@ struct ChatEventView: View {
                 .onChange(of: selected_emoji) { newSelectedEmoji in
                     if let newSelectedEmoji {
                         Task {
-                            await send_like(emoji: newSelectedEmoji.value)
+                            await react(with: newSelectedEmoji.value)
                             popover_state = .closed
                         }
                     }
@@ -234,9 +234,11 @@ struct ChatEventView: View {
         .shadow(color: (is_pressing || self.popover_state.some_sheet_open()) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (is_pressing || self.popover_state.some_sheet_open()) ? 8 : 0, y: (is_pressing || self.popover_state.some_sheet_open()) ? 15 : 0)
         .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, perform: {
             let should_show_zap_sheet = actions.contains(.zap) && !damus_state.settings.nozaps && damus_state.settings.onlyzaps_mode
-            // Both a reaction and a zap request are new signed events naming this note, so neither
-            // is offered on one that came out of a gift wrap. With nothing to open, the long press
-            // does nothing rather than presenting a picker whose every choice would be refused.
+            // A note that came out of a gift wrap offers whichever of these has a private form to
+            // take, so the long press has something to open on one — see `NoteActions.available`.
+            // The guard stays because either can still be switched off, by `nozaps`, by
+            // `onlyzaps_mode`, or by a pubkey-only login, and with nothing to open the long press
+            // should do nothing rather than present a picker whose every choice would be refused.
             guard should_show_zap_sheet || actions.contains(.like) else { return }
             withAnimation(.bouncy(duration: 0.2, extraBounce: 0.35)) {
                 popover_state = should_show_zap_sheet ? .open_zap_sheet : .open_emoji_selector
@@ -265,18 +267,23 @@ struct ChatEventView: View {
         )
     }
     
-    func send_like(emoji: String) async {
-        guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: await damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
+    /// Reacts to the bubble's note. ``send_reaction(to:emoji:keypair:damus_state:)`` decides whether
+    /// that is a public kind 7 or a giftwrapped one — this view has no branch of its own, which
+    /// matters here more than anywhere: the chat bubble is the one place a private reply is read in
+    /// its own thread, so it is where a reaction to one is most likely to be made.
+    func react(with emoji: String) async {
+        guard let keypair = damus_state.keypair.to_full() else { return }
+
+        // Before the send rather than after, so the tap feels answered while the private path is
+        // still sealing and wrapping.
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        guard let reaction = await send_reaction(to: event, emoji: emoji, keypair: keypair, damus_state: damus_state) else {
             return
         }
 
-        self.bar.our_like = like_ev
-
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-        
-        await damus_state.nostrNetwork.postbox.send(like_ev)
+        self.bar.our_like = reaction
     }
     
     var action_bar: some View {
