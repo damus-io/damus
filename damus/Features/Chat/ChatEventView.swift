@@ -121,6 +121,11 @@ struct ChatEventView: View {
         ZapTarget.note(id: event.id, author: event.pubkey)
     }
 
+    /// What this note may be made to do. See ``NoteActions/available(on:)``. The bubble's own
+    /// long press is a react/zap affordance like any other, and it is the one the thread puts
+    /// closest to a private reply.
+    var actions: NoteActions { NoteActions.available(on: event) }
+
     // MARK: Views
 
     var event_bubble: some View {
@@ -228,8 +233,12 @@ struct ChatEventView: View {
         .scaleEffect(self.popover_state.some_sheet_open() ? 1.08 : is_pressing ? 1.02 : 1)
         .shadow(color: (is_pressing || self.popover_state.some_sheet_open()) ? .black.opacity(0.1) : .black.opacity(0.3), radius: (is_pressing || self.popover_state.some_sheet_open()) ? 8 : 0, y: (is_pressing || self.popover_state.some_sheet_open()) ? 15 : 0)
         .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, perform: {
+            let should_show_zap_sheet = actions.contains(.zap) && !damus_state.settings.nozaps && damus_state.settings.onlyzaps_mode
+            // Both a reaction and a zap request are new signed events naming this note, so neither
+            // is offered on one that came out of a gift wrap. With nothing to open, the long press
+            // does nothing rather than presenting a picker whose every choice would be refused.
+            guard should_show_zap_sheet || actions.contains(.like) else { return }
             withAnimation(.bouncy(duration: 0.2, extraBounce: 0.35)) {
-                let should_show_zap_sheet = !damus_state.settings.nozaps && damus_state.settings.onlyzaps_mode
                 popover_state = should_show_zap_sheet ? .open_zap_sheet : .open_emoji_selector
             }
         }, onPressingChanged: { is_pressing in

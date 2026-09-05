@@ -181,9 +181,10 @@ class NdbNote: Codable, Equatable, Hashable {
     /// thread.
     ///
     /// - Warning: A private reply is plaintext in the database and indistinguishable *by kind* from a
-    ///   public note, so every `kinds: [1]` query in the app returns one. Containment is a post-filter
-    ///   responsibility at every read path — see `should_show_event`, which fails closed on this and
-    ///   is opted out of only by the thread view.
+    ///   public note, so every `kinds: [1]` query in the app returns one, and it is *drawn* wherever
+    ///   one is drawn — marked as private by ``SwiftUI/View/privateReplyTreatment(damus_state:event:compact:)``
+    ///   rather than hidden. What is contained is not the note but what can be *done* with it: see
+    ///   ``NoteActions/available(on:)``.
     var is_private_reply: Bool {
         is_rumor && kind == NostrKind.text.rawValue
     }

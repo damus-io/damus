@@ -47,12 +47,17 @@ struct EventActionBar: View {
         }
     }
     
+    /// What this note may be made to do. See ``NoteActions/available(on:)`` — every button below
+    /// except reply publishes an event of its own, so for a note that came out of a gift wrap the
+    /// button is absent rather than present and refused.
+    var actions: NoteActions { NoteActions.available(on: event) }
+
     var show_like: Bool {
         if damus_state.settings.onlyzaps_mode {
             return false
         }
-        
-        return true
+
+        return actions.contains(.like)
     }
     
     var space_if_spread: AnyView {
@@ -160,7 +165,9 @@ struct EventActionBar: View {
     var swipe_action_menu_content: some View {
         Group {
             self.reply_swipe_button
-            self.repost_swipe_button
+            if actions.contains(.repost) {
+                self.repost_swipe_button
+            }
             if show_like {
                 self.like_swipe_button
             }
@@ -172,7 +179,9 @@ struct EventActionBar: View {
             if show_like {
                 self.like_swipe_button
             }
-            self.repost_swipe_button
+            if actions.contains(.repost) {
+                self.repost_swipe_button
+            }
             self.reply_swipe_button
         }
     }
@@ -180,11 +189,11 @@ struct EventActionBar: View {
     var action_bar_content: some View {
         let hide_items_without_activity = options.contains(.hide_items_without_activity)
         let should_hide_chat_bubble = hide_items_without_activity && bar.replies == 0
-        let should_hide_repost = hide_items_without_activity && bar.boosts == 0
+        let should_hide_repost = !actions.contains(.repost) || (hide_items_without_activity && bar.boosts == 0)
         let should_hide_reactions = hide_items_without_activity && bar.likes == 0
         let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
-        let should_hide_zap = hide_items_without_activity && zap_model.zap_total == 0
-        let should_hide_share_button = hide_items_without_activity
+        let should_hide_zap = !actions.contains(.zap) || (hide_items_without_activity && zap_model.zap_total == 0)
+        let should_hide_share_button = !actions.contains(.share) || hide_items_without_activity
         // Only render the bar if at least one action is visible; avoids empty overlays/dots.
         let has_any_action = (!should_hide_chat_bubble && damus_state.keypair.privkey != nil)
             || !should_hide_repost
