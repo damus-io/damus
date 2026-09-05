@@ -360,23 +360,88 @@ struct PostView: View {
         })
     }
     
+    /// The lock, and the audience it decides, split in two: this button holds the *control*, and
+    /// ``ReplyView``'s "Replying privately to @a" line holds the *statement*.
+    ///
+    /// The worst outcome this feature can have is a user believing a note is private when it is
+    /// public, and the second worst is the reverse — so the composer has to answer "who can see
+    /// this" in words while they are still typing. It just does not have to answer it twice. It used
+    /// to: a full-width row here said "Only you and @a can see this reply" directly under a reply
+    /// line that was still listing the thread's `p` tags, and the more prominent of the two
+    /// statements was the wrong one. Moving the sentence up into the reply line — the place the user
+    /// is already reading to find out who they are talking to — leaves exactly one audience
+    /// statement, and it is the true one. That is what makes an icon-only control safe here: the
+    /// lock never has to carry the meaning on its own.
+    ///
+    /// When ``private_reply_required`` this is not a control at all: no button, no tap target, drawn
+    /// dimmed with the reason carried on its accessibility hint. A toggle that snapped back would
+    /// teach the user that the lock is theirs to set and that the app overrode them this once; a
+    /// lock that is plainly not a toggle says the truthful thing, which is that this reply's
+    /// audience was decided by the note they are answering. The reply line does the explaining.
+    @ViewBuilder
+    var PrivacyButton: some View {
+        if can_reply_privately {
+            if private_reply_required {
+                privacy_lock
+                    .opacity(0.5)
+                    .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
+                    .accessibilityLabel(Text("Private reply", comment: "Accessibility label for the lock in the note composer that makes a reply private."))
+                    .accessibilityAddTraits(.isSelected)
+                    .accessibilityHint(Text("Replies to a private note are always private", comment: "Explanation in the note composer for why a reply cannot be made public."))
+            } else {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        is_private_reply.toggle()
+                    }
+                    post_changed(post: post, media: uploadedMedias)
+                }, label: {
+                    privacy_lock
+                })
+                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
+                .accessibilityLabel(Text("Private reply", comment: "Accessibility label for the lock in the note composer that makes a reply private."))
+                .accessibilityAddTraits(sending_privately ? [.isSelected] : [])
+            }
+        }
+    }
+
+    /// The lock itself, sized and padded to sit in the same 24pt box as the image, camera and GIF
+    /// icons beside it.
+    var privacy_lock: some View {
+        Image(systemName: sending_privately ? "lock.fill" : "lock.open")
+            .font(.system(size: 21))
+            .frame(width: 24, height: 24)
+            // The same success palette ``PrivateReplyBadge`` draws the note's own lock in, and
+            // deliberately not the purple used elsewhere: the composer is a preview of what the
+            // sent note will look like, so the locked state here and the badge there have to read
+            // as one thing rather than two features that both involve a lock. Unlocked, it takes the
+            // accent tint the image and camera buttons already use — no button style of its own —
+            // because an unlocked lock is just another button in the row.
+            .foregroundColor(sending_privately ? DamusColors.success : nil)
+            .padding(6)
+    }
+
     var AttachmentBar: some View {
         HStack(alignment: .center, spacing: 15) {
-            ImageButton
-            CameraButton
-            if damus_state.settings.enable_gifs_feature {
-                GIFButton
+            Group {
+                ImageButton
+                CameraButton
+                if damus_state.settings.enable_gifs_feature {
+                    GIFButton
+                }
             }
+            // Only the attachment buttons go dead during an upload. The lock decides where the note
+            // is going, which stays the user's to change while an image is still on its way up.
+            .disabled(uploading_disabled)
+            PrivacyButton
             Spacer()
             AutoSaveIndicatorView(saveViewModel: self.autoSaveModel)
         }
-        .disabled(uploading_disabled)
     }
     
     var PostButton: some View {
         // The button label is the last thing a user reads before sending, so it says which of the two
-        // things they are about to do. A lock that only changes a small icon elsewhere in the composer
-        // is a lock people mis-tap.
+        // things they are about to do. ``PrivacyButton`` is a small icon, and a small icon is easy to
+        // mis-tap — so the state it sets is repeated here, in words, on the control that commits it.
         Button(action: {
             Task { await self.send_post() }
         }, label: {
@@ -396,70 +461,6 @@ struct PostView: View {
         
     }
 
-    /// The lock, and the audience it implies, stated in every position it can be in.
-    ///
-    /// Deliberately a full-width row that names *who* rather than a switch labelled "private". The
-    /// worst outcome this feature can have is a user believing a note is private when it is public,
-    /// and the second worst is the reverse — so the composer answers the question in words, while they
-    /// are still typing, in whichever state the lock is in.
-    ///
-    /// When ``private_reply_required`` the row is not a control at all: no button, no tap target, and
-    /// a second line saying why. A switch that snapped back would teach the user that the lock is
-    /// theirs to set and that the app disagreed with them this once; a fixed statement says the
-    /// truthful thing, which is that this reply's audience was decided by the note they are answering.
-    @ViewBuilder
-    var PrivacyBar: some View {
-        if let recipient = private_reply_recipient {
-            let recipient_name = event_author_name(profiles: damus_state.profiles, pubkey: recipient)
-            if private_reply_required {
-                privacy_bar_label(recipient_name: recipient_name)
-                    .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
-            } else {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        is_private_reply.toggle()
-                    }
-                    post_changed(post: post, media: uploadedMedias)
-                }, label: {
-                    privacy_bar_label(recipient_name: recipient_name)
-                        .contentShape(Rectangle())
-                })
-                .buttonStyle(PlainButtonStyle())
-                .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_privacy_toggle.rawValue)
-                .accessibilityAddTraits(sending_privately ? [.isSelected] : [])
-            }
-        }
-    }
-
-    /// The contents of ``PrivacyBar``, drawn the same whether or not it is tappable — the state it
-    /// reports is what matters, not whether the user put it there.
-    func privacy_bar_label(recipient_name: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 8) {
-                Image(systemName: sending_privately ? "lock.fill" : "lock.open")
-                if sending_privately {
-                    Text("Only you and \(recipient_name) can see this reply", comment: "Label in the note composer stating that a reply will be encrypted and visible only to the person being replied to.")
-                } else {
-                    Text("Anyone can see this reply", comment: "Label in the note composer stating that a reply will be posted publicly.")
-                }
-                Spacer()
-            }
-            if private_reply_required {
-                Text("Replies to a private note are always private", comment: "Explanation in the note composer for why a reply cannot be made public.")
-                    .font(.caption)
-                    .opacity(0.8)
-            }
-        }
-        .font(.footnote)
-        // The same success palette ``PrivateReplyBadge`` draws the note's own lock in, and
-        // deliberately not the purple used elsewhere: the composer is a preview of what the
-        // sent note will look like, so the locked state here and the badge there have to read
-        // as one thing rather than two features that both involve a lock.
-        .foregroundColor(sending_privately ? DamusColors.success : .secondary)
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
-    }
-    
     func isEmpty() -> Bool {
         return self.uploadedMedias.count == 0 &&
             self.post.mutableString.trimmingCharacters(in: .whitespacesAndNewlines) ==
@@ -725,7 +726,12 @@ struct PostView: View {
                     ScrollView {
                         VStack(alignment: .leading) {
                             if case .replying_to(let replying_to) = self.action {
-                                ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
+                                ReplyView(replying_to: replying_to,
+                                          damus: damus_state,
+                                          original_pubkeys: pubkeys,
+                                          filtered_pubkeys: $filtered_pubkeys,
+                                          sending_privately: sending_privately,
+                                          private_reply_recipient: private_reply_recipient)
                             }
                             
                             Editor(deviceSize: deviceSize)
@@ -755,13 +761,9 @@ struct PostView: View {
                         .environmentObject(tagModel)
                } else {
                     Divider()
-                    VStack(alignment: .leading) {
-                        PrivacyBar
-                            .padding(.horizontal)
-                        AttachmentBar
-                            .padding(.vertical, 5)
-                            .padding(.horizontal)
-                    }
+                    AttachmentBar
+                        .padding(.vertical, 5)
+                        .padding(.horizontal)
                 }
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))

@@ -70,7 +70,8 @@ enum AppAccessibilityIdentifiers: String {
     /// A user result in the mention autocomplete list
     case post_composer_mention_user_result
 
-    /// The lock that turns a reply into a private reply, and the line naming who can see it
+    /// The lock button in the attachment bar that turns a reply into a private reply. Locked and
+    /// untappable when the parent is itself private.
     case post_composer_privacy_toggle
 
 

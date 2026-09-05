@@ -40,8 +40,8 @@ final class PrivateReplyChainTests: XCTestCase {
 
     /// Turning the toggle off does not make the reply public. `sending_privately` is the value the
     /// send path and the button label read, and it ignores the toggle when the parent is private —
-    /// which is why `PrivacyBar` renders as a statement rather than as a button in that case, instead
-    /// of as a switch that snaps back.
+    /// which is why `PrivacyButton` renders as a locked, untappable icon in that case, instead of as
+    /// a toggle that snaps back.
     @MainActor
     func testTheLockCannotBeTurnedOff() throws {
         let alice = test_keypair_full
