@@ -1991,6 +1991,8 @@
 		D7C17590000000000000000C /* NIP17SendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175900000000000000003 /* NIP17SendTests.swift */; };
 		D7C175920000000000000006 /* PrivateReplyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000005 /* PrivateReplyTests.swift */; };
 		D7C175920000000000000008 /* PrivateReplyIngestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000007 /* PrivateReplyIngestTests.swift */; };
+		D7C175920000000000000037 /* PrivateReplyRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000036 /* PrivateReplyRoundTripTests.swift */; };
+		D7C175920000000000000035 /* PrivateReplyVisibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000034 /* PrivateReplyVisibilityTests.swift */; };
 		D7C175920000000000000033 /* PrivateReplyNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000032 /* PrivateReplyNotificationTests.swift */; };
 		D7C175920000000000000031 /* PrivateReplyChainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000030 /* PrivateReplyChainTests.swift */; };
 		D7C17592000000000000001F /* PrivateReplyActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C17592000000000000001E /* PrivateReplyActionTests.swift */; };
@@ -3081,6 +3083,8 @@
 		D7C175900000000000000003 /* NIP17SendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP17SendTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000005 /* PrivateReplyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000007 /* PrivateReplyIngestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyIngestTests.swift; sourceTree = "<group>"; };
+		D7C175920000000000000036 /* PrivateReplyRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyRoundTripTests.swift; sourceTree = "<group>"; };
+		D7C175920000000000000034 /* PrivateReplyVisibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyVisibilityTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000032 /* PrivateReplyNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyNotificationTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000030 /* PrivateReplyChainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyChainTests.swift; sourceTree = "<group>"; };
 		D7C17592000000000000001E /* PrivateReplyActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyActionTests.swift; sourceTree = "<group>"; };
@@ -4114,6 +4118,8 @@
 				D7C175900000000000000003 /* NIP17SendTests.swift */,
 				D7C175920000000000000005 /* PrivateReplyTests.swift */,
 				D7C175920000000000000007 /* PrivateReplyIngestTests.swift */,
+				D7C175920000000000000036 /* PrivateReplyRoundTripTests.swift */,
+				D7C175920000000000000034 /* PrivateReplyVisibilityTests.swift */,
 				D7C175920000000000000032 /* PrivateReplyNotificationTests.swift */,
 				D7C175920000000000000030 /* PrivateReplyChainTests.swift */,
 				D7C17592000000000000001E /* PrivateReplyActionTests.swift */,
@@ -6740,6 +6746,8 @@
 				D7C17590000000000000000C /* NIP17SendTests.swift in Sources */,
 				D7C175920000000000000006 /* PrivateReplyTests.swift in Sources */,
 				D7C175920000000000000008 /* PrivateReplyIngestTests.swift in Sources */,
+				D7C175920000000000000037 /* PrivateReplyRoundTripTests.swift in Sources */,
+				D7C175920000000000000035 /* PrivateReplyVisibilityTests.swift in Sources */,
 				D7C175920000000000000033 /* PrivateReplyNotificationTests.swift in Sources */,
 				D7C175920000000000000031 /* PrivateReplyChainTests.swift in Sources */,
 				D7C17592000000000000001F /* PrivateReplyActionTests.swift in Sources */,
