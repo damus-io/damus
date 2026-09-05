@@ -543,9 +543,13 @@ identically:
 
 | What was done | Result |
 | --- | --- |
-| video object created, no upload attempted | `status 0` indefinitely |
-| `POST .../fetch` against a URL that 404s | `status 0` indefinitely |
-| TUS upload started, then abandoned mid-transfer | `status 0` indefinitely |
+| video object created, no upload attempted | stuck at `status 0` |
+| `POST .../fetch` against a URL that 404s | stuck at `status 0` |
+| TUS upload started, then abandoned mid-transfer | stuck at `status 0` |
+
+Each was watched for minutes, not hours, and none of them moved — so whether
+Bunny eventually expires a byte-less video object on its own is **not** settled
+here. Do not design around it doing so.
 
 **Not one of them produced a webhook of any kind** — which also corrects a
 reading of the success capture: the `Status=0` POST fires when the upload
@@ -613,8 +617,14 @@ matters. It also saves nothing, the manifest being a few hundred bytes. (And
 headers, so that is not an alternative either.)
 
 **`status == 4` from the authenticated video API is the only correct readiness
-signal.** This confirms the epic's rule, for a stronger reason than it was
-originally given.
+signal** — no unauthenticated probe substitutes for it. This confirms the epic's
+rule, for a stronger reason than it was originally given.
+
+It is necessary but **not sufficient**: the encode-failure capture below found a
+truncated source that reaches `status == 4` with a full ladder and a working
+manifest while only 16.7 s of a claimed 30 s actually plays. So readiness is
+`status == 4` **and** no `transcodingMessages` at `level >= 2` — see
+[the damaged-source trap](#the-dangerous-case-a-damaged-source-succeeds).
 
 **One consequence for Phase 11.** Since the CDN manifest lags `status == 4` by
 up to ~2 minutes, publishing the instant status flips means the first clients to
@@ -701,6 +711,10 @@ Two mechanical notes on the change:
   failure captured died at load, before any rendition existed. A source that
   encodes 360p and then fails at 720p has not been observed, and it is the case
   where `availableResolutions` is non-empty *and* the encode failed.
+- Whether Bunny ever expires a video object that never received bytes. The
+  three `status 0` cases were each watched for minutes and none moved; an
+  hours-scale TTL on Bunny's side would not have been seen. Phase 5's reap
+  should not assume one either way.
 - Whether the seven-POST webhook sequence holds for a *long* encode where
   renditions land minutes apart rather than seconds. Both captured encodes
   finished in under 90 s.
