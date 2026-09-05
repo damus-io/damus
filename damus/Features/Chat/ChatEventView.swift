@@ -136,14 +136,6 @@ struct ChatEventView: View {
             background_style: by_other_user ? DamusColors.adaptableGrey : DamusColors.adaptablePurpleBackground
         ) {
             VStack(alignment: .leading, spacing: 4) {
-                // Inside the bubble rather than around it: the thread's own bubble colour already
-                // says whose note this is, and a lock drawn outside would be read as belonging to the
-                // gap between notes. The badge sits above the name for the same reason it sits above
-                // the content everywhere else — it is the first thing to read, not a footnote.
-                if event.is_private_reply {
-                    PrivateReplyBadge(damus_state: damus_state, event: event)
-                }
-
                 if by_other_user {
                     HStack {
                         ProfileName(pubkey: event.pubkey, damus: damus_state)
@@ -154,6 +146,19 @@ struct ChatEventView: View {
                         Text(verbatim: "\(format_relative_time(event.created_at))")
                             .foregroundColor(.gray)
                     }
+                }
+
+                // The one surface that draws the badge itself. Everywhere else the audience sentence
+                // stands in the note's reply description, displacing the public "Replying to @a, @b"
+                // line; a chat bubble draws its parent as a quote instead of a sentence, so there is
+                // no such line here to displace and the badge has to be placed by hand — directly
+                // under the author, which is where every other surface puts it, so the bubble reads
+                // in the same order as the rest of the app: who wrote it, who else can see it, what
+                // it says. Inside the bubble rather than around it: the thread's own bubble colour
+                // already says whose note this is, and a lock drawn outside would be read as
+                // belonging to the gap between notes.
+                if event.is_private_reply {
+                    PrivateReplyBadge(damus_state: damus_state, event: event)
                 }
                 
                 if let reply_ref = event.direct_reply_ref(),

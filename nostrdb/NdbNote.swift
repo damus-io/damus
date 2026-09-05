@@ -182,8 +182,9 @@ class NdbNote: Codable, Equatable, Hashable {
     ///
     /// - Warning: A private reply is plaintext in the database and indistinguishable *by kind* from a
     ///   public note, so every `kinds: [1]` query in the app returns one, and it is *drawn* wherever
-    ///   one is drawn — marked as private by ``SwiftUI/View/privateReplyTreatment(damus_state:event:compact:)``
-    ///   rather than hidden. What is contained is not the note but what can be *done* with it: see
+    ///   one is drawn — marked as private by the audience sentence its reply description carries in
+    ///   place of the public "Replying to @a, @b" line (``ReplyDescription``) rather than hidden.
+    ///   What is contained is not the note but what can be *done* with it: see
     ///   ``NoteActions/available(on:)``.
     var is_private_reply: Bool {
         is_rumor && kind == NostrKind.text.rawValue

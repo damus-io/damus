@@ -94,7 +94,8 @@ struct ReplyView: View {
     ///
     /// Shared with ``PrivateReplyBadge`` rather than reproduced here, so the composer is a literal
     /// preview of the note: what the user reads while typing is what they will read afterwards, in
-    /// the same words. A recipient we cannot name is not a case the composer can reach — the lock is
+    /// the same words and in the same place — the sent note draws it as its ``ReplyDescription``,
+    /// which is that note's version of this very line. A recipient we cannot name is not a case the composer can reach — the lock is
     /// only offered when there is one — but the label stands up without them either way.
     var PrivatelyReplyingTo: some View {
         PrivateReplyAudienceLabel(damus_state: damus,

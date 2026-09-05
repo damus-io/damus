@@ -70,7 +70,7 @@ struct EventShell<Content: View>: View {
                 }
 
                 if !options.contains(.no_replying_to) {
-                    ReplyPart(events: state.events, event: event, keypair: state.keypair, ndb: state.ndb)
+                    ReplyPart(state: state, event: event)
                 }
                 
                 content
@@ -97,7 +97,7 @@ struct EventShell<Content: View>: View {
                 VStack(alignment: .leading, spacing: 2) {
                     EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon, size: options.contains(.small_text) ? .small : .normal, options: options)
                     UserStatusView(status: state.profiles.profile_data(pubkey).status, show_general: state.settings.show_general_statuses, show_music: state.settings.show_music_statuses)
-                    ReplyPart(events: state.events, event: event, keypair: state.keypair, ndb: state.ndb)
+                    ReplyPart(state: state, event: event)
                     ProxyView(event: event)
                 }
             }
@@ -127,11 +127,6 @@ struct EventShell<Content: View>: View {
                 Threaded
             }
         }
-        // The shared chrome for every text note, and so the one place that catches a private reply
-        // wherever it is drawn — the home timeline, a profile, a search result, a thread parent, a
-        // quote preview. Putting the lock on any single screen instead would leave the surfaces
-        // nobody thought about rendering one bare.
-        .privateReplyTreatment(damus_state: state, event: event, compact: options.contains(.nested))
         .contentShape(Rectangle())
         .id(event.id)
         .padding([.bottom], 2)

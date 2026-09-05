@@ -18,8 +18,8 @@ import Foundation
 ///
 /// So containment cannot live at egress. It has to live here, where the affordance is built, which
 /// is also the only place it can be made to *disappear*. A disabled boost button invites a tap and
-/// teaches nothing; a missing one is self-explanatory next to the lock badge
-/// (``PrivateReplyBadge``).
+/// teaches nothing; a missing one is self-explanatory next to the note's own lock and audience
+/// sentence (``PrivateReplyAudienceLabel``).
 ///
 /// This is a value rather than a set of `if`s scattered across two view files so that the decision
 /// is testable without a view: `NoteActions.available(on:keypair:)` is exactly what the menu and the action

@@ -14,8 +14,9 @@ import XCTest
 /// asked for a private reply to be absent from the home timeline, the author's profile, search and
 /// reply counts, and present only in its thread. That containment was built, and jb55 rejected it:
 /// if the note is visibly locked, hiding it is the wrong trade. So a private reply is drawn wherever
-/// a public note is, marked by ``PrivateReplyBadge``, and what is withheld is not the note but what
-/// can be *done* with it (``NoteActions/available(on:keypair:)``).
+/// a public note is, marked by the audience sentence its reply description carries in place of the
+/// public "Replying to @a, @b" line (``ReplyDescription``), and what is withheld is not the note but
+/// what can be *done* with it (``NoteActions/available(on:keypair:)``).
 ///
 /// These tests therefore assert the current design rather than a leak. Each one is a tripwire: if a
 /// future change starts filtering private replies out of one of these surfaces, that is a decision

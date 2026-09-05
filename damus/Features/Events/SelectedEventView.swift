@@ -47,12 +47,7 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
-                if event.is_private_reply {
-                    PrivateReplyBadge(damus_state: damus, event: event)
-                        .padding(.horizontal)
-                }
-
-                ReplyPart(events: damus.events, event: event, keypair: damus.keypair, ndb: damus.ndb)
+                ReplyPart(state: damus, event: event)
                     .padding(.horizontal)
                 
                 ProxyView(event: event)
