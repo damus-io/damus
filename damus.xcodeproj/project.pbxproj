@@ -2094,6 +2094,15 @@
 		F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */; };
 		FQ9UEENWE218BBQDVQXU3RA9 /* KingfisherImageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAY65YZMB3VK8HOZYGCNV2YJ /* KingfisherImageProvider.swift */; };
 		K9G5YXAZ4Y19GSLH8TWS8CO1 /* KingfisherImageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAY65YZMB3VK8HOZYGCNV2YJ /* KingfisherImageProvider.swift */; };
+		DAB705000000000000000001 /* TusProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000000 /* TusProtocol.swift */; };
+		DAB705000000000000000003 /* TusUploadRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000002 /* TusUploadRecord.swift */; };
+		DAB705000000000000000005 /* TusUploadStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000004 /* TusUploadStore.swift */; };
+		DAB705000000000000000007 /* TusUploadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000006 /* TusUploadError.swift */; };
+		DAB705000000000000000009 /* TusUploadClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000008 /* TusUploadClient.swift */; };
+		DAB70500000000000000000B /* TusProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB70500000000000000000A /* TusProtocolTests.swift */; };
+		DAB70500000000000000000D /* TusUploadStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB70500000000000000000C /* TusUploadStoreTests.swift */; };
+		DAB70500000000000000000F /* TusUploadClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB70500000000000000000E /* TusUploadClientTests.swift */; };
+		DAB705000000000000000065 /* TusProcessKillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000064 /* TusProcessKillTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -3110,6 +3119,15 @@
 		F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDismiss.swift; sourceTree = "<group>"; };
 		F7F0BA262978E54D009531F3 /* ParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsView.swift; sourceTree = "<group>"; };
 		F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusParseContentTests.swift; sourceTree = "<group>"; };
+		DAB705000000000000000000 /* TusProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusProtocol.swift; sourceTree = "<group>"; };
+		DAB705000000000000000002 /* TusUploadRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadRecord.swift; sourceTree = "<group>"; };
+		DAB705000000000000000004 /* TusUploadStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadStore.swift; sourceTree = "<group>"; };
+		DAB705000000000000000006 /* TusUploadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadError.swift; sourceTree = "<group>"; };
+		DAB705000000000000000008 /* TusUploadClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadClient.swift; sourceTree = "<group>"; };
+		DAB70500000000000000000A /* TusProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusProtocolTests.swift; sourceTree = "<group>"; };
+		DAB70500000000000000000C /* TusUploadStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadStoreTests.swift; sourceTree = "<group>"; };
+		DAB70500000000000000000E /* TusUploadClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadClientTests.swift; sourceTree = "<group>"; };
+		DAB705000000000000000064 /* TusProcessKillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusProcessKillTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -4071,6 +4089,10 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				DAB705000000000000000064 /* TusProcessKillTests.swift */,
+				DAB70500000000000000000A /* TusProtocolTests.swift */,
+				DAB70500000000000000000C /* TusUploadStoreTests.swift */,
+				DAB70500000000000000000E /* TusUploadClientTests.swift */,
 				5EA2C4000000000000000011 /* AdvancedSearchTests.swift */,
 				5EA2C400000000000000002B /* LazyEmojiProviderTests.swift */,
 				D79C07432FA57BB200BD4BFF /* SensitiveDataScrubbingTests.swift */,
@@ -4856,6 +4878,7 @@
 		5C78A79C2E303CA300CF177D /* Media */ = {
 			isa = PBXGroup;
 			children = (
+				DAB70500000000000000005B /* Upload */,
 				5CFDE6E32EF4F773004E8661 /* GIF */,
 				5C78A79D2E303D2600CF177D /* Models */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
@@ -5693,6 +5716,26 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		DAB70500000000000000005A /* Tus */ = {
+			isa = PBXGroup;
+			children = (
+				DAB705000000000000000000 /* TusProtocol.swift */,
+				DAB705000000000000000002 /* TusUploadRecord.swift */,
+				DAB705000000000000000004 /* TusUploadStore.swift */,
+				DAB705000000000000000006 /* TusUploadError.swift */,
+				DAB705000000000000000008 /* TusUploadClient.swift */,
+			);
+			path = Tus;
+			sourceTree = "<group>";
+		};
+		DAB70500000000000000005B /* Upload */ = {
+			isa = PBXGroup;
+			children = (
+				DAB70500000000000000005A /* Tus */,
+			);
+			path = Upload;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -6058,6 +6101,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAB705000000000000000001 /* TusProtocol.swift in Sources */,
+				DAB705000000000000000003 /* TusUploadRecord.swift in Sources */,
+				DAB705000000000000000005 /* TusUploadStore.swift in Sources */,
+				DAB705000000000000000007 /* TusUploadError.swift in Sources */,
+				DAB705000000000000000009 /* TusUploadClient.swift in Sources */,
 				D7C175900000000000000013 /* NIP17Conversation.swift in Sources */,
 				5EA2C4000000000000000028 /* AdvancedSearchFilterSheet.swift in Sources */,
 				5EA2C4000000000000000024 /* AdvancedSearchDatePreset.swift in Sources */,
@@ -6664,6 +6712,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAB705000000000000000065 /* TusProcessKillTests.swift in Sources */,
+				DAB70500000000000000000B /* TusProtocolTests.swift in Sources */,
+				DAB70500000000000000000D /* TusUploadStoreTests.swift in Sources */,
+				DAB70500000000000000000F /* TusUploadClientTests.swift in Sources */,
 				5EA2C4000000000000000012 /* AdvancedSearchTests.swift in Sources */,
 				5EA2C400000000000000002C /* LazyEmojiProviderTests.swift in Sources */,
 				4C2D34412BDAF1B300F9FB44 /* NIP10Tests.swift in Sources */,
