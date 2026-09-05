@@ -112,6 +112,30 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         return nil
     }
     
+    // Before the mention branch, because a private reply is also a kind 1 and would otherwise be
+    // announced as an ordinary public reply, with its plaintext on the lock screen and no sign that
+    // it is a secret.
+    //
+    // The branch is on `is_private_reply` — nostrdb's rumor flag — and not on the kind, for the same
+    // reason the kind-14 path guards on it: the flag is set only by the unwrapper, so it marks
+    // exactly the notes that came out of a giftwrap addressed to us. Without it an ordinary public
+    // mention could be dressed up as private; with the kind alone, every mention would be.
+    if type == .text, ev.is_private_reply {
+        // Gated on `dm_notification`, not on the mention/reply settings. A private reply is the same
+        // class of secret as a NIP-17 DM and shows the same plaintext, and the people who set their
+        // reply and mention preferences did so when no note could be private — so the DM setting is
+        // the one they would expect to govern this, and it is the one that says "yes, put private
+        // messages on my lock screen".
+        //
+        // Nothing for a reply of our own. Our self-addressed wrap comes back through the same
+        // ingester as an inbound one, so without this we would notify ourselves about our own note.
+        guard state.settings.dm_notification,
+              ev.pubkey != state.keypair.pubkey else {
+            return nil
+        }
+        return LocalNotification(type: .private_reply, event: ev, target: .note(ev), content: ev.content)
+    }
+
     if type == .text,
        state.settings.mention_notification
     {

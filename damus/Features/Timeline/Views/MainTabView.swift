@@ -134,7 +134,10 @@ extension LocalNotificationType {
         switch self {
         case .dm:
             return .dms
-        case .like, .mention, .reply, .tagged, .repost, .zap, .profile_zap:
+        // A private reply is a reply: it answers a note of ours and belongs in the thread it
+        // answers, not in the DM list, which has no thread to put it in and would file it under a
+        // conversation that does not exist.
+        case .like, .mention, .reply, .private_reply, .tagged, .repost, .zap, .profile_zap:
             return .notifications
         }
     }
