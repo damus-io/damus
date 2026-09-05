@@ -1,0 +1,40 @@
+Encode-failure capture, 2026-09-05. Webhook POSTs and the status GET on one clock (UTC).
+Video objects were created via POST /library/{LIBRARY_ID}/videos and given bytes with a
+single PUT. `hook` lines are inbound POSTs to the tunnel; `poll` lines are the status GET.
+
+==============================================================================
+random bytes (2 MB of /dev/urandom, named .mp4)  ->  {GUID_RANDOM_BYTES_1}
+==============================================================================
++  0.00s  hook  Status=0
++  0.18s  poll  status=2 encodeProgress=0 avail=None storageSize=0 length=0
++  0.77s  hook  Status=5
++  2.55s  poll  status=5 encodeProgress=5 avail=None storageSize=0 length=0  msg=level3/issueCode7
+
+==============================================================================
+truncated but structurally valid mp4 (faststart moov, media cut at 56%)  ->  {GUID_PARTIAL_1}
+==============================================================================
++  0.00s  hook  Status=0
++  0.42s  poll  status=2 encodeProgress=0 avail=None storageSize=0 length=0
++  0.94s  hook  Status=1
++  1.42s  hook  Status=1
++  2.69s  poll  status=2 encodeProgress=5 avail=None storageSize=0 length=30
++ 14.77s  hook  Status=2
++ 16.00s  hook  Status=4
++ 16.31s  hook  Status=4
++ 16.76s  poll  status=4 encodeProgress=100 avail='360p,480p,720p' storageSize=0 length=30  msg=level2/issueCode2
++ 16.84s  hook  Status=3
++ 19.15s  poll  status=4 encodeProgress=100 avail='360p,480p,720p' storageSize=16942046 length=30  msg=level2/issueCode2
+
+==============================================================================
+Video objects that were created but never successfully given bytes
+==============================================================================
+{GUID_NEVER_UPLOADED}  created, no upload attempted        -> status 0, zero webhooks, indefinitely
+{GUID_FETCH_404}       created, POST .../fetch on a 404 URL -> status 0, zero webhooks, indefinitely
+{GUID_TUS_ABANDONED}   created, TUS upload started then abandoned mid-transfer -> status 0, zero webhooks
+
+  The fetch call answered synchronously and never went asynchronous:
+    HTTP 422  {"success":false,"message":"Origin returned HTTP 404 (Not Found).","statusCode":422}
+
+  All three were still status 0 with empty transcodingMessages when the capture ended.
+  No webhook of any Status was ever delivered for any of them -- so the Status=0 POST
+  fires on upload, not on creation.

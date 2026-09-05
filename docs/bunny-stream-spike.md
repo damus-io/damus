@@ -21,7 +21,10 @@ zero stalls. The pipe works as the epic describes it.
 `video.damus.io` is live on a Let's Encrypt certificate and serves it publicly.
 The encoding webhook has since been captured against a real ingress, and it
 disagrees with the docs in ways that change Phase 5's design — see
-[the webhook section](#the-encoding-webhook-as-it-actually-behaves).
+[the webhook section](#the-encoding-webhook-as-it-actually-behaves) and
+[the encode-failure path](#the-encode-failure-path), where the sharpest finding
+is that a damaged source reaches `status 4` and reports a duration it cannot
+play.
 
 ## The two API scopes
 
@@ -116,8 +119,9 @@ Captured at both ends of its life:
 [full progression](bunny-stream-spike/encode-status-progression.log).
 
 `status` observed: `0` created → `2` processing → `3` transcoding → `4`
-finished. (`5`/`6` are error states; not observed here.) Phase 4 should treat
-`>= 4` as terminal and only `4` as success.
+finished. `5` (encode failed) has since been captured too — see
+[the encode-failure path](#the-encode-failure-path), which also shows that `4`
+alone is *not* enough to call an encode clean. `6` was never reachable.
 
 The progression, abridged:
 
@@ -339,7 +343,7 @@ safety has to come from the row state machine, not from the signature.
 Both real encodes produced exactly seven POSTs, in exactly this order:
 
 ```
-Status=0   Created
+Status=0   Created           (fires on upload, not on create — see below)
 Status=1   Uploaded
 Status=1   Uploaded          (duplicate)
 Status=2   Processing
@@ -358,6 +362,11 @@ rarely.
 `Status=1` is also worth noting: it never appears in the polled progression
 (`0 → 2 → 3 → 4`), so the webhook enum surfaces states the status `GET` does
 not.
+
+Despite its name, the leading `Status=0` is **not** emitted when the video
+object is created — it is emitted when bytes land. A created object that is
+never uploaded emits nothing at all, forever; see
+[status 0 is a black hole](#status-0-is-a-black-hole-and-nothing-ever-tells-you).
 
 ### The webhook's `Status=4` leads the API
 
@@ -394,6 +403,173 @@ All of the above collapses into one rule:
 That is replay-safe, reorder-safe, tolerant of the missing terminal doorbell,
 tolerant of dropped deliveries, and immune to the payload gap — all at once, and
 without a single special case.
+
+The failure capture below leaves that rule intact and adds two things to it:
+the terminal check must be `status == 4` **and** no `transcodingMessages` at
+`level >= 2`, and the sweep must also reap rows stuck at `status 0`, which no
+webhook will ever resolve.
+
+## The encode-failure path
+
+Captured 2026-09-05 the same way as the success path — a logging receiver
+behind a temporary tunnel, `WebhookUrl` pointed at it, both surfaces on one
+clock. Raw:
+[`encode-failure-timeline.log`](bunny-stream-spike/encode-failure-timeline.log) ·
+[`webhook-failure-payloads.jsonl`](bunny-stream-spike/webhook-failure-payloads.jsonl) ·
+[`webhook-failure-headers.txt`](bunny-stream-spike/webhook-failure-headers.txt) ·
+[status 5 object](bunny-stream-spike/video-object-status5-error.json) ·
+[status 4 from a damaged source](bunny-stream-spike/video-object-status4-partial-source.json).
+
+Synthetic files only. Six kinds of bad input were tried; between them they
+produce **three** outcomes, and the one that matters most is not the failure.
+
+### Yes, a failed encode emits a webhook — and it is the clean case
+
+Bad input does **not** get rejected at the door. `PUT`ting 2 MB of
+`/dev/urandom` named `.mp4` returns `{"success":true,"message":"OK"}`; the file
+is accepted, queued, and fails inside the encoder a second and a half later.
+Status `5` is trivially reachable.
+
+Exactly two POSTs arrive, ~0.8 s apart:
+
+```
+Status=0
+Status=5
+```
+
+No duplicate, no reordering, nothing else — reproduced on four separate failed
+encodes (random bytes ×2, a zero-byte file, and an mp4 truncated before its
+`moov`). **The failure path does not have the success path's `0,1,1,2,4,4,3`
+pathology**, and unlike the success path it *does* end on its terminal state:
+`5` is the last POST, and the status `GET` agreed within the 2 s poll interval
+rather than lagging the way `4` lags by up to 27 s.
+
+Headers and signing are byte-for-byte the success path's:
+`hex(HMAC_SHA256(library.ReadOnlyApiKey, raw_body))` verified on **22/22** POSTs
+across this capture, failures included. The payload is the same 115-byte
+four-field body, so it still carries no reason, no message, and no diagnostic —
+**a receiver learns only that the guid failed, never why.** Webhook-then-fetch
+applies to the error branch exactly as it does to success.
+
+`Status=6` was never produced, by any of the six inputs. See below.
+
+### The video object at status 5
+
+Everything is empty ([full capture](bunny-stream-spike/video-object-status5-error.json)):
+
+```
+status=5  encodeProgress=5  availableResolutions=null  storageSize=0
+length=0  width=0  height=0  framerate=0  thumbnailCount=0
+thumbnailUrl=null  thumbnailBlurhash=null  isPublic=false
+```
+
+Two traps in there:
+
+- **`encodeProgress` freezes at `5`, not `0` and not `100`.** A UI driving a
+  progress bar off it parks at 5 % forever, and any "is it done?" test written
+  as `encodeProgress == 100` silently never fires. Terminality is `status >= 4`;
+  success is `status == 4`.
+- **`storageSize` is `0`, so a failed encode is free** — nothing to reconcile
+  into the quota. Phase 14 can ignore status-5 rows rather than special-casing
+  them.
+
+### `transcodingMessages` is the only error channel, and its `level` is the API
+
+The diagnostic lives entirely in `transcodingMessages`. Three levels were
+observed, and they mean genuinely different things:
+
+| `level` | `issueCode` | Observed message | Means |
+| --- | --- | --- | --- |
+| 1 | 4 | `Source video stream has variable framerate` | informational; encode fine |
+| 2 | 2 | `There were errors when transcoding files, video might not be transcoded properly.` | **encode finished at status 4 anyway, with damage** |
+| 3 | 7 | `Invalid file. Cannot load file temp/{guid}/original` | fatal; status 5 |
+
+So `level` — not `status` — is what distinguishes "encoded cleanly" from
+"encoded, but the output is wrong". Phase 5 should persist the whole array and
+treat `level >= 2` as the thing worth alerting on, `level 1` as noise.
+
+Two details for whoever surfaces these to users:
+
+- **The level-3 message leaks Bunny's internal storage path**
+  (`temp/{internal-guid}/original`). Do not render `message` verbatim in the
+  app; map `issueCode` to our own copy.
+- **`value` is truncated by Bunny at 255 characters**, mid-word. On the level-2
+  message it is raw ffmpeg stderr, cut off in the middle of a line. It is a
+  debugging hint, not a parseable field.
+
+### The dangerous case: a damaged source *succeeds*
+
+This is the finding that changes Phase 4 and Phase 5, and it is not a failure at
+all.
+
+A structurally valid mp4 with its `moov` at the front and its media truncated at
+56 % — the kind of file a client that dies mid-upload produces — was **not**
+rejected and did **not** go to status 5. It encoded to **status 4**, full
+`360p,480p,720p` ladder, thumbnails, blurhash, a working master playlist, and
+the ordinary success webhook sequence `0,1,1,2,4,4,3`. The only trace of the
+damage is a `level 2` message.
+
+And it lies about its length:
+
+```
+video object:            length = 30      (the container's claim)
+actual playable HLS:     16.7 s           (summed EXTINF, 360p rendition)
+```
+
+**`status == 4` does not mean the encode was clean, and `length` on a damaged
+source is the source's claim rather than what Bunny produced.** A pipeline that
+checks only `status == 4` publishes a note for a video that plays half way and
+stops, with `imeta` metadata that says otherwise. Phase 4's terminal check
+should be `status == 4 && no transcodingMessages with level >= 2`, and Phase 11
+should take duration from the manifest, not from `length`, or accept that it can
+be wrong.
+
+Related, from the same capture: **`availableResolutions` is not sorted.** The
+success path recorded `360p,480p,720p,1080p`, but this encode reported
+`480p,720p,360p`. Parse it as a set; never index into it.
+
+Also worth knowing: `storageSize` was still `0` for 2.4 s *after* `status`
+flipped to `4`. It is not merely "0 until finished" — it is 0 slightly past
+finished, so a reconcile that fetches the instant it sees `4` can bank a zero.
+
+### Status 0 is a black hole, and nothing ever tells you
+
+Three different ways of never delivering bytes were tried, and all three behave
+identically:
+
+| What was done | Result |
+| --- | --- |
+| video object created, no upload attempted | `status 0` indefinitely |
+| `POST .../fetch` against a URL that 404s | `status 0` indefinitely |
+| TUS upload started, then abandoned mid-transfer | `status 0` indefinitely |
+
+**Not one of them produced a webhook of any kind** — which also corrects a
+reading of the success capture: the `Status=0` POST fires when the upload
+lands, *not* when the video object is created. A video object with no bytes is
+invisible to the webhook surface forever.
+
+The fetch failure at least reports synchronously and never goes asynchronous:
+
+```
+HTTP 422  {"success":false,"message":"Origin returned HTTP 404 (Not Found).","statusCode":422}
+```
+
+So Phase 5's reconcile sweep has a second job beyond the one the success capture
+gave it: **reap rows stuck at status 0 past a TTL.** A user whose upload dies
+mid-transfer leaves a row that no webhook will ever resolve and no error will
+ever explain, and their quota is holding a reservation for it.
+
+### Status 6 was not reachable
+
+`6` was never observed. Between them the six inputs covered garbage bytes, an
+empty file, a headerless truncation, a media truncation, a failed server-side
+fetch and an abandoned upload — every plausible route to "upload failed" — and
+they all landed on `5` or sat at `0`.
+
+Treat `6` as a documented value that may exist for live streams or a path we
+have not hit, handle it defensively as terminal-failure alongside `5`, and do
+not write anything that depends on distinguishing them. Nobody should spend more
+time chasing it than this.
 
 ## Readiness: what you may and may not probe
 
@@ -514,14 +690,15 @@ Two mechanical notes on the change:
 
 ## Not done
 
-- Behaviour of `status` `5`/`6` (encode failure). Only the success path has been
-  exercised, on the video object and on the webhook alike — so it is not known
-  whether a failed encode even emits a webhook, nor what `transcodingMessages`
-  carries on the error path. Phase 4/5 error handling would benefit from
-  deliberately uploading a corrupt file; it is a few minutes' work with an
-  ingress up.
+- `status 6`. Six kinds of bad input all landed on `5` or sat at `0`; see
+  [status 6 was not reachable](#status-6-was-not-reachable). Not worth more
+  chasing — handle it defensively as terminal-failure alongside `5`.
+- What a *long* encode does when it fails partway through the ladder. Every
+  failure captured died at load, before any rendition existed. A source that
+  encodes 360p and then fails at 720p has not been observed, and it is the case
+  where `availableResolutions` is non-empty *and* the encode failed.
 - Whether the seven-POST webhook sequence holds for a *long* encode where
   renditions land minutes apart rather than seconds. Both captured encodes
   finished in under 90 s.
-- `WebhookUrl` is back to `null`. The capture used a temporary tunnel that no
-  longer exists; it must be pointed at the real Purple API in Phase 5.
+- `WebhookUrl` is back to `""`. Both captures used temporary tunnels that no
+  longer exist; it must be pointed at the real Purple API in Phase 5.

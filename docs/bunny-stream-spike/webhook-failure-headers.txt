@@ -1,0 +1,18 @@
+Verbatim headers of the Status=5 (encode failed) webhook POST, as received.
+X-Forwarded-* are added by the ngrok tunnel used to capture this, not by Bunny.
+Identical in every respect to the success-path headers.
+
+Host: {WEBHOOK_HOST}
+Content-Length: 115
+Content-Type: application/json; charset=utf-8
+Traceparent: {TRACEPARENT}
+X-Bunnystream-Signature: {HMAC_SHA256_HEX}
+X-Bunnystream-Signature-Algorithm: hmac-sha256
+X-Bunnystream-Signature-Version: v1
+X-Forwarded-For: {IP}
+X-Forwarded-Host: {WEBHOOK_HOST}
+X-Forwarded-Proto: https
+Accept-Encoding: gzip
+
+body:
+{"IsLiveStreamWebhook":false,"VideoLibraryId":{LIBRARY_ID},"VideoGuid":"{GUID_RANDOM_BYTES_1}","Status":5}
