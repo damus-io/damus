@@ -1,7 +1,7 @@
 {
   "Id": "{LIBRARY_ID}",
   "Name": "damus-purple-video",
-  "EnabledResolutions": "360p,480p,720p,1080p",
+  "EnabledResolutions": "360p,480p,720p",
   "OutputCodecs": "x264",
   "KeepOriginalFiles": false,
   "EnableMP4Fallback": false,

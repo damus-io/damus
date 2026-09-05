@@ -46,7 +46,7 @@ The card's encoder spec, as applied:
 
 | Setting | Value | Why |
 | --- | --- | --- |
-| `EnabledResolutions` | `360p,480p,720p,1080p` | 240p dropped; 1440p/2160p were already off by default |
+| `EnabledResolutions` | `360p,480p,720p` | 240p dropped; 1440p/2160p were already off by default; 1080p disabled 2026-09-05, see below |
 | `OutputCodecs` | `x264` | H.264 only. This is already the default — AV1/VP9/HEVC are opt-in |
 | `KeepOriginalFiles` | `false` | default is `true`; would have stored the 310 MB source forever |
 | `EnableMP4Fallback` | `false` | default is `true`; a whole extra copy of every rendition |
@@ -444,7 +444,7 @@ author waited for. A cheap unauthenticated `GET` of the master playlist,
 confirming its `RESOLUTION` set matches `availableResolutions` before
 publishing, closes that window.
 
-## 720p vs 1080p — the open decision
+## 720p vs 1080p — settled: 720p ceiling for v1
 
 Per-rendition stored bytes, measured by summing the actual HLS segments for the
 93-second sample ([`rendition-bytes.txt`](bunny-stream-spike/rendition-bytes.txt)):
@@ -481,9 +481,10 @@ Quality, measured against the source (both renditions normalized to 1080×1920):
 marginally *lower* (within noise). A 1:1 crop of the highest-detail region of
 the frame, displayed at equal size, is not visually distinguishable.
 
-**Recommendation: ship v1 with a 720p ceiling.** It halves storage and delivery
-for a difference this sample cannot show, and 1080p is a clean lever to sell
-later as a higher Purple tier exactly as the epic anticipates.
+**Decided: v1 ships with a 720p ceiling.** jb55 made the call on 2026-09-05 and
+`EnabledResolutions` is now `360p,480p,720p`. It halves storage and delivery for
+a difference this sample cannot show, and 1080p stays a clean lever to sell later
+as a higher Purple tier exactly as the epic anticipates.
 
 **The honest caveat.** This is *one* 93-second sample: handheld, indoor, low
 light, 59.88 fps VFR. Motion blur and sensor noise set the detail ceiling well
@@ -497,9 +498,19 @@ playback flatters 1080p more than an inline timeline does. If jb55 wants the
 decision hardened before Phase 9, the cheap version is two or three more
 samples across those conditions.
 
-The library is currently configured **with** 1080p enabled, so nothing is
-foreclosed; flipping `EnabledResolutions` to `360p,480p,720p` is a one-call
-change that only affects future encodes.
+That caveat is not retired by the decision — it is the thing to re-test if 1080p
+is ever revisited.
+
+Two mechanical notes on the change:
+
+- **It only affects future encodes.** Existing videos keep the renditions they
+  were encoded with, so the Phase 0 spike video still carries its 1080p rendition
+  and still bills for those 62.72 MB. Bunny's re-encode endpoint would strip it;
+  not worth doing for one sample, but Phase 13/14 should know that a ladder
+  change is not retroactive.
+- **Phase 1 must set this explicitly** when it creates libraries, exactly as with
+  `KeepOriginalFiles` and `EnableMP4Fallback` — a library created with no
+  arguments comes up with 1080p on.
 
 ## Not done
 
