@@ -127,6 +127,11 @@ struct EventShell<Content: View>: View {
                 Threaded
             }
         }
+        // The shared chrome for every text note, and so the one place that catches a private reply
+        // wherever it is drawn — the home timeline, a profile, a search result, a thread parent, a
+        // quote preview. Putting the lock on any single screen instead would leave the surfaces
+        // nobody thought about rendering one bare.
+        .privateReplyTreatment(damus_state: state, event: event, compact: options.contains(.nested))
         .contentShape(Rectangle())
         .id(event.id)
         .padding([.bottom], 2)

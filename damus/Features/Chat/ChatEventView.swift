@@ -131,6 +131,14 @@ struct ChatEventView: View {
             background_style: by_other_user ? DamusColors.adaptableGrey : DamusColors.adaptablePurpleBackground
         ) {
             VStack(alignment: .leading, spacing: 4) {
+                // Inside the bubble rather than around it: the thread's own bubble colour already
+                // says whose note this is, and a lock drawn outside would be read as belonging to the
+                // gap between notes. The badge sits above the name for the same reason it sits above
+                // the content everywhere else — it is the first thing to read, not a footnote.
+                if event.is_private_reply {
+                    PrivateReplyBadge(damus_state: damus_state, event: event)
+                }
+
                 if by_other_user {
                     HStack {
                         ProfileName(pubkey: event.pubkey, damus: damus_state)
