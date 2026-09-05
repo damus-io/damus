@@ -19,8 +19,9 @@ adaptively and right-way-up in `AVPlayer` from an unauthenticated CDN URL, with
 zero stalls. The pipe works as the epic describes it.
 
 `video.damus.io` is live on a Let's Encrypt certificate and serves it publicly.
-One thing is **not** done, flagged below: a captured webhook payload, which
-needs a public ingress.
+The encoding webhook has since been captured against a real ingress, and it
+disagrees with the docs in ways that change Phase 5's design — see
+[the webhook section](#the-encoding-webhook-as-it-actually-behaves).
 
 ## The two API scopes
 
@@ -282,6 +283,167 @@ were no stalls. Adaptive HLS from the public `video.damus.io` URL works, over
 the Let's Encrypt certificate, with no credentials of any kind on the request —
 which is the whole premise the epic rests on.
 
+## The encoding webhook, as it actually behaves
+
+Captured 2026-09-05 by pointing `WebhookUrl` at a logging receiver behind a
+temporary public tunnel, across three encodes: a 20-second clip, a 4-minute
+clip, and one against an endpoint that returned `500` to everything. Raw:
+[`webhook-payloads.jsonl`](bunny-stream-spike/webhook-payloads.jsonl) ·
+[`webhook-headers.txt`](bunny-stream-spike/webhook-headers.txt).
+
+Synthetic `testsrc2` clips were used, not personal video.
+
+### The payload
+
+The entire body, 115 bytes:
+
+```json
+{"IsLiveStreamWebhook":false,"VideoLibraryId":123456,"VideoGuid":"<guid>","Status":0}
+```
+
+The documented shape plus an undocumented `IsLiveStreamWebhook`. **There is no
+`storageSize`, no `availableResolutions`, no `width`/`height`, no
+`encodeProgress`, no title, no duration.** Phase 5's own done-when — reconcile
+quota against real stored bytes — and Phase 14's cost attribution both need
+fields that are simply not in the payload. **Phase 5 must webhook-then-fetch.**
+
+### Authentication
+
+Bunny signs, which the docs did not lead us to expect:
+
+```
+X-Bunnystream-Signature: <64 hex chars>
+X-Bunnystream-Signature-Algorithm: hmac-sha256
+X-Bunnystream-Signature-Version: v1
+```
+
+Reproduced exactly, on all 21 captured POSTs:
+
+```
+signature = hex(HMAC_SHA256(key = library.ReadOnlyApiKey, msg = raw_request_body))
+```
+
+Note the key is the library's **`ReadOnlyApiKey`**, *not* `ApiKey` — both are
+fields on the library object, and picking the wrong one fails closed in a way
+that looks like Bunny being broken. Phase 5 must hold `ReadOnlyApiKey` and MAC
+the **raw body bytes** before JSON parsing; re-serializing the parsed object
+changes the bytes and the signature will not match.
+
+There is **no timestamp and no nonce** in the payload or the headers, so the
+signature proves authenticity but gives no replay protection at all. Duplicate
+deliveries are byte-identical and therefore carry identical signatures. Replay
+safety has to come from the row state machine, not from the signature.
+
+### Delivery is duplicated and out of order — deterministically
+
+Both real encodes produced exactly seven POSTs, in exactly this order:
+
+```
+Status=0   Created
+Status=1   Uploaded
+Status=1   Uploaded          (duplicate)
+Status=2   Processing
+Status=4   Finished
+Status=4   Finished          (duplicate)
+Status=3   Transcoding       <-- arrives AFTER Finished
+```
+
+The trailing `3` came 2.2 s after the `4` on the short clip and 5.7 s after on
+the long one. This is not a race we happened to lose; it reproduced identically
+on both encodes. **A receiver that does `row.status = payload.Status` moves a
+finished video backwards into transcoding** — precisely the regression Phase 5's
+done-when forbids, and it would happen on every single upload rather than
+rarely.
+
+`Status=1` is also worth noting: it never appears in the polled progression
+(`0 → 2 → 3 → 4`), so the webhook enum surfaces states the status `GET` does
+not.
+
+### The webhook's `Status=4` leads the API
+
+On the 4-minute clip the `Status=4` POST arrived at 21:57:02 while the status
+`GET` still returned `status=3, encodeProgress=65` for a further **27 seconds**.
+The short clip showed the same lead, ~3 s.
+
+So a receiver that fetches immediately on the `4` doorbell can get `3` back and
+conclude the video is not ready — and **there is no later terminal doorbell**,
+because the final POST in the sequence is the out-of-order `3`.
+
+**Consequence: the webhook cannot be relied on to deliver a final terminal
+state.** Phase 5 needs a periodic reconcile sweep over rows sitting in
+non-terminal states, as a backstop rather than an optimization. It is the
+server-side mirror of the client-side foreground reconcile in Phase 10.
+
+### There are no retries
+
+With the receiver returning `500` to every POST, all seven were delivered
+exactly once and never retried — confirmed by recounting five minutes after the
+encode finished. **Bunny does not retry failed webhook deliveries.** A receiver
+that is down, mid-deploy, or briefly erroring loses the notification outright.
+That makes the reconcile sweep above mandatory, not defensive.
+
+### The shape this implies for Phase 5
+
+All of the above collapses into one rule:
+
+> Verify the HMAC against the raw body, then **ignore `Status` entirely**. Treat
+> the POST as nothing more than "something changed about this guid", fetch the
+> authoritative video object from the API, and apply a monotonic state machine.
+> Sweep periodically for rows stuck in non-terminal states.
+
+That is replay-safe, reorder-safe, tolerant of the missing terminal doorbell,
+tolerant of dropped deliveries, and immune to the payload gap — all at once, and
+without a single special case.
+
+## Readiness: what you may and may not probe
+
+Phase 0 left open whether the public HLS manifest is a cheap readiness probe,
+letting a client skip an authenticated status call. **It is not**, and it fails
+in both directions. Measured on the 4-minute clip
+([`manifest-readiness-timeline.log`](bunny-stream-spike/manifest-readiness-timeline.log)),
+`t` relative to upload completion:
+
+| t | `status` | `encodeProgress` | `availableResolutions` | public manifest | `RESOLUTION` lines in the body |
+| --- | --- | --- | --- | --- | --- |
+| 63.4 s | 3 | 40 | `360p` | `404` (`cdn-cache: HIT`) | — |
+| **66.0 s** | 3 | 40 | `360p` | **`200`** | **`360x640` only** |
+| 80.9 s | 3 | 65 | all four | `200` | `360x640` only |
+| **85.9 s** | **4** | 100 | all four | `200` | `360x640` only *(stale)* |
+| ~195 s | 4 | 100 | all four | `200` (revalidated) | all four |
+
+Three separate hazards, all real:
+
+1. **The manifest answers `200` about 20 s before the encode finishes, listing
+   only 360p.** A client that publishes on manifest availability ships a note
+   whose video has one 360p rendition. This is the premature-publish bug the
+   spike warned about, now observed rather than hypothesized.
+2. **It then lags completion by up to ~2 minutes.** The manifest was still
+   advertising 360p-only at `status == 4`, held there by `cache-control: public,
+   max-age=30` on the CDN plus whenever Bunny actually rewrites it.
+3. **The pre-encode `404` is negative-cached.** Every pre-encode probe came back
+   `cdn-cache: HIT` with `max-age=30`, so a probe can see a stale `404` for up
+   to 30 s after the manifest genuinely exists.
+
+`HEAD` specifically is the wrong instrument regardless of timing: it only proves
+a manifest *exists*, while which renditions are in it lives in the body's
+`EXT-X-STREAM-INF` / `RESOLUTION` lines. So `HEAD` cannot distinguish "360p
+only, still encoding" from "full ladder, done" — the one distinction that
+matters. It also saves nothing, the manifest being a few hundred bytes. (And
+`HEAD` on Bunny's *video API* returns `405`, with no status in the response
+headers, so that is not an alternative either.)
+
+**`status == 4` from the authenticated video API is the only correct readiness
+signal.** This confirms the epic's rule, for a stronger reason than it was
+originally given.
+
+**One consequence for Phase 11.** Since the CDN manifest lags `status == 4` by
+up to ~2 minutes, publishing the instant status flips means the first clients to
+fetch the note can get a manifest still advertising 360p only. It plays, so
+nothing is broken, but early viewers get the worst rendition of a video the
+author waited for. A cheap unauthenticated `GET` of the master playlist,
+confirming its `RESOLUTION` set matches `availableResolutions` before
+publishing, closes that window.
+
 ## 720p vs 1080p — the open decision
 
 Per-rendition stored bytes, measured by summing the actual HLS segments for the
@@ -341,12 +503,14 @@ change that only affects future encodes.
 
 ## Not done
 
-- **A captured webhook payload.** `WebhookUrl` is still `null`. Capturing a real
-  one needs a publicly reachable ingress (an ngrok tunnel was the plan) and that
-  was declined by the sandbox, so rather than guess at a shape Phase 5 would be
-  built against, it is left empty. It is ~10 minutes with a tunnel, or free once
-  `video.damus.io` and a staging Purple API exist. **Phase 5 should not start
-  from documentation alone** — capture one first.
-- Behaviour of `status` `5`/`6` (encode failure). Only the success path was
-  exercised. Phase 4/5 error handling would benefit from deliberately uploading
-  a corrupt file.
+- Behaviour of `status` `5`/`6` (encode failure). Only the success path has been
+  exercised, on the video object and on the webhook alike — so it is not known
+  whether a failed encode even emits a webhook, nor what `transcodingMessages`
+  carries on the error path. Phase 4/5 error handling would benefit from
+  deliberately uploading a corrupt file; it is a few minutes' work with an
+  ingress up.
+- Whether the seven-POST webhook sequence holds for a *long* encode where
+  renditions land minutes apart rather than seconds. Both captured encodes
+  finished in under 90 s.
+- `WebhookUrl` is back to `null`. The capture used a temporary tunnel that no
+  longer exists; it must be pointed at the real Purple API in Phase 5.
