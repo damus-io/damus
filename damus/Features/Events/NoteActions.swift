@@ -36,7 +36,8 @@ struct NoteActions: OptionSet {
     /// kind 7 on a public note, and a kind-7 *rumor* in its own gift wrap on one that came out of a
     /// wrap — see ``send_reaction(to:emoji:keypair:damus_state:)``, which is where that is decided.
     static let like = NoteActions(rawValue: 1 << 2)
-    /// Zap (a kind 9734 zap request naming the note).
+    /// Zap (a kind 9734 zap request naming the note). Forced to ``ZapType/priv`` when the note is a
+    /// rumor — see ``ZapType/forced(on:requested:ndb:)``.
     static let zap = NoteActions(rawValue: 1 << 3)
     /// Every way of handing the note to somebody else as a string: the iOS share sheet, Copy Link,
     /// and Copy note ID — all of which are the same `nevent` in different wrapping.
@@ -67,17 +68,20 @@ struct NoteActions: OptionSet {
     /// and a NIP-56 report is a public signed event naming a note no moderator can ever look at,
     /// which announces the private exchange in return for nothing.
     ///
-    /// **Reacting is not on that list, and was.** The objection to it was real — a kind 7 publishes a
-    /// *public* event naming the note and, through its `p` tag, its author, which announces to a relay
-    /// that a private note reached you and who sent it. But that is an argument about a public kind 7,
-    /// and the answer to it is to make the reaction private too rather than to withhold the
+    /// **Reacting and zapping are not on that list, and were.** The objection to them was real — a
+    /// kind 7 and a kind 9734 each publish a *public* event naming the note and, through its `p` tag,
+    /// its author, which announces to a relay that a private note reached you and who sent it. But
+    /// the answer to that is to make the reaction and the zap private too, not to withhold the
     /// affordance: ``send_reaction(to:emoji:keypair:damus_state:)`` sends a kind-7 *rumor* in its own
-    /// gift wrap. So what this flag now means is "may react", not "may publish a kind 7" — and which
-    /// of the two it is gets decided at the send path rather than here, because a view that had to
-    /// pick would be a second place to get it wrong.
+    /// gift wrap, and a zap at a rumor is forced to ``ZapType/priv``. So what this flag now means is
+    /// "may react" and "may zap", not "may publish a kind 7" — and the private form of each is
+    /// chosen at the send path rather than here, because a view that had to pick would be a second
+    /// place to get it wrong.
     ///
-    /// ``zap`` is still gone, and for the same reason it was: a zap request is a public event naming
-    /// the note. It has a private form too, and taking it is separate work.
+    /// One leak survives that and is accepted deliberately: a zap receipt is published by the
+    /// recipient's LNURL server, not by us, and it names the rumor's id — the only thing about this
+    /// feature that puts one on a relay. An observer cannot tell that id from any other note they do
+    /// not happen to have, so it says less than it looks like it does.
     ///
     /// **Muting a conversation publishes a note id**, in our public mutelist, so it is only safe when
     /// the id is one the world already has — and for a rumor it is not. ``NostrEvent/thread_id()``
@@ -116,7 +120,7 @@ struct NoteActions: OptionSet {
         }
 
         if event.is_rumor {
-            actions.subtract([.repost, .zap, .share, .broadcast, .copyJSON, .report, .muteThread])
+            actions.subtract([.repost, .share, .broadcast, .copyJSON, .report, .muteThread])
         }
 
         if keypair.privkey == nil {

@@ -1994,6 +1994,7 @@
 		D7C17590000000000000000C /* NIP17SendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175900000000000000003 /* NIP17SendTests.swift */; };
 		D7C175920000000000000006 /* PrivateReplyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000005 /* PrivateReplyTests.swift */; };
 		D7C175920000000000000008 /* PrivateReplyIngestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000007 /* PrivateReplyIngestTests.swift */; };
+		D7C175920000000000000047 /* PrivateZapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000046 /* PrivateZapTests.swift */; };
 		D7C175920000000000000045 /* PrivateReactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000044 /* PrivateReactionTests.swift */; };
 		D7C175920000000000000037 /* PrivateReplyRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000036 /* PrivateReplyRoundTripTests.swift */; };
 		D7C175920000000000000035 /* PrivateReplyVisibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000034 /* PrivateReplyVisibilityTests.swift */; };
@@ -3088,6 +3089,7 @@
 		D7C175900000000000000003 /* NIP17SendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP17SendTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000005 /* PrivateReplyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000007 /* PrivateReplyIngestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyIngestTests.swift; sourceTree = "<group>"; };
+		D7C175920000000000000046 /* PrivateZapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateZapTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000044 /* PrivateReactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReactionTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000036 /* PrivateReplyRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyRoundTripTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000034 /* PrivateReplyVisibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyVisibilityTests.swift; sourceTree = "<group>"; };
@@ -4124,6 +4126,7 @@
 				D7C175900000000000000003 /* NIP17SendTests.swift */,
 				D7C175920000000000000005 /* PrivateReplyTests.swift */,
 				D7C175920000000000000007 /* PrivateReplyIngestTests.swift */,
+				D7C175920000000000000046 /* PrivateZapTests.swift */,
 				D7C175920000000000000044 /* PrivateReactionTests.swift */,
 				D7C175920000000000000036 /* PrivateReplyRoundTripTests.swift */,
 				D7C175920000000000000034 /* PrivateReplyVisibilityTests.swift */,
@@ -6755,6 +6758,7 @@
 				D7C17590000000000000000C /* NIP17SendTests.swift in Sources */,
 				D7C175920000000000000006 /* PrivateReplyTests.swift in Sources */,
 				D7C175920000000000000008 /* PrivateReplyIngestTests.swift in Sources */,
+				D7C175920000000000000047 /* PrivateZapTests.swift in Sources */,
 				D7C175920000000000000045 /* PrivateReactionTests.swift in Sources */,
 				D7C175920000000000000037 /* PrivateReplyRoundTripTests.swift in Sources */,
 				D7C175920000000000000035 /* PrivateReplyVisibilityTests.swift in Sources */,

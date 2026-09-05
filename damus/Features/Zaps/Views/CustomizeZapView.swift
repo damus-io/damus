@@ -71,11 +71,20 @@ struct CustomizeZapView: View {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
     
+    /// Whether the zap type is settled before the sheet opens, because the note came out of a gift
+    /// wrap and ``ZapType/forced(on:requested:ndb:)`` will make it ``ZapType/priv`` whatever is picked.
+    ///
+    /// This only removes the *choice*. `send_zap` forces the type regardless, so a bug here costs the
+    /// user an honest label rather than their privacy — which is the right way round, and the reason
+    /// the enforcement is not in this file.
+    let zap_type_is_forced: Bool
+
     init(state: DamusState, target: ZapTarget, lnurl: String) {
         self.target = target
         self.zap_amounts = get_zap_amount_items(state.settings.default_zap_amount)
         self.lnurl = lnurl
         self.state = state
+        self.zap_type_is_forced = target.isPrivateNote(ndb: state.ndb)
     }
     
     func amount_parts(_ n: Int) -> [ZapAmountItem] {
@@ -262,6 +271,11 @@ struct CustomizeZapView: View {
         }
         .onAppear {
             model.set_defaults(settings: state.settings)
+            // After the defaults, and deliberately overriding `default_zap_type`: a user whose default
+            // is Public would otherwise be shown "Public" on a zap that is about to be sent privately.
+            if zap_type_is_forced {
+                model.zap_type = .priv
+            }
         }
         .onReceive(handle_notify(.zapping)) { zap_ev in
             receive_zap(zap_ev: zap_ev)
@@ -272,10 +286,24 @@ struct CustomizeZapView: View {
         }
     }
     
+    @ViewBuilder
     func ZapTypeButton() -> some View {
-        Button(action: {
-            model.show_zap_types = true
-        }) {
+        if zap_type_is_forced {
+            // Not a disabled button. A control that can be tapped and does nothing teaches the user
+            // nothing about why; a plain lock and the word Private says what is happening, and matches
+            // the badge already on the note itself.
+            ZapTypeLabel()
+        } else {
+            Button(action: {
+                model.show_zap_types = true
+            }) {
+                ZapTypeLabel()
+            }
+        }
+    }
+
+    func ZapTypeLabel() -> some View {
+        HStack {
             switch model.zap_type {
             case .pub:
                 Image("globe")

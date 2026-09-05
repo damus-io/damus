@@ -201,9 +201,9 @@ final class PrivateReplyVisibilityTests: XCTestCase {
     /// Wherever one of the surfaces above draws a private reply, every affordance that would put the
     /// note, or a pointer to it, in front of anyone but its two readers is gone.
     ///
-    /// What is left is not "nothing", and the difference is the point. Reply and react survive because
-    /// each has a private form to take: both become rumors in their own gift wraps. The rest do not: a
-    /// zap request has one too but taking it is separate work, and a boost or Copy note JSON
+    /// What is left is not "nothing", and the difference is the point. Reply, react and zap survive
+    /// because each has a private form to take — the reply and the reaction become rumors in their own
+    /// gift wraps, the zap is forced to ``ZapType/priv``. The rest do not: a boost or Copy note JSON
     /// carries the plaintext by construction, a share hands over an `nevent` that resolves for nobody,
     /// a report names a note no moderator can fetch, and a mutelist is a public record whatever you put
     /// in it. So the rule is not "a private note can do less", it is "a private note cannot be
@@ -212,10 +212,9 @@ final class PrivateReplyVisibilityTests: XCTestCase {
         let f = try ingestPrivateReply()
         let actions = NoteActions.available(on: f.rumor, keypair: f.sender.to_keypair())
 
-        XCTAssertEqual(actions, [.reply, .like],
-                       "the two that take a private form, and nothing else")
+        XCTAssertEqual(actions, [.reply, .like, .zap],
+                       "the three that have a private form, and nothing else")
         for (action, why) in [(NoteActions.repost, "a boost embeds the plaintext in a new signed kind 6"),
-                              (.zap, "a zap request is a public event naming the note and its author"),
                               (.share, "an nevent for a rumor is a link nobody else can resolve"),
                               (.broadcast, "Broadcast pushes this exact note to every connected relay"),
                               (.copyJSON, "Copy note JSON puts the plaintext on the system pasteboard"),
