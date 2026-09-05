@@ -80,10 +80,8 @@ class DamusState: HeadlessDamusState, ObservableObject {
         let nostrNetwork = NostrNetworkManager(delegate: networkManagerDelegate, addNdbToRelayPool: addNdbToRelayPool)
         self.nostrNetwork = nostrNetwork
         self.wallet.nostrNetwork = nostrNetwork
-        self.snapshotManager = .init(ndb: ndb)
-        // Our own notes are kept regardless of how old they are; everyone
-        // else's are subject to the cutoff a prune computes.
         self.pruneManager = .init(ndb: ndb, keepAuthors: [keypair.pubkey])
+        self.snapshotManager = .init(ndb: ndb, our_pubkey: keypair.pubkey)
     }
     
     @MainActor

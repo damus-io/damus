@@ -1,0 +1,9 @@
+t=13:55:07 status=2 encodeProgress=5 w=1920 h=1080 rotation=-90 length=93 avail=None storageSize=0 framerate=59.882 thumbCount=0
+t=13:55:22 status=2 encodeProgress=35 w=1920 h=1080 rotation=-90 length=93 avail=None storageSize=0 framerate=59.882 thumbCount=0
+t=13:55:37 status=2 encodeProgress=35 w=1920 h=1080 rotation=-90 length=93 avail=None storageSize=0 framerate=59.882 thumbCount=0
+t=13:55:53 status=3 encodeProgress=35 w=1920 h=1080 rotation=-90 length=93 avail=None storageSize=0 framerate=59.882 thumbCount=47
+t=13:56:08 status=3 encodeProgress=35 w=1920 h=1080 rotation=-90 length=93 avail=None storageSize=0 framerate=59.882 thumbCount=47
+t=13:56:24 status=3 encodeProgress=45 w=1920 h=1080 rotation=-90 length=93 avail='360p' storageSize=0 framerate=59.882 thumbCount=47
+t=13:56:39 status=3 encodeProgress=45 w=1920 h=1080 rotation=-90 length=93 avail='360p' storageSize=0 framerate=59.882 thumbCount=47
+t=13:56:55 status=3 encodeProgress=70 w=1920 h=1080 rotation=-90 length=93 avail='360p,480p,720p,1080p' storageSize=0 framerate=59.882 thumbCount=47
+t=13:57:26 status=4 encodeProgress=100 w=1920 h=1080 rotation=-90 length=93 avail='360p,480p,720p,1080p' storageSize=128452105 thumbCount=47

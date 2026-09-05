@@ -1,0 +1,42 @@
+Public HLS master playlist availability vs authoritative encode status.
+4-minute 1080x1920 synthetic clip, 362 MB source. t=0 is upload completion.
+manifestRes is parsed from EXT-X-STREAM-INF RESOLUTION lines in the manifest BODY.
+
+t=   0.7s status=2 progress=  0 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=MISS
+t=   3.2s status=2 progress=  0 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=   5.7s status=2 progress=  0 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=   8.1s status=2 progress=  0 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  10.6s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  13.0s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  15.5s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  18.1s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  20.7s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  23.1s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  25.6s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  28.1s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  30.7s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  33.5s status=2 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=EXPIRED
+t=  35.9s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  38.3s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  40.8s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  43.3s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  45.7s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  48.2s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  50.8s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  53.3s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  55.8s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  58.3s status=3 progress=  5 avail=None                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  60.9s status=3 progress= 40 avail=360p                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  63.4s status=3 progress= 40 avail=360p                         storageSize=0          manifest=404 manifestRes=[] age=None cc=public, max-age=30 cdncache=HIT
+t=  66.0s status=3 progress= 40 avail=360p                         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=EXPIRED
+t=  68.4s status=3 progress= 40 avail=360p                         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  70.8s status=3 progress= 40 avail=360p                         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  73.4s status=3 progress= 40 avail=360p                         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  75.9s status=3 progress= 40 avail=360p                         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  78.4s status=3 progress= 40 avail=360p                         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  80.9s status=3 progress= 65 avail=360p,480p,720p,1080p         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  83.4s status=3 progress= 65 avail=360p,480p,720p,1080p         storageSize=0          manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+t=  85.9s status=4 progress=100 avail=360p,480p,720p,1080p         storageSize=289215191  manifest=200 manifestRes=['360x640'] age=None cc=public, max-age=30 cdncache=HIT
+
+then, polled separately after the run:
+21:59:17  manifest=200 cdn-cache=EXPIRED manifestRes=[360x640 480x854 720x1280 1080x1920]

@@ -237,6 +237,98 @@ class DraftTests: XCTestCase {
     }
 
 
+    // MARK: - A private reply's lock
+
+    /// The failure this feature must never have: a draft of a **private** reply coming back as a
+    /// **public** one.
+    ///
+    /// The lock rides on the kind-31234 wrapper, not on the drafted note — a private reply's rumor is
+    /// byte-identical to the public reply it could have been, so the note itself cannot say. This is
+    /// the whole loop through the real save path: composer state, sealed into a PNS envelope, opened
+    /// by nostrdb, read back by a fresh `Drafts`.
+    @MainActor
+    func testAPrivateReplyDraftComesBackStillPrivate() async throws {
+        let state = try drafts_state()
+        let parent = try XCTUnwrap(NostrEvent(content: "the note being answered", keypair: test_keypair, kind: 1, tags: []))
+        try state.ndb.add(event: parent)
+        try poll(until: { (try? state.ndb.lookup_note_and_copy(parent.id)) != nil })
+
+        let artifacts = DraftArtifacts(content: NSMutableAttributedString(string: "typed under the lock"),
+                                       media: [], references: [], id: UUID().uuidString,
+                                       is_private_reply: true)
+        state.drafts.replies[parent.id] = artifacts
+
+        await state.drafts.save(damus_state: state)
+        try poll(until: { (try? self.stored_draft(artifacts.id, in: state)) != nil })
+
+        let reloaded = Drafts()
+        reloaded.load(from: state)
+
+        let restored = try XCTUnwrap(reloaded.replies[parent.id], "the draft belongs under the note it replies to")
+        XCTAssertEqual(restored.content.string, "typed under the lock")
+        XCTAssertTrue(restored.is_private_reply, "a draft that lost its lock would reopen as a public reply")
+    }
+
+    /// The other direction, which matters just as much: an ordinary reply draft must not come back
+    /// wearing a lock nobody set. Every draft saved before this feature existed is one of these.
+    @MainActor
+    func testAPublicReplyDraftComesBackPublic() async throws {
+        let state = try drafts_state()
+        let parent = try XCTUnwrap(NostrEvent(content: "the note being answered", keypair: test_keypair, kind: 1, tags: []))
+        try state.ndb.add(event: parent)
+        try poll(until: { (try? state.ndb.lookup_note_and_copy(parent.id)) != nil })
+
+        let artifacts = DraftArtifacts(content: NSMutableAttributedString(string: "typed in the open"),
+                                       media: [], references: [], id: UUID().uuidString)
+        state.drafts.replies[parent.id] = artifacts
+
+        await state.drafts.save(damus_state: state)
+        try poll(until: { (try? self.stored_draft(artifacts.id, in: state)) != nil })
+
+        let reloaded = Drafts()
+        reloaded.load(from: state)
+        XCTAssertFalse(try XCTUnwrap(reloaded.replies[parent.id]).is_private_reply)
+    }
+
+    /// Where the marker lives, asserted directly: on the kind-31234 wrapper, and *not* in the drafted
+    /// note. If it ever moved inside, a private reply's rumor would stop being byte-identical to the
+    /// public reply it could have been — which is the property phase 1 built the composer around.
+    func testTheLockIsOnTheWrapperAndNotOnTheDraftedNote() throws {
+        let note = try XCTUnwrap(NostrEvent(content: "a private reply in progress", keypair: test_keypair, kind: 1, tags: []))
+
+        let public_draft = try NIP37Draft(unwrapped_note: note, draft_id: "d").draft_note(author: test_keypair_full.pubkey)
+        XCTAssertFalse(public_draft.tags.contains([NIP37Draft.private_reply_tag]))
+
+        let private_draft = try NIP37Draft(unwrapped_note: note, draft_id: "d", is_private_reply: true)
+            .draft_note(author: test_keypair_full.pubkey)
+        XCTAssertTrue(private_draft.tags.contains([NIP37Draft.private_reply_tag]),
+                      "the wrapper carries the marker")
+        XCTAssertEqual(NdbNote.owned_from_json(json: private_draft.content), note,
+                       "and the drafted note is untouched by it")
+        // Compared as notes rather than as strings: `JSONEncoder` does not fix its key order, so two
+        // encodings of one note differ byte for byte while being the same note. The claim is about
+        // the note.
+        XCTAssertEqual(NdbNote.owned_from_json(json: public_draft.content),
+                       NdbNote.owned_from_json(json: private_draft.content),
+                       "the same reply, drafted locked or not, stores the same note")
+    }
+
+    /// The marker survives the trip through nostrdb, read back off a stored note rather than off the
+    /// value we just built. A tag that serialized but did not parse would fail closed to *public*,
+    /// silently, which is the direction that leaks.
+    @MainActor
+    func testTheLockSurvivesNostrdb() throws {
+        let state = try drafts_state()
+        let reply = try XCTUnwrap(NostrEvent(content: "sealed and locked", keypair: test_keypair, kind: 1, tags: []))
+        let draft_id = UUID().uuidString
+        let draft = NIP37Draft(unwrapped_note: reply, draft_id: draft_id, is_private_reply: true)
+        try seed(try draft.draft_note(author: state.pubkey), in: state)
+
+        let stored = try XCTUnwrap(stored_draft(draft_id, in: state))
+        XCTAssertTrue(try XCTUnwrap(NIP37Draft(draft_note: stored)).is_private_reply)
+    }
+
+
     // MARK: Helpers
 
     /// A `DamusState` on its own database, with our key registered with the ingester threads so it

@@ -42,8 +42,7 @@ struct LossyLocalNotification {
     }
     
     static func from(ndb_note: NdbNote) -> LossyLocalNotification? {
-        guard let known_kind = ndb_note.known_kind,
-              let type = LocalNotificationType.from(nostr_kind: known_kind) else {
+        guard let type = LocalNotificationType.from(note: ndb_note) else {
             return nil
         }
         let target: MentionRef = .init(nip19: .note(ndb_note.id))
@@ -85,7 +84,24 @@ enum LocalNotificationType: String {
     case repost
     case zap
     case profile_zap
-    
+    /// A reply that reached us inside a gift wrap — see ``NdbNote/is_private_reply``.
+    ///
+    /// Distinct from ``reply`` because the two are the same *kind* and must not read the same on a
+    /// lock screen: one is a public note anyone can already see, the other is a secret of the same
+    /// class as a DM. Distinct from ``dm`` because it belongs to a thread rather than to a
+    /// conversation, so it opens in the notifications tab and not the DM list.
+    case private_reply
+
+    /// The notification a note warrants, given what the note *is* rather than only what kind it is.
+    ///
+    /// Prefer this to ``from(nostr_kind:)``: kind 1 is two different things depending on
+    /// ``NdbNote/is_rumor``, and the kind alone cannot tell a private reply from a public mention.
+    static func from(note: NdbNote) -> Self? {
+        if note.is_private_reply { return .private_reply }
+        guard let known_kind = note.known_kind else { return nil }
+        return from(nostr_kind: known_kind)
+    }
+
     static func from(nostr_kind: NostrKind) -> Self? {
         switch nostr_kind {
             case .text:

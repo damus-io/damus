@@ -11,6 +11,14 @@ import Foundation
 /// A known Nostr event kind, addressable by name, with the actual number assigned by the protocol as the value
 enum NostrKind: UInt32, Codable {
     case metadata = 0
+    /// An ordinary text note.
+    ///
+    /// - Warning: Kind 1 is **two different things** depending on ``NdbNote/is_rumor``. A signed
+    ///   kind 1 is a public note. A kind 1 carrying nostrdb's rumor flag came out of a gift wrap
+    ///   addressed to us and is a *private reply* (``NdbNote/is_private_reply``) — plaintext in the
+    ///   local database, but a note only two people were ever meant to see. A `kinds: [1]` filter
+    ///   cannot tell them apart, and no filter can express "not a rumor", so every read path that
+    ///   queries for kind 1 has to post-filter. Adding one without doing so is a leak.
     case text = 1
     case contacts = 3
     /// A legacy NIP-04 direct message.

@@ -146,6 +146,12 @@ struct ShareExtensionView: View {
             switch post_notification {
             case .post(let post):
                 Task { await self.post(post) }
+            case .privateReply:
+                // Unreachable: the highlighter only ever composes with `.highlighting`, and the lock
+                // is offered only when replying. Handled rather than ignored so that a future action
+                // added here has to think about it.
+                assertionFailure("the highlighter extension cannot compose a private reply")
+                self.highlighter_state = .cancelled
             case .cancel:
                 self.highlighter_state = .cancelled
             }

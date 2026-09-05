@@ -47,12 +47,17 @@ struct EventActionBar: View {
         }
     }
     
+    /// What this note may be made to do. See ``NoteActions/available(on:keypair:)`` — every button below
+    /// except reply publishes an event of its own, so for a note that came out of a gift wrap the
+    /// button is absent rather than present and refused.
+    var actions: NoteActions { NoteActions.available(on: event, keypair: damus_state.keypair) }
+
     var show_like: Bool {
         if damus_state.settings.onlyzaps_mode {
             return false
         }
-        
-        return true
+
+        return actions.contains(.like)
     }
     
     var space_if_spread: AnyView {
@@ -88,7 +93,7 @@ struct EventActionBar: View {
     var like_swipe_button: some View {
         SwipeAction(image: "shaka", backgroundColor: DamusColors.adaptableGrey) {
             Task {
-                await send_like(emoji: damus_state.settings.default_emoji_reaction)
+                await react(with: damus_state.settings.default_emoji_reaction)
                 self.swipe_context?.state.wrappedValue = .closed
             }
         }
@@ -138,7 +143,7 @@ struct EventActionBar: View {
                 if bar.liked {
                     //notify(.delete, bar.our_like)
                 } else {
-                    Task { await send_like(emoji: emoji) }
+                    Task { await react(with: emoji) }
                 }
             }
             
@@ -159,8 +164,12 @@ struct EventActionBar: View {
     
     var swipe_action_menu_content: some View {
         Group {
-            self.reply_swipe_button
-            self.repost_swipe_button
+            if actions.contains(.reply) {
+                self.reply_swipe_button
+            }
+            if actions.contains(.repost) {
+                self.repost_swipe_button
+            }
             if show_like {
                 self.like_swipe_button
             }
@@ -172,21 +181,25 @@ struct EventActionBar: View {
             if show_like {
                 self.like_swipe_button
             }
-            self.repost_swipe_button
-            self.reply_swipe_button
+            if actions.contains(.repost) {
+                self.repost_swipe_button
+            }
+            if actions.contains(.reply) {
+                self.reply_swipe_button
+            }
         }
     }
     
     var action_bar_content: some View {
         let hide_items_without_activity = options.contains(.hide_items_without_activity)
         let should_hide_chat_bubble = hide_items_without_activity && bar.replies == 0
-        let should_hide_repost = hide_items_without_activity && bar.boosts == 0
+        let should_hide_repost = !actions.contains(.repost) || (hide_items_without_activity && bar.boosts == 0)
         let should_hide_reactions = hide_items_without_activity && bar.likes == 0
         let zap_model = self.damus_state.events.get_cache_data(self.event.id).zaps_model
-        let should_hide_zap = hide_items_without_activity && zap_model.zap_total == 0
-        let should_hide_share_button = hide_items_without_activity
+        let should_hide_zap = !actions.contains(.zap) || (hide_items_without_activity && zap_model.zap_total == 0)
+        let should_hide_share_button = !actions.contains(.share) || hide_items_without_activity
         // Only render the bar if at least one action is visible; avoids empty overlays/dots.
-        let has_any_action = (!should_hide_chat_bubble && damus_state.keypair.privkey != nil)
+        let has_any_action = (!should_hide_chat_bubble && actions.contains(.reply))
             || !should_hide_repost
             || (show_like && !should_hide_reactions)
             || (!should_hide_zap && self.lnurl != nil)
@@ -195,7 +208,7 @@ struct EventActionBar: View {
         return Group {
             if has_any_action {
                 HStack(spacing: options.contains(.no_spread) ? 10 : 0) {
-                    if damus_state.keypair.privkey != nil && !should_hide_chat_bubble {
+                    if actions.contains(.reply) && !should_hide_chat_bubble {
                         self.reply_button
                     }
                     
@@ -302,17 +315,21 @@ struct EventActionBar: View {
         }
     }
 
-    func send_like(emoji: String) async {
-        guard let keypair = damus_state.keypair.to_full(),
-              let like_ev = await make_like_event(keypair: keypair, liked: event, content: emoji, relayURL: damus_state.nostrNetwork.relaysForEvent(event: event).first) else {
+    /// Reacts to the note. ``send_reaction(to:emoji:keypair:damus_state:)`` decides whether that is a
+    /// public kind 7 or a giftwrapped one; this view does not need to know which, and deliberately
+    /// has no branch of its own to get wrong.
+    func react(with emoji: String) async {
+        guard let keypair = damus_state.keypair.to_full() else { return }
+
+        // Before the send rather than after, so the tap feels answered while the private path is
+        // still sealing and wrapping.
+        generator.impactOccurred()
+
+        guard let reaction = await send_reaction(to: event, emoji: emoji, keypair: keypair, damus_state: damus_state) else {
             return
         }
 
-        self.bar.our_like = like_ev
-
-        generator.impactOccurred()
-        
-        await damus_state.nostrNetwork.postbox.send(like_ev)
+        self.bar.our_like = reaction
     }
     
     // MARK: Helper structures

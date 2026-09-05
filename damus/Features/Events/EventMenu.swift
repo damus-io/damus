@@ -50,6 +50,11 @@ struct MenuItems: View {
 
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
+
+    /// What this note may be made to do. See ``NoteActions/available(on:keypair:)`` — for a private reply
+    /// or a DM most of this menu republishes a note that must never leave its gift wrap, so the
+    /// items are absent rather than present and refused.
+    var actions: NoteActions { NoteActions.available(on: event, keypair: damus_state.keypair) }
     
     init(damus_state: DamusState, event: NostrEvent, target_pubkey: Pubkey, profileModel: ProfileModel) {
         let bookmarked = damus_state.bookmarks.isBookmarked(event)
@@ -87,13 +92,15 @@ struct MenuItems: View {
                 Label(NSLocalizedString("Copy user public key", comment: "Context menu option for copying the ID of the user who created the note."), image: "user")
             }
 
-            Button {
-                Task { UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: await event_relay_url_strings()))) }
-            } label: {
-                Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
+            if actions.contains(.share) {
+                Button {
+                    Task { UIPasteboard.general.string = Bech32Object.encode(.nevent(NEvent(event: event, relays: await event_relay_url_strings()))) }
+                } label: {
+                    Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
+                }
             }
 
-            if damus_state.settings.developer_mode {
+            if damus_state.settings.developer_mode && actions.contains(.copyJSON) {
                 Button {
                     UIPasteboard.general.string = event_to_json(ev: event)
                 } label: {
@@ -111,15 +118,15 @@ struct MenuItems: View {
                 Label(isBookmarked ? removeBookmarkString : addBookmarkString, image: imageName)
             }
 
-            Button {
-                notify(.broadcast(event))
-            } label: {
-                Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
+            if actions.contains(.broadcast) {
+                Button {
+                    notify(.broadcast(event))
+                } label: {
+                    Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
+                }
             }
             // Mute thread - relocated to below Broadcast, as to move further away from Add Bookmark to prevent accidental muted threads
-            // Not offered on a direct message of either protocol: muting a thread publishes the note
-            // id in our mutelist, which for a NIP-17 rumor would leak the id of a private message.
-            if event.known_kind != .dm && event.known_kind != .private_dm {
+            if actions.contains(.muteThread) {
                 MuteDurationMenu { duration in
                     if let full_keypair = self.damus_state.keypair.to_full(),
                        let new_mutelist_ev = toggle_from_mutelist(keypair: full_keypair, prev: damus_state.mutelist_manager.event, to_toggle: .thread(event.thread_id(), duration?.date_from_now)) {
@@ -137,10 +144,12 @@ struct MenuItems: View {
             }
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if damus_state.keypair.pubkey != target_pubkey && damus_state.keypair.privkey != nil {
-                Button(role: .destructive) {
-                    notify(.report(.note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))))
-                } label: {
-                    Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), image: "raising-hand")
+                if actions.contains(.report) {
+                    Button(role: .destructive) {
+                        notify(.report(.note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))))
+                    } label: {
+                        Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), image: "raising-hand")
+                    }
                 }
                 
                 MuteDurationMenu { duration in

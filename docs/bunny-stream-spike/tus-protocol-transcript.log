@@ -1,0 +1,30 @@
+# source=IMG_1853.MOV size=310964852 chunk=8388608 expire_in=7200s
+  date: Sat, 05 Sep 2026 20:54:12 GMT
+  server: Kestrel
+  location: /tusupload/055a191e542542da9b29fe45f3ba1729
+  stream-server: 730
+  stream-apiver: 1.5.27
+  upload-expires: Sat, 05 Sep 2026 22:54:12 GMT
+  tus-resumable: 1.0.0
+  stream-proxy: 730
+## Location absolute? NO (relative) -> /tusupload/055a191e542542da9b29fe45f3ba1729
+PATCH #1 HTTP 204 Upload-Offset=8388608 (8388608/310964852)
+    date: Sat, 05 Sep 2026 20:54:12 GMT
+    server: Kestrel
+    stream-server: 730
+    stream-apiver: 1.5.27
+    tus-resumable: 1.0.0
+    upload-offset: 8388608
+    upload-expires: Sat, 05 Sep 2026 22:54:12 GMT
+    stream-proxy: 730
+PATCH #2 HTTP 204 Upload-Offset=16777216 (16777216/310964852)
+    date: Sat, 05 Sep 2026 20:54:13 GMT
+    server: Kestrel
+    stream-server: 730
+    stream-apiver: 1.5.27
+    tus-resumable: 1.0.0
+    upload-offset: 16777216
+    upload-expires: Sat, 05 Sep 2026 22:54:12 GMT
+    stream-proxy: 730
+# DONE patches=38 missing_offset_headers=0 bytes=310964852/310964852 elapsed=35.0s
+# Upload-Offset echoed on every PATCH: YES
