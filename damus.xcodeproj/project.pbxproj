@@ -1981,6 +1981,7 @@
 		D7C175900000000000000016 /* NIP17Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175900000000000000012 /* NIP17Conversation.swift */; };
 		D7C17590000000000000000C /* NIP17SendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175900000000000000003 /* NIP17SendTests.swift */; };
 		D7C175920000000000000006 /* PrivateReplyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000005 /* PrivateReplyTests.swift */; };
+		D7C175920000000000000008 /* PrivateReplyIngestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C175920000000000000007 /* PrivateReplyIngestTests.swift */; };
 		D7DB1FDF2D5A78CE00CF06DA /* NIP44.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */; };
 		D7DB1FE02D5A78CE00CF06DA /* NIP44.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DB1FDD2D5A78CE00CF06DA /* NIP44.swift */; };
 		D7DB1FE42D5A9AC900CF06DA /* CryptoSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D7DB1FE32D5A9AC900CF06DA /* CryptoSwift */; };
@@ -3062,6 +3063,7 @@
 		D7C175900000000000000012 /* NIP17Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP17Conversation.swift; sourceTree = "<group>"; };
 		D7C175900000000000000003 /* NIP17SendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP17SendTests.swift; sourceTree = "<group>"; };
 		D7C175920000000000000005 /* PrivateReplyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyTests.swift; sourceTree = "<group>"; };
+		D7C175920000000000000007 /* PrivateReplyIngestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateReplyIngestTests.swift; sourceTree = "<group>"; };
 		D7DB1FED2D5AC50F00CF06DA /* NIP44v2EncryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP44v2EncryptionTests.swift; sourceTree = "<group>"; };
 		D7DB1FF02D5AC5D700CF06DA /* nip44.vectors.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nip44.vectors.json; sourceTree = "<group>"; };
 		D7DB1FF22D5AC5E400CF06DA /* LICENSES */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSES; sourceTree = "<group>"; };
@@ -4087,6 +4089,7 @@
 				D7E14C012F68B22D00BF84B8 /* NdbIngesterKeyTests.swift */,
 				D7C175900000000000000003 /* NIP17SendTests.swift */,
 				D7C175920000000000000005 /* PrivateReplyTests.swift */,
+				D7C175920000000000000007 /* PrivateReplyIngestTests.swift */,
 				D774A5CB2F4F9679006A4D64 /* StorageStatsManagerTests.swift */,
 				D77A96BE2F3131BE00CC3246 /* RelayHintsTests.swift */,
 				D776BE432F233012002DA1C9 /* EntityPreloaderTests.swift */,
@@ -6703,6 +6706,7 @@
 				D7E14C022F68B22D00BF84B8 /* NdbIngesterKeyTests.swift in Sources */,
 				D7C17590000000000000000C /* NIP17SendTests.swift in Sources */,
 				D7C175920000000000000006 /* PrivateReplyTests.swift in Sources */,
+				D7C175920000000000000008 /* PrivateReplyIngestTests.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
 				D795356B2EBD28A800AACF98 /* AppLifecycleHandlingTests.swift in Sources */,
 				D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */,
