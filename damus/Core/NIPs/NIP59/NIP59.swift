@@ -216,8 +216,9 @@ extension NIP59 {
     /// Almost always `parent`'s author. The exception is a private message of *our own*: its author is
     /// us, so the author rule would address the answer to ourselves and quietly end a conversation the
     /// user believes they are continuing. The person on the other end of that conversation is the one
-    /// the parent was addressed to, which is its single `p` tag — on a rumor the `p` tags are not a
-    /// mention list, they are the audience.
+    /// the parent was addressed to, and the only record of that on our own copy is its `p` tag — the
+    /// copy we can read is the wrap addressed to ourselves, so its ``NdbNote/rumor_receiver_pubkey``
+    /// is us and says nothing about who else got one.
     ///
     /// So the rule is not "the parent's author" but "the parent's *counterparty*", which is the same
     /// thing in every case but this one. It keeps a private exchange 1:1 for its whole length and never
@@ -228,6 +229,18 @@ extension NIP59 {
     /// private reply (kind 1). Reading the audience off a `p` tag is only safe because a rumor whose
     /// `pubkey` is ours can only have been built by us: nostrdb copies that pubkey off the *seal*, and
     /// a seal is signed, so nobody but the holder of our key can produce one that names us.
+    ///
+    /// - Important: "Built by us" means built by *this key*, not necessarily by this app, and that is
+    ///   the limit of what a tag can tell us here. ``createPrivateReply(_:replyingTo:keypair:createdAt:)``
+    ///   writes exactly one `p` tag naming the recipient, so on a parent this app made the first tag
+    ///   *is* the audience — but ``NdbNote/is_rumor`` matches any wrapped note, including one our own
+    ///   key sent from another client that left an ordinary NIP-10 reply's thread `p` tags in place.
+    ///   The first of those is a mention, not a recipient, and a reply here would be addressed to it.
+    ///   The read side no longer takes that risk: ``private_reply_audience(of:)`` answers from the gift
+    ///   wrap's receiver and names nobody at all in this case, because a wrong name in green is worse
+    ///   than no name. The send side has no such field to fall back on — an inbound wrap's receiver is
+    ///   always us — so the choice here would be between this tag and refusing to reply, and the tag
+    ///   is right for every parent damus itself produced.
     ///
     /// Only ever consults the direct parent. A public note that happens to sit under a private
     /// ancestor — which our own client cannot produce, but another client could, by publicly replying

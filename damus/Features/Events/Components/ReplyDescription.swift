@@ -14,8 +14,14 @@ import SwiftUI
 /// "Replying privately to @a". They are the same statement about the same note, so they are drawn in
 /// the same place and differ only in words and colour, exactly as they do in the composer
 /// (``ReplyView/ReplyingToSection``). Anything that instead *added* the private sentence would be
-/// saying it twice, since the public line names that same person too: a private reply's only `p` tag
-/// is its recipient.
+/// saying it twice — a public reply's line already names people, and a private note's audience is
+/// not a second, separate fact about it.
+///
+/// The two halves answer the same question from different evidence, and only the private one is
+/// reliable: the public line lists the note's `p` tags, which are whatever its author wrote, while
+/// the private one reads the gift wrap's receiver — see ``private_reply_audience(of:)``. That is why
+/// the private branch cannot be a string produced by ``reply_desc(ndb:event:replying_to:locale:)``
+/// from the same tags.
 // jb55 - TODO: this could be a lot better
 struct ReplyDescription: View {
     let state: DamusState

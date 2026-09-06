@@ -10,19 +10,58 @@ import SwiftUI
 /// The person a private reply was addressed to — its audience, and the "@a" in "Replying privately
 /// to @a".
 ///
-/// A private reply carries exactly one `p` tag, and on a private reply a `p` tag is not a mention,
-/// it *is* the audience: ``NIP59/createPrivateReply(_:replyingTo:keypair:)`` strips the thread's `p`
-/// tags and appends the single recipient. So the answer does not depend on who is asking. Both people
-/// a private reply exists for read the same sentence off the same tag, which is the property that
-/// lets the composer and the note say the same thing — see ``PrivateReplyAudienceLabel``.
+/// **The audience is not a tag.** It is ``NdbNote/rumor_receiver_pubkey``: the pubkey of the key that
+/// actually opened the gift wrap, which nostrdb copies into the rumor's repurposed signature field at
+/// ingest (`memcpy(sig, unwrap_key->pubkey, 32)`). A sender cannot influence it — it is not read from
+/// the wrap's `p` tag but from which of *our* keys decrypted the thing — and it is exactly the fact
+/// the sentence is asserting: who this note was delivered to.
 ///
-/// Returns `nil` for anything that is not a private reply, and for a malformed one that lost its
-/// audience tag — the label then says "Replying privately" rather than naming somebody wrong, which
-/// is the right way to fail on a question the reader is trusting us to answer.
+/// A `p` tag cannot answer it, and believing otherwise is what put the wrong name on the note. The
+/// argument was that ``NIP59/createPrivateReply(_:replyingTo:keypair:)`` strips a thread's `p` tags
+/// and appends exactly one naming the recipient, so on a private reply a `p` tag is not a mention, it
+/// *is* the audience. True — of the notes *this app builds*. ``NdbNote/is_private_reply`` does not
+/// match only those: it is `is_rumor && kind == 1`, so it is set for **any** kind 1 that came out of a
+/// wrap addressed to us, however the sender chose to tag it. Another client wrapping an ordinary
+/// NIP-10 reply keeps the thread's `p` tags, and in a thread rooted at the sender's own note the first
+/// of those is the sender — so the first tag named the author of a note we had *received*, which is
+/// the one thing the sentence can never be.
+///
+/// So the rumor is answered by where it was delivered, with one exception:
+///
+/// - **A rumor somebody else wrote.** It is here only because a wrap was addressed to us, so we are
+///   the audience. ``NdbNote/rumor_receiver_pubkey`` says so, and no tag gets a vote.
+/// - **A rumor we wrote.** The copy we can read is the wrap ``NIP59/privateEvent(rumor:to:from:)``
+///   addresses to *ourselves* — the only copy of our own message we can decrypt — so its receiver is
+///   us and says nothing about who else got one. Here the single `p` tag is the answer, and here it is
+///   trustworthy: nostrdb copies a rumor's `pubkey` off the **seal**, a seal is signed, so a rumor
+///   naming us as its author can only have been sealed by our own key. Nobody else can reach this
+///   branch.
+///
+/// Which branch a note is on is a property of the note alone: ``NdbNote/rumor_receiver_pubkey`` is
+/// always one of the keys registered with ``Ndb/add_key(_:)``, i.e. one of ours, so `pubkey ==
+/// receiver` *is* "we wrote it" and the answer never depends on who is asking. That is what lets the
+/// composer, the sender's copy and the recipient's copy carry one sentence — see
+/// ``PrivateReplyAudienceLabel`` — even though the two ends now derive it from different fields.
+///
+/// Returns `nil` for anything that is not a private reply, and for the one case a note genuinely
+/// cannot answer: a reply of *ours* carrying a thread's `p` tags rather than damus's single recipient
+/// tag, where our own copy's receiver is us and the tags are a mention list. The label then says
+/// "Replying privately" rather than naming somebody wrong, which is the right way to fail a question
+/// the reader is trusting us to answer.
 @MainActor
 func private_reply_audience(of event: NostrEvent) -> Pubkey? {
-    guard event.is_private_reply else { return nil }
-    return event.referenced_pubkeys.first
+    guard event.is_private_reply, let receiver = event.rumor_receiver_pubkey else { return nil }
+
+    // A wrap addressed to somebody other than the note's author is one only *our* key could have
+    // opened, so the person it was delivered to is us. Whatever the sender tagged is a mention list.
+    guard event.pubkey == receiver else { return receiver }
+
+    // Our own copy, wrapped to ourselves. Exactly one `p` tag is the shape this app's builder
+    // produces and the only shape that can be read as an audience; several of them is a thread's
+    // mention list, which names nobody in particular.
+    let tagged = Array(event.referenced_pubkeys)
+    guard tagged.count == 1 else { return nil }
+    return tagged.first
 }
 
 /// The one sentence the app has for a private reply's audience: **"Replying privately to @a"**.
