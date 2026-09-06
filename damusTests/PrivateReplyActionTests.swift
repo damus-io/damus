@@ -22,6 +22,11 @@ import XCTest
 /// rumors in their own gift wraps and the third is forced to ``ZapType/priv``. An earlier version of
 /// this class asserted react and zap absent; that was the right diagnosis of the leak and the wrong
 /// remedy.
+///
+/// Copy note JSON was on the absent list for a subtler version of the same mistake: it moves the
+/// plaintext, but only onto the clipboard of the device already displaying the note, which has no
+/// recipient at all. Every action still asserted absent here ends up somewhere — a relay, a
+/// moderator, whoever a link is sent to.
 final class PrivateReplyActionTests: XCTestCase {
 
     // MARK: Fixtures
@@ -94,12 +99,14 @@ final class PrivateReplyActionTests: XCTestCase {
     // MARK: A private reply
 
     /// The whole rule in one assertion: everything that would republish the reply or hand out a
-    /// pointer to it is gone, and the three things that have a private form survive.
+    /// pointer to it is gone, the three things that have a private form survive, and so does the one
+    /// whose only destination is the reader's own clipboard.
     func testAPrivateReplyOffersOnlyWhatHasAPrivateForm() throws {
         let alice = generate_new_keypair()
         let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
 
-        XCTAssertEqual(NoteActions.available(on: reply, keypair: alice.to_keypair()), [.reply, .like, .zap])
+        XCTAssertEqual(NoteActions.available(on: reply, keypair: alice.to_keypair()),
+                       [.reply, .like, .zap, .copyJSON])
     }
 
     /// Named individually, because each one is a distinct leak and a regression on any single one
@@ -117,12 +124,33 @@ final class PrivateReplyActionTests: XCTestCase {
                        "a kind 6 embeds the rumor's JSON in its content and is itself a perfectly ordinary signed event, so no egress guard would stop it — this is the worst one")
         XCTAssertFalse(actions.contains(.broadcast),
                        "Broadcast is refused at egress, but silently — the item has to be gone, not inert")
-        XCTAssertFalse(actions.contains(.copyJSON),
-                       "Copy note JSON puts the plaintext and a bogus signature on the system pasteboard, and nothing downstream stops it")
         XCTAssertFalse(actions.contains(.share),
                        "an nevent for a rumor is a link nobody else can resolve")
         XCTAssertFalse(actions.contains(.report),
                        "a NIP-56 report is a public event naming a note no moderator can fetch, and it announces the private exchange")
+    }
+
+    /// **Copy note JSON is offered, and was not.**
+    ///
+    /// It was removed alongside boost and Broadcast, on the grounds that it puts the plaintext and a
+    /// bogus signature on the system pasteboard. But the pasteboard is not a relay and has nobody on
+    /// the other end of it: the note is already on the screen of the person doing the copying, which
+    /// is exactly why Copy text was never withheld. And the JSON cannot be published by anyone —
+    /// a rumor's `sig` field holds the wrap's receiver and id rather than a signature
+    /// (``NdbNote/is_rumor``), so no relay will accept the event back.
+    ///
+    /// The cost of withholding it was concrete: it is developer-mode-only and exists to diagnose a
+    /// note that renders wrong, and it was missing on the one machine that holds the key when a
+    /// private reply was naming the wrong audience.
+    func testTheReaderCanCopyAPrivateReplysJSON() throws {
+        let alice = generate_new_keypair()
+        let (reply, _) = try privateReply(from: alice, toANoteBy: generate_new_keypair())
+        let actions = NoteActions.available(on: reply, keypair: alice.to_keypair())
+
+        XCTAssertTrue(actions.contains(.copyJSON),
+                      "copying to your own clipboard is not republishing, pointing at, or handing on")
+        XCTAssertFalse(actions.contains(.broadcast),
+                       "and it buys no way to publish the thing — that is still gone")
     }
 
     /// **React and zap are offered, and were not.**
@@ -233,8 +261,9 @@ final class PrivateReplyActionTests: XCTestCase {
         let rumor = try ingestedRumor(dm.giftWrapToSelf, as: alice, kinds: [.private_dm])
 
         XCTAssertTrue(rumor.is_rumor)
-        XCTAssertEqual(NoteActions.available(on: rumor, keypair: alice.to_keypair()), [.reply, .like, .zap],
-                       "a DM keeps the same three, by the same rumor rule rather than by its kind")
+        XCTAssertEqual(NoteActions.available(on: rumor, keypair: alice.to_keypair()),
+                       [.reply, .like, .zap, .copyJSON],
+                       "a DM keeps exactly what a private reply keeps, by the same rumor rule rather than by its kind")
         XCTAssertEqual(rumor.thread_id(), rumor.id,
                        "and here is the thread id that rule protects: the rumor itself")
     }

@@ -44,7 +44,8 @@ struct NoteActions: OptionSet {
     static let share = NoteActions(rawValue: 1 << 4)
     /// Broadcast: push this exact note to every connected relay.
     static let broadcast = NoteActions(rawValue: 1 << 5)
-    /// Copy note JSON (developer mode).
+    /// Copy note JSON (developer mode). Available on a rumor as well — it goes to the reader's own
+    /// pasteboard and nowhere else, see ``available(on:keypair:)``.
     static let copyJSON = NoteActions(rawValue: 1 << 6)
     /// Report (NIP-56) — a public signed event naming the note and its author.
     static let report = NoteActions(rawValue: 1 << 7)
@@ -62,11 +63,15 @@ struct NoteActions: OptionSet {
     /// **A rumor cannot be republished, pointed at, or handed on.** ``NdbNote/is_rumor`` is set only
     /// by nostrdb's gift-wrap unwrapper, so it marks exactly the notes that reached us inside a wrap
     /// and exist nowhere else: private replies (``NdbNote/is_private_reply``) and NIP-17 DMs. A boost
-    /// embeds the rumor's JSON in the content of a new kind 6 and Copy note JSON puts it on the system
-    /// pasteboard, so both republish the plaintext outright; Broadcast pushes the note itself;
-    /// sharing hands on an `nevent` that resolves for nobody, a link to a note no one else can fetch;
-    /// and a NIP-56 report is a public signed event naming a note no moderator can ever look at,
-    /// which announces the private exchange in return for nothing.
+    /// embeds the rumor's JSON in the content of a new kind 6, so it republishes the plaintext
+    /// outright; Broadcast pushes the note itself; sharing hands on an `nevent` that resolves for
+    /// nobody, a link to a note no one else can fetch; and a NIP-56 report is a public signed event
+    /// naming a note no moderator can ever look at, which announces the private exchange in return
+    /// for nothing.
+    ///
+    /// Every one of those has a *recipient* — a relay, a moderator, whoever the link is sent to. That
+    /// is what makes the list a list, and it is the test each candidate has to pass. See Copy note
+    /// JSON below, which was on it and does not pass.
     ///
     /// **Reacting and zapping are not on that list, and were.** The objection to them was real — a
     /// kind 7 and a kind 9734 each publish a *public* event naming the note and, through its `p` tag,
@@ -106,6 +111,19 @@ struct NoteActions: OptionSet {
     /// is sealed by us — so ``like`` goes with ``reply``; a public reaction dressed up as a private
     /// one would be the same mistake wearing a smaller hat.
     ///
+    /// **Copy note JSON belongs beside Copy text, not in the subtraction.** It was subtracted, on the
+    /// grounds that it puts the plaintext on the system pasteboard. So does Copy text, which is
+    /// deliberately kept, and on reasoning that covers both: the reader can already read the note, so
+    /// a copy of what is on their own screen reaching their own clipboard is not the note leaving its
+    /// wrap. The pasteboard has nobody on the other end of it, which is what separates it from every
+    /// entry above. The JSON adds the rumor's id, its author, its tags and the repurposed signature
+    /// field — things the reader is already looking at or holds the key to — and adds no way to
+    /// publish any of them, because a rumor's `sig` is not a signature (see ``NdbNote/is_rumor``) and
+    /// no relay will accept the event back. Meanwhile the affordance has exactly one purpose, which
+    /// is why it is behind developer mode: reading a note that renders wrong. Taking it away took that
+    /// away from the only person who can do it — the one holding the key the wrap was addressed to —
+    /// and a private reply naming the wrong audience is precisely the bug it existed to diagnose.
+    ///
     /// What is left off this list entirely is what stays available on anything: Copy text (the
     /// reader can already read it), Copy user public key, Add bookmark (bookmarks live in
     /// `UserDefaults`, not in a published list — see ``BookmarksManager``), and Mute/Block user,
@@ -120,7 +138,7 @@ struct NoteActions: OptionSet {
         }
 
         if event.is_rumor {
-            actions.subtract([.repost, .share, .broadcast, .copyJSON, .report, .muteThread])
+            actions.subtract([.repost, .share, .broadcast, .report, .muteThread])
         }
 
         if keypair.privkey == nil {
