@@ -1,0 +1,223 @@
+#!/usr/bin/env python3
+"""Start an Xcode Cloud build over the App Store Connect API, and watch it.
+
+This is the fully remote path: the build runs on Apple's machines, so nothing
+here depends on a Mac being awake, unlocked, or holding a distribution
+certificate. All it needs is an App Store Connect API key.
+
+  # see what workflows exist
+  ./devtools/release/xcode-cloud-build.py --list
+
+  # start the release candidate workflow on a branch and wait for it
+  ./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
+      --branch master --wait
+
+  # print the request without sending it
+  ./devtools/release/xcode-cloud-build.py "PR check" --branch master --dry-run
+
+Credentials come from ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH; see asc_api.py.
+"""
+
+import argparse
+import json
+import os
+import sys
+import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import asc_api  # noqa: E402
+
+PRODUCT_NAME = "damus"
+
+# Terminal values of a build run's completionStatus.
+DONE = {"SUCCEEDED", "FAILED", "ERRORED", "CANCELED", "SKIPPED"}
+
+
+def find_product(bearer):
+    body = asc_api.get("/v1/ciProducts?limit=200", bearer=bearer)
+    products = body.get("data", [])
+    for product in products:
+        if product.get("attributes", {}).get("name") == PRODUCT_NAME:
+            return product
+    names = ", ".join(
+        repr(p.get("attributes", {}).get("name")) for p in products
+    ) or "none"
+    raise asc_api.AscError(
+        f"no Xcode Cloud product named {PRODUCT_NAME!r}; the key can see: {names}"
+    )
+
+
+def list_workflows(bearer, product_id):
+    body = asc_api.get(
+        f"/v1/ciProducts/{product_id}/workflows?limit=200", bearer=bearer
+    )
+    return body.get("data", [])
+
+
+def find_workflow(workflows, name):
+    wanted = name.casefold()
+    for workflow in workflows:
+        if workflow.get("attributes", {}).get("name", "").casefold() == wanted:
+            return workflow
+    available = ", ".join(
+        repr(w.get("attributes", {}).get("name")) for w in workflows
+    ) or "none"
+    raise asc_api.AscError(f"no workflow named {name!r}; available: {available}")
+
+
+def find_git_reference(bearer, workflow_id, branch):
+    """Resolve a branch name to the gitReference id Xcode Cloud knows it by.
+
+    A build run without a sourceBranchOrTag uses whatever the workflow's start
+    condition names, which for a release workflow is not necessarily the branch
+    you meant. Passing it explicitly keeps "cut a build from master" honest.
+
+    The repository is fetched through the workflow's related-resource endpoint
+    rather than read off the relationship payload, because App Store Connect
+    only populates relationship `data` for some requests.
+    """
+    repository = asc_api.get(
+        f"/v1/ciWorkflows/{workflow_id}/repository", bearer=bearer
+    ).get("data", {})
+    repository_id = repository.get("id")
+    if not repository_id:
+        raise asc_api.AscError(
+            "could not find the workflow's repository, so --branch cannot be "
+            "resolved; re-run without --branch to use the workflow default"
+        )
+
+    path = f"/v1/scmRepositories/{repository_id}/gitReferences?limit=200"
+    seen = []
+    while path:
+        body = asc_api.get(path, bearer=bearer)
+        for ref in body.get("data", []):
+            attrs = ref.get("attributes", {})
+            if attrs.get("kind") != "BRANCH":
+                continue
+            if attrs.get("name") == branch:
+                return ref["id"]
+            seen.append(attrs.get("name"))
+        next_link = body.get("links", {}).get("next") or ""
+        path = next_link.replace(asc_api.BASE_URL, "", 1) if next_link else ""
+
+    raise asc_api.AscError(
+        f"no branch {branch!r} in the connected repository; saw: "
+        + (", ".join(sorted(set(n for n in seen if n))[:20]) or "none")
+    )
+
+
+def build_run_body(workflow_id, git_reference_id=None):
+    relationships = {
+        "workflow": {"data": {"type": "ciWorkflows", "id": workflow_id}}
+    }
+    if git_reference_id:
+        relationships["sourceBranchOrTag"] = {
+            "data": {"type": "scmGitReferences", "id": git_reference_id}
+        }
+    return {"data": {"type": "ciBuildRuns", "relationships": relationships}}
+
+
+def wait_for(build_run_id, poll_seconds, timeout_seconds):
+    """Poll a build run to completion.
+
+    Deliberately mints a fresh token per poll rather than reusing the caller's:
+    a release build outlives the 20-minute token lifetime, and a token that
+    expires mid-wait would look like a build failure.
+    """
+    deadline = time.time() + timeout_seconds
+    last = None
+    while time.time() < deadline:
+        attrs = asc_api.get(
+            f"/v1/ciBuildRuns/{build_run_id}"
+        ).get("data", {}).get("attributes", {})
+        progress = attrs.get("executionProgress")
+        status = attrs.get("completionStatus")
+        state = (progress, status)
+        if state != last:
+            print(f"  {progress or '?'}" + (f" / {status}" if status else ""))
+            last = state
+        if status in DONE:
+            return status
+        time.sleep(poll_seconds)
+    raise asc_api.AscError(
+        f"build run {build_run_id} did not finish within {timeout_seconds}s "
+        "(it may still be running; check App Store Connect)"
+    )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("workflow", nargs="?", help="workflow name (see --list)")
+    parser.add_argument("--branch", help="branch to build (default: the workflow's own)")
+    parser.add_argument("--list", action="store_true", help="list workflows and exit")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="resolve ids and print the request without starting a build",
+    )
+    parser.add_argument("--wait", action="store_true", help="poll until the build ends")
+    parser.add_argument("--poll-seconds", type=int, default=30)
+    parser.add_argument("--timeout-seconds", type=int, default=90 * 60)
+    args = parser.parse_args()
+
+    if not args.workflow and not args.list:
+        parser.error("a workflow name is required unless --list is given")
+
+    try:
+        # One token for the id lookups and the POST; wait_for mints its own.
+        bearer = asc_api.token()
+        product = find_product(bearer)
+        workflows = list_workflows(bearer, product["id"])
+
+        if args.list:
+            print(f"product {PRODUCT_NAME} ({product['id']})")
+            for workflow in workflows:
+                attrs = workflow.get("attributes", {})
+                flag = "" if attrs.get("isEnabled", True) else "  (disabled)"
+                print(f"  {attrs.get('name')!r}  {workflow['id']}{flag}")
+            return 0
+
+        workflow = find_workflow(workflows, args.workflow)
+        git_reference_id = (
+            find_git_reference(bearer, workflow["id"], args.branch)
+            if args.branch
+            else None
+        )
+        body = build_run_body(workflow["id"], git_reference_id)
+
+        if args.dry_run:
+            print("POST /v1/ciBuildRuns")
+            print(json.dumps(body, indent=2))
+            return 0
+
+        status, response = asc_api.request(
+            "POST", "/v1/ciBuildRuns", body, bearer=bearer
+        )
+        if not 200 <= status < 300:
+            print(
+                f"error: could not start the build (HTTP {status}): "
+                f"{asc_api.describe(response)}",
+                file=sys.stderr,
+            )
+            return 1
+
+        run = response.get("data", {})
+        number = run.get("attributes", {}).get("number")
+        print(f"started build {number} (run {run.get('id')})")
+
+        if not args.wait:
+            return 0
+
+        outcome = wait_for(run["id"], args.poll_seconds, args.timeout_seconds)
+        print(f"build {number}: {outcome}")
+        return 0 if outcome == "SUCCEEDED" else 1
+
+    except asc_api.AscError as err:
+        print(f"error: {err}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
