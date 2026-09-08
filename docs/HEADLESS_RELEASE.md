@@ -103,10 +103,21 @@ Three things about this step that are easy to get wrong:
   link, `144cd6b4...` with one). The script refuses an ambiguous name and makes
   you pass an id, rather than silently picking one and mailing a build to the
   wrong set of people.
-- **External groups are not instant.** The first build of a new version needs
-  Beta App Review approval before external testers receive it. The submission
-  can be automated; Apple's approval cannot, so an external release is never
-  fully unattended on the first build of a version.
+- **Only the release-candidate workflow produces externally-distributable
+  builds.** This is the trap. `Experimental build workflow` and `PR check`
+  archive with `buildDistributionAudience: INTERNAL_ONLY`, and that is baked
+  into the build — it shows as `buildAudienceType: INTERNAL_ONLY` and can
+  *never* be added to an external group, no matter what you do to it
+  afterwards. Only `Release candidate build workflow` archives as
+  `APP_STORE_ELIGIBLE`. `--list` prints the audience per build, and the script
+  refuses an internal-only build with an explanation instead of letting you
+  chase a review or permissions problem that does not exist. The local path's
+  equivalent knob is `--internal-only`.
+- **External groups may not be instant.** A version that has never cleared Beta
+  App Review needs it before external testers get the build; a later build of an
+  already-approved version is normally accepted without a fresh submission.
+  `--submit-for-review` submits when Apple asks for it. The submission is
+  automatable; approval is not.
 - **Export compliance must already be answered** or distribution is rejected.
   The script warns rather than answering for you — it is a legal declaration
   about the app, not a checkbox to automate. Recent damus builds are all
@@ -231,8 +242,12 @@ Verified on this Mac (Xcode 26.6, build 17F113):
 
 Still not tested:
 
-- **External group distribution** and Beta App Review submission. Only the
-  `Internal` group has actually been released to.
+- **External group distribution.** Only the `Internal` group has been released
+  to, and it could not have been otherwise: build 1335 came from the
+  experimental workflow, so it is `INTERNAL_ONLY` and is permanently ineligible
+  for external groups. Proving the external path needs a build from the
+  release-candidate workflow — which is a real 1.18 release candidate, so it
+  belongs to the release, not to this spike.
 - **The local path's signing.** Automatic creation of the distribution
   certificate and App Store profiles, and therefore the `destination: upload`
   export, have never run — the local path is still only proven as far as the

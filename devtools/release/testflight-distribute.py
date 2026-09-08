@@ -269,9 +269,10 @@ def main() -> int:
             for build in builds(10):
                 attrs = build["attributes"]
                 flag = "  (expired)" if attrs.get("expired") else ""
+                audience = attrs.get("buildAudienceType") or "?"
                 print(
                     f"  {attrs.get('version'):>6}  {attrs.get('processingState'):<10}"
-                    f"  {str(attrs.get('uploadedDate'))[:19]}{flag}"
+                    f"  {audience:<19}  {str(attrs.get('uploadedDate'))[:19]}{flag}"
                 )
             print("\nTestFlight groups:")
             for group in beta_groups():
@@ -334,16 +335,30 @@ def main() -> int:
             names = ", ".join(
                 repr(g["attributes"].get("name")) for g in external
             )
+
+            # Internal-only is baked into the build when it is archived, not
+            # decided at distribution time, so no amount of reviewing or
+            # answering compliance will make such a build externally
+            # distributable. Say that plainly rather than letting the caller
+            # chase a permissions or review problem that does not exist.
+            if attrs.get("buildAudienceType") == "INTERNAL_ONLY":
+                raise asc_api.AscError(
+                    f"build {attrs.get('version')} is INTERNAL_ONLY and can "
+                    f"never go to an external group such as {names}. That is "
+                    "fixed when the build is archived: the 'Experimental build "
+                    "workflow' and 'PR check' archive as INTERNAL_ONLY, and "
+                    "only the 'Release candidate build workflow' archives as "
+                    "APP_STORE_ELIGIBLE. Cut a new build with that workflow "
+                    "(or, on the local path, without --internal-only)."
+                )
+
             state = review_state(build["id"])
             print(
                 f"note: {names} {'is' if len(external) == 1 else 'are'} EXTERNAL; "
-                f"Beta App Review state is {state or 'not submitted'}."
+                f"Beta App Review state is {state or 'not submitted'}. A build "
+                "of an already-approved version is normally accepted without a "
+                "fresh submission."
             )
-            # Do not pre-judge whether a review is needed. A build of a
-            # version that has already been approved is normally accepted
-            # without a fresh submission, and only App Store Connect knows for
-            # sure — so attempt the release and report Apple's own error if it
-            # refuses. --submit-for-review is there for when it does.
             if state != "APPROVED" and args.submit_for_review:
                 submit_for_review(build["id"], args.dry_run)
                 print(
