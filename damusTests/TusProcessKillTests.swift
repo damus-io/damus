@@ -14,8 +14,8 @@
 //
 //  Both phases share a fixed directory in the app container — nothing is carried
 //  in memory, and phase B has no knowledge of phase A beyond what is on disk.
-//  They are excluded from an ordinary test run by requiring TUS_KILL_TEST_MB,
-//  since neither is meaningful on its own.
+//  Neither is meaningful on its own, so both *skip* rather than fail unless
+//  TUS_KILL_TEST_MB is set, which keeps an ordinary CI run green.
 //
 //  See docs/tus-upload-testing.md for the driver script.
 //
@@ -54,7 +54,9 @@ final class TusProcessKillTests: XCTestCase {
     // MARK: - Phase A: start it, then sit there waiting to be killed
 
     func testPhaseA_startLargeUploadAndBlockUntilKilled() async throws {
-        let megabytes = try XCTUnwrap(Self.megabytes, "Set TUS_KILL_TEST_MB to run the process-kill phases.")
+        guard let megabytes = Self.megabytes else {
+            throw XCTSkip("Set TUS_KILL_TEST_MB to run the process-kill phases; see docs/tus-upload-testing.md for the driver script.")
+        }
         let total = Int64(megabytes) * 1024 * 1024
 
         // Start from nothing so phase B cannot be fooled by an earlier run.
@@ -92,7 +94,9 @@ final class TusProcessKillTests: XCTestCase {
     // MARK: - Phase B: a cold process picks it up
 
     func testPhaseB_resumeAfterProcessKill() async throws {
-        let megabytes = try XCTUnwrap(Self.megabytes, "Set TUS_KILL_TEST_MB to run the process-kill phases.")
+        guard let megabytes = Self.megabytes else {
+            throw XCTSkip("Set TUS_KILL_TEST_MB to run the process-kill phases; see docs/tus-upload-testing.md for the driver script.")
+        }
         let total = Int64(megabytes) * 1024 * 1024
 
         let store = try TusUploadStore(directory: Self.storeDirectory)
