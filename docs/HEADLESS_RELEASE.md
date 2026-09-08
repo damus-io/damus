@@ -25,7 +25,6 @@ release is two commands, not one.
 | Needs the Mac awake    | no                                 | yes                                 |
 | Needs a distribution cert locally | no                      | yes — see below                     |
 | Build time             | Apple's builders                   | ~2.5 min archive on this Mac        |
-| dSYMs to Sentry        | already automatic                  | script does it if `SENTRY_AUTH_TOKEN` is set |
 | Signing                | Apple manages it                   | cloud-managed cert, created on first run |
 | Pushes to testers      | no — needs step two                | no — needs step two                 |
 | Failure surface        | one API call                       | Xcode toolchain, keychain, nix env, network |
@@ -34,10 +33,9 @@ release is two commands, not one.
 
 Xcode Cloud is already fully wired up for damus and has three enabled
 workflows: `PR check`, `Experimental build workflow`, and `Release candidate
-build workflow`. `ci_scripts/ci_post_xcodebuild.sh` already runs there and
-already uploads dSYMs to Sentry. The remote path therefore reuses a pipeline
-that is known-good, rather than standing up a second, subtly different one on
-one particular laptop.
+build workflow`. The remote path therefore reuses a pipeline that is
+known-good, rather than standing up a second, subtly different one on one
+particular laptop.
 
 It also removes the whole class of failures that come from the Mac being a
 laptop: asleep, on a different network, mid-OS-update, or with another agent
@@ -269,6 +267,38 @@ Neither is visible as an error in the API response, so if a triggered build dies
 instantly, check the workflow's Xcode version and re-authorize the SCM
 connection in App Store Connect before debugging anything else. Both need the
 web UI; neither can be fixed from here.
+
+## Why no Xcode Cloud build has succeeded since June
+
+The first real API-triggered build, 1334, archived cleanly and even produced an
+`app-store.zip` export — then failed anyway, because the post-build hook
+`ci_scripts/ci_post_xcodebuild.sh` exited 1:
+
+```
+Installation path: /usr/local/bin/sentry-cli
+sudo: a terminal is required to read the password
+sudo: a password is required
+```
+
+The sentry-cli installer defaults to `/usr/local/bin`, which it can only write
+with `sudo`, and an Xcode Cloud builder has no tty to take a password. Under
+`set -eu` that aborted the script, which failed the whole action, which meant
+the finished archive was never uploaded to App Store Connect.
+
+Two things made this worse than it looks. The install ran *before* the
+`SENTRY_AUTH_TOKEN` check, so the script failed even with Sentry entirely
+unconfigured — every one of its careful `warning: ... skipping` guards was
+unreachable dead code. And it failed *after* a successful archive, so the build
+looked like a compile problem rather than a five-line shell bug.
+
+The hook landed 2026-04-30 and the last successful build was 2026-06-03, which
+is consistent with this having quietly blocked releases ever since.
+
+The hook has been removed rather than fixed — that was the call. Note the
+Sentry SDK is still linked into the app, so crash reports still arrive; they
+will just be unsymbolicated, because nothing uploads dSYMs any more. Removing
+the SDK, or restoring dSYM uploads by setting `INSTALL_DIR` to somewhere
+writable, are both separate decisions.
 
 ## Where it can still stop and wait for a human
 

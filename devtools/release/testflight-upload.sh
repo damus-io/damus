@@ -158,15 +158,4 @@ xcb -exportArchive \
     -exportOptionsPlist "$EXPORT_OPTIONS" \
     "${AUTH[@]}"
 
-# Xcode Cloud does this in ci_scripts/ci_post_xcodebuild.sh; a local archive has
-# to upload its own dSYMs or the Sentry crash reports stay unsymbolicated.
-if [ -n "${SENTRY_AUTH_TOKEN:-}" ] && command -v sentry-cli >/dev/null 2>&1; then
-  echo "==> uploading dSYMs to Sentry"
-  sentry-cli debug-files upload --auth-token "$SENTRY_AUTH_TOKEN" \
-    --org damus-nostr-inc --project apple-ios --include-sources \
-    "$ARCHIVE_PATH/dSYMs" || echo "warning: Sentry dSYM upload failed"
-else
-  echo "warning: SENTRY_AUTH_TOKEN unset or sentry-cli missing; dSYMs not uploaded"
-fi
-
 echo "==> done"
