@@ -2130,6 +2130,8 @@
 		DAB705000000000000000083 /* PurpleVideoDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000082 /* PurpleVideoDecodingTests.swift */; };
 		DAB705000000000000000085 /* PurpleVideoErrorMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000084 /* PurpleVideoErrorMappingTests.swift */; };
 		DAB705000000000000000087 /* PurpleVideoRoutesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000086 /* PurpleVideoRoutesTests.swift */; };
+		DAB705000000000000000079 /* PurpleVideoAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000078 /* PurpleVideoAPIClient.swift */; };
+		DAB70500000000000000007B /* PurpleVideoAuthorization+Tus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB70500000000000000007A /* PurpleVideoAuthorization+Tus.swift */; };
 		DAB705000000000000000005 /* TusUploadStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000004 /* TusUploadStore.swift */; };
 		DAB705000000000000000007 /* TusUploadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000006 /* TusUploadError.swift */; };
 		DAB705000000000000000009 /* TusUploadClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB705000000000000000008 /* TusUploadClient.swift */; };
@@ -3179,6 +3181,8 @@
 		DAB705000000000000000082 /* PurpleVideoDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PurpleVideoDecodingTests.swift"; sourceTree = "<group>"; };
 		DAB705000000000000000084 /* PurpleVideoErrorMappingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PurpleVideoErrorMappingTests.swift"; sourceTree = "<group>"; };
 		DAB705000000000000000086 /* PurpleVideoRoutesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PurpleVideoRoutesTests.swift"; sourceTree = "<group>"; };
+		DAB705000000000000000078 /* PurpleVideoAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PurpleVideoAPIClient.swift"; sourceTree = "<group>"; };
+		DAB70500000000000000007A /* PurpleVideoAuthorization+Tus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PurpleVideoAuthorization+Tus.swift"; sourceTree = "<group>"; };
 		DAB705000000000000000004 /* TusUploadStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadStore.swift; sourceTree = "<group>"; };
 		DAB705000000000000000006 /* TusUploadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadError.swift; sourceTree = "<group>"; };
 		DAB705000000000000000008 /* TusUploadClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TusUploadClient.swift; sourceTree = "<group>"; };
@@ -5798,6 +5802,8 @@
 		DAB70500000000000000008A /* Video */ = {
 			isa = PBXGroup;
 			children = (
+				DAB705000000000000000078 /* PurpleVideoAPIClient.swift */,
+				DAB70500000000000000007A /* PurpleVideoAuthorization+Tus.swift */,
 				DAB705000000000000000070 /* PurpleVideoModels.swift */,
 				DAB705000000000000000072 /* PurpleVideoAPIError.swift */,
 				DAB705000000000000000074 /* PurpleVideoRoutes.swift */,
@@ -6197,6 +6203,8 @@
 				DAB705000000000000000073 /* PurpleVideoAPIError.swift in Sources */,
 				DAB705000000000000000075 /* PurpleVideoRoutes.swift in Sources */,
 				DAB705000000000000000077 /* PurpleVideoWire.swift in Sources */,
+				DAB705000000000000000079 /* PurpleVideoAPIClient.swift in Sources */,
+				DAB70500000000000000007B /* PurpleVideoAuthorization+Tus.swift in Sources */,
 				DAB705000000000000000005 /* TusUploadStore.swift in Sources */,
 				DAB705000000000000000007 /* TusUploadError.swift in Sources */,
 				DAB705000000000000000009 /* TusUploadClient.swift in Sources */,
