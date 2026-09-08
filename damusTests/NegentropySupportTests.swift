@@ -14,15 +14,10 @@ final class NegentropySupportTests: XCTestCase {
     
     // MARK: - Helper Functions
     
-    /// Creates and runs a local relay on the specified port.
-    /// - Parameter port: The port number to run the relay on
+    /// Creates and runs a local relay on a free port.
     /// - Returns: The running LocalRelay instance
-    private func setupRelay(port: UInt16) async throws -> LocalRelay {
-        let builder = RelayBuilder().port(port: port)
-        let relay = LocalRelay(builder: builder)
-        try await relay.run()
-        print("Relay url: \(await relay.url())")
-        return relay
+    private func setupRelay() async throws -> LocalRelay {
+        try await LocalRelayTestSupport.startRelay()
     }
     
     /// Connects to a relay and waits for the connection to be established.
@@ -126,7 +121,7 @@ final class NegentropySupportTests: XCTestCase {
     
     func testBasic() async throws {
         // Given: A relay with noteA and noteB, and local storage has noteA
-        let relay = try await setupRelay(port: 8080)    // Do not discard the result to avoid relay from being garbage collected and shutdown
+        let relay = try await setupRelay()    // Do not discard the result to avoid relay from being garbage collected and shutdown
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -158,7 +153,7 @@ final class NegentropySupportTests: XCTestCase {
     
     func testEmptyLocalStorage() async throws {
         // Given: A relay with noteA and noteB, and empty local storage
-        let relay = try await setupRelay(port: 8081)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -192,8 +187,8 @@ final class NegentropySupportTests: XCTestCase {
     /// Should get noteA from Relay1 and noteC from Relay2 (deduplicating noteB).
     func testTwoRelaysWithOverlap() async throws {
         // Given: Two relays with overlapping events and local storage has noteB
-        let relay1 = try await setupRelay(port: 8082)
-        let relay2 = try await setupRelay(port: 8083)
+        let relay1 = try await setupRelay()
+        let relay2 = try await setupRelay()
         
         let relayUrl1 = RelayURL(await relay1.url().description)!
         let relayUrl2 = RelayURL(await relay2.url().description)!
@@ -238,7 +233,7 @@ final class NegentropySupportTests: XCTestCase {
     /// Should receive EOSE only without any events.
     func testAllEventsSynced() async throws {
         // Given: A relay with noteA and noteB, and local storage has both events
-        let relay = try await setupRelay(port: 8084)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -276,7 +271,7 @@ final class NegentropySupportTests: XCTestCase {
     /// Should receive no new events.
     func testRelaySubset() async throws {
         // Given: A relay with noteA and noteB, and local storage has noteA, noteB, and noteC
-        let relay = try await setupRelay(port: 8085)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -318,9 +313,9 @@ final class NegentropySupportTests: XCTestCase {
     /// Should only receive B and D.
     func testThreeRelaysPartialSync() async throws {
         // Given: Three relays with overlapping events and local storage has noteA and noteC
-        let relay1 = try await setupRelay(port: 8086)
-        let relay2 = try await setupRelay(port: 8087)
-        let relay3 = try await setupRelay(port: 8088)
+        let relay1 = try await setupRelay()
+        let relay2 = try await setupRelay()
+        let relay3 = try await setupRelay()
         
         let relayUrl1 = RelayURL(await relay1.url().description)!
         let relayUrl2 = RelayURL(await relay2.url().description)!
@@ -381,9 +376,9 @@ final class NegentropySupportTests: XCTestCase {
     /// Should only receive text note B and DM D.
     func testMultipleFiltersWithDifferentKinds() async throws {
         // Given: Three relays with mixed event kinds and local storage has text note A and DM C
-        let relay1 = try await setupRelay(port: 8089)
-        let relay2 = try await setupRelay(port: 8090)
-        let relay3 = try await setupRelay(port: 8091)
+        let relay1 = try await setupRelay()
+        let relay2 = try await setupRelay()
+        let relay3 = try await setupRelay()
         
         let relayUrl1 = RelayURL(await relay1.url().description)!
         let relayUrl2 = RelayURL(await relay2.url().description)!
@@ -452,7 +447,7 @@ final class NegentropySupportTests: XCTestCase {
     /// puts the vector through as ndb streams notes in.
     func testGiftwrapRandomizedTimestampsReconcile() async throws {
         // Given: A relay holding six wraps whose timestamps are scattered across a two-day window
-        let relay = try await setupRelay(port: 8092)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
 
         let now = UInt32(Date().timeIntervalSince1970)
@@ -506,7 +501,6 @@ final class NegentropySupportTests: XCTestCase {
     /// With a backoff at least as wide as the NIP-59 fuzz window it must be delivered.
     func testGiftwrapLiveStreamArrivesWithSinceBackoff() async throws {
         let delivered = try await streamBackdatedGiftwrapAfterReconciliation(
-            port: 8093,
             liveStreamSinceBackoff: NostrKind.giftwrapCreatedAtFuzzWindow
         )
         XCTAssertTrue(delivered, "A backdated wrap must reach the live stream when the since bound is backed off")
@@ -518,7 +512,6 @@ final class NegentropySupportTests: XCTestCase {
     /// giftwraps, and it exists inside `negentropySubscribe` too if the backoff is left at zero.
     func testGiftwrapLiveStreamMissedWithoutSinceBackoff() async throws {
         let delivered = try await streamBackdatedGiftwrapAfterReconciliation(
-            port: 8094,
             liveStreamSinceBackoff: 0
         )
         XCTAssertFalse(delivered, "Without a backoff the relay should filter the backdated wrap out")
@@ -526,8 +519,8 @@ final class NegentropySupportTests: XCTestCase {
 
     /// Runs a giftwrap `negentropySubscribe` against an empty relay, publishes a wrap stamped 36 hours in
     /// the past once reconciliation has finished, and reports whether the live stream delivered it.
-    private func streamBackdatedGiftwrapAfterReconciliation(port: UInt16, liveStreamSinceBackoff: UInt32) async throws -> Bool {
-        let relay = try await setupRelay(port: port)
+    private func streamBackdatedGiftwrapAfterReconciliation(liveStreamSinceBackoff: UInt32) async throws -> Bool {
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         let relayConnection = await connectToRelay(url: relayUrl)
         let relayPool = try await setupRelayPool(with: [relayUrl])

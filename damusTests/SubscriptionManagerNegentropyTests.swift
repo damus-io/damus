@@ -19,15 +19,10 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     
     // MARK: - Helper Functions
     
-    /// Creates and runs a local relay on the specified port.
-    /// - Parameter port: The port number to run the relay on
+    /// Creates and runs a local relay on a free port.
     /// - Returns: The running LocalRelay instance
-    private func setupRelay(port: UInt16) async throws -> LocalRelay {
-        let builder = RelayBuilder().port(port: port)
-        let relay = LocalRelay(builder: builder)
-        try await relay.run()
-        print("Relay url: \(await relay.url())")
-        return relay
+    private func setupRelay() async throws -> LocalRelay {
+        try await LocalRelayTestSupport.startRelay()
     }
     
     /// Connects to a relay and waits for the connection to be established.
@@ -183,7 +178,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     /// Should stream noteA from NDB first, then sync noteB via negentropy from the relay.
     func testBasicNegentropyStreaming() async throws {
         // Given: A relay with noteA and noteB, and local NDB has noteA
-        let relay = try await setupRelay(port: 9080)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -221,7 +216,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     /// Should sync all events from the relay via negentropy.
     func testEmptyLocalStorageNegentropySync() async throws {
         // Given: A relay with noteA and noteB, and empty local NDB
-        let relay = try await setupRelay(port: 9081)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -260,7 +255,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     /// Should stream events from NDB only, without syncing from relays.
     func testAllEventsSyncedNegentropyMode() async throws {
         // Given: A relay with noteA and noteB, and local NDB has both events
-        let relay = try await setupRelay(port: 9082)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -300,8 +295,8 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     /// Should stream noteB from NDB, then sync noteA and noteC via negentropy (deduplicating noteB).
     func testTwoRelaysWithOverlapNegentropySync() async throws {
         // Given: Two relays with overlapping events and local NDB has noteB
-        let relay1 = try await setupRelay(port: 9083)
-        let relay2 = try await setupRelay(port: 9084)
+        let relay1 = try await setupRelay()
+        let relay2 = try await setupRelay()
         
         let relayUrl1 = RelayURL(await relay1.url().description)!
         let relayUrl2 = RelayURL(await relay2.url().description)!
@@ -350,9 +345,9 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     /// Should stream A and C from NDB, then sync B and D via negentropy.
     func testThreeRelaysPartialSyncNegentropy() async throws {
         // Given: Three relays with overlapping events and local NDB has noteA and noteC
-        let relay1 = try await setupRelay(port: 9085)
-        let relay2 = try await setupRelay(port: 9086)
-        let relay3 = try await setupRelay(port: 9087)
+        let relay1 = try await setupRelay()
+        let relay2 = try await setupRelay()
+        let relay3 = try await setupRelay()
         
         let relayUrl1 = RelayURL(await relay1.url().description)!
         let relayUrl2 = RelayURL(await relay2.url().description)!
@@ -409,9 +404,9 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     /// Should stream A and C from NDB, then sync B and D via negentropy.
     func testMultipleFiltersWithDifferentKindsNegentropy() async throws {
         // Given: Three relays with mixed event kinds and local NDB has text note A and DM C
-        let relay1 = try await setupRelay(port: 9089)
-        let relay2 = try await setupRelay(port: 9090)
-        let relay3 = try await setupRelay(port: 9091)
+        let relay1 = try await setupRelay()
+        let relay2 = try await setupRelay()
+        let relay3 = try await setupRelay()
         
         let relayUrl1 = RelayURL(await relay1.url().description)!
         let relayUrl2 = RelayURL(await relay2.url().description)!
@@ -470,7 +465,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     
     func testPartialUnsupportedRelayPool() async throws {
         // Given: Two relays (one with negentropy, another one not), and the one with negentropy has an event we need
-        let relay2 = try await setupRelay(port: 9092)
+        let relay2 = try await setupRelay()
         
         let relayUrl1 = RelayURL("ws://nos.lol/v2")!    // This can be any relay that does not support negentropy
                                                         // Adding an external relay may cause flakiness if the relay enables negentropy, but currently

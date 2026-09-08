@@ -21,15 +21,12 @@ final class EntityPreloaderTests: XCTestCase {
     
     // MARK: - Helper Functions
     
-    /// Creates and runs a local relay on the specified port.
-    /// - Parameter port: The port number to run the relay on
+    /// Creates and runs a rate-limited local relay on a free port.
     /// - Returns: The running LocalRelay instance
-    private func setupRelay(port: UInt16) async throws -> LocalRelay {
-        let builder = RelayBuilder().port(port: port).rateLimit(limit: .init(maxReqs: 100, notesPerMinute: 100))
-        let relay = LocalRelay(builder: builder)
-        try await relay.run()
-        print("Relay url: \(await relay.url())")
-        return relay
+    private func setupRelay() async throws -> LocalRelay {
+        try await LocalRelayTestSupport.startRelay { builder in
+            builder.rateLimit(limit: .init(maxReqs: 100, notesPerMinute: 100))
+        }
     }
     
     /// Connects to a relay and waits for the connection to be established.
@@ -169,7 +166,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test that preloading with .noPreloading strategy does not trigger metadata fetching
     func testNoPreloadingStrategy() async throws {
         // Given: A relay with a note and metadata for the author
-        let relay = try await setupRelay(port: 9100)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let authorKeypair = generate_new_keypair().to_keypair()
@@ -216,7 +213,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test that preloading with .preload strategy fetches author metadata
     func testPreloadAuthorMetadata() async throws {
         // Given: A relay with a note and metadata for the author (metadata NOT in NDB)
-        let relay = try await setupRelay(port: 9101)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let authorKeypair = test_keypair
@@ -266,7 +263,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test that preloading fetches metadata for all referenced pubkeys (p-tags)
     func testPreloadReferencedPubkeys() async throws {
         // Given: A relay with a note that references other users, and metadata for all referenced users
-        let relay = try await setupRelay(port: 9102)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let authorKeypair = test_keypair
@@ -346,7 +343,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test that preloading batches requests efficiently when multiple notes arrive
     func testBatchingMultipleNotes() async throws {
         // Given: A relay with multiple notes from different authors and their metadata
-        let relay = try await setupRelay(port: 9103)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let author1Keypair = test_keypair
@@ -430,7 +427,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test that preloading works correctly with negentropy streaming mode
     func testPreloadWithNegentropyStreaming() async throws {
         // Given: A relay with a note and metadata, NDB has the note but not the metadata
-        let relay = try await setupRelay(port: 9104)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let authorKeypair = test_keypair
@@ -479,7 +476,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test that preloading doesn't duplicate requests for the same pubkey
     func testPreloadDeduplication() async throws {
         // Given: A relay with multiple notes from the same author and their metadata
-        let relay = try await setupRelay(port: 9105)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let authorKeypair = test_keypair
@@ -536,7 +533,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// Test preloading with streamExistingEvents (which stops at EOSE)
     func testPreloadWithStreamExistingEvents() async throws {
         // Given: A relay with a note and metadata
-        let relay = try await setupRelay(port: 9106)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         let authorKeypair = test_keypair
@@ -623,7 +620,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// profile metadata has been preloaded.
     func testFollowPackProfilesNotAvailableImmediately() async throws {
         // Given: A relay with a follow pack event containing 80 users, and metadata for all users
-        let relay = try await setupRelay(port: 9107)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         // Create 65 users with their metadata
@@ -769,7 +766,7 @@ final class EntityPreloaderTests: XCTestCase {
     /// This helps quantify the user-perceived latency of profile "pop-in".
     func testFollowPackPreloadingDelay() async throws {
         // Given: A relay with a follow pack event containing users and their metadata
-        let relay = try await setupRelay(port: 9108)
+        let relay = try await setupRelay()
         let relayUrl = RelayURL(await relay.url().description)!
         
         // Create 3 users with their metadata (smaller set for timing measurement)
