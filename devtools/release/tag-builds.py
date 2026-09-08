@@ -44,6 +44,10 @@ import asc_api  # noqa: E402
 import build_index  # noqa: E402
 
 
+# --push with no value means "work the remote out"; None means do not push.
+AUTO_REMOTE = object()
+
+
 def run_column(record):
     if record.run_number is None:
         return record.run_status
@@ -73,14 +77,10 @@ def show(records):
 
 
 def push(remote, records, dry_run, force=False):
-    refs = [record.tag for record in records]
     if dry_run:
-        print(f"  would push {len(refs)} tag(s) to {remote}")
+        print(f"  would push {len(records)} tag(s) to {remote}")
         return
-    # A moved tag needs a forced push as well as a forced tag, or git rejects
-    # it as a non-fast-forward and the local and remote mappings disagree.
-    args = ["push", remote] + (["--force"] if force else []) + refs
-    build_index.git(*args)
+    refs = build_index.push_tags(remote, records, force=force)
     print(f"  pushed {len(refs)} tag(s) to {remote}")
 
 
@@ -102,9 +102,11 @@ def main() -> int:
     )
     parser.add_argument(
         "--push",
+        nargs="?",
+        const=AUTO_REMOTE,
         metavar="REMOTE",
-        help="push the tags to this remote once written; named explicitly "
-        "because remote names differ per clone (here: 'github', 'monad')",
+        help="push the tags once written; with no value, to whichever remote "
+        "points at the upstream repository",
     )
     parser.add_argument(
         "--force",
@@ -113,6 +115,15 @@ def main() -> int:
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
+
+    remote = args.push
+    if remote is AUTO_REMOTE:
+        remote = build_index.default_remote()
+        if not remote:
+            parser.error(
+                "no remote points at the upstream repository; name one, as in "
+                "--push github"
+            )
 
     if args.commit and not args.build:
         parser.error("--commit says what one build was made from; pass --build too")
@@ -163,9 +174,9 @@ def main() -> int:
         for problem in problems:
             print(f"warning: {problem}", file=sys.stderr)
 
-        if args.push and written:
-            push(args.push, written, args.dry_run, force=args.force)
-        elif args.push:
+        if remote and written:
+            push(remote, written, args.dry_run, force=args.force)
+        elif remote:
             print("  nothing new to push")
 
         if args.dry_run:

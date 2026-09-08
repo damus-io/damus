@@ -143,20 +143,25 @@ next one.
 ### Which commit is in which build
 
 Because Apple assigns the number, nothing in the repository says what went into
-build 1338. `devtools/release/tag-builds.py` writes that back as annotated
-`build/<number>` git tags, read out of the API:
+build 1338 — and the answer is perishable. The commit lives on the Xcode Cloud
+*run*, never on the build, and Apple keeps only the last handful of runs: at
+the time of writing the product listed six, back to 1333, so **builds 1332 and
+earlier can no longer be mapped through the API at all**.
 
-```sh
-# what App Store Connect knows, and what is already tagged
-./devtools/release/tag-builds.py --list
+So this is recorded automatically, in two places, as annotated `build/<number>`
+git tags:
 
-# write the missing tags
-./devtools/release/tag-builds.py
+1. **`ci_scripts/ci_post_xcodebuild.sh`**, on the builder, at the one moment
+   both halves are known. Tags `$CI_COMMIT` as `build/$CI_BUILD_NUMBER` and
+   pushes it, for any archive action that is not a pull request build. This
+   catches builds however they were started — the script, the web UI, a branch
+   push — and needs no Mac.
+2. **`xcode-cloud-build.py`**, whenever it is already waiting for a build. Same
+   tag, from the App Store Connect side, pushed to whichever remote points at
+   the upstream repository. Belt and braces for the hook, and the half that
+   works without a push token.
 
-# and share them
-./devtools/release/tag-builds.py --push github
-```
-
+Whichever gets there first wins; the other reports the tag as already written.
 Then the questions answer themselves:
 
 ```sh
@@ -166,31 +171,52 @@ git tag --contains <sha>            # which builds carry this fix
 git describe --match 'build/*'      # the last build at or before HEAD
 ```
 
-The mapping comes from two hops — `/v1/ciProducts/<p>/buildRuns` carries
-`sourceCommit.commitSha`, and `/v1/ciBuildRuns/<run>/builds` names the build
-that run produced. Going through the second hop rather than assuming build
-number == run number is what makes it correct for the two cases that keep
-happening here: a run that never got a builder produced no build and is
-skipped, and a run that reports `FAILED` after uploading a good archive still
-gets tagged.
-
-**Tag as you build.** Apple keeps only the last handful of runs — at the time
-of writing the product listed six, back to 1333 — and the commit lives on the
-run, not on the build. Once a run ages out there is no API left to ask, which
-is why builds 1332 and earlier can no longer be mapped automatically. So
-`xcode-cloud-build.py --tag` tags the commit as soon as the build lands
-(it implies `--wait`, since the number does not exist until then):
+`devtools/release/tag-builds.py` is the manual backstop, for auditing the
+mapping or repairing it:
 
 ```sh
-./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
-    --branch master --tag
-```
-
-For an older build whose run is gone, `--commit` records the mapping by hand:
-
-```sh
+./devtools/release/tag-builds.py --list     # what ASC knows, what is tagged
+./devtools/release/tag-builds.py --push     # write and push what is missing
 ./devtools/release/tag-builds.py --build 1332 --commit 6a1c0de9f2b1
 ```
+
+That last form records a build whose run has already aged out, where nothing
+automatic can help any more.
+
+**The mapping is read, not guessed.** `/v1/ciProducts/<p>/buildRuns` carries
+`sourceCommit.commitSha`, and `/v1/ciBuildRuns/<run>/builds` names the build
+that run actually produced. Going through the second hop rather than assuming
+build number == run number is what makes it right for the two cases that keep
+happening here: run 1334 started, `FAILED`, and produced no build, while 1337
+and 1338 both report `FAILED` and produced perfectly good builds.
+
+#### The hook cannot be allowed to fail
+
+`ci_post_xcodebuild.sh` runs after the archive action and **before Xcode Cloud
+uploads the archive**, so a non-zero exit throws away a finished build. This is
+the same file, at the same path, that discarded every build for three months
+when the Sentry install inside it failed under `set -eu` (296f3bddd4f8). So the
+new one has no `set -e`, tolerates every failure individually, never lets git
+prompt for a credential (`GIT_TERMINAL_PROMPT=0`, or a missing credential hangs
+the archive until the run times out), and ends in an unconditional `exit 0`. A
+missing tag is a footnote; a discarded release build is a wasted evening.
+
+#### The push token
+
+Pushing from the builder needs a credential the checkout does not have. Set a
+GitHub token with `contents:write` as a **secret** environment variable named
+`GITHUB_TAG_PUSH_TOKEN` on each workflow that archives. Xcode Cloud environment
+variables are UI-only — `CiWorkflow` has no `environmentVariables` attribute in
+the App Store Connect API, so this cannot be scripted:
+
+> App Store Connect → Xcode Cloud → Manage Workflows → *(workflow)* →
+> Environment → Add variable, tick **Secret**.
+
+Until that exists the hook still tries the checkout's own credentials and says
+in the build log whether it worked, so the first build after this lands will
+answer whether a token is needed at all. If the push fails, the tag exists only
+on the builder and dies with it — `tag-builds.py --push` recovers it, as long
+as it is run before the run ages out.
 
 ## One-time setup
 
@@ -419,6 +445,10 @@ unattended:
 5. **The first local-path run**, if it creates a distribution certificate. Worth
    watching once rather than discovering a certificate-limit error remotely.
    Moot while the Xcode Cloud path is the one in use.
+6. **The `GITHUB_TAG_PUSH_TOKEN` secret**, one-time, per archiving workflow. Not
+   in the release path at all — without it a build still cuts and still ships,
+   it just may not manage to push its `build/<number>` tag from the builder.
+   Xcode Cloud environment variables have no API, so a person has to set it.
 
 Nothing else prompts. Given the key, the full flow is two non-interactive
 commands:

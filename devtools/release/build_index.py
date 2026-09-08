@@ -35,6 +35,9 @@ APP_ID = "1628663131"  # com.jb55.damus2
 # clear of the hand-cut v1.18-style release tags.
 TAG_PREFIX = "build/"
 
+# Used to recognise the upstream remote among however many a clone has.
+UPSTREAM_PATH = "damus-io/damus"
+
 
 @dataclass
 class BuildRecord:
@@ -212,6 +215,30 @@ def git(*args, check=True, env=None):
             f"git {' '.join(args)} failed: {proc.stderr.strip() or proc.stdout.strip()}"
         )
     return proc
+
+
+def default_remote():
+    """The remote that looks like the upstream repository, or None.
+
+    Picked by URL rather than by name: clones name their remotes differently —
+    this one has 'github' and 'monad' and no 'origin' at all — so a hard-coded
+    name would quietly do nothing in half of them.
+    """
+    for line in git("remote", "-v", check=False).stdout.splitlines():
+        name, _, rest = line.partition("\t")
+        if UPSTREAM_PATH in rest and rest.rstrip().endswith("(push)"):
+            return name
+    return None
+
+
+def push_tags(remote, records, force=False):
+    """Push the given builds' tags. Raises AscError if git refuses."""
+    refs = [record.tag for record in records]
+    # A moved tag needs a forced push as well as a forced tag, or git rejects
+    # it as a non-fast-forward and the local and remote mappings disagree.
+    args = ["push", remote] + (["--force"] if force else []) + refs
+    git(*args)
+    return refs
 
 
 def have_commit(sha):

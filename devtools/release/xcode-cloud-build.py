@@ -12,12 +12,15 @@ certificate. All it needs is an App Store Connect API key.
   ./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
       --branch master --wait
 
-  # ...and record which commit became which build number, as a git tag
-  ./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
-      --branch master --tag
-
   # print the request without sending it
   ./devtools/release/xcode-cloud-build.py "PR check" --branch master --dry-run
+
+Waiting also records which commit became which build number, as a pushed
+`build/<number>` git tag — Apple prunes the run that holds that mapping within
+a few builds, so it is recorded by default rather than on request. `--no-tag`
+opts out; `--tag` on a bare invocation opts into the wait it needs. The same
+tag is written on the builder by ci_scripts/ci_post_xcodebuild.sh, which also
+catches builds nobody started from here.
 
 Credentials come from ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH; see asc_api.py.
 """
@@ -134,30 +137,46 @@ def wait_for(build_run_id, poll_seconds, timeout_seconds):
     )
 
 
-def tag_build(run_id, dry_run=False):
-    """Write a build/<number> tag for whatever this run uploaded.
+def tag_build(run_id):
+    """Write and push a build/<number> tag for whatever this run uploaded.
 
-    Worth doing at build time rather than later: Apple keeps only the last
-    handful of runs, and once a run ages out the commit a build came from is
-    no longer recoverable from the API at all.
+    Belt and braces for ci_scripts/ci_post_xcodebuild.sh, which does the same
+    thing on the builder: that one needs a push token the builder may not have,
+    this one runs where the credentials already are. Whichever gets there first
+    wins, and the other reports the tag as already written.
+
+    Never raises. A build that is not tagged is a nuisance; a tagging bug that
+    takes down the release script is worse.
     """
-    run = asc_api.get(f"/v1/ciBuildRuns/{run_id}").get("data", {})
-    records = build_index.records_for_run(run)
-    if not records:
-        print(
-            "  no build was uploaded, so there is nothing to tag",
-            file=sys.stderr,
-        )
-        return
+    try:
+        run = asc_api.get(f"/v1/ciBuildRuns/{run_id}").get("data", {})
+        records = build_index.records_for_run(run)
+        if not records:
+            print("  no build was uploaded, so there is nothing to tag")
+            return
 
-    written, already, problems = build_index.apply_tags(records, dry_run=dry_run)
-    for record in written:
-        verb = "would tag" if dry_run else "tagged"
-        print(f"  {verb} {record.tag} -> {record.commit_sha[:12]}")
-    for record in already:
-        print(f"  {record.tag} was already tagged")
-    for problem in problems:
-        print(f"  warning: {problem}", file=sys.stderr)
+        written, already, problems = build_index.apply_tags(records)
+        for record in written:
+            print(f"  tagged {record.tag} -> {record.commit_sha[:12]}")
+        for record in already:
+            print(f"  {record.tag} was already tagged")
+        for problem in problems:
+            print(f"  warning: {problem}", file=sys.stderr)
+
+        if not written:
+            return
+        remote = build_index.default_remote()
+        if not remote:
+            print(
+                "  warning: no remote points at the upstream repository, so "
+                "the tag is local only",
+                file=sys.stderr,
+            )
+            return
+        build_index.push_tags(remote, written)
+        print(f"  pushed {len(written)} tag(s) to {remote}")
+    except asc_api.AscError as err:
+        print(f"  warning: could not tag this build: {err}", file=sys.stderr)
 
 
 def main() -> int:
@@ -175,9 +194,11 @@ def main() -> int:
     parser.add_argument("--wait", action="store_true", help="poll until the build ends")
     parser.add_argument(
         "--tag",
-        action="store_true",
-        help="once the build lands, tag the commit it was built from as "
-        "build/<number> (implies --wait; see tag-builds.py)",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="tag the commit this build was made from as build/<number> and "
+        "push it (default: whenever --wait is given; --tag on its own implies "
+        "--wait, since the number does not exist until the run ends)",
     )
     parser.add_argument("--poll-seconds", type=int, default=30)
     parser.add_argument("--timeout-seconds", type=int, default=90 * 60)
@@ -190,9 +211,15 @@ def main() -> int:
     if not args.workflow and not args.list:
         parser.error("a workflow name is required unless --list is given")
 
-    # The build number does not exist until Apple assigns it, so there is
-    # nothing to tag until the run is over.
-    if args.tag:
+    # Tagging is the default rather than a flag, because the commit behind a
+    # build number stops being recoverable once Apple prunes the run: a
+    # mapping you have to remember to record is a mapping you lose. It is tied
+    # to --wait because Apple assigns the number as the run ends — so a bare
+    # fire-and-forget invocation stays fire-and-forget, and an explicit --tag
+    # opts into the wait it needs.
+    if args.tag is None:
+        args.tag = args.wait
+    elif args.tag:
         args.wait = True
 
     try:
