@@ -220,11 +220,12 @@ struct ContentView: View {
                     route.view(navigationCoordinator: navigationCoordinator, damusState: damus)
                 }
         }
-        .modifier(TimelineTabBadge(timeline: timeline, notification_status: home.notification_status, settings: damus.settings))
-        .tabItem {
-            Image(timeline.tab_image)
-                .accessibilityLabel(timeline.tab_accessibility_label)
-        }
+        .modifier(TimelineTabItem(
+            timeline: timeline,
+            notification_status: home.notification_status,
+            settings: damus.settings,
+            is_selected: self.selected_timeline == timeline
+        ))
         .tag(timeline)
     }
 

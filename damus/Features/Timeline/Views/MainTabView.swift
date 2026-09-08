@@ -25,53 +25,162 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
     return (current.rawValue & indicator_setting) == timeline_to_notification_bits(timeline, ev: nil).rawValue
 }
 
-/// The unread-events badge on a timeline's tab bar item.
+/// The unread-events hint on a timeline's tab bar item.
 ///
-/// The system tab bar owns its items, so the dot the custom `TabButton` used to
-/// overlay with `alignmentGuide` offsets is gone. `View.badge(_:)` is the native
-/// equivalent: it is `@available(iOS 15.0, ...)` and applies to a `TabView`
-/// child that carries a `.tabItem`, so it needs neither the iOS 18+ `Tab` struct
-/// nor an availability guard.
+/// This supplies the whole `.tabItem`: the tab's icon, plus a small red dot when
+/// that timeline has unread events.
 ///
 /// This is a `ViewModifier` rather than a plain `View` extension because it has
 /// to observe ``NotificationStatusModel``. `ContentView` holds its `HomeModel`
 /// as a plain property, so without an `@ObservedObject` somewhere in the view
-/// graph the badge would never update — the custom `TabButton` observed the same
+/// graph the hint would never update — the custom `TabButton` observed the same
 /// model for the same reason.
 ///
 /// ``NotificationStatusModel/new_events`` is a `NewEventsBits` bitfield rather
-/// than a count, and there is no native plain-dot badge — `.badge` takes an
-/// `Int`, `Text` or string. A blank `Text` gets us the dot anyway: the badge
-/// sizes itself to its empty label and the system draws it as a bare round dot,
-/// which is what the old overlay drew. Surfacing real counts instead would mean
-/// new per-timeline counters in the model, and the bit-set sites dedupe on
-/// last-seen-event timestamps, so any count derived from them would undercount.
+/// than a count, so the hint is a dot and not a number. Surfacing real counts
+/// would mean new per-timeline counters in the model, and the bit-set sites
+/// dedupe on last-seen-event timestamps, so any count derived from them would
+/// undercount.
 ///
-/// One deliberate visual difference from the old overlay: the system badge is
-/// the standard notification red rather than the accent purple the hand-drawn
-/// `Circle` used. Recolouring it means reaching into `UITabBarAppearance`, which
-/// is the same global appearance state Liquid Glass styles, so we take the
-/// native colour.
-struct TimelineTabBadge: ViewModifier {
+/// ## Why the dot is drawn into the icon instead of using `.badge`
+///
+/// `View.badge(_:)` is the native-looking answer and is what this used through
+/// build 1337, with a blank `Text` for a label. A TestFlight report said the
+/// result was a solid red disc roughly as wide as the icon itself, and measuring
+/// it on an iOS 26.5 simulator says why: **a tab bar badge has a fixed minimum
+/// size of about 18pt** — the height a numeric badge needs — and no label or
+/// font gets it below that. Every one of these renders the same 55x55px disc at
+/// 3x, i.e. the bug:
+///
+/// - `Text(verbatim: " ")`, the old label. The space's advance width is not the
+///   problem; the badge never sized itself to the label at all.
+/// - `Text(verbatim: "")` and `Text(verbatim: "\u{200B}")`. A genuinely empty or
+///   zero-width label neither shrinks the badge nor suppresses it.
+/// - `Text(verbatim: " ").font(.system(size: 1))`. `.badge` ignores the label's
+///   font.
+/// - `badgeTextAttributes` with a 1pt font, both on `UITabBarItem.appearance()`
+///   and on the tab bar's own `UITabBarAppearance`. Not smaller (55 -> 59px),
+///   and it reaches into the global appearance state Liquid Glass styles.
+///
+/// `.badgeProminence(.decreased)` is iOS 17+, below our floor, and adjusts
+/// colour rather than size.
+///
+/// An `.overlay` on the icon inside `.tabItem` does not work either: SwiftUI
+/// takes only the `Image` and `Text` out of a tab item's content and drops
+/// everything else, so the overlay never draws. That is also why the dot the
+/// custom `TabButton` used to place with `alignmentGuide` offsets could not
+/// simply be moved onto the system tab bar's items when it took them over.
+///
+/// What the tab bar does honour is the item's image, so the dot is composited
+/// into it at ``dot_diameter`` against a 24pt icon. The canvas grows by half a
+/// dot on every side so the icon stays centred where the tab bar puts it.
+///
+/// ## What compositing costs
+///
+/// A template image is a mask — everything in it takes the item's tint — so a
+/// dot drawn into one comes out black or white rather than red. The composited
+/// image therefore has to be `.alwaysOriginal`, which also opts the icon out of
+/// the tint the tab bar would have applied, so this reproduces that tint by
+/// hand: the `AccentColor` asset when the tab is selected and `UIColor.label`
+/// when it is not, both matched against the system's own rendering. To keep that
+/// approximation from mattering when it need not, a tab with no unread events
+/// keeps the plain template asset and the system's own tinting; only a tab
+/// actually showing a dot uses the composited image.
+///
+/// The dot stays `systemRed`, the colour of the badge it replaces, rather than
+/// the accent purple of the old hand-drawn `Circle`.
+struct TimelineTabItem: ViewModifier {
     let timeline: Timeline
     @ObservedObject var notification_status: NotificationStatusModel
     let settings: UserSettingsStore
+    /// Whether this is the tab the tab bar is currently showing.
+    ///
+    /// Needed because a composited icon has to reproduce the tint the tab bar
+    /// applies to a template image, and that tint depends on selection.
+    let is_selected: Bool
+
+    @Environment(\.colorScheme) private var color_scheme
+
+    /// The diameter of the unread dot, in points, against a 24pt tab icon.
+    ///
+    /// Small enough to read as a hint, which the ~18pt native badge did not.
+    private static let dot_diameter: CGFloat = 8
 
     func body(content: Content) -> some View {
-        content.badge(self.badge_label)
+        content.tabItem {
+            self.tab_icon
+                .accessibilityLabel(self.accessibility_label)
+        }
     }
 
-    /// A blank label when this tab has unread events, `nil` (no badge) otherwise.
-    private var badge_label: Text? {
-        guard show_indicator(
+    /// Whether this timeline has unread events the user wants indicated.
+    private var has_unread: Bool {
+        show_indicator(
             timeline: self.timeline,
             current: self.notification_status.new_events,
             indicator_setting: self.settings.notification_indicators
-        ) else {
-            return nil
+        )
+    }
+
+    /// The plain template asset, or the composited icon-plus-dot when unread.
+    private var tab_icon: Image {
+        guard self.has_unread, let dotted = self.dotted_tab_image else {
+            return Image(self.timeline.tab_image)
         }
 
-        return Text(verbatim: " ")
+        return Image(uiImage: dotted)
+    }
+
+    /// The tab's icon with the unread dot drawn at its top trailing corner.
+    ///
+    /// `nil` if the asset is missing, which leaves ``tab_icon`` on the plain
+    /// asset rather than dropping the tab item altogether.
+    private var dotted_tab_image: UIImage? {
+        guard let base = UIImage(named: self.timeline.tab_image) else { return nil }
+
+        let dot = Self.dot_diameter
+        let inset = dot / 2
+        let canvas = CGSize(width: base.size.width + dot, height: base.size.height + dot)
+        // A composited image is resolved once, here, rather than per trait
+        // collection at draw time, so the dynamic colours have to be resolved
+        // against the scheme this view was rendered for. Reading it from the
+        // environment is also what re-renders us when the scheme changes.
+        let traits = UITraitCollection(
+            userInterfaceStyle: self.color_scheme == .dark ? .dark : .light
+        )
+        // `AccentColor` is the asset SwiftUI tints the selected item with. The
+        // fallback is the unselected colour rather than `UIColor.tintColor`,
+        // which resolves to the system blue away from a view hierarchy.
+        let tint = (self.is_selected ? UIColor(named: "AccentColor") ?? .label : .label)
+            .resolvedColor(with: traits)
+
+        return UIGraphicsImageRenderer(size: canvas).image { context in
+            base.withTintColor(tint, renderingMode: .alwaysOriginal)
+                .draw(in: CGRect(origin: CGPoint(x: inset, y: inset), size: base.size))
+
+            UIColor.systemRed.resolvedColor(with: traits).setFill()
+            context.cgContext.fillEllipse(
+                in: CGRect(x: canvas.width - dot, y: 0, width: dot, height: dot)
+            )
+        }
+        .withRenderingMode(.alwaysOriginal)
+    }
+
+    /// The tab's VoiceOver label, noting unread events when the dot is showing.
+    ///
+    /// The dot is part of an image, so without this it is invisible to
+    /// VoiceOver.
+    private var accessibility_label: String {
+        let label = self.timeline.tab_accessibility_label
+        guard self.has_unread else { return label }
+
+        return String(
+            format: NSLocalizedString(
+                "%@, unread",
+                comment: "Accessibility label for a tab bar tab that has unread events. The placeholder is the tab's own name, e.g. 'Home'."
+            ),
+            label
+        )
     }
 }
     
