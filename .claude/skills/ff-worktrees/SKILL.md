@@ -1,6 +1,6 @@
 ---
 name: ff-worktrees
-description: Fast-forward master and every git worktree branch up to a target ref (default origin/master), skipping any worktree with unmerged commits. Use when the user wants to sync/update their worktree branches to latest master — e.g. "/ff-worktrees", "ff all worktrees to origin/master", "fast-forward the worktrees".
+description: Fast-forward master and every git worktree branch up to a target ref (default github/master), skipping any worktree with unmerged commits. Use when the user wants to sync/update their worktree branches to latest master — e.g. "/ff-worktrees", "ff all worktrees to github/master", "fast-forward the worktrees".
 ---
 
 # ff-worktrees
@@ -17,14 +17,15 @@ ever clobbered.
 devtools/ff-worktrees.sh [target]
 ```
 
-- `target` — ref to fast-forward toward. Defaults to `origin/master`. When it
-  looks like `<remote>/<branch>` and `<remote>` is configured, the remote is
-  fetched first.
+- `target` — ref to fast-forward toward. Defaults to `github/master` — this
+  repo's remote is named `github`, not `origin`. When it looks like
+  `<remote>/<branch>` and `<remote>` is configured, the remote is fetched
+  first.
 
 Examples:
 
 ```bash
-devtools/ff-worktrees.sh                 # ff everything to origin/master
+devtools/ff-worktrees.sh                 # ff everything to github/master
 devtools/ff-worktrees.sh monad/master    # ff everything to monad/master
 ```
 
