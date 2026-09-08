@@ -12,6 +12,10 @@ certificate. All it needs is an App Store Connect API key.
   ./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
       --branch master --wait
 
+  # ...and record which commit became which build number, as a git tag
+  ./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
+      --branch master --tag
+
   # print the request without sending it
   ./devtools/release/xcode-cloud-build.py "PR check" --branch master --dry-run
 
@@ -26,25 +30,10 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import asc_api  # noqa: E402
-
-PRODUCT_NAME = "damus"
+import build_index  # noqa: E402
 
 # Terminal values of a build run's completionStatus.
 DONE = {"SUCCEEDED", "FAILED", "ERRORED", "CANCELED", "SKIPPED"}
-
-
-def find_product(bearer):
-    body = asc_api.get("/v1/ciProducts?limit=200", bearer=bearer)
-    products = body.get("data", [])
-    for product in products:
-        if product.get("attributes", {}).get("name") == PRODUCT_NAME:
-            return product
-    names = ", ".join(
-        repr(p.get("attributes", {}).get("name")) for p in products
-    ) or "none"
-    raise asc_api.AscError(
-        f"no Xcode Cloud product named {PRODUCT_NAME!r}; the key can see: {names}"
-    )
 
 
 def list_workflows(bearer, product_id):
@@ -145,6 +134,32 @@ def wait_for(build_run_id, poll_seconds, timeout_seconds):
     )
 
 
+def tag_build(run_id, dry_run=False):
+    """Write a build/<number> tag for whatever this run uploaded.
+
+    Worth doing at build time rather than later: Apple keeps only the last
+    handful of runs, and once a run ages out the commit a build came from is
+    no longer recoverable from the API at all.
+    """
+    run = asc_api.get(f"/v1/ciBuildRuns/{run_id}").get("data", {})
+    records = build_index.records_for_run(run)
+    if not records:
+        print(
+            "  no build was uploaded, so there is nothing to tag",
+            file=sys.stderr,
+        )
+        return
+
+    written, already, problems = build_index.apply_tags(records, dry_run=dry_run)
+    for record in written:
+        verb = "would tag" if dry_run else "tagged"
+        print(f"  {verb} {record.tag} -> {record.commit_sha[:12]}")
+    for record in already:
+        print(f"  {record.tag} was already tagged")
+    for problem in problems:
+        print(f"  warning: {problem}", file=sys.stderr)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -158,6 +173,12 @@ def main() -> int:
         help="resolve ids and print the request without starting a build",
     )
     parser.add_argument("--wait", action="store_true", help="poll until the build ends")
+    parser.add_argument(
+        "--tag",
+        action="store_true",
+        help="once the build lands, tag the commit it was built from as "
+        "build/<number> (implies --wait; see tag-builds.py)",
+    )
     parser.add_argument("--poll-seconds", type=int, default=30)
     parser.add_argument("--timeout-seconds", type=int, default=90 * 60)
     args = parser.parse_args()
@@ -169,14 +190,19 @@ def main() -> int:
     if not args.workflow and not args.list:
         parser.error("a workflow name is required unless --list is given")
 
+    # The build number does not exist until Apple assigns it, so there is
+    # nothing to tag until the run is over.
+    if args.tag:
+        args.wait = True
+
     try:
         # One token for the id lookups and the POST; wait_for mints its own.
         bearer = asc_api.token()
-        product = find_product(bearer)
+        product = build_index.find_product(bearer)
         workflows = list_workflows(bearer, product["id"])
 
         if args.list:
-            print(f"product {PRODUCT_NAME} ({product['id']})")
+            print(f"product {build_index.PRODUCT_NAME} ({product['id']})")
             for workflow in workflows:
                 attrs = workflow.get("attributes", {})
                 flag = "" if attrs.get("isEnabled", True) else "  (disabled)"
@@ -216,6 +242,13 @@ def main() -> int:
 
         outcome = wait_for(run["id"], args.poll_seconds, args.timeout_seconds)
         print(f"build {number}: {outcome}")
+
+        # Deliberately after a FAILED run too: the RC workflow's test action
+        # regularly fails long after a good archive has been uploaded, and
+        # that build still needs its commit recorded.
+        if args.tag:
+            tag_build(run["id"])
+
         return 0 if outcome == "SUCCEEDED" else 1
 
     except asc_api.AscError as err:

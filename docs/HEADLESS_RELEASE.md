@@ -140,6 +140,58 @@ For the local path there is no such counter, so either bump the project version
 deliberately or pass `--manage-version` and let App Store Connect assign the
 next one.
 
+### Which commit is in which build
+
+Because Apple assigns the number, nothing in the repository says what went into
+build 1338. `devtools/release/tag-builds.py` writes that back as annotated
+`build/<number>` git tags, read out of the API:
+
+```sh
+# what App Store Connect knows, and what is already tagged
+./devtools/release/tag-builds.py --list
+
+# write the missing tags
+./devtools/release/tag-builds.py
+
+# and share them
+./devtools/release/tag-builds.py --push github
+```
+
+Then the questions answer themselves:
+
+```sh
+git show build/1338                 # the commit that shipped as 1338
+git log build/1337..build/1338      # what a tester got between two builds
+git tag --contains <sha>            # which builds carry this fix
+git describe --match 'build/*'      # the last build at or before HEAD
+```
+
+The mapping comes from two hops — `/v1/ciProducts/<p>/buildRuns` carries
+`sourceCommit.commitSha`, and `/v1/ciBuildRuns/<run>/builds` names the build
+that run produced. Going through the second hop rather than assuming build
+number == run number is what makes it correct for the two cases that keep
+happening here: a run that never got a builder produced no build and is
+skipped, and a run that reports `FAILED` after uploading a good archive still
+gets tagged.
+
+**Tag as you build.** Apple keeps only the last handful of runs — at the time
+of writing the product listed six, back to 1333 — and the commit lives on the
+run, not on the build. Once a run ages out there is no API left to ask, which
+is why builds 1332 and earlier can no longer be mapped automatically. So
+`xcode-cloud-build.py --tag` tags the commit as soon as the build lands
+(it implies `--wait`, since the number does not exist until then):
+
+```sh
+./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
+    --branch master --tag
+```
+
+For an older build whose run is gone, `--commit` records the mapping by hand:
+
+```sh
+./devtools/release/tag-builds.py --build 1332 --commit 6a1c0de9f2b1
+```
+
 ## One-time setup
 
 ### 1. An App Store Connect API key (required, and the only real blocker)
