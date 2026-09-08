@@ -127,6 +127,51 @@ Three things about this step that are easy to get wrong:
   about the app, not a checkbox to automate. Recent damus builds are all
   "does not use non-exempt encryption".
 
+## Trunk-based: master builds every push
+
+`Release candidate build workflow` has a `branchStartCondition` on `master`
+with `autoCancel`, so every push to master cuts a TestFlight build and a second
+push cancels the first rather than queueing behind it. Nothing needs to be run
+by hand to get a build any more; `xcode-cloud-build.py` remains for building
+some other branch, or for watching a build to its end.
+
+It is that workflow and not `Experimental build workflow` on purpose: it
+archives `APP_STORE_ELIGIBLE`, so a master build can still be promoted to an
+external group later. `INTERNAL_ONLY` is baked in at archive time and cannot be
+undone, which makes an internal-only build a dead end.
+
+**Setting a start condition over the API nulls its siblings.** A `PATCH` of
+`branchStartCondition` alone came back 200 and quietly set
+`manualBranchStartCondition` and `manualTagStartCondition` to `null`, which
+would have taken manual triggering with it. The start conditions are not
+independently patchable: send every one you want to keep in the same request,
+and diff the workflow against a snapshot afterwards.
+
+```sh
+# snapshot first, always
+./devtools/release/asc_api.py GET /v1/ciWorkflows/<id> > before.json
+```
+
+### Getting those builds to testers
+
+Xcode Cloud can distribute to a TestFlight group as a post-action, and that is
+the only part of this that is not scriptable: `CiWorkflow` in the App Store
+Connect API models `actions` (build, test, archive, analyze) and nothing else,
+so post-actions exist only in the UI.
+
+> App Store Connect → Xcode Cloud → Manage Workflows → *Release candidate build
+> workflow* → Post-Actions → **TestFlight Internal Testing** → the `Internal`
+> group.
+
+That is separate from the archive action's deployment preparation, which stays
+on **App Store Connect and TestFlight** — if adding the post-action ever flips
+it, the archive action's `buildDistributionAudience` changes from
+`APP_STORE_ELIGIBLE` to `INTERNAL_ONLY`, which is worth re-reading after the
+change and is exactly the trap described above.
+
+Until that post-action exists, master builds still need
+`testflight-distribute.py` to reach anyone.
+
 ## Build numbers: Xcode Cloud owns them
 
 Worth knowing before worrying about burning one. `CURRENT_PROJECT_VERSION` is
@@ -139,6 +184,84 @@ exists.
 For the local path there is no such counter, so either bump the project version
 deliberately or pass `--manage-version` and let App Store Connect assign the
 next one.
+
+### Which commit is in which build
+
+Because Apple assigns the number, nothing in the repository says what went into
+build 1338 — and the answer is perishable. The commit lives on the Xcode Cloud
+*run*, never on the build, and Apple keeps only the last handful of runs: at
+the time of writing the product listed six, back to 1333, so **builds 1332 and
+earlier can no longer be mapped through the API at all**.
+
+So this is recorded automatically, in two places, as annotated `build/<number>`
+git tags:
+
+1. **`ci_scripts/ci_post_xcodebuild.sh`**, on the builder, at the one moment
+   both halves are known. Tags `$CI_COMMIT` as `build/$CI_BUILD_NUMBER` and
+   pushes it, for any archive action that is not a pull request build. This
+   catches builds however they were started — the script, the web UI, a branch
+   push — and needs no Mac.
+2. **`xcode-cloud-build.py`**, whenever it is already waiting for a build. Same
+   tag, from the App Store Connect side, pushed to whichever remote points at
+   the upstream repository. Belt and braces for the hook, and the half that
+   works without a push token.
+
+Whichever gets there first wins; the other reports the tag as already written.
+Then the questions answer themselves:
+
+```sh
+git show build/1338                 # the commit that shipped as 1338
+git log build/1337..build/1338      # what a tester got between two builds
+git tag --contains <sha>            # which builds carry this fix
+git describe --match 'build/*'      # the last build at or before HEAD
+```
+
+`devtools/release/tag-builds.py` is the manual backstop, for auditing the
+mapping or repairing it:
+
+```sh
+./devtools/release/tag-builds.py --list     # what ASC knows, what is tagged
+./devtools/release/tag-builds.py --push     # write and push what is missing
+./devtools/release/tag-builds.py --build 1332 --commit 6a1c0de9f2b1
+```
+
+That last form records a build whose run has already aged out, where nothing
+automatic can help any more.
+
+**The mapping is read, not guessed.** `/v1/ciProducts/<p>/buildRuns` carries
+`sourceCommit.commitSha`, and `/v1/ciBuildRuns/<run>/builds` names the build
+that run actually produced. Going through the second hop rather than assuming
+build number == run number is what makes it right for the two cases that keep
+happening here: run 1334 started, `FAILED`, and produced no build, while 1337
+and 1338 both report `FAILED` and produced perfectly good builds.
+
+#### The hook cannot be allowed to fail
+
+`ci_post_xcodebuild.sh` runs after the archive action and **before Xcode Cloud
+uploads the archive**, so a non-zero exit throws away a finished build. This is
+the same file, at the same path, that discarded every build for three months
+when the Sentry install inside it failed under `set -eu` (296f3bddd4f8). So the
+new one has no `set -e`, tolerates every failure individually, never lets git
+prompt for a credential (`GIT_TERMINAL_PROMPT=0`, or a missing credential hangs
+the archive until the run times out), and ends in an unconditional `exit 0`. A
+missing tag is a footnote; a discarded release build is a wasted evening.
+
+#### The push token
+
+Pushing from the builder needs a credential the checkout does not have. Set a
+GitHub token with `contents:write` as a **secret** environment variable named
+`GITHUB_TAG_PUSH_TOKEN` on each workflow that archives. Xcode Cloud environment
+variables are UI-only — `CiWorkflow` has no `environmentVariables` attribute in
+the App Store Connect API, so this cannot be scripted:
+
+> App Store Connect → Xcode Cloud → Manage Workflows → *(workflow)* →
+> Environment → Add variable, tick **Secret**.
+
+Until that exists the hook still tries the checkout's own credentials and says
+in the build log whether it worked, so the first build after this lands will
+answer whether a token is needed at all. If the push fails, the tag exists only
+on the builder and dies with it — `tag-builds.py --push` recovers it, as long
+as it is run before the run ages out.
 
 ## One-time setup
 
@@ -367,6 +490,10 @@ unattended:
 5. **The first local-path run**, if it creates a distribution certificate. Worth
    watching once rather than discovering a certificate-limit error remotely.
    Moot while the Xcode Cloud path is the one in use.
+6. **The `GITHUB_TAG_PUSH_TOKEN` secret**, one-time, per archiving workflow. Not
+   in the release path at all — without it a build still cuts and still ships,
+   it just may not manage to push its `build/<number>` tag from the builder.
+   Xcode Cloud environment variables have no API, so a person has to set it.
 
 Nothing else prompts. Given the key, the full flow is two non-interactive
 commands:

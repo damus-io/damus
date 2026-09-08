@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import CryptoKit
+import Network
 import NostrSDK
 import Negentropy
 @testable import damus
@@ -97,11 +99,18 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         return networkManager
     }
     
-    /// Stores events in NostrDB for testing purposes.
+    /// Stores events in NostrDB and does not return until they are queryable.
+    ///
+    /// `Ndb.add(event:)` hands the note to the ingester and returns; the note only becomes visible
+    /// to a *query* once that ingest commits. Every test here goes on to assert **when** an event
+    /// surfaces in a stream, and a subscription's initial results come from exactly such a query
+    /// (see `Ndb.subscribe(filters:maxSimultaneousResults:)`) — so without this wait the tests are
+    /// racing the ingester, and a note that lost the race is reported as a streaming-order bug
+    /// rather than as the setup race it is.
     /// - Parameters:
     ///   - events: Array of NostrEvent to store in NDB
     ///   - ndb: The Ndb instance to store events in
-    private func storeEventsInNdb(_ events: [NostrEvent], ndb: Ndb) {
+    private func storeEventsInNdb(_ events: [NostrEvent], ndb: Ndb) async throws {
         for event in events {
             do {
                 try ndb.add(event: event)
@@ -109,6 +118,19 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
                 XCTFail("Failed to store event in NDB: \(error)")
             }
         }
+        for event in events {
+            try await waitUntilQueryable(event.id, in: ndb)
+        }
+    }
+
+    /// Polls NostrDB until `noteId` can be found by a query, or the timeout elapses.
+    private func waitUntilQueryable(_ noteId: NoteId, in ndb: Ndb, timeout: Duration = .seconds(5)) async throws {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            if (try? ndb.lookup_note_key(noteId)) != nil { return }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTFail("Timed out waiting for \(noteId.hex()) to become queryable in NostrDB")
     }
     
     /// Runs a subscription manager stream and fulfills expectations based on received events and EOSE signals.
@@ -133,6 +155,8 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
     ) {
         Task {
             var ndbEoseSeen = false
+            var seenBeforeNdbEose: Set<NoteId> = []
+            var alreadyFulfilled: Set<NoteId> = []
             
             for await item in networkManager.reader.advancedStream(filters: filters, streamMode: streamMode) {
                 switch item {
@@ -140,21 +164,40 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
                     try? lender.borrow { event in
                         // Check if this event came before or after NDB EOSE
                         if !ndbEoseSeen {
-                            // Event came from NDB - verify it's expected from NDB
+                            // Before `ndbEose` NostrDB is the only source there can be: under a
+                            // `.negentropy` network optimization `SubscriptionManager` does not start the
+                            // network stream at all until the NDB stream has emitted its EOSE
+                            // (`SubscriptionManager.advancedStream`, the `.ndbEose` branch). That is a
+                            // real guarantee, and the one the DM/giftwrap backfill leans on: the
+                            // negentropy vector is built from these events, so reconciliation must not
+                            // begin until they have all been seen. An event only the relay holds
+                            // appearing here means that guarantee broke.
                             if negentropyEventExpectations[event.id] != nil {
                                 XCTFail("Event \(event.id) arrived from NDB (before ndbEose) but was expected from negentropy (after ndbEose). This indicates incorrect streaming behavior.")
                             }
                             
-                            if let expectation = ndbEventExpectations[event.id] {
+                            seenBeforeNdbEose.insert(event.id)
+                            if let expectation = ndbEventExpectations[event.id], alreadyFulfilled.insert(event.id).inserted {
                                 expectation.fulfill()
                             }
                         } else {
-                            // Event came from negentropy sync (after NDB EOSE) - verify it's expected from negentropy
-                            if ndbEventExpectations[event.id] != nil {
-                                XCTFail("Event \(event.id) arrived from negentropy (after ndbEose) but was expected from NDB (before ndbEose). This indicates incorrect streaming behavior.")
+                            // After `ndbEose` there are *two* sources, not one, so "arrived late" does
+                            // not imply "came from negentropy". The NDB subscription stays live past its
+                            // EOSE by design — that is what makes it a subscription — and re-emits
+                            // whatever is ingested next, including the very notes negentropy just pulled
+                            // down; `multiSessionNdbStream` also restarts a finished NDB session and
+                            // replays its initial results. So a *repeat* delivery of an event we already
+                            // got from NDB is expected behaviour, not a bug.
+                            //
+                            // What would be a bug is an event NDB already held showing up here for the
+                            // *first* time: that means it was missing from the negentropy vector when
+                            // reconciliation started, so a relay re-sent something we had — precisely
+                            // the waste negentropy exists to avoid. That is what is asserted below.
+                            if ndbEventExpectations[event.id] != nil && !seenBeforeNdbEose.contains(event.id) {
+                                XCTFail("Event \(event.id) reached the stream for the first time after ndbEose, but NDB already had it before the stream started. The negentropy vector was incomplete when reconciliation began, so a relay re-sent an event we already had.")
                             }
                             
-                            if let expectation = negentropyEventExpectations[event.id] {
+                            if let expectation = negentropyEventExpectations[event.id], alreadyFulfilled.insert(event.id).inserted {
                                 expectation.fulfill()
                             }
                         }
@@ -188,7 +231,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         sendEvents([noteA, noteB], to: relayConnection)
         
         let ndb = await test_damus_state.ndb
-        storeEventsInNdb([noteA], ndb: ndb)
+        try await storeEventsInNdb([noteA], ndb: ndb)
         
         let networkManager = try await setupNetworkManager(with: [relayUrl], ndb: ndb)
         
@@ -265,7 +308,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         sendEvents([noteA, noteB], to: relayConnection)
         
         let ndb = await test_damus_state.ndb
-        storeEventsInNdb([noteA, noteB], ndb: ndb)
+        try await storeEventsInNdb([noteA, noteB], ndb: ndb)
         
         let networkManager = try await setupNetworkManager(with: [relayUrl], ndb: ndb)
         
@@ -314,7 +357,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         sendEvents([noteB, noteC], to: relayConnection2)
         
         let ndb = await test_damus_state.ndb
-        storeEventsInNdb([noteB], ndb: ndb)
+        try await storeEventsInNdb([noteB], ndb: ndb)
         
         let networkManager = try await setupNetworkManager(with: [relayUrl1, relayUrl2], ndb: ndb)
         
@@ -371,7 +414,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         sendEvents([noteC, noteD], to: relayConnection3)
         
         let ndb = await test_damus_state.ndb
-        storeEventsInNdb([noteA, noteC], ndb: ndb)
+        try await storeEventsInNdb([noteA, noteC], ndb: ndb)
         
         let networkManager = try await setupNetworkManager(with: [relayUrl1, relayUrl2, relayUrl3], ndb: ndb)
         
@@ -432,7 +475,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         sendEvents([noteC, noteD], to: relayConnection3)
         
         let ndb = await test_damus_state.ndb
-        storeEventsInNdb([noteA, noteC], ndb: ndb)
+        try await storeEventsInNdb([noteA, noteC], ndb: ndb)
         
         let networkManager = try await setupNetworkManager(with: [relayUrl1, relayUrl2, relayUrl3], ndb: ndb)
         
@@ -467,11 +510,15 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         // Given: Two relays (one with negentropy, another one not), and the one with negentropy has an event we need
         let relay2 = try await setupRelay()
         
-        let relayUrl1 = RelayURL("ws://nos.lol/v2")!    // This can be any relay that does not support negentropy
-                                                        // Adding an external relay may cause flakiness if the relay enables negentropy, but currently
-                                                        // there is no feasible way to configure a local relay that rejects negentropy requests.
-                                                        // Therefore, keep this external relay until it causes issues and then we can investigate
-                                                        // how to improve this test's robustness.
+        // The relay that cannot reconcile. `RelayBuilder` has no knob for turning NIP-77 off, so this
+        // is a hand-rolled stand-in whose NIP-11 document leaves NIP-77 out, and which is otherwise a
+        // well-behaved (if empty) NIP-01 relay — see `NegentropyRefusingRelay` at the bottom of this
+        // file. It used to be `ws://nos.lol/v2`, which made the outcome depend on the public internet
+        // and on whether that relay happened to have negentropy enabled that day.
+        let relay1 = try await NegentropyRefusingRelay.started()
+        defer { relay1.stop() }
+        
+        let relayUrl1 = relay1.url
         let relayUrl2 = RelayURL(await relay2.url().description)!
         
         let noteA = NostrEvent(content: "A", keypair: test_keypair)!
@@ -482,7 +529,7 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
         sendEvents([noteA, noteB], to: relayConnection2)
         
         let ndb = await test_damus_state.ndb
-        storeEventsInNdb([noteB], ndb: ndb)
+        try await storeEventsInNdb([noteB], ndb: ndb)
         
         let networkManager = try await setupNetworkManager(with: [relayUrl1, relayUrl2], ndb: ndb)
         
@@ -510,6 +557,321 @@ final class SubscriptionManagerNegentropyTests: XCTestCase {
 }
 
 // MARK: - Test Doubles
+
+/// A local relay that says it does not support NIP-77, and speaks just enough of NIP-01 and of the
+/// WebSocket protocol to be a well-behaved (if empty) member of a `RelayPool`.
+///
+/// It exists because `RelayBuilder` — and so `LocalRelay` — has no way to turn negentropy support
+/// off, while the behaviour worth testing here is a pool where only *some* relays can reconcile.
+/// The test used to reach for `ws://nos.lol/v2` instead, which made the outcome depend on the public
+/// internet and on whichever NIPs that operator had enabled that day.
+///
+/// It is hand-rolled on a raw TCP listener rather than on `NWProtocolWebSocket` because the relay has
+/// to answer **two** protocols on one port. Before reconciling, `RelayConnection.getMissingIds`
+/// fetches the relay's NIP-11 document over plain HTTP; a WebSocket-only listener leaves that request
+/// hanging until `URLSession` gives up a minute later, which is long past any test's patience. Here
+/// the HTTP GET is answered with a document listing NIP-1 and not NIP-77, which is the relay saying
+/// in the ordinary way that it cannot reconcile — and is what makes this fast and deterministic.
+///
+/// The rest is deliberately minimal:
+/// - `REQ` → an immediate `EOSE`. It stores nothing, so it has nothing to return, and answering at
+///   once keeps `RelayPool.subscribe`'s EOSE bookkeeping honest instead of leaving it to the
+///   5-second fallback timer.
+/// - `NEG-OPEN` → `NEG-ERR`, for the belt-and-braces case where something asks to reconcile anyway.
+/// - everything else (`CLOSE`, `NEG-CLOSE`, `EVENT`, …) → ignored.
+/// - WebSocket frames are read one per message; fragmented frames are not reassembled, which no
+///   Nostr client sends for messages this small.
+private final class NegentropyRefusingRelay: @unchecked Sendable {
+    private let listener: NWListener
+    private let queue: DispatchQueue
+    private var peers: [Peer] = []
+
+    /// The `ws://` URL this relay is reachable at.
+    let url: RelayURL
+
+    /// The NIP-11 document handed to anyone who asks over HTTP. NIP-77 is pointedly absent.
+    private static let relayInformationDocument = """
+    {"name":"NegentropyRefusingRelay","description":"Test double: NIP-01 only, no negentropy","supported_nips":[1],"software":"damusTests","version":"1"}
+    """
+
+    /// Starts a relay on an ephemeral loopback port.
+    ///
+    /// The port is `.any` rather than a fixed number so that parallel test destinations sharing the
+    /// host's loopback cannot collide on it.
+    static func started() async throws -> NegentropyRefusingRelay {
+        let parameters = NWParameters.tcp
+        parameters.allowLocalEndpointReuse = true
+        let listener = try NWListener(using: parameters, on: .any)
+        let queue = DispatchQueue(label: "NegentropyRefusingRelay")
+        // Nothing can reach us before `started()` returns and hands out the URL, so anything that
+        // arrives in the gap between `start` and the real handler below is not ours to serve.
+        listener.newConnectionHandler = { $0.cancel() }
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+            // `stateUpdateHandler` keeps firing after the listener is up, and a continuation may only
+            // be resumed once.
+            let resume = ResumeOnce()
+            listener.stateUpdateHandler = { state in
+                switch state {
+                case .ready:
+                    if resume.claim() { continuation.resume() }
+                case .failed(let error):
+                    if resume.claim() { continuation.resume(throwing: error) }
+                case .cancelled:
+                    if resume.claim() { continuation.resume(throwing: CancellationError()) }
+                default:
+                    break
+                }
+            }
+            listener.start(queue: queue)
+        }
+
+        guard let port = listener.port?.rawValue, let url = RelayURL("ws://127.0.0.1:\(port)") else {
+            listener.cancel()
+            throw StartupError.couldNotDetermineURL
+        }
+
+        let relay = NegentropyRefusingRelay(listener: listener, queue: queue, url: url)
+        listener.newConnectionHandler = { [weak relay] connection in relay?.accept(connection) }
+        return relay
+    }
+
+    private init(listener: NWListener, queue: DispatchQueue, url: RelayURL) {
+        self.listener = listener
+        self.queue = queue
+        self.url = url
+    }
+
+    func stop() {
+        listener.cancel()
+        queue.async {
+            for peer in self.peers { peer.connection.cancel() }
+            self.peers = []
+        }
+    }
+
+    // MARK: Connection handling
+
+    /// One connected client, and whatever of its bytes we have not made a message out of yet.
+    private final class Peer {
+        let connection: NWConnection
+        var inbox: [UInt8] = []
+        var upgraded = false
+
+        init(connection: NWConnection) {
+            self.connection = connection
+        }
+    }
+
+    private func accept(_ connection: NWConnection) {
+        let peer = Peer(connection: connection)
+        queue.async { self.peers.append(peer) }
+        connection.start(queue: queue)
+        read(peer)
+    }
+
+    private func read(_ peer: Peer) {
+        peer.connection.receive(minimumIncompleteLength: 1, maximumLength: 64 * 1024) { [weak self] data, _, isComplete, error in
+            guard let self else { return }
+            if let data, !data.isEmpty {
+                peer.inbox.append(contentsOf: data)
+                self.process(peer)
+            }
+            guard !isComplete, error == nil else {
+                peer.connection.cancel()
+                return
+            }
+            self.read(peer)
+        }
+    }
+
+    private func process(_ peer: Peer) {
+        if !peer.upgraded {
+            guard let headerEnd = indexAfterHTTPHeaders(in: peer.inbox) else { return }
+            let head = String(decoding: peer.inbox[..<headerEnd], as: UTF8.self)
+            peer.inbox.removeFirst(headerEnd)
+            guard let key = webSocketKey(inHeaders: head) else {
+                // Not a WebSocket upgrade, so it is the NIP-11 fetch. Answer it and hang up.
+                send(bytes: Array(httpRelayInformationResponse().utf8), on: peer, thenClose: true)
+                return
+            }
+            send(bytes: Array(webSocketHandshakeResponse(forKey: key).utf8), on: peer, thenClose: false)
+            peer.upgraded = true
+        }
+
+        while let frame = nextFrame(from: &peer.inbox) {
+            switch frame.opcode {
+            case 0x1:   // text
+                handle(message: String(decoding: frame.payload, as: UTF8.self), on: peer)
+            case 0x8:   // close
+                peer.connection.cancel()
+                return
+            case 0x9:   // ping
+                send(frame: 0xA, payload: frame.payload, on: peer, thenClose: false)
+            default:
+                break
+            }
+        }
+    }
+
+    private func handle(message: String, on peer: Peer) {
+        guard let data = message.data(using: .utf8),
+              let array = try? JSONSerialization.jsonObject(with: data) as? [Any],
+              array.count >= 2,
+              let verb = array[0] as? String,
+              let subscriptionId = array[1] as? String
+        else { return }
+
+        switch verb {
+        case "REQ":
+            send(json: ["EOSE", subscriptionId], on: peer)
+        case "NEG-OPEN":
+            send(json: ["NEG-ERR", subscriptionId, "blocked: negentropy is not supported by this relay"], on: peer)
+        default:
+            break
+        }
+    }
+
+    // MARK: HTTP
+
+    /// The offset just past the blank line that ends an HTTP header block, or `nil` if it has not all
+    /// arrived yet.
+    private func indexAfterHTTPHeaders(in bytes: [UInt8]) -> Int? {
+        let terminator: [UInt8] = Array("\r\n\r\n".utf8)
+        guard bytes.count >= terminator.count else { return nil }
+        for start in 0...(bytes.count - terminator.count) where Array(bytes[start..<start + terminator.count]) == terminator {
+            return start + terminator.count
+        }
+        return nil
+    }
+
+    private func webSocketKey(inHeaders headers: String) -> String? {
+        for line in headers.split(separator: "\r\n") {
+            let parts = line.split(separator: ":", maxSplits: 1)
+            guard parts.count == 2, parts[0].lowercased() == "sec-websocket-key" else { continue }
+            return parts[1].trimmingCharacters(in: .whitespaces)
+        }
+        return nil
+    }
+
+    private func httpRelayInformationResponse() -> String {
+        let body = Self.relayInformationDocument
+        return """
+        HTTP/1.1 200 OK\r
+        Content-Type: application/nostr+json\r
+        Access-Control-Allow-Origin: *\r
+        Content-Length: \(body.utf8.count)\r
+        Connection: close\r
+        \r
+        \(body)
+        """
+    }
+
+    private func webSocketHandshakeResponse(forKey key: String) -> String {
+        // RFC 6455's fixed GUID, concatenated with the client's key and SHA-1'd.
+        let magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+        let accept = Data(Insecure.SHA1.hash(data: Data((key + magic).utf8))).base64EncodedString()
+        return """
+        HTTP/1.1 101 Switching Protocols\r
+        Upgrade: websocket\r
+        Connection: Upgrade\r
+        Sec-WebSocket-Accept: \(accept)\r
+        \r
+
+        """
+    }
+
+    // MARK: WebSocket framing
+
+    private struct Frame {
+        let opcode: UInt8
+        let payload: [UInt8]
+    }
+
+    /// Pulls one complete frame off the front of `bytes`, or returns `nil` and leaves `bytes` alone
+    /// when the frame has not fully arrived.
+    private func nextFrame(from bytes: inout [UInt8]) -> Frame? {
+        guard bytes.count >= 2 else { return nil }
+        let opcode = bytes[0] & 0x0F
+        let isMasked = bytes[1] & 0x80 != 0
+        var length = Int(bytes[1] & 0x7F)
+        var offset = 2
+
+        if length == 126 {
+            guard bytes.count >= offset + 2 else { return nil }
+            length = Int(bytes[offset]) << 8 | Int(bytes[offset + 1])
+            offset += 2
+        } else if length == 127 {
+            guard bytes.count >= offset + 8 else { return nil }
+            length = bytes[offset..<offset + 8].reduce(0) { $0 << 8 | Int($1) }
+            offset += 8
+        }
+
+        var mask: [UInt8] = []
+        if isMasked {
+            guard bytes.count >= offset + 4 else { return nil }
+            mask = Array(bytes[offset..<offset + 4])
+            offset += 4
+        }
+
+        guard bytes.count >= offset + length else { return nil }
+        var payload = Array(bytes[offset..<offset + length])
+        if isMasked {
+            for index in payload.indices { payload[index] ^= mask[index % 4] }
+        }
+        bytes.removeFirst(offset + length)
+        return Frame(opcode: opcode, payload: payload)
+    }
+
+    private func send(json message: [String], on peer: Peer) {
+        guard let data = try? JSONSerialization.data(withJSONObject: message) else { return }
+        send(frame: 0x1, payload: Array(data), on: peer, thenClose: false)
+    }
+
+    private func send(frame opcode: UInt8, payload: [UInt8], on peer: Peer, thenClose: Bool) {
+        var bytes: [UInt8] = [0x80 | opcode]      // FIN set: every frame we send is a whole message
+        if payload.count < 126 {
+            bytes.append(UInt8(payload.count))
+        } else if payload.count <= 0xFFFF {
+            bytes.append(126)
+            bytes.append(UInt8(payload.count >> 8))
+            bytes.append(UInt8(payload.count & 0xFF))
+        } else {
+            bytes.append(127)
+            for shift in stride(from: 56, through: 0, by: -8) {
+                bytes.append(UInt8((payload.count >> shift) & 0xFF))
+            }
+        }
+        bytes.append(contentsOf: payload)
+        send(bytes: bytes, on: peer, thenClose: thenClose)
+    }
+
+    private func send(bytes: [UInt8], on peer: Peer, thenClose: Bool) {
+        peer.connection.send(content: Data(bytes), completion: .contentProcessed({ _ in
+            if thenClose { peer.connection.cancel() }
+        }))
+    }
+
+    /// Lets exactly one caller through, so a continuation is resumed once no matter how many times
+    /// the listener reports its state.
+    private final class ResumeOnce: @unchecked Sendable {
+        private let lock = NSLock()
+        private var used = false
+
+        func claim() -> Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            if used { return false }
+            used = true
+            return true
+        }
+    }
+
+    enum StartupError: Error {
+        case couldNotDetermineURL
+    }
+}
+
 
 /// Test delegate for NostrNetworkManager that provides minimal configuration for testing
 private final class TestNetworkDelegate: NostrNetworkManager.Delegate {
