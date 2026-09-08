@@ -92,8 +92,12 @@ export ASC_KEY_ID=...  ASC_ISSUER_ID=...
 ```
 
 `Internal` (`b99dead7-12a5-4ca8-b4fa-06aebbf7e677`) is the group to release to.
-Notes are set for one locale (`--locale`, default `en-US`); App Store Connect
-may carry other locales such as `en-CA`, which will stay blank.
+Notes are written to **every locale the build has**, because a locale left blank
+renders as no release notes at all for testers who see it. That matters here:
+damus's `primaryLocale` is **`en-CA`**, not `en-US`, and App Store Connect shows
+the primary locale — writing only `en-US` produces a build whose notes look
+empty, which is what happened to build 1338 before this was fixed. `--locale`
+narrows it to one when you want that.
 `--wait` sits through the post-upload processing, which a build must clear before
 it can be distributed at all.
 

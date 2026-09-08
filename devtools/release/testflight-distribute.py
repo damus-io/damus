@@ -30,7 +30,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import asc_api  # noqa: E402
 
 APP_ID = "1628663131"  # com.jb55.damus2
-DEFAULT_LOCALE = "en-US"
 
 
 def builds(limit=20):
@@ -57,6 +56,18 @@ def resolve_build(number=None):
     raise asc_api.AscError(
         "every recent build has expired; upload one, or pass --build explicitly"
     )
+
+
+def primary_locale():
+    """The app's primary locale — the one App Store Connect actually shows.
+
+    Not en-US for this app: it is en-CA. Writing What to Test to the wrong
+    locale silently produces a build whose notes look empty to testers, which
+    is exactly what happened to build 1338.
+    """
+    return asc_api.get(f"/v1/apps/{APP_ID}").get("data", {}).get(
+        "attributes", {}
+    ).get("primaryLocale")
 
 
 def beta_groups():
@@ -122,50 +133,75 @@ def wait_for_processing(build_id, poll_seconds=30, timeout_seconds=45 * 60):
 
 
 def set_notes(build_id, text, locale, dry_run):
-    """Create or update the What to Test text for one locale."""
+    """Set What to Test.
+
+    With no explicit locale, write every locale the build already has, falling
+    back to the app's primary one — a locale left blank renders as no release
+    notes at all for testers who see it, and App Store Connect shows the
+    primary locale, which is not necessarily en-US.
+    """
     existing = asc_api.get(
         f"/v1/builds/{build_id}/betaBuildLocalizations"
     ).get("data", [])
-    current = next(
-        (
-            loc for loc in existing
-            if loc["attributes"].get("locale") == locale
-        ),
-        None,
-    )
 
-    if current:
-        method, path = "PATCH", f"/v1/betaBuildLocalizations/{current['id']}"
-        body = {
-            "data": {
-                "type": "betaBuildLocalizations",
-                "id": current["id"],
-                "attributes": {"whatsNew": text},
-            }
-        }
+    if locale:
+        targets = [locale]
     else:
-        method, path = "POST", "/v1/betaBuildLocalizations"
-        body = {
-            "data": {
-                "type": "betaBuildLocalizations",
-                "attributes": {"whatsNew": text, "locale": locale},
-                "relationships": {
-                    "build": {"data": {"type": "builds", "id": build_id}}
-                },
+        targets = [
+            loc["attributes"]["locale"]
+            for loc in existing
+            if loc.get("attributes", {}).get("locale")
+        ]
+        if not targets:
+            primary = primary_locale()
+            if not primary:
+                raise asc_api.AscError(
+                    "could not determine the app's primary locale; pass --locale"
+                )
+            targets = [primary]
+
+    by_locale = {
+        loc["attributes"]["locale"]: loc["id"]
+        for loc in existing
+        if loc.get("attributes", {}).get("locale")
+    }
+
+    for target in targets:
+        existing_id = by_locale.get(target)
+        if existing_id:
+            method = "PATCH"
+            path = f"/v1/betaBuildLocalizations/{existing_id}"
+            body = {
+                "data": {
+                    "type": "betaBuildLocalizations",
+                    "id": existing_id,
+                    "attributes": {"whatsNew": text},
+                }
             }
-        }
+        else:
+            method = "POST"
+            path = "/v1/betaBuildLocalizations"
+            body = {
+                "data": {
+                    "type": "betaBuildLocalizations",
+                    "attributes": {"whatsNew": text, "locale": target},
+                    "relationships": {
+                        "build": {"data": {"type": "builds", "id": build_id}}
+                    },
+                }
+            }
 
-    if dry_run:
-        print(f"  would {method} {path}  ({len(text)} chars of notes, {locale})")
-        return
+        if dry_run:
+            print(f"  would {method} {path}  ({len(text)} chars, {target})")
+            continue
 
-    status, response = asc_api.request(method, path, body)
-    if not 200 <= status < 300:
-        raise asc_api.AscError(
-            f"could not set What to Test (HTTP {status}): "
-            f"{asc_api.describe(response)}"
-        )
-    print(f"  set What to Test for {locale} ({len(text)} chars)")
+        status, response = asc_api.request(method, path, body)
+        if not 200 <= status < 300:
+            raise asc_api.AscError(
+                f"could not set What to Test for {target} (HTTP {status}): "
+                f"{asc_api.describe(response)}"
+            )
+        print(f"  set What to Test for {target} ({len(text)} chars)")
 
 
 def review_state(build_id):
@@ -246,7 +282,11 @@ def main() -> int:
     )
     parser.add_argument("--notes", help="What to Test text")
     parser.add_argument("--notes-file", help="read What to Test text from a file")
-    parser.add_argument("--locale", default=DEFAULT_LOCALE)
+    parser.add_argument(
+        "--locale",
+        help="only write this locale; default is every locale the build has, "
+        "else the app's primary locale",
+    )
     parser.add_argument("--list", action="store_true", help="show builds and groups")
     parser.add_argument("--wait", action="store_true", help="wait out build processing")
     parser.add_argument(

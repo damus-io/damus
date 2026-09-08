@@ -359,23 +359,32 @@ struct ConnectWalletView: View {
         }
     }
     
+    /// The introduction and the setup form are two states of this same screen, so they are
+    /// chosen between here rather than layered on top of each other.
+    ///
+    /// The introduction used to be a `.fullScreenCover`, which it requested on its very first
+    /// render — i.e. while the navigation stack was still animating this view in, and while the
+    /// side menu that pushed it was still animating closed. UIKit does not reliably finish a
+    /// `.fullScreen` presentation started mid-transition, and when it does not, it never removes
+    /// the presenting view: both hierarchies stay in the window, interleaved, and whether the
+    /// one in front happens to hide the one behind comes down to how opaque its background
+    /// renders on that particular device. Branching keeps that from being representable.
     var MainContent: some View {
         Group {
             switch model.connect_state {
             case .new(let nwc):
                 AreYouSure(nwc: nwc, show_introduction: $show_introduction, model: self.model)
-                    .onAppear() {
-                        show_introduction = false
-                    }
             case .existing:
                 Text(verbatim: "Shouldn't happen")
             case .none:
-                ConnectWallet
+                if show_introduction {
+                    ZapExplainerView(show_introduction: $show_introduction, nav: nav)
+                }
+                else {
+                    ConnectWallet
+                }
             }
         }
-        .fullScreenCover(isPresented: $show_introduction, content: {
-            ZapExplainerView(show_introduction: $show_introduction, nav: nav)
-        })
     }
 }
 
