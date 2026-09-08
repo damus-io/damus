@@ -232,13 +232,19 @@ def default_remote():
 
 
 def push_tags(remote, records, force=False):
-    """Push the given builds' tags. Raises AscError if git refuses."""
+    """Push the given builds' tags.
+
+    Returns (refs, changed) — changed is False when the remote already had them
+    all, so a caller can say what happened rather than claiming a push that
+    git turned into a no-op. Raises AscError if git refuses.
+    """
     refs = [record.tag for record in records]
     # A moved tag needs a forced push as well as a forced tag, or git rejects
     # it as a non-fast-forward and the local and remote mappings disagree.
     args = ["push", remote] + (["--force"] if force else []) + refs
-    git(*args)
-    return refs
+    proc = git(*args)
+    output = proc.stdout + proc.stderr
+    return refs, "Everything up-to-date" not in output
 
 
 def have_commit(sha):

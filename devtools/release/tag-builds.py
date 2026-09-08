@@ -80,8 +80,11 @@ def push(remote, records, dry_run, force=False):
     if dry_run:
         print(f"  would push {len(records)} tag(s) to {remote}")
         return
-    refs = build_index.push_tags(remote, records, force=force)
-    print(f"  pushed {len(refs)} tag(s) to {remote}")
+    refs, changed = build_index.push_tags(remote, records, force=force)
+    if changed:
+        print(f"  pushed {len(refs)} tag(s) to {remote}")
+    else:
+        print(f"  {len(refs)} tag(s) already on {remote}")
 
 
 def main() -> int:
@@ -174,10 +177,15 @@ def main() -> int:
         for problem in problems:
             print(f"warning: {problem}", file=sys.stderr)
 
-        if remote and written:
-            push(remote, written, args.dry_run, force=args.force)
-        elif remote:
-            print("  nothing new to push")
+        # Everything correctly tagged locally, not just what this run wrote:
+        # "--push" means "make sure these are on the remote", and a tag written
+        # by an earlier run that never got pushed is the whole problem.
+        if remote:
+            publishable = written + already
+            if publishable:
+                push(remote, publishable, args.dry_run, force=args.force)
+            else:
+                print("  no tags to push")
 
         if args.dry_run:
             print("dry run: nothing was written")
