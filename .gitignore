@@ -9,5 +9,6 @@ build-git-hash.txt
 .build
 /build
 __pycache__/
+.privenv
 
 .sentryclirc

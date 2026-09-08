@@ -160,10 +160,27 @@ default. Note the `.p8` is downloadable exactly once; Apple will not re-issue
 it. A team may hold several keys, so losing one means minting a replacement and
 revoking the old one, not losing access.
 
-Both scripts read `ASC_KEY_ID` and `ASC_ISSUER_ID` from the environment. Put
-them somewhere a non-interactive shell will pick up — the issuer id is the same
-for every key in the team and neither value is secret on its own; the `.p8` is
-the secret.
+Both scripts read `ASC_KEY_ID` and `ASC_ISSUER_ID` from the environment. The
+issuer id is the same for every key in the team, and neither value is secret on
+its own — the `.p8` is the secret.
+
+`.envrc` sources a gitignored `.privenv`, so direnv supplies them and the
+scripts run with no env prefix. Create one per worktree:
+
+```sh
+cat > .privenv <<'ENV'
+export ASC_KEY_ID=...
+export ASC_ISSUER_ID=...
+export ASC_KEY_PATH=$HOME/projects/damus/ios-deploy-keys/AuthKey_....p8
+ENV
+chmod 600 .privenv
+direnv allow
+```
+
+The `source .privenv || :` in `.envrc` is a no-op where the file is absent, so
+checkouts without credentials are unaffected. Note direnv only watches files it
+loads with `dotenv`/`source_env`; with plain `source` you need `direnv allow`
+again after editing `.privenv`.
 
 ### 2. A distribution certificate (local path only)
 
