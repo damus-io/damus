@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftUI
 @testable import damus
 
 // MARK: - The query model
@@ -1372,5 +1373,91 @@ final class AdvancedSearchRunnerPolicyTests: XCTestCase {
                                                              in: ndb,
                                                              isCancelled: { true }))
         XCTAssertEqual(try AdvancedSearchEngine.search(AdvancedSearchQuery(authors: [author_a]), in: ndb).keys.count, 8)
+    }
+}
+
+
+// MARK: - The search match highlight
+
+/// The match highlight is painted behind note content that already carries its
+/// own colors: hashtags render in ``DamusColors/purple`` and so do mentions and
+/// links. Reported from TestFlight against the advanced results screen — a
+/// `#memes` note matched on "memes" drew accent magenta text on an
+/// accent-magenta fill, 1.03:1, which is invisible.
+final class SearchHighlightContrastTests: XCTestCase {
+    /// WCAG 2.1 relative luminance.
+    private func luminance(_ color: UIColor) -> CGFloat {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        func channel(_ c: CGFloat) -> CGFloat {
+            c <= 0.03928 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+    }
+
+    private func contrast(_ a: UIColor, on b: UIColor) -> CGFloat {
+        let la = luminance(a), lb = luminance(b)
+        return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+    }
+
+    private func resolved(_ color: Color, _ style: UIUserInterfaceStyle) -> UIColor {
+        UIColor(color).resolvedColor(with: UITraitCollection(userInterfaceStyle: style))
+    }
+
+    private let styles: [(String, UIUserInterfaceStyle)] = [("light", .light), ("dark", .dark)]
+
+    /// Highlighted text has to clear AA against the fill it sits on, in both
+    /// themes. The bug was dark mode at 1.03:1, but light mode was also failing
+    /// at 1.88:1, so neither theme is allowed to regress.
+    func test_highlighted_text_is_readable_on_the_match_fill() {
+        for (name, style) in styles {
+            let fill = resolved(DamusColors.highlight, style)
+            let text = resolved(DamusColors.highlightedText, style)
+            let ratio = contrast(text, on: fill)
+            XCTAssertGreaterThanOrEqual(ratio, 4.5,
+                "\(name) mode highlighted text is \(ratio):1 on its fill, below the 4.5:1 AA floor")
+        }
+    }
+
+    /// The ratio above is only the on-screen ratio if the fill is opaque. A
+    /// translucent fill composites against whatever is behind it, which is how
+    /// the reported collision got in: a 0.78-alpha magenta over black landed on
+    /// the same color as the hashtag text drawn on top of it.
+    func test_the_match_fill_is_opaque() {
+        for (name, style) in styles {
+            var alpha: CGFloat = 0
+            resolved(DamusColors.highlight, style).getRed(nil, green: nil, blue: nil, alpha: &alpha)
+            XCTAssertEqual(alpha, 1.0, accuracy: 0.001,
+                "\(name) mode match fill is translucent, so its contrast depends on the backdrop")
+        }
+    }
+
+    /// The regression itself: highlighting a hashtag must replace its accent
+    /// foreground, not just paint a fill behind it and leave the text magenta.
+    @MainActor
+    func test_highlighting_a_hashtag_replaces_its_accent_foreground() throws {
+        // The reporter's note, and the term their `#memes` filter chip matched on.
+        let content = hashtag_str("memes") + CompatibleText(stringLiteral: " ") + hashtag_str("memestr")
+        let view = NoteContentView(damus_state: make_test_damus_state(),
+                                   event: NostrEvent(content: "#memes #memestr", keypair: test_keypair)!,
+                                   blur_images: false,
+                                   size: .normal,
+                                   options: [],
+                                   highlightTerms: ["memes"])
+
+        let highlighted = view.highlightedContent(content).attributed
+        let expected = DamusColors.highlightedText
+
+        var checked = 0
+        for run in highlighted.runs where run.backgroundColor != nil {
+            checked += 1
+            XCTAssertEqual(run.foregroundColor, expected,
+                "a highlighted run kept its own foreground instead of the highlight's")
+            XCTAssertNotEqual(run.foregroundColor, DamusColors.purple,
+                "a highlighted hashtag is still accent magenta on the magenta fill")
+        }
+
+        // Both "memes" spans — the whole hashtag and the stem of "#memestr".
+        XCTAssertEqual(checked, 2, "expected two highlighted runs in \"#memes #memestr\"")
     }
 }
