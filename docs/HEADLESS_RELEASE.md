@@ -127,6 +127,51 @@ Three things about this step that are easy to get wrong:
   about the app, not a checkbox to automate. Recent damus builds are all
   "does not use non-exempt encryption".
 
+## Trunk-based: master builds every push
+
+`Release candidate build workflow` has a `branchStartCondition` on `master`
+with `autoCancel`, so every push to master cuts a TestFlight build and a second
+push cancels the first rather than queueing behind it. Nothing needs to be run
+by hand to get a build any more; `xcode-cloud-build.py` remains for building
+some other branch, or for watching a build to its end.
+
+It is that workflow and not `Experimental build workflow` on purpose: it
+archives `APP_STORE_ELIGIBLE`, so a master build can still be promoted to an
+external group later. `INTERNAL_ONLY` is baked in at archive time and cannot be
+undone, which makes an internal-only build a dead end.
+
+**Setting a start condition over the API nulls its siblings.** A `PATCH` of
+`branchStartCondition` alone came back 200 and quietly set
+`manualBranchStartCondition` and `manualTagStartCondition` to `null`, which
+would have taken manual triggering with it. The start conditions are not
+independently patchable: send every one you want to keep in the same request,
+and diff the workflow against a snapshot afterwards.
+
+```sh
+# snapshot first, always
+./devtools/release/asc_api.py GET /v1/ciWorkflows/<id> > before.json
+```
+
+### Getting those builds to testers
+
+Xcode Cloud can distribute to a TestFlight group as a post-action, and that is
+the only part of this that is not scriptable: `CiWorkflow` in the App Store
+Connect API models `actions` (build, test, archive, analyze) and nothing else,
+so post-actions exist only in the UI.
+
+> App Store Connect → Xcode Cloud → Manage Workflows → *Release candidate build
+> workflow* → Post-Actions → **TestFlight Internal Testing** → the `Internal`
+> group.
+
+That is separate from the archive action's deployment preparation, which stays
+on **App Store Connect and TestFlight** — if adding the post-action ever flips
+it, the archive action's `buildDistributionAudience` changes from
+`APP_STORE_ELIGIBLE` to `INTERNAL_ONLY`, which is worth re-reading after the
+change and is exactly the trap described above.
+
+Until that post-action exists, master builds still need
+`testflight-distribute.py` to reach anyone.
+
 ## Build numbers: Xcode Cloud owns them
 
 Worth knowing before worrying about burning one. `CURRENT_PROJECT_VERSION` is
