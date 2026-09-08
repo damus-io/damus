@@ -28,13 +28,21 @@ class DamusColors {
     static let green = Color("DamusGreen")
     static let purple = Color("DamusPurple")
     static let deepPurple = Color("DamusDeepPurple")
-    static let highlight = Color(UIColor { traits in
+    static let highlight = Color("DamusHighlight")
+    /// Text color for a span sitting on ``highlight``.
+    ///
+    /// A highlight fill has to recolor the text it covers rather than leave it
+    /// alone: hashtags render in ``purple`` and mentions and links are the same
+    /// accent family, so accent-on-highlight is one hue against itself. No
+    /// single fill can serve both those and plain body text, because reaching
+    /// 4.5:1 against the accent magenta needs a near-white or near-black fill
+    /// and both of those fail the body text the same highlight covers.
+    static let highlightedText = Color(UIColor { traits in
         if traits.userInterfaceStyle == .dark {
-            // Vivid Damus magenta tuned for dark backgrounds (strong contrast without glow)
-            return UIColor(red: 0.95, green: 0.43, blue: 0.82, alpha: 0.78)
+            return UIColor.white
         } else {
-            // Slightly deeper pink on light so text stays legible
-            return UIColor(red: 0.88, green: 0.32, blue: 0.74, alpha: 0.62)
+            // Deep plum rather than plain black, to stay in the highlight's hue
+            return UIColor(red: 0x3D/255.0, green: 0x0B/255.0, blue: 0x36/255.0, alpha: 1.0)
         }
     })
     static let blue = Color("DamusBlue")

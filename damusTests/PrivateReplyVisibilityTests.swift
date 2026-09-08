@@ -204,21 +204,22 @@ final class PrivateReplyVisibilityTests: XCTestCase {
     ///
     /// What is left is not "nothing", and the difference is the point. Reply, react and zap survive
     /// because each has a private form to take — the reply and the reaction become rumors in their own
-    /// gift wraps, the zap is forced to ``ZapType/priv``. The rest do not: a boost or Copy note JSON
-    /// carries the plaintext by construction, a share hands over an `nevent` that resolves for nobody,
-    /// a report names a note no moderator can fetch, and a mutelist is a public record whatever you put
-    /// in it. So the rule is not "a private note can do less", it is "a private note cannot be
-    /// published", and answering somebody privately is not publishing.
+    /// gift wraps, the zap is forced to ``ZapType/priv``. Copy note JSON survives because a pasteboard
+    /// has nobody on the other end of it: the reader can already read the note, which is why Copy text
+    /// was never withheld either. The rest do not survive: a boost carries the plaintext into a new
+    /// signed kind 6, a share hands over an `nevent` that resolves for nobody, a report names a note no
+    /// moderator can fetch, and a mutelist is a public record whatever you put in it. So the rule is
+    /// not "a private note can do less", it is "a private note cannot be published" — and neither
+    /// answering somebody privately nor reading the note yourself is publishing.
     func testEverywhereItIsDrawnItCannotBeRepublished() throws {
         let f = try ingestPrivateReply()
         let actions = NoteActions.available(on: f.rumor, keypair: f.sender.to_keypair())
 
-        XCTAssertEqual(actions, [.reply, .like, .zap],
-                       "the three that have a private form, and nothing else")
+        XCTAssertEqual(actions, [.reply, .like, .zap, .copyJSON],
+                       "the three with a private form plus the one that goes nowhere, and nothing else")
         for (action, why) in [(NoteActions.repost, "a boost embeds the plaintext in a new signed kind 6"),
                               (.share, "an nevent for a rumor is a link nobody else can resolve"),
                               (.broadcast, "Broadcast pushes this exact note to every connected relay"),
-                              (.copyJSON, "Copy note JSON puts the plaintext on the system pasteboard"),
                               (.report, "a NIP-56 report names a note no moderator can ever fetch"),
                               (.muteThread, "a mutelist is public, and a rumor's thread id can be its own")] {
             XCTAssertFalse(actions.contains(action), why)
@@ -226,6 +227,23 @@ final class PrivateReplyVisibilityTests: XCTestCase {
 
         XCTAssertEqual(NoteActions.available(on: f.publicReply, keypair: f.sender.to_keypair()), .all,
                        "and the public control keeps everything, so this is about privateness")
+    }
+
+    /// Copy note JSON, specifically, because it was withheld and is not any more.
+    ///
+    /// Every other entry in the subtraction above has a recipient — a relay, a moderator, whoever a
+    /// link is sent to. This one's destination is the reader's own clipboard, on the device already
+    /// displaying the note, behind developer mode, and the JSON it copies cannot be published by
+    /// anybody: a rumor's `sig` field is not a signature but the wrap's receiver and id, so no relay
+    /// will take the event. Withholding it only ever cost the person holding the key their one way of
+    /// diagnosing a note that renders wrong.
+    func testTheReaderCanCopyARumorsJSON() throws {
+        let f = try ingestPrivateReply()
+
+        XCTAssertTrue(NoteActions.available(on: f.rumor, keypair: f.sender.to_keypair()).contains(.copyJSON),
+                      "a pasteboard is not a relay, and Copy text was never withheld either")
+        XCTAssertFalse(NoteActions.available(on: f.rumor, keypair: f.sender.to_keypair()).contains(.broadcast),
+                       "which is not the same as being allowed to publish it")
     }
 
     /// And the marker itself: the badge is drawn from the same predicate the surfaces above ignore,

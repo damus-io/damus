@@ -548,6 +548,9 @@ struct NoteContentView: View {
 
             while let range = attributed[searchStart...].range(of: term, options: .caseInsensitive) {
                 attributed[range].backgroundColor = DamusColors.highlight
+                // The fill covers accent-colored spans too (hashtags, mentions,
+                // links), which are its own hue, so it sets the text color as well.
+                attributed[range].foregroundColor = DamusColors.highlightedText
                 searchStart = range.upperBound
             }
         }

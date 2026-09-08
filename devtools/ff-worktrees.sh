@@ -11,11 +11,11 @@
 # Usage:
 #   devtools/ff-worktrees.sh [target]
 #
-#   target   ref to fast-forward toward (default: origin/master).
+#   target   ref to fast-forward toward (default: github/master).
 #            When it looks like <remote>/<branch> the remote is fetched first.
 #
 # Examples:
-#   devtools/ff-worktrees.sh                 # ff everything to origin/master
+#   devtools/ff-worktrees.sh                 # ff everything to github/master
 #   devtools/ff-worktrees.sh monad/master    # ff everything to monad/master
 #
 # Safe to run from any worktree. It never resets a branch, never deletes work,
