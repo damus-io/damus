@@ -162,6 +162,10 @@ def main() -> int:
     parser.add_argument("--timeout-seconds", type=int, default=90 * 60)
     args = parser.parse_args()
 
+    # Line-buffer stdout so progress is visible when this is redirected to a
+    # log, which is the normal case: it is meant to be run unattended.
+    sys.stdout.reconfigure(line_buffering=True)
+
     if not args.workflow and not args.list:
         parser.error("a workflow name is required unless --list is given")
 

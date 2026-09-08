@@ -9,8 +9,13 @@ exists, cutting a build is one HTTP request that Apple's builders service, and
 the Mac does not even need to be awake.
 
 There is also a local archive-and-upload path, which works but needs a
-distribution certificate this machine does not currently have. Both are
-described below.
+distribution certificate this machine does not currently have.
+
+Either way there is a **second step**: both Xcode Cloud workflows stop after
+archiving — their own descriptions say they "will NOT publish to TestFlight
+groups". Getting a build to testers is a separate App Store Connect call, which
+is what `devtools/release/testflight-distribute.py` does. So the full headless
+release is two commands, not one.
 
 ## The two paths
 
@@ -22,6 +27,7 @@ described below.
 | Build time             | Apple's builders                   | ~2.5 min archive on this Mac        |
 | dSYMs to Sentry        | already automatic                  | script does it if `SENTRY_AUTH_TOKEN` is set |
 | Signing                | Apple manages it                   | cloud-managed cert, created on first run |
+| Pushes to testers      | no — needs step two                | no — needs step two                 |
 | Failure surface        | one API call                       | Xcode toolchain, keychain, nix env, network |
 
 ### Why Xcode Cloud wins here
@@ -68,6 +74,55 @@ export ASC_KEY_ID=...  ASC_ISSUER_ID=...
 `--internal-only` sets `testFlightInternalTestingOnly`, which makes the build
 ineligible for external TestFlight and the App Store. Use it for anything that
 is not a real release candidate.
+
+## Step two: actually pushing to TestFlight
+
+Uploading a build makes it exist in App Store Connect. It does **not** put it in
+front of anyone — that needs a group release, which neither Xcode Cloud workflow
+does on purpose.
+
+```sh
+export ASC_KEY_ID=...  ASC_ISSUER_ID=...
+
+# what is uploaded, and what groups exist
+./devtools/release/testflight-distribute.py --list
+
+# notes plus the internal group, on the newest build
+./devtools/release/testflight-distribute.py --group Internal \
+    --notes-file /tmp/whats-new.txt --wait
+```
+
+`Internal` (`b99dead7-12a5-4ca8-b4fa-06aebbf7e677`) is the group to release to.
+`--wait` sits through the post-upload processing, which a build must clear before
+it can be distributed at all.
+
+Three things about this step that are easy to get wrong:
+
+- **Two groups are both named `Beta Testers`** (`eff35341...` without a public
+  link, `144cd6b4...` with one). The script refuses an ambiguous name and makes
+  you pass an id, rather than silently picking one and mailing a build to the
+  wrong set of people.
+- **External groups are not instant.** The first build of a new version needs
+  Beta App Review approval before external testers receive it. The submission
+  can be automated; Apple's approval cannot, so an external release is never
+  fully unattended on the first build of a version.
+- **Export compliance must already be answered** or distribution is rejected.
+  The script warns rather than answering for you — it is a legal declaration
+  about the app, not a checkbox to automate. Recent damus builds are all
+  "does not use non-exempt encryption".
+
+## Build numbers: Xcode Cloud owns them
+
+Worth knowing before worrying about burning one. `CURRENT_PROJECT_VERSION` is
+`1` in the project and is not what ships: **App Store Connect build numbers are
+Xcode Cloud's own run counter.** Builds 1332, 1331, 1330 in App Store Connect
+are runs 1332, 1331, 1330. Failed runs skip a number and produce no build, so a
+run that never starts costs nothing — the counter moves, no TestFlight build
+exists.
+
+For the local path there is no such counter, so either bump the project version
+deliberately or pass `--manage-version` and let App Store Connect assign the
+next one.
 
 ## One-time setup
 
@@ -139,6 +194,12 @@ Verified on this Mac (Xcode 26.6, build 17F113):
 - **Export is where it stops today.** `-exportArchive` with
   `method: app-store-connect` fails on the missing distribution certificate, as
   quoted above.
+- **The Xcode Cloud path works end to end with a real key.** The API key
+  resolves the product and all four workflows, `--branch master` resolves to the
+  right git reference, `POST /v1/ciBuildRuns` starts a build, and the poll
+  reports `PENDING → RUNNING → COMPLETE` with the right exit code. The product
+  and workflow ids matched what had been read out of Xcode's local cache
+  exactly.
 - **The API key auth path is wired through correctly.** Re-running the export
   with `-allowProvisioningUpdates -authenticationKeyPath/-ID/-IssuerID` and a
   deliberately invalid key changed the failure from a purely local "no profiles
@@ -157,15 +218,18 @@ Verified on this Mac (Xcode 26.6, build 17F113):
   `cryptography` nor `PyJWT`), and App Store Connect parses it — a throwaway
   key returns a clean `401 NOT_AUTHORIZED` rather than a malformed-token error.
 
-Not tested, because it needs a real key:
+- **Distribution reads and guards are live-tested.** `--list` enumerates real
+  builds and groups; the ambiguous-`Beta Testers` guard, the unknown-group
+  error, the expired-build refusal, and the unknown-build-number error were all
+  exercised against the live API.
 
-- Automatic creation of the distribution certificate and App Store profiles.
-- A real upload, and therefore the `destination: upload` export.
-- Every live App Store Connect call in `xcode-cloud-build.py`. The endpoints and
-  request body follow Apple's documentation, and the product and workflow ids
-  were cross-checked against Xcode's own local cache, but the script has not run
-  against the live API. Expect to shake out a field name or two on the first
-  real run; `--list` and `--dry-run` exist for exactly that.
+Still not tested:
+
+- **The local path's signing.** Automatic creation of the distribution
+  certificate and App Store profiles, and therefore the `destination: upload`
+  export, have never run — the local path is still only proven as far as the
+  archive. The Xcode Cloud path made it unnecessary to push further.
+- **External group distribution** and Beta App Review submission.
 
 ## Uploading: which tool
 
@@ -193,23 +257,18 @@ One caveat that bit nothing here but is worth knowing: `xcrun altool
 `asc_api.py` mints its own token instead, which is why it does not shell out to
 altool.
 
-## The next step, already agreed
+## A gotcha that will happen again
 
-There is no App Store Connect API key yet — one needs minting per step 1 above.
-Once it exists, the agreed way to prove the remote path for real is to start the
-**`Experimental build workflow`** (not the release candidate one) via the API:
+The first API-triggered build failed in nine seconds with `startedDate: null`,
+zero actions, and no build produced. That signature — created, never started —
+means the run never got a builder, and the two causes here were **a stale Xcode
+version pinned in the workflow** and **lapsed GitHub authorization**. The repo
+record showed `lastAccessedDate` three months old, which is the tell.
 
-```sh
-export ASC_KEY_ID=...  ASC_ISSUER_ID=...
-./devtools/release/xcode-cloud-build.py "Experimental build workflow" \
-    --branch <a throwaway branch> --dry-run   # eyeball it first
-./devtools/release/xcode-cloud-build.py "Experimental build workflow" \
-    --branch <a throwaway branch> --wait
-```
-
-That consumes a build number, which is expected and fine, but it never presents
-itself as a 1.18 release candidate. Doing it against the experimental workflow
-also shakes out any wrong field names in the script somewhere harmless.
+Neither is visible as an error in the API response, so if a triggered build dies
+instantly, check the workflow's Xcode version and re-authorize the SCM
+connection in App Store Connect before debugging anything else. Both need the
+web UI; neither can be fixed from here.
 
 ## Where it can still stop and wait for a human
 
@@ -217,18 +276,25 @@ For the remote-from-a-bar use case, these are the places the flow is not
 unattended:
 
 1. **Minting the API key.** One-time, needs a browser and a person. Cannot be
-   automated.
-2. **The first local-path run**, if it creates a distribution certificate. Worth
+   automated. Done.
+2. **A stale Xcode version or lapsed SCM auth**, per the section above. Both are
+   web-UI fixes and both present as an instant build failure. This is the most
+   likely thing to strand a remote release, because nothing warns you until you
+   try.
+3. **Export compliance**, if a build comes up with it unanswered. Deliberately
+   not automated — it is a declaration about the app.
+4. **Beta App Review**, for the first build of a version going to external
+   testers. The submission is automatable; Apple's approval is not.
+5. **The first local-path run**, if it creates a distribution certificate. Worth
    watching once rather than discovering a certificate-limit error remotely.
-3. **Deciding the build number.** Nothing here bumps `CURRENT_PROJECT_VERSION`
-   (it is `1` in the project; Xcode Cloud manages the real build number itself).
-   For the local path, either bump it deliberately beforehand or pass
-   `--manage-version` and let App Store Connect assign the next one. An upload
-   with a number App Store Connect has already seen is rejected, and a number
-   once used is burned permanently.
-4. **"What to Test" notes and external tester distribution.** Not covered here.
-   The upload lands the build; releasing it to an external group is a separate
-   step.
+   Moot while the Xcode Cloud path is the one in use.
 
-Nothing else prompts. Given the key, both paths run start to finish from a
-single non-interactive command.
+Nothing else prompts. Given the key, the full flow is two non-interactive
+commands:
+
+```sh
+./devtools/release/xcode-cloud-build.py "Release candidate build workflow" \
+    --branch master --wait
+./devtools/release/testflight-distribute.py --group Internal \
+    --notes-file whats-new.txt --wait
+```
