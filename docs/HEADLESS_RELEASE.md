@@ -3,10 +3,11 @@
 The goal: trigger a TestFlight build by talking to an agentic session on the
 studio Mac, from anywhere, with no Xcode window, no Organizer, and no clicking.
 
-Short answer: **yes, and the Xcode Cloud path is the one to use.** Everything
-needed is already configured except an App Store Connect API key. Once that key
-exists, cutting a build is one HTTP request that Apple's builders service, and
-the Mac does not even need to be awake.
+Short answer: **yes, and the Xcode Cloud path is the one to use.** This has now
+been done end to end: build 1335 was triggered, built, uploaded and released to
+the `Internal` TestFlight group entirely from the command line, without opening
+Xcode. Cutting a build is one HTTP request that Apple's builders service, so the
+Mac does not even need to be awake.
 
 There is also a local archive-and-upload path, which works but needs a
 distribution certificate this machine does not currently have.
@@ -91,6 +92,8 @@ export ASC_KEY_ID=...  ASC_ISSUER_ID=...
 ```
 
 `Internal` (`b99dead7-12a5-4ca8-b4fa-06aebbf7e677`) is the group to release to.
+Notes are set for one locale (`--locale`, default `en-US`); App Store Connect
+may carry other locales such as `en-CA`, which will stay blank.
 `--wait` sits through the post-upload processing, which a build must clear before
 it can be distributed at all.
 
@@ -220,14 +223,20 @@ Verified on this Mac (Xcode 26.6, build 17F113):
   builds and groups; the ambiguous-`Beta Testers` guard, the unknown-group
   error, the expired-build refusal, and the unknown-build-number error were all
   exercised against the live API.
+- **The whole chain ran for real.** Build 1335 was triggered from the command
+  line on the `headless-release` branch, succeeded on Apple's builders, uploaded
+  to App Store Connect, and was then given What to Test notes and released to
+  the `Internal` group — all without opening Xcode. It was the first successful
+  Xcode Cloud build since 2026-06-03.
 
 Still not tested:
 
+- **External group distribution** and Beta App Review submission. Only the
+  `Internal` group has actually been released to.
 - **The local path's signing.** Automatic creation of the distribution
   certificate and App Store profiles, and therefore the `destination: upload`
   export, have never run — the local path is still only proven as far as the
   archive. The Xcode Cloud path made it unnecessary to push further.
-- **External group distribution** and Beta App Review submission.
 
 ## Uploading: which tool
 
@@ -311,8 +320,12 @@ unattended:
    web-UI fixes and both present as an instant build failure. This is the most
    likely thing to strand a remote release, because nothing warns you until you
    try.
-3. **Export compliance**, if a build comes up with it unanswered. Deliberately
-   not automated — it is a declaration about the app.
+3. **Export compliance** — fixed at the source, so this should no longer stop
+   anyone. `ITSAppUsesNonExemptEncryption` was absent from the project, so every
+   build arrived unanswered and had to be clicked by hand before it could reach
+   testers. It is declared in `damus/Info.plist` now, and future builds arrive
+   pre-answered. The scripts still only warn and never answer it: it is a
+   declaration about the app, not a checkbox to automate.
 4. **Beta App Review**, for the first build of a version going to external
    testers. The submission is automatable; Apple's approval is not.
 5. **The first local-path run**, if it creates a distribution certificate. Worth
