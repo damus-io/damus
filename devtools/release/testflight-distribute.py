@@ -168,6 +168,45 @@ def set_notes(build_id, text, locale, dry_run):
     print(f"  set What to Test for {locale} ({len(text)} chars)")
 
 
+def review_state(build_id):
+    """Return the build's Beta App Review state, or None if never submitted.
+
+    External groups will not accept a build until it has been through Beta App
+    Review. Approval is tracked per build, though a build of a version that has
+    already been approved usually clears quickly.
+    """
+    submission = asc_api.get(
+        f"/v1/builds/{build_id}/betaAppReviewSubmission"
+    ).get("data")
+    if not submission:
+        return None
+    return submission.get("attributes", {}).get("betaReviewState")
+
+
+def submit_for_review(build_id, dry_run):
+    path = "/v1/betaAppReviewSubmissions"
+    body = {
+        "data": {
+            "type": "betaAppReviewSubmissions",
+            "relationships": {
+                "build": {"data": {"type": "builds", "id": build_id}}
+            },
+        }
+    }
+    if dry_run:
+        print(f"  would POST {path}  -> submit for Beta App Review")
+        return
+
+    status, response = asc_api.request("POST", path, body)
+    if not 200 <= status < 300:
+        raise asc_api.AscError(
+            f"could not submit for Beta App Review (HTTP {status}): "
+            f"{asc_api.describe(response)}"
+        )
+    state = response.get("data", {}).get("attributes", {}).get("betaReviewState")
+    print(f"  submitted for Beta App Review (state: {state})")
+
+
 def add_to_group(group, build_id, dry_run):
     path = f"/v1/betaGroups/{group['id']}/relationships/builds"
     body = {"data": [{"type": "builds", "id": build_id}]}
@@ -180,9 +219,15 @@ def add_to_group(group, build_id, dry_run):
 
     status, response = asc_api.request("POST", path, body)
     if not 200 <= status < 300:
+        hint = ""
+        if not internal:
+            hint = (
+                " — if Apple is asking for Beta App Review, re-run with "
+                "--submit-for-review"
+            )
         raise asc_api.AscError(
             f"could not add the build to {name!r} (HTTP {status}): "
-            f"{asc_api.describe(response)}"
+            f"{asc_api.describe(response)}{hint}"
         )
     print(f"  released to {name!r} (internal={internal})")
 
@@ -204,6 +249,12 @@ def main() -> int:
     parser.add_argument("--locale", default=DEFAULT_LOCALE)
     parser.add_argument("--list", action="store_true", help="show builds and groups")
     parser.add_argument("--wait", action="store_true", help="wait out build processing")
+    parser.add_argument(
+        "--submit-for-review",
+        action="store_true",
+        help="submit the build for Beta App Review, required before an "
+        "external group will accept it",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -283,12 +334,25 @@ def main() -> int:
             names = ", ".join(
                 repr(g["attributes"].get("name")) for g in external
             )
+            state = review_state(build["id"])
             print(
-                f"note: {names} {'is' if len(external) == 1 else 'are'} EXTERNAL. "
-                "The first build of a new version needs Beta App Review "
-                "approval before external testers receive it; Apple gates that "
-                "and it is not instant."
+                f"note: {names} {'is' if len(external) == 1 else 'are'} EXTERNAL; "
+                f"Beta App Review state is {state or 'not submitted'}."
             )
+            # Do not pre-judge whether a review is needed. A build of a
+            # version that has already been approved is normally accepted
+            # without a fresh submission, and only App Store Connect knows for
+            # sure — so attempt the release and report Apple's own error if it
+            # refuses. --submit-for-review is there for when it does.
+            if state != "APPROVED" and args.submit_for_review:
+                submit_for_review(build["id"], args.dry_run)
+                print(
+                    "  approval is gated by Apple and is not instant; re-run "
+                    "once the state reads APPROVED."
+                )
+                if args.dry_run:
+                    print("dry run: nothing was changed")
+                return 0
 
         if notes:
             set_notes(build["id"], notes, args.locale, args.dry_run)
