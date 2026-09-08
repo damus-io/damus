@@ -15,6 +15,9 @@ Damus is an iOS client built around a local relay model ([damus-io/damus#3204](h
 ## Development Workflow
 
 - Use `just build` / `just test` for simulator builds and the primary test suite (requires `xcbeautify`). Update or add `just` recipes if new repeatable workflows emerge.
+- **Run builds and tests in the background, never as a blocking foreground command.** Several worktrees of this repo share one DerivedData and are often driven by concurrent agent sessions. A foreground `xcodebuild` holds its session for the whole run, and when more than one session does that they end up waiting on each other's locks and spinning. Kick the run off in the background, tail its log, and poll for the result.
+- Scope any cleanup to your own simulator: pass `-destination 'platform=iOS Simulator,id=<UDID>'` and kill with `pkill -f "id=<YOUR-SIM-UDID>"`. Never `pkill -f "^xcodebuild"` — that takes out other worktrees' runs mid-test.
+- Concurrent builds can produce a transient `** BUILD FAILED **` with no `error:` lines. Rerun once before hunting it in your diff.
 - Xcode project is `damus.xcodeproj`; the main scheme is `damus`. Ensure new targets or resources integrate cleanly with this scheme.
 - Rebuild WASM helpers with `make` when touching `nostrscript/` sources.
 - Follow `docs/DEV_TIPS.md` for debugging (enabling Info logging, staging push notification settings) and keep tips updated when discovering new workflows.

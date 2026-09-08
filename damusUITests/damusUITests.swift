@@ -180,6 +180,48 @@ class damusUITests: XCTestCase {
         app.buttons[AID.post_composer_cancel_button.rawValue].tapIfExists(timeout: 5)
     }
     
+    /// Opens the post composer with an empty editor, whatever an earlier test left in it.
+    ///
+    /// Cancelling the composer keeps what was typed, on purpose: `PostView.cancel()` does not
+    /// call `clear_draft()`, so the content is autosaved as a NIP-37 draft in NostrDB and
+    /// `PostView.onAppear` loads it straight back in. NostrDB lives in the app container, so
+    /// that draft survives the relaunch `setUpWithError` does and turns up in whichever
+    /// composer test runs next — `testPastedNpubResolvesToProfileName` leaves an `@jack`
+    /// mention behind for `testPostComposerCursorPosition` to type on top of. Start from an
+    /// empty editor instead of trusting the order the tests happen to run in.
+    func openEmptyPostComposer() throws -> XCUIElement {
+        guard app.buttons[AID.post_button.rawValue].waitForExistence(timeout: 10) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        app.buttons[AID.post_button.rawValue].tap()
+
+        let textView = app.textViews[AID.post_composer_text_view.rawValue]
+        guard textView.waitForExistence(timeout: 5) else {
+            throw DamusUITestError.timeout_waiting_for_element
+        }
+        textView.tap()
+        clearPostComposer(textView)
+        return textView
+    }
+
+    /// Empties the composer's editor, so that neither this test's assertions nor the next
+    /// test's opening state can be about a restored draft.
+    ///
+    /// Deleting backwards needs the caret past the end of the text, which a plain `tap()` in
+    /// the middle of the editor does not give us, so tap the trailing edge first. A mention is
+    /// a single link run that a backspace may swallow whole, so re-read the text and go again
+    /// rather than assuming one pass of `count` deletes is enough.
+    func clearPostComposer(_ textView: XCUIElement) {
+        for _ in 0..<3 {
+            let text = textView.value as? String ?? ""
+            guard !text.isEmpty else { return }
+            textView.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+            textView.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count))
+        }
+        XCTAssertEqual(textView.value as? String ?? "", "",
+                       "The post composer should start empty, but a draft was left in it")
+    }
+
     func login() throws {
         app.buttons[AID.sign_in_option_button.rawValue].tap()
         
@@ -196,19 +238,7 @@ class damusUITests: XCTestCase {
     func testPostComposerCursorPosition() throws {
         try self.loginIfNotAlready()
 
-        // Wait for main interface to load, then tap the post button (FAB)
-        guard app.buttons[AID.post_button.rawValue].waitForExistence(timeout: 10) else {
-            throw DamusUITestError.timeout_waiting_for_element
-        }
-        app.buttons[AID.post_button.rawValue].tap()
-
-        // Wait for the post composer text view to appear
-        guard app.textViews[AID.post_composer_text_view.rawValue].waitForExistence(timeout: 5) else {
-            throw DamusUITestError.timeout_waiting_for_element
-        }
-
-        let textView = app.textViews[AID.post_composer_text_view.rawValue]
-        textView.tap()
+        let textView = try self.openEmptyPostComposer()
 
         // Type a test string character by character
         // If the cursor jumps to position 0 after the first character,
@@ -222,7 +252,9 @@ class damusUITests: XCTestCase {
                        "Text should be '\(testString)' but was '\(actualText)'. " +
                        "This may indicate a cursor position bug.")
 
-        // Cancel the post to clean up
+        // Cancel the post to clean up. Empty the editor first — cancelling saves a draft, and
+        // it would be restored into whichever composer test runs after this one.
+        clearPostComposer(textView)
         app.buttons[AID.post_composer_cancel_button.rawValue].tap()
     }
 
@@ -237,17 +269,7 @@ class damusUITests: XCTestCase {
         try self.loginIfNotAlready()
 
         // Open post composer
-        guard app.buttons[AID.post_button.rawValue].waitForExistence(timeout: 10) else {
-            throw DamusUITestError.timeout_waiting_for_element
-        }
-        app.buttons[AID.post_button.rawValue].tap()
-
-        guard app.textViews[AID.post_composer_text_view.rawValue].waitForExistence(timeout: 5) else {
-            throw DamusUITestError.timeout_waiting_for_element
-        }
-
-        let textView = app.textViews[AID.post_composer_text_view.rawValue]
-        textView.tap()
+        let textView = try self.openEmptyPostComposer()
 
         // Type "@" to trigger mention autocomplete
         textView.typeText("@")
@@ -256,6 +278,7 @@ class damusUITests: XCTestCase {
         let mentionResult = app.otherElements[AID.post_composer_mention_user_result.rawValue].firstMatch
         guard mentionResult.waitForExistence(timeout: 5) else {
             // If no autocomplete results (no contacts loaded), skip this test gracefully
+            clearPostComposer(textView)
             app.buttons[AID.post_composer_cancel_button.rawValue].tap()
             throw XCTSkip("No mention autocomplete results available - contacts may not be loaded")
         }
@@ -290,7 +313,9 @@ class damusUITests: XCTestCase {
         XCTAssertTrue(finalText.contains("@"),
                       "Text should still contain the mention '@' but was '\(finalText)'")
 
-        // Cancel to clean up
+        // Cancel to clean up. Empty the editor first — cancelling saves a draft, and it would
+        // be restored into whichever composer test runs after this one.
+        clearPostComposer(textView)
         app.buttons[AID.post_composer_cancel_button.rawValue].tap()
     }
 
@@ -321,17 +346,7 @@ class damusUITests: XCTestCase {
         }
 
         // Open post composer
-        guard app.buttons[AID.post_button.rawValue].waitForExistence(timeout: 10) else {
-            throw DamusUITestError.timeout_waiting_for_element
-        }
-        app.buttons[AID.post_button.rawValue].tap()
-
-        guard app.textViews[AID.post_composer_text_view.rawValue].waitForExistence(timeout: 5) else {
-            throw DamusUITestError.timeout_waiting_for_element
-        }
-
-        let textView = app.textViews[AID.post_composer_text_view.rawValue]
-        textView.tap()
+        let textView = try self.openEmptyPostComposer()
 
         // Use a well-known npub (jack dorsey) that should resolve to a profile name
         let testNpub = "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m"
@@ -360,6 +375,7 @@ class damusUITests: XCTestCase {
             if firstMenuItem.waitForExistence(timeout: 1) {
                 firstMenuItem.tap()
             } else {
+                clearPostComposer(textView)
                 app.buttons[AID.post_composer_cancel_button.rawValue].tap()
                 throw XCTSkip("Paste menu not available in this environment")
             }
@@ -369,10 +385,12 @@ class damusUITests: XCTestCase {
             // Check if paste worked despite not finding the button
             let checkText = textView.value as? String ?? ""
             if !checkText.contains("@") && !checkText.contains("npub") {
+                clearPostComposer(textView)
                 app.buttons[AID.post_composer_cancel_button.rawValue].tap()
                 throw XCTSkip("Could not trigger paste action")
             }
             // Paste worked via fallback - clean up and exit
+            clearPostComposer(textView)
             app.buttons[AID.post_composer_cancel_button.rawValue].tap()
             return
         }
@@ -415,7 +433,9 @@ class damusUITests: XCTestCase {
                            "Mention should resolve to profile name, not show npub. Text: '\(finalText)'")
         }
 
-        // Cancel to clean up
+        // Cancel to clean up. Empty the editor first — cancelling saves a draft, and it would
+        // be restored into whichever composer test runs after this one.
+        clearPostComposer(textView)
         app.buttons[AID.post_composer_cancel_button.rawValue].tap()
     }
 

@@ -87,6 +87,17 @@ struct EditMetadataView: View {
                     .offset(y: offset > 0 ? -offset : 0) // Pin the top
             }
             .frame(height: BANNER_HEIGHT)
+
+            // The back button rides on top of the banner rather than in a toolbar. It has
+            // always been styled as a floating overlay — a chevron on a translucent circle —
+            // and a toolbar is what breaks the banner: this view draws under the top safe area
+            // (`ignoresSafeArea(edges: .top)` below), so an otherwise invisible UINavigationBar
+            // covers the banner's own edit button and eats every tap aimed at it. That is
+            // https://github.com/damus-io/damus/issues/2636, which `testEditBannerImage` guards.
+            navBackButton
+                .padding(.leading, 20)
+                .padding(.top, topLevelGeo.safeAreaInsets.top)
+
             VStack(alignment: .leading) {
                 let pfp_size: CGFloat = 90.0
 
@@ -235,11 +246,7 @@ struct EditMetadataView: View {
         .ignoresSafeArea(edges: .top)
         .background(Color(.systemGroupedBackground))
         .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                navBackButton
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .alert(NSLocalizedString("Discard changes?", comment: "Alert user that changes have been made."), isPresented: $confirm_save_alert) {
             Button(NSLocalizedString("No", comment: "Do not discard changes."), role: .cancel) {
             }

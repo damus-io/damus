@@ -364,7 +364,10 @@ struct ChatroomThreadView: View {
             }
             .onReceive(handle_notify(.post), perform: { notify in
                 switch notify {
-                case .post(_):
+                case .post(_), .privateReply(_, _):
+                    // A private reply arrives in the thread by way of nostrdb unwrapping the copy we
+                    // addressed to ourselves, so it lands the same way a public one does — a moment
+                    // later, through the same subscription — and wants the same scroll-to-it.
                     user_just_posted_flag = true
                 case .cancel:
                     return

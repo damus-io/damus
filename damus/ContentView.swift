@@ -434,7 +434,7 @@ struct ContentView: View {
             }
 
             Task {
-                if await !handle_post_notification(keypair: keypair, postbox: state.nostrNetwork.postbox, events: state.events, post: post, clientTag: state.clientTagComponents) {
+                if await !handle_post_notification(keypair: keypair, damus_state: state, post: post, clientTag: state.clientTagComponents) {
                     self.active_sheet = nil
                 }
             }
@@ -1192,8 +1192,18 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) async -> Bool 
 ///
 /// When successful, this function also rebroadcasts up to 3 referenced events and 3 quoted events
 /// to help ensure they are available on relays.
-func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult, clientTag: [String]? = nil) async -> Bool {
+@MainActor
+func handle_post_notification(keypair: FullKeypair, damus_state: DamusState, post: NostrPostResult, clientTag: [String]? = nil) async -> Bool {
+    let postbox = damus_state.nostrNetwork.postbox
+    let events = damus_state.events
     switch post {
+    case .privateReply(let post, let parent):
+        // Nothing here goes through `PostBox`: a private reply produces no signed event, only the two
+        // gift wraps that carry it. The referenced-event re-broadcast below is skipped too — there is
+        // no one to help resolve the parent for, and republishing it at the same moment would tie the
+        // two together for anyone watching the relay.
+        return await send_private_reply(post, replyingTo: parent, keypair: keypair, damus_state: damus_state)
+
     case .post(let post):
         //let post = tup.0
         //let to_relays = tup.1

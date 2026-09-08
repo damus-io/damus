@@ -40,6 +40,15 @@ struct ReplyQuoteView: View {
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
                     if can_show_event {
+                        // A one-line preview has no room for the audience sentence, so the quoted
+                        // parent gets the lock alone. It has to get something: this is the one place a
+                        // private note is drawn inside another note's chrome, and without a mark it
+                        // would read as a quote of an ordinary public reply.
+                        if event.is_private_reply {
+                            Image(systemName: "lock.fill")
+                                .font(.caption2)
+                                .foregroundColor(DamusColors.success)
+                        }
                         ProfilePicView(pubkey: event.pubkey, size: 14, highlight: .reply, profiles: state.profiles, disable_animation: false, damusState: state)
                         let blur_images = should_blur_images(settings: state.settings, contacts: state.contacts, ev: event, our_pubkey: state.pubkey)
                         NoteContentView(damus_state: state, event: event, blur_images: blur_images, size: .small, options: options)

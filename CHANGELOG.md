@@ -1,3 +1,45 @@
+## [1.18] - 2026-09-05
+
+### Added
+
+- Private direct messages (NIP-17). New conversations are sealed and gift-wrapped, so relays can no longer see who is talking to whom, and they are delivered over each person's DM inbox relay list. Push notifications work for them too. (William Casarin)
+- Advanced search: filter notes by author, date range, exact phrase, content type and sort order, from a filter sheet on the explore tab or from the search button on any profile or hashtag timeline. Queries also understand from:, since:, until:, kind:, sort:, "exact phrases" and #hashtags typed inline. (William Casarin)
+- A setting for how much space the database may use — 512 MB, 2 GB, 8 GB, or unlimited. Damus trims older cached notes in the background once you go over it, keeping your profile, contacts, mutelist, bookmarks and everything you have posted. (William Casarin)
+
+
+### Changed
+
+- Damus now uses the system tab bar. Each tab keeps its own navigation, so switching tabs and coming back no longer loses your place. (William Casarin)
+- Adopt the iOS 26 Liquid Glass appearance (William Casarin)
+- On iOS 26 the tab bar shrinks as you scroll down a timeline, and the timeline filters move into a glass bar just above it instead of sitting at the top of the screen (William Casarin)
+- Legacy encrypted direct messages (NIP-04) are off by default; Damus now uses NIP-17, which also hides who you are talking to. Turn the old messages back on in Settings -> Privacy. (William Casarin)
+- "Compact Database" in Storage settings is now "Free Up Space Now". It trims cached notes in the background instead of requiring a restart, says how much it will free, and discards superseded copies of profiles, contact lists and drafts. Trimmed notes are re-downloaded from relays as you browse. (William Casarin)
+- The app no longer blocks on a database optimization screen at launch (William Casarin)
+- Improve home timeline scrolling performance (William Casarin)
+- Improve launch time by loading saved drafts and building the emoji index off the main thread (William Casarin)
+- Improved responsiveness while a NWC wallet is attached (William Casarin)
+- Update the vendored nostrdb, which runs a one-time note metadata migration on first launch (William Casarin)
+
+
+### Fixed
+
+- Fixed the banner edit button in Edit Profile being unclickable (William Casarin)
+- Fixed the notification extension's database snapshot growing to gigabytes (William Casarin)
+- Fixed duplicate profile search entries caused by a nostrdb key comparison bug (William Casarin)
+- Notes from muted accounts no longer appear in search results. Muted people still show up in profile search, so you can still reach them to unmute. (William Casarin)
+- Fixed one-click Coinos wallet setup being unable to reconnect. Damus re-derived the same wallet key every time, and Coinos stopped accepting the keys it retired after its August 2026 credential disclosure; reconnecting now mints a fresh one. (Adam Soltys)
+- Update note relay counts after successful post or broadcast relay acknowledgements (Sjors Provoost)
+
+
+### Removed
+
+- Swiping sideways between timeline filters (use the selector above the timeline) (William Casarin)
+
+
+
+[1.18]: https://github.com/damus-io/damus/releases/tag/v1.18
+
+
 ## [1.17] - 2026-06-03
 
 ### Added

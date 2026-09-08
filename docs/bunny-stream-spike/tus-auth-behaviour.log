@@ -1,0 +1,31 @@
+# synthetic source size=19020331 chunk=4194304
+
+=== A: expiry DURING upload (expire = now + 40s) ===
+create HTTP 201 location=/tusupload/d50ea7a9244e4882b9bd8948c0c3a9a9
+upload-expires header: Sat, 05 Sep 2026 21:05:23 GMT
+PATCH pre-expiry HTTP 204 Upload-Offset=4194304
+sleeping 48s to cross the expiry boundary...
+>>> PATCH POST-expiry HTTP 400 Bad Request
+    body[:200]=b'Invalid expiry time, cannot be in the past.'
+    content-type: text/plain
+    date: Sat, 05 Sep 2026 21:05:31 GMT
+    server: Kestrel
+    access-control-allow-credentials: true
+    access-control-allow-headers: *
+    access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+    access-control-allow-origin: *
+    access-control-expose-headers: *
+    transfer-encoding: chunked
+    stream-server: 730
+    stream-apiver: 1.5.27
+    stream-proxy: 730
+>>> HEAD POST-expiry HTTP 400 Upload-Offset=None
+
+=== B: re-mint signature and resume the SAME upload URL ===
+HEAD with fresh signature HTTP 404 Upload-Offset=None
+
+=== C: wrong signature ===
+>>> CREATE with bad signature HTTP 401 Unauthorized body=b''
+CLEANUP_IDS ca05e29f-48be-4630-8d2b-c7fc4b7c2c34 d8f42210-c5da-4b8b-9583-ebb3ff7fe696
+
+[exited with code 0]

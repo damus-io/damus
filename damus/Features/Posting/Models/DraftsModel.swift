@@ -34,22 +34,35 @@ class DraftArtifacts: Equatable {
     ///
     /// For example, when replying to an event, the user can select which pubkey mentions they want to keep, and which ones to remove.
     var filtered_pubkeys: Set<Pubkey> = []
-    
+    /// Whether the composer had the lock on when this draft was last touched — that is, whether this
+    /// is a draft of a **private reply**.
+    ///
+    /// A draft that came back without this would come back as a *public* reply, which is the one
+    /// failure this feature must never have. It is stored, not merely held in memory, so it survives
+    /// the app being killed with the composer open; see ``NIP37Draft/is_private_reply``.
+    ///
+    /// Only meaningful for a reply draft. Nothing else in the app can be private, and `PostView`
+    /// ignores it outside `.replying_to`, so a draft that somehow carries it elsewhere is inert
+    /// rather than wrong.
+    var is_private_reply: Bool = false
+
     /// A unique ID for this draft that allows us to address these if we need to.
     ///
     /// This will be the unique identifier in the NIP-37 note
     let id: String
-    
-    init(content: NSMutableAttributedString = NSMutableAttributedString(string: ""), media: [UploadedMedia] = [], references: [RefId], id: String) {
+
+    init(content: NSMutableAttributedString = NSMutableAttributedString(string: ""), media: [UploadedMedia] = [], references: [RefId], id: String, is_private_reply: Bool = false) {
         self.content = content
         self.media = media
         self.references = references
         self.id = id
+        self.is_private_reply = is_private_reply
     }
     
     static func == (lhs: DraftArtifacts, rhs: DraftArtifacts) -> Bool {
         return (
             lhs.media == rhs.media &&
+            lhs.is_private_reply == rhs.is_private_reply &&     // Flipping the lock changes the draft even when not a character of it changed
             lhs.content.string == rhs.content.string    // Comparing the text content is not perfect but acceptable in this case because attributes for our post editor are determined purely from text content
         )
     }
@@ -75,7 +88,13 @@ class DraftArtifacts: Equatable {
         guard let keypair = damus_state.keypair.to_full() else { return nil }
         let post = await build_post(state: damus_state, action: action, draft: self)
         guard let note = post.to_event(keypair: keypair, clientTag: damus_state.clientTagComponents) else { return nil }
-        return NIP37Draft(unwrapped_note: note, draft_id: self.id)
+        // The drafted note is the *public* rendering even for a private reply, and deliberately: a
+        // private reply's rumor is byte-identical to the public reply it could have been, so there is
+        // one note to store and a flag on the wrapper saying how to reopen it. It is signed here for
+        // the same reason every draft is — `owned_from_json` will not read a note back without an
+        // `id` and a `sig` — and it is a signature on a note that lives only in the content string of
+        // a local, PNS-encrypted draft event, never in nostrdb's note index and never on a relay.
+        return NIP37Draft(unwrapped_note: note, draft_id: self.id, is_private_reply: self.is_private_reply)
     }
     
     /// Instantiates a draft object from a NIP-37 draft
@@ -84,11 +103,13 @@ class DraftArtifacts: Equatable {
     ///   - damus_state: Damus state of the user who wants to load this draft object. Needed for pulling profiles from Ndb.
     /// - Returns: A draft artifacts object, or `nil` if such cannot be loaded.
     static func from(nip37_draft: NIP37Draft, damus_state: DamusState) -> DraftArtifacts? {
-        return Self.from(
+        let artifacts = Self.from(
             event: nip37_draft.unwrapped_note,
             draft_id: nip37_draft.id,
             damus_state: damus_state
         )
+        artifacts?.is_private_reply = nip37_draft.is_private_reply
+        return artifacts
     }
     
     /// Load a draft artifacts object from a plain, unwrapped NostrEvent
@@ -276,6 +297,11 @@ class Drafts: ObservableObject {
             draft_id: nip37_draft.id,
             damus_state: damus_state
         )
+        // The lock has to come back on with the draft. A private reply reopening as a public one is
+        // the failure this feature must never have, so it rides on the wrapper rather than being
+        // re-derived from the drafted note — which, being byte-identical to a public reply, cannot
+        // say.
+        draft_artifacts.is_private_reply = nip37_draft.is_private_reply
 
         // Find out where to place this draft
         switch known_kind {

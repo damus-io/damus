@@ -164,6 +164,31 @@ class NdbNote: Codable, Equatable, Hashable {
         guard let bytes = ndb_note_rumor_giftwrap_id(note.ptr) else { return nil }
         return NoteId(Data(bytes: bytes, count: 32))
     }
+
+    /// Whether this note is a **private reply**: an ordinary kind-1 reply that reached us inside a
+    /// NIP-59 gift wrap and must never leave one.
+    ///
+    /// This is the one predicate the whole read side keys off, and it is exact.
+    ///
+    /// ``is_rumor`` is `NDB_NOTE_FLAG_RUMOR`, a flag **only nostrdb's unwrapper sets** — never a
+    /// relay, and never anything damus builds locally. So a kind-1 note carrying it is, by
+    /// construction, a note that came out of a gift wrap addressed to us, which is precisely the
+    /// definition of a private reply. There is no tag to trust, no signature to check, and nothing an
+    /// attacker can publish to make one appear.
+    ///
+    /// The converse matters just as much: a **signed** kind 1 arriving from a relay is never a private
+    /// reply, however it is tagged. Nobody can publish themselves a lock badge in someone else's
+    /// thread.
+    ///
+    /// - Warning: A private reply is plaintext in the database and indistinguishable *by kind* from a
+    ///   public note, so every `kinds: [1]` query in the app returns one, and it is *drawn* wherever
+    ///   one is drawn — marked as private by the audience sentence its reply description carries in
+    ///   place of the public "Replying to @a, @b" line (``ReplyDescription``) rather than hidden.
+    ///   What is contained is not the note but what can be *done* with it: see
+    ///   ``NoteActions/available(on:)``.
+    var is_private_reply: Bool {
+        is_rumor && kind == NostrKind.text.rawValue
+    }
     
     /// NDBTODO: make this into data
     var pubkey: Pubkey {

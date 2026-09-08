@@ -1,0 +1,4 @@
+360p segments=24 bytes=10534204
+480p segments=24 bytes=17000276
+720p segments=24 bytes=31102720
+1080p segments=24 bytes=65769168

@@ -178,6 +178,12 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
     guard let keypair = damus_state.keypair.to_full() else {
         return
     }
+
+    // Every zap in the app arrives here, which is why the rule is applied here and not at the pickers:
+    // a zap at a note that came out of a gift wrap is forced private, whatever the picker offered,
+    // whatever `default_zap_type` says, and whatever entry point is added next. See
+    // `ZapType.forced(on:requested:ndb:)` for what that buys and what it does not.
+    let zap_type = ZapType.forced(on: target, requested: zap_type, ndb: damus_state.ndb)
     
     // Only take the first 10 because reasons
     let relays = Array(await damus_state.nostrNetwork.ourRelayDescriptors.prefix(10))

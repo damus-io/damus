@@ -1,0 +1,31 @@
+{
+  "Id": "{LIBRARY_ID}",
+  "Name": "damus-purple-video",
+  "EnabledResolutions": "360p,480p,720p",
+  "OutputCodecs": "x264",
+  "KeepOriginalFiles": false,
+  "EnableMP4Fallback": false,
+  "ExposeOriginals": false,
+  "EncodingTier": 0,
+  "JitEncodingEnabled": false,
+  "EnableTranscribing": false,
+  "EnableDRM": false,
+  "EnableLive": false,
+  "BlockNoneReferrer": false,
+  "AllowedReferrers": [],
+  "AllowDirectPlay": true,
+  "PlayerTokenAuthenticationEnabled": false,
+  "PullZoneType": 1,
+  "WebhookUrl": null,
+  "ReplicationRegions": [
+    ""
+  ],
+  "Bitrate360p": 800,
+  "Bitrate480p": 1400,
+  "Bitrate720p": 2800,
+  "Bitrate1080p": 5000,
+  "Bitrate1440p": 8000,
+  "Bitrate2160p": 25000,
+  "EnableMultiAudioTrackSupport": true,
+  "UseSeparateAudioStream": false
+}

@@ -23,7 +23,13 @@ struct NotificationFormatter {
         }
         switch event.known_kind {
             case .text:
-                content.title = NSLocalizedString("Someone posted a note", comment: "Title label for push notification where someone posted a note")
+                // Kind 1 is two different things. A rumor came out of a giftwrap addressed to us, so
+                // it is a private reply and must not be announced as a note anyone can see.
+                if event.is_private_reply {
+                    content.title = NSLocalizedString("Someone replied privately", comment: "Title label for push notification where someone sent the user a private reply")
+                } else {
+                    content.title = NSLocalizedString("Someone posted a note", comment: "Title label for push notification where someone posted a note")
+                }
                 content.body = event.content
                 break
             case .dm:
@@ -91,6 +97,13 @@ struct NotificationFormatter {
             case .reply:
                 title = String(format: NSLocalizedString("%@ replied to your note", comment: "Heading for local notification indicating a new reply"), displayName)
                 identifier = "myReplyNotification"
+            case .private_reply:
+                // The title carries the whole difference from `.reply`, because the body is the same
+                // shape — the reply's text — and a lock screen is read at a glance. Saying it in
+                // words rather than with an icon keeps it legible in the notification list, in
+                // banners, and to VoiceOver.
+                title = String(format: NSLocalizedString("%@ replied privately", comment: "Heading for local notification indicating a new private reply, visible only to the recipient"), displayName)
+                identifier = "myPrivateReplyNotification"
         }
         content.title = title
         content.body = notify.content

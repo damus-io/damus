@@ -166,6 +166,9 @@ struct UnownedNdbNote: ~Copyable {
     var rumor_receiver_pubkey: Pubkey? { _ndbNote.rumor_receiver_pubkey }
     /// The id of the giftwrap this rumor came out of; `nil` unless ``is_rumor``.
     var rumor_giftwrap_id: NoteId? { _ndbNote.rumor_giftwrap_id }
+    /// Whether this is a private reply — a kind-1 rumor. See ``NdbNote/is_private_reply``, which is
+    /// where the reasoning lives; every read path in the app keys off this.
+    var is_private_reply: Bool { _ndbNote.is_private_reply }
     
     func toOwned() -> NdbNote {
         return _ndbNote.to_owned()

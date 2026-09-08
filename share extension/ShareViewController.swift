@@ -174,6 +174,13 @@ struct ShareExtensionView: View {
             switch post_notification {
             case .post(let post):
                 Task { await self.post(post) }
+            case .privateReply:
+                // Unreachable: the share extension only ever composes with `.sharing`, and the lock
+                // is offered only when replying. Handled rather than ignored so that a future action
+                // added here has to think about it.
+                assertionFailure("the share extension cannot compose a private reply")
+                self.share_state = .cancelled
+                dismissParent?()
             case .cancel:
                 self.share_state = .cancelled
                 dismissParent?()
