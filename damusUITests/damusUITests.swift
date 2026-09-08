@@ -168,6 +168,36 @@ class damusUITests: XCTestCase {
         sleep(2)
     }
     
+    /// Tests that the Zap explainer and the wallet setup form are never on screen together.
+    ///
+    /// They are two states of one screen, and used to be a view plus a `.fullScreenCover` over
+    /// it. The cover was requested on the setup view's first render — during the navigation push
+    /// that created it — and when UIKit did not finish that presentation it left the presenting
+    /// view in the window, so both hierarchies rendered at once with their text interleaved.
+    /// Reading the accessibility tree catches that whether or not the front hierarchy's
+    /// background happens to hide the one behind it on this particular device.
+    func testWalletIntroductionDoesNotOverlapSetupForm() throws {
+        try self.loginIfNotAlready()
+
+        guard app.buttons[AID.main_side_menu_button.rawValue].tapIfExists(timeout: 10) else { throw DamusUITestError.timeout_waiting_for_element }
+        guard app.buttons["Wallet"].tapIfExists(timeout: 10) else { throw DamusUITestError.timeout_waiting_for_element }
+
+        guard app.staticTexts["Why add Zaps?"].waitForExistence(timeout: 10) else { throw DamusUITestError.timeout_waiting_for_element }
+
+        // The overlap outlived the push and side menu animations, so settle before judging what
+        // is on screen — otherwise a pass could just mean we looked before both layers landed.
+        sleep(2)
+
+        XCTAssertFalse(app.staticTexts["Create new wallet"].exists, "The wallet setup form is drawn underneath the Zap explainer")
+        XCTAssertFalse(app.staticTexts["Scan NWC Address"].exists, "The wallet setup form is drawn underneath the Zap explainer")
+
+        // Leaving the explainer is what reveals the setup form, and it takes the explainer away.
+        guard app.buttons["Set up wallet"].tapIfExists(timeout: 5) else { throw DamusUITestError.timeout_waiting_for_element }
+
+        XCTAssertTrue(app.staticTexts["Create new wallet"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Why add Zaps?"].exists, "The Zap explainer is still drawn behind the wallet setup form")
+    }
+
     func loginIfNotAlready() throws {
         if app.buttons[AID.sign_in_option_button.rawValue].waitForExistence(timeout: 5) {
             try self.login()
