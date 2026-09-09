@@ -110,6 +110,23 @@ generic image/link/video preview paths, including MP4 video rendering.
 Playback is shared across voice rows and cooperates with the existing video
 player and recorder; interrupted or abandoned requests cannot start a new player.
 
+Read-side attachments merge transcript URLs with NIP-808 `imeta` and `r` tags
+and any remaining cached references. Each attachment is deduplicated without
+rewriting the URL used for fetching. Declared image/video MIME types support
+opaque URLs; optional image metadata accepts multiword fields such as `alt`.
+Images and independent videos use Damus's existing media carousel and media
+visibility settings. Tag-only web links retain their optional titles and remain
+clickable when rich previews are disabled. Additional audio references remain
+links; they are not selected as the primary recording.
+
+The same renderer handles feeds, profiles, replies, quotes and verified repost
+originals. It repairs older cached artifacts that excluded attached videos.
+Every declared primary audio URL stays excluded from ordinary media/preview
+paths, including aliases with fragments or default ports. Invalid primary
+recording metadata does not hide otherwise valid, independent attachments.
+nostrdb already preserves these tags, so attachment rendering needs no new
+database migration.
+
 The shared row below the transcript uses a rounded adaptive background, a scrubber,
 a 1x/2x/3x speed button, and a fixed 52-point play/pause/loading button with the
 same Damus gradient as the microphone and feed compose button. There is no
@@ -156,6 +173,7 @@ formats voice posts/reposts without importing recording or playback services.
 | Text default, text draft preservation, attachment controls and both dismissal decisions | PostView and VoiceComposerControls; `damusUITests.testAudioModeDismissesKeyboardAndPreservesTextDraft` |
 | Trash enter/leave, final position, duplicate/cancelled releases and repeat holds | `VoiceRecordingGesture`, `VoiceComposerModelTests`, executable `scripts/check_voice_composition.swift`; real touch/VoiceOver checks on device |
 | NIP-27/NIP-92 attachment payloads and photo receipt validation | `VoicePostAttachments`, `VoiceEventBuilder`, `VoicePhotoFiles`, `VoiceBlossomUploader`; protocol/composer/media service tests |
+| Read-side tag-only/mixed photo, video and link attachments; primary exclusion; cached order; verified reposts | `VoiceAttachmentReferences`, `NoteContent`, `NoteContentView`, `ImageMetadata`; executable composition checks and `VoiceIntegrationTests.testVoiceAttachmentsRenderFromWireTagsContentAndVerifiedReposts` |
 | Private text and uncached quote restoration | DraftsModel; added `DraftTests` cases |
 | Exact Nosis playback speeds; keep pause, position and selection across rows | `VoicePlaybackRate`, `VoicePlayback`, `VoiceAudioFiles`; executable composition checks and `VoiceMediaServicesTests.testPlaybackSpeedSurvivesPauseSeekingAndChangingRows` |
 | App/extension/test source membership | `scripts/check_voice_sources.py`; final Xcode build remains required |
@@ -206,10 +224,11 @@ After the build exits successfully, run the focused regression suites:
 (xcodebuild -project damus.xcodeproj -scheme damus -configuration Debug -destination "platform=iOS Simulator,id=$VOICE_SIM_UDID" -derivedDataPath build/VoiceDerivedData test -only-testing:damusTests/VoiceMediaReferenceTests -only-testing:damusTests/VoiceProtocolTests -only-testing:damusTests/VoiceDraftStoreTests -only-testing:damusTests/VoiceMediaServicesTests -only-testing:damusTests/VoiceSpeechJobTests -only-testing:damusTests/VoiceComposerModelTests -only-testing:damusTests/VoiceIntegrationTests -only-testing:damusTests/DraftTests -only-testing:damusTests/AdvancedSearchTests; printf '%s' "$?" > build/voice-checks/tests.exit) > build/voice-checks/tests.log 2>&1 &
 ```
 
-A portable executable check compiles the actual gesture, playback-rate and media-reference sources:
+A portable executable check compiles the actual gesture, playback-rate, primary-media
+and read-side attachment sources:
 
 ```bash
-swiftc damus/Features/Voice/Models/VoiceRecordingGesture.swift damus/Features/Voice/Models/VoicePlaybackRate.swift damus/Features/Voice/Models/VoiceMediaReference.swift scripts/check_voice_composition.swift -o build/voice-checks/composition-checks
+swiftc damus/Features/Voice/Models/VoiceRecordingGesture.swift damus/Features/Voice/Models/VoicePlaybackRate.swift damus/Features/Voice/Models/VoiceMediaReference.swift damus/Features/Voice/Models/VoiceAttachmentReferences.swift scripts/check_voice_composition.swift -o build/voice-checks/composition-checks
 build/voice-checks/composition-checks
 ```
 
@@ -235,6 +254,15 @@ Check the player in light and dark mode, narrow quoted rows and larger text size
 its controls should stay stable through loading/play/pause, and each speed button
 tap should cycle 1x/2x/3x without starting idle audio. Listen at each speed, scrub
 before and during playback, pause/change speed/resume, and switch posts.
+For read-side attachments, inspect posts with two images (including an opaque
+URL), an independent video, and titled links in the home feed, a profile, a
+quote and a verified repost. Include attachments present only in tags, repeat
+the same URL in the transcript, reopen cached rows, disable rich previews,
+and toggle media loading. Confirm independent media appears once in the
+carousel and the primary recording never appears as an image/video preview.
+Check both light/dark mode and large text. Signed-wire/rendering XCTest fixtures
+cover the shared data path; visual media loading and settings checks remain
+manual because this Windows workspace cannot run SwiftUI or an iOS simulator.
 Use captured/mock relay and HTTP responses for automated tests. Live provider
 upload/account verification requires a separately authorized real upload.
 

@@ -55,6 +55,12 @@ def check_targets(repo, production, tests):
     for path in tests:
         if target_files['damusTests'].count(path.name) != 1:
             raise ValueError('damusTests: missing/duplicate ' + path.name)
+    for target, names in target_files.items():
+        if not {'NoteContent.swift', 'ImageMetadata.swift'}.intersection(names):
+            continue
+        for dependency in ['VoiceAttachmentReferences.swift', 'VoiceMediaReference.swift']:
+            if names.count(dependency) != 1:
+                raise ValueError(f'{target}: attachment rendering requires {dependency} exactly once')
     for filename in ['NostrKind.swift', 'NdbNote.swift', 'LocalNotification.swift',
                      'NotificationFormatter.swift', 'NotificationService.swift', 'nostrdb.c']:
         if target_files['DamusNotificationService'].count(filename) != 1:
@@ -69,7 +75,7 @@ def check_targets(repo, production, tests):
             raise ValueError('Voice source reference must resolve from SOURCE_ROOT: ' + label)
         if not (repo / match.group(1).strip('"')).is_file():
             raise ValueError('Missing voice source: ' + label)
-    print(f'PASS: {len(production)} voice sources in app/share/highlighter; {len(tests)} XCTest files; notification dependencies; unique project IDs', flush=True)
+    print(f'PASS: {len(production)} voice sources in app/share/highlighter; {len(tests)} XCTest files; attachment/notification dependencies; unique project IDs', flush=True)
 
 
 def main():
@@ -80,7 +86,7 @@ def main():
     repo = Path(__file__).resolve().parents[1]
     production = sorted((repo / 'damus/Features/Voice').rglob('*.swift'))
     tests = sorted((repo / 'damusTests').glob('Voice*Tests.swift'))
-    if len(production) != 17 or len(tests) != 7:
+    if len(production) != 18 or len(tests) != 7:
         parser.error('Unexpected voice file inventory; review target expectations')
     check_targets(repo, production, tests)
     if not args.swiftc:

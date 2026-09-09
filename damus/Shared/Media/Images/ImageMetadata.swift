@@ -93,7 +93,8 @@ func decode_image_metadata(_ parts: [String]) -> ImageMetadata? {
             continue
         }
         
-        let ps = part.split(separator: " ")
+        // NIP-92 values such as alt text contain spaces; split the field name only.
+        let ps = part.split(separator: " ", maxSplits: 1)
         
         guard ps.count == 2 else {
             return nil
@@ -170,18 +171,19 @@ func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> Image
 }
 
 
-/// Primary voice audio is verified by the voice player, never preloaded as image metadata.
+/// Use the same voice attachment classification as rendering and exclude primary audio.
 func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
-    let isVoice = ev.known_kind == .voice
-    let primaryURLs = isVoice ? Set(ev.tags.strings().filter { $0.first == "url" && $0.count > 1 }
-        .compactMap { URL(string: $0[1]) }) : Set<URL>()
+    let imageURLs: Set<String>? = ev.known_kind == .voice
+        ? Set(VoiceAttachmentReferences(tags: ev.tags.strings()).attachments
+            .filter { $0.kind == .image }.map { VoiceAttachmentReferences.identity($0.url) })
+        : nil
+    var seen = Set<String>()
     return ev.tags.reduce(into: [ImageMetadata]()) { meta, tag in
         guard tag.count >= 2, tag[0].matches_str("imeta"),
               let data = ImageMetadata(tag: tag.strings()) else { return }
-        if isVoice {
-            guard !primaryURLs.contains(data.url) else { return }
-            let types = tag.strings().dropFirst().filter { $0.hasPrefix("m ") }.map { String($0.dropFirst(2)).lowercased() }
-            guard types.allSatisfy({ $0.hasPrefix("image/") }) else { return }
+        if let imageURLs {
+            let key = VoiceAttachmentReferences.identity(data.url)
+            guard imageURLs.contains(key), seen.insert(key).inserted else { return }
         }
         meta.append(data)
     }
@@ -202,7 +204,7 @@ func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
         cache.store_img_metadata(url: meta.url, meta: state)
         
         guard let blurhash = state.meta.blurhash else {
-            return
+            continue
         }
         
         Task {

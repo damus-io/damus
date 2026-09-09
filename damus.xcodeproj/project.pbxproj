@@ -14,6 +14,11 @@
 		808E00000000000000000065 /* VoicePostAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000001 /* VoicePostAttachments.swift */; };
 		808E00000000000000000066 /* VoiceRecordingGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000002 /* VoiceRecordingGesture.swift */; };
 		808F00000000000000000065 /* VoicePlaybackRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000001 /* VoicePlaybackRate.swift */; };
+		808F00000000000000000066 /* VoiceAttachmentReferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000002 /* VoiceAttachmentReferences.swift */; };
+		808F000000000000000000CA /* VoiceAttachmentReferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000002 /* VoiceAttachmentReferences.swift */; };
+		808F0000000000000000012E /* VoiceAttachmentReferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000002 /* VoiceAttachmentReferences.swift */; };
+		808F00000000000000000192 /* VoiceAttachmentReferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000002 /* VoiceAttachmentReferences.swift */; };
+		808F00000000000000000193 /* VoiceMediaReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D00000000000000000064 /* VoiceMediaReference.swift */; };
 		808F000000000000000000C9 /* VoicePlaybackRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000001 /* VoicePlaybackRate.swift */; };
 		808F0000000000000000012D /* VoicePlaybackRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808F00000000000000000001 /* VoicePlaybackRate.swift */; };
 		808E00000000000000000067 /* VoicePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000003 /* VoicePhotoFiles.swift */; };
@@ -2265,6 +2270,7 @@
 		808E00000000000000000001 /* VoicePostAttachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoicePostAttachments.swift; path = "damus/Features/Voice/Models/VoicePostAttachments.swift"; sourceTree = SOURCE_ROOT; };
 		808E00000000000000000002 /* VoiceRecordingGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceRecordingGesture.swift; path = "damus/Features/Voice/Models/VoiceRecordingGesture.swift"; sourceTree = SOURCE_ROOT; };
 		808F00000000000000000001 /* VoicePlaybackRate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoicePlaybackRate.swift; path = "damus/Features/Voice/Models/VoicePlaybackRate.swift"; sourceTree = SOURCE_ROOT; };
+		808F00000000000000000002 /* VoiceAttachmentReferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceAttachmentReferences.swift; path = "damus/Features/Voice/Models/VoiceAttachmentReferences.swift"; sourceTree = SOURCE_ROOT; };
 		808E00000000000000000003 /* VoicePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoicePhotoFiles.swift; path = "damus/Features/Voice/Services/VoicePhotoFiles.swift"; sourceTree = SOURCE_ROOT; };
 		808E00000000000000000004 /* VoiceAttachmentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceAttachmentViews.swift; path = "damus/Features/Voice/Views/VoiceAttachmentViews.swift"; sourceTree = SOURCE_ROOT; };
 		808D000000000000000000C8 /* VoiceMediaReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceMediaReferenceTests.swift; path = "damusTests/VoiceMediaReferenceTests.swift"; sourceTree = SOURCE_ROOT; };
@@ -3387,6 +3393,7 @@
 				808E00000000000000000001 /* VoicePostAttachments.swift */,
 				808E00000000000000000002 /* VoiceRecordingGesture.swift */,
 				808F00000000000000000001 /* VoicePlaybackRate.swift */,
+				808F00000000000000000002 /* VoiceAttachmentReferences.swift */,
 				808E00000000000000000003 /* VoicePhotoFiles.swift */,
 				808E00000000000000000004 /* VoiceAttachmentViews.swift */,
 				808D000000000000000000C8 /* VoiceMediaReferenceTests.swift */,
@@ -6338,6 +6345,7 @@
 				808E00000000000000000065 /* VoicePostAttachments.swift in Sources */,
 				808E00000000000000000066 /* VoiceRecordingGesture.swift in Sources */,
 				808F00000000000000000065 /* VoicePlaybackRate.swift in Sources */,
+				808F00000000000000000066 /* VoiceAttachmentReferences.swift in Sources */,
 				808E00000000000000000067 /* VoicePhotoFiles.swift in Sources */,
 				808E00000000000000000068 /* VoiceAttachmentViews.swift in Sources */,
 				DAB705000000000000000001 /* TusProtocol.swift in Sources */,
@@ -7098,6 +7106,7 @@
 				808E000000000000000000C9 /* VoicePostAttachments.swift in Sources */,
 				808E000000000000000000CA /* VoiceRecordingGesture.swift in Sources */,
 				808F000000000000000000C9 /* VoicePlaybackRate.swift in Sources */,
+				808F000000000000000000CA /* VoiceAttachmentReferences.swift in Sources */,
 				808E000000000000000000CB /* VoicePhotoFiles.swift in Sources */,
 				808E000000000000000000CC /* VoiceAttachmentViews.swift in Sources */,
 				D7C175900000000000000014 /* NIP17Conversation.swift in Sources */,
@@ -7752,6 +7761,7 @@
 				808E0000000000000000012D /* VoicePostAttachments.swift in Sources */,
 				808E0000000000000000012E /* VoiceRecordingGesture.swift in Sources */,
 				808F0000000000000000012D /* VoicePlaybackRate.swift in Sources */,
+				808F0000000000000000012E /* VoiceAttachmentReferences.swift in Sources */,
 				808E0000000000000000012F /* VoicePhotoFiles.swift in Sources */,
 				808E00000000000000000130 /* VoiceAttachmentViews.swift in Sources */,
 				D73E5E342C6A97F4007EB227 /* MuteNotify.swift in Sources */,
@@ -8318,6 +8328,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				808F00000000000000000192 /* VoiceAttachmentReferences.swift in Sources */,
+				808F00000000000000000193 /* VoiceMediaReference.swift in Sources */,
 				D7C175900000000000000016 /* NIP17Conversation.swift in Sources */,
 				4CC6A9772CAB650F00989CEF /* CommentItem.swift in Sources */,
 				4C8FA7242BED58A900798A6A /* ThreadReply.swift in Sources */,

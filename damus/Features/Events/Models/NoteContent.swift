@@ -31,12 +31,20 @@ struct NoteArtifactsSeparated: Equatable {
         return urls.compactMap { url in url.is_link }
     }
     
-    /// Exclude primary voice media from generic preview/download paths, retaining separate images.
+    /// Resolve NIP-808 attachments while excluding primary audio from generic media paths.
     func voiceSafe(for event: NostrEvent) -> NoteArtifactsSeparated {
         guard event.known_kind == .voice else { return self }
-        let primaryURLs = Set(event.tags.strings().filter { $0.first == "url" && $0.count > 1 }.compactMap { URL(string: $0[1]) })
-        return NoteArtifactsSeparated(content: content, words: words,
-            urls: urls.filter { $0.is_video == nil && !primaryURLs.contains($0.url) }, invoices: invoices)
+        // Reading attributed links also repairs artifacts cached with videos filtered out.
+        let contentURLs = content.attributed.runs.compactMap { $0.link }
+        let references = VoiceAttachmentReferences(tags: event.tags.strings(), contentURLs: contentURLs, cachedURLs: urls.map(\.url))
+        let resolved = references.attachments.map { attachment -> UrlType in
+            switch attachment.kind {
+            case .image: return .media(.image(attachment.url))
+            case .video: return .media(.video(attachment.url))
+            case .link: return .link(attachment.url)
+            }
+        }
+        return NoteArtifactsSeparated(content: content, words: words, urls: resolved, invoices: invoices)
     }
 
     static func just_content(_ content: String) -> NoteArtifactsSeparated {
@@ -87,7 +95,7 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
     }
     catch {
         // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
-        return .separated(.just_content(ev.get_content(keypair)))
+        return .separated(NoteArtifactsSeparated.just_content(ev.get_content(keypair)).voiceSafe(for: ev))
     }
 }
 

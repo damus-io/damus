@@ -112,3 +112,42 @@ match Nosis's `PlaybackRate.playerRate`: 1.0, 1.4 and 1.7.
 - **Mac/device checks pending:** Apple SDK build, XCTest execution, light/dark
   presentation in feeds/profiles/quotes, control stability, VoiceOver and listening
   at each speed. The Windows checks do not establish these runtime outcomes.
+
+## Read-side voice attachments
+
+The shared content renderer now merges body references with NIP-808 `imeta` and
+`r` tags. Independent photos/videos use the normal carousel, tag-only links
+remain readable, and primary audio stays excluded from generic media previews.
+Older cached artifacts recover attached videos without changing tag order.
+Image metadata accepts multiword fields and processing continues after images
+without blurhash. Undistract mode continues to hide attachments.
+
+- **PASS:** production attachment parser executable compiled, linked and ran
+  with exit 0. Fixtures cover tag-only/mixed images, videos and titled links;
+  optional/declared MIME; opaque and exact query URLs; deduplication; cached
+  ordering/idempotence; primary aliases/conflicts; and malformed references.
+  Previous rate, gesture and primary-media checks also pass.
+  [Log](../.build/voice-checks/attachments-final-composition.log), [exit](../.build/voice-checks/attachments-final-composition.exit).
+- **PASS:** 18 voice sources in app/share/highlighter, seven XCTest files,
+  unique project IDs, and attachment dependencies in every target compiling
+  shared content, including the notification extension. Swift syntax passes
+  for all 29 checked files, exit 0.
+  [Log](../.build/voice-checks/attachments-final-sources.log), [exit](../.build/voice-checks/attachments-final-sources.exit).
+- **PASS:** final code/target review and patch whitespace checks. Nosis is
+  unchanged; this read-side fix needs no new nostrdb migration or wire format.
+- **Added, not executed here:** signed JSON parsing through nostrdb blocks,
+  attributed-link extraction, shared row artifacts, dimensions/blurhash
+  processing, cached video recovery, Undistract mode, and verified repost
+  rendering in `VoiceIntegrationTests`.
+- **Mac checks pending:** Apple SDK app/extension build, XCTest execution,
+  actual image/video/link presentation in feeds/profiles/quotes/reposts,
+  media settings, light/dark appearance, and accessibility.
+
+The initial target check caught missing notification-extension model membership;
+the final check includes that correction. An initial Windows attributed-text
+probe failed to link a Foundation internal symbol. That platform-dependent
+operation remains covered by the unexecuted iOS integration fixture; the
+portable executable exercises the actual attachment parser with URL inputs.
+The passive workspace snapshot still reports the existing Nosis C/header
+diagnostics (97 errors, eight warnings). It does not provide Apple SDK Swift
+type checking.
