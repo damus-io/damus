@@ -77,6 +77,9 @@ def main():
     else:
         flags += ["-pthread"]
         if sys.platform == "darwin":
+            # Darwin uses named LMDB semaphores. Without this definition the
+            # literal macro name plus the hashed suffix overflows MNAME_LEN.
+            flags += ["-DMDB_SEM_NAME_PREFIX=damus-voice"]
             libraries += ["-framework", "Security"]
     if args.sanitize:
         flags += ["-fsanitize=address,undefined", "-fno-omit-frame-pointer"]
