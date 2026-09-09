@@ -13,6 +13,7 @@ struct CreateAccountView: View, KeyboardReadable {
     @StateObject var profileUploadObserver = ImageUploadingObserver()
     var nav: NavigationCoordinator
     @State var keyboardVisible: Bool = false
+    @State var showPrivateKeyWarning: Bool = false
     let maxViewportHeightForAdaptiveContentSize: CGFloat = 975 // 956px height = iPhone 16 Pro Max
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
@@ -23,6 +24,23 @@ struct CreateAccountView: View, KeyboardReadable {
         let keypair = generate_new_keypair()
         self.account.pubkey = keypair.pubkey
         self.account.privkey = keypair.privkey
+    }
+
+    /// Checks whether any signup field contains what appears to be a private key.
+    ///
+    /// Reads `account.name` and `account.about`, splits each on whitespace, and
+    /// calls `containsPrivateKeyMaterial` on every token.  Returns `true` as soon
+    /// as any token matches; returns `false` if none do.
+    func fieldsContainPrivateKey() -> Bool {
+        let fieldsToCheck = [account.name, account.about]
+        for field in fieldsToCheck {
+            for token in field.components(separatedBy: .whitespaces) {
+                if containsPrivateKeyMaterial(token) {
+                    return true
+                }
+            }
+        }
+        return false
     }
     
     var body: some View {
@@ -65,7 +83,11 @@ struct CreateAccountView: View, KeyboardReadable {
                 .padding(.top, 25)
                 
                 Button(action: {
-                    nav.push(route: Route.SaveKeys(account: account))
+                    if fieldsContainPrivateKey() {
+                        showPrivateKeyWarning = true
+                    } else {
+                        nav.push(route: Route.SaveKeys(account: account))
+                    }
                 }) {
                     HStack {
                         Text("Next", comment: "Button to continue with account creation.")
@@ -78,6 +100,19 @@ struct CreateAccountView: View, KeyboardReadable {
                 .opacity(profileUploadObserver.isLoading || account.name.isEmpty ? 0.5 : 1)
                 .padding(.top, 20)
                 .accessibilityIdentifier(AppAccessibilityIdentifiers.sign_up_next_button.rawValue)
+                .alert(
+                    NSLocalizedString("Private Key Detected", comment: "Alert title warning that a private key was found in a signup field."),
+                    isPresented: $showPrivateKeyWarning
+                ) {
+                    Button(NSLocalizedString("Go Back", comment: "Alert button to go back and remove the private key from the signup field."), role: .cancel) {
+                        showPrivateKeyWarning = false
+                    }
+                    Button(NSLocalizedString("Continue Anyway", comment: "Alert button to continue signup even though a private key may be present in a field."), role: .destructive) {
+                        nav.push(route: Route.SaveKeys(account: account))
+                    }
+                } message: {
+                    Text("One of your profile fields appears to contain a private key (nsec or hex). Sharing your private key publicly will compromise your account. Please go back and remove it.", comment: "Alert message warning the user that their private key may have been entered into a profile field during signup.")
+                }
                 
                 LoginPrompt()
                     .padding(.top)
@@ -181,5 +216,23 @@ func FormLabel(_ title: String, optional: Bool = false) -> some View {
                 .foregroundColor(DamusColors.mediumGrey)
         }
     }
+}
+
+/// Returns `true` when `text` looks like a private key that should not appear in a profile field.
+///
+/// Two patterns are matched:
+/// - A bech32-encoded private key whose HRP is "nsec" (e.g. `nsec1…`).
+/// - A 64-character hexadecimal string (any case), which is the raw representation
+///   of a 256-bit private key.
+func containsPrivateKeyMaterial(_ text: String) -> Bool {
+    // Bech32-encoded private key (nsec1…)
+    if let key = decode_bech32_key(text), case .sec = key {
+        return true
+    }
+    // Raw hex private key: exactly 64 hex characters
+    if text.count == 64, hex_decode(text) != nil {
+        return true
+    }
+    return false
 }
 
