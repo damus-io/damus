@@ -257,9 +257,26 @@ the App Store Connect API, so this cannot be scripted:
 > App Store Connect → Xcode Cloud → Manage Workflows → *(workflow)* →
 > Environment → Add variable, tick **Secret**.
 
-Until that exists the hook still tries the checkout's own credentials and says
-in the build log whether it worked, so the first build after this lands will
-answer whether a token is needed at all. If the push fails, the tag exists only
+Build 1339 settled whether a token is needed at all. It is:
+
+```
+build-tag: tagged build/1339 -> cb01a16882491b81f519dd3b3a8cde0273277415
+build-tag: no GITHUB_TAG_PUSH_TOKEN set; trying the checkout's own credentials
+fatal: could not read Username for 'http://github.com': terminal prompts disabled
+```
+
+Note the URL. **The builder's `origin` is `http://github.com/...`**, a rewrite
+of Apple's own, and that matters twice: it has no usable credential, and a
+credential stored for `https://github.com` would not match an `http://` remote,
+so the token would have been ignored even once set. The hook normalises the
+remote to its canonical HTTPS form before pushing.
+
+The log lives in the run's `LOG_BUNDLE` artifact as `ci_post_xcodebuild.log`:
+
+```sh
+./devtools/release/asc_api.py GET /v1/ciBuildActions/<archive-action>/artifacts
+./devtools/release/asc_api.py GET /v1/ciArtifacts/<log-bundle-id>   # .downloadUrl
+``` If the push fails, the tag exists only
 on the builder and dies with it — `tag-builds.py --push` recovers it, as long
 as it is run before the run ages out.
 

@@ -81,8 +81,10 @@ impatiently() {
     guard=$!
     wait "$job" 2>/dev/null
     status=$?
-    # Kill the guard's whole group, or its `sleep` outlives the subshell.
-    kill -9 -"$guard" 2>/dev/null
+    # Kill the guard's whole group, or its `sleep` outlives the subshell, and
+    # reap it in the same breath so the shell does not narrate the kill into
+    # the build log.
+    { kill -9 -"$guard"; wait "$guard"; } 2>/dev/null
     set +m
     return $status
 }
@@ -101,21 +103,40 @@ if ! git -c user.name="Xcode Cloud" -c user.email="noreply@damus.io" \
 fi
 say "tagged $tag -> $CI_COMMIT"
 
+# Xcode Cloud rewrites the checkout's origin to an `http://github.com/...` URL
+# of its own. Pushing to that asks for a username no one can type, and — the
+# subtle half — a credential stored for `https://github.com` does not match an
+# `http://` remote, so the token below would be ignored and the push would fail
+# anyway. Normalise to the canonical HTTPS URL, keeping whatever repository the
+# origin names so a fork still pushes to itself.
 remote=$(git remote get-url origin 2>/dev/null)
-if [ -z "$remote" ]; then
-    remote="https://github.com/damus-io/damus.git"
-fi
+case "$remote" in
+    http://github.com/*) remote="https://github.com/${remote#http://github.com/}" ;;
+    git@github.com:*)    remote="https://github.com/${remote#git@github.com:}" ;;
+    "")                  remote="https://github.com/damus-io/damus.git" ;;
+    *) ;;  # already https, or some other host — leave it alone
+esac
+
+# Only used to key the credential file, and only for an https remote.
+case "$remote" in
+    https://*) host=${remote#https://}; host=${host%%/*} ;;
+    *)         host="" ;;
+esac
 
 # The token goes in a credential file rather than in the URL or in an argument,
 # so it stays out of the build log and out of the process list.
 creds=""
 config=""
-if [ -n "${GITHUB_TAG_PUSH_TOKEN:-}" ]; then
+if [ -n "${GITHUB_TAG_PUSH_TOKEN:-}" ] && [ -n "$host" ]; then
     creds=$(mktemp) || creds=""
 fi
 if [ -n "$creds" ]; then
-    printf 'https://x-access-token:%s@github.com\n' "$GITHUB_TAG_PUSH_TOKEN" > "$creds"
+    printf 'https://x-access-token:%s@%s\n' "$GITHUB_TAG_PUSH_TOKEN" "$host" > "$creds"
     config="credential.helper=store --file=$creds"
+elif [ -n "${GITHUB_TAG_PUSH_TOKEN:-}" ]; then
+    say "GITHUB_TAG_PUSH_TOKEN is set, but $remote is not an https remote it can"
+    say "authenticate; trying the checkout's own credentials"
+    config="credential.helper="
 else
     say "no GITHUB_TAG_PUSH_TOKEN set; trying the checkout's own credentials"
     config="credential.helper="
