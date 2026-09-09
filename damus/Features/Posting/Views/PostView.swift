@@ -631,10 +631,8 @@ struct PostView: View {
                 Picker("Post format", selection: Binding(get: { voice.mode }, set: { value in
                     voice.changeMode(value)
                     focusWordAttributes = (nil, nil)
+                    // Keep keyboard focus local to the composer, including in app extensions.
                     focus = value == .text
-                    if value == .audio {
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    }
                 })) {
                     Text("Text").tag(VoiceComposerModel.Mode.text)
                     Text("Audio").tag(VoiceComposerModel.Mode.audio)
