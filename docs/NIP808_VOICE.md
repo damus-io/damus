@@ -127,7 +127,7 @@ recording metadata does not hide otherwise valid, independent attachments.
 nostrdb already preserves these tags, so attachment rendering needs no new
 database migration.
 
-The shared row below the transcript uses a rounded adaptive background, a scrubber,
+The shared row above the transcript uses a rounded adaptive background, a scrubber,
 a 1x/2x/3x speed button, and a fixed 52-point play/pause/loading button with the
 same Damus gradient as the microphone and feed compose button. There is no
 "Voice post" label or duration counter. The existing idle-scrub start behavior
@@ -254,6 +254,8 @@ Check the player in light and dark mode, narrow quoted rows and larger text size
 its controls should stay stable through loading/play/pause, and each speed button
 tap should cycle 1x/2x/3x without starting idle audio. Listen at each speed, scrub
 before and during playback, pause/change speed/resume, and switch posts.
+Confirm the vertical order is player, transcription, then attachments in feeds,
+profiles, replies, quotes and verified reposts, including posts without a transcript.
 For read-side attachments, inspect posts with two images (including an opaque
 URL), an independent video, and titled links in the home feed, a profile, a
 quote and a verified repost. Include attachments present only in tags, repeat

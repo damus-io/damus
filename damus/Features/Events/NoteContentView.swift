@@ -212,6 +212,11 @@ struct NoteContentView: View {
         let contentToRender = highlightedContent(artifacts.content)
 
         return VStack(alignment: .leading) {
+            if event.known_kind == .voice, !options.contains(.no_media) {
+                VoicePlayerView(event: event, video: damus_state.video)
+                    .padding(.horizontal, with_padding ? 16 : 0)
+            }
+
             if artifacts.content.attributed.characters.count != 0 {
                 if size == .selected {
                     if with_padding {
@@ -237,11 +242,6 @@ struct NoteContentView: View {
                         translateView
                     }
                 }
-            }
-
-            if event.known_kind == .voice, !options.contains(.no_media) {
-                VoicePlayerView(event: event, video: damus_state.video)
-                    .padding(.horizontal, with_padding ? 16 : 0)
             }
 
             if artifacts.media.count > 0 {
