@@ -27,8 +27,8 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
 
 /// The unread-events hint on a timeline's tab bar item.
 ///
-/// This supplies the whole `.tabItem`: the tab's icon, plus a small red dot when
-/// that timeline has unread events.
+/// This supplies the whole `.tabItem`: the tab's icon, plus a small purple dot
+/// when that timeline has unread events.
 ///
 /// This is a `ViewModifier` rather than a plain `View` extension because it has
 /// to observe ``NotificationStatusModel``. `ContentView` holds its `HomeModel`
@@ -78,8 +78,9 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
 /// ## What compositing costs
 ///
 /// A template image is a mask — everything in it takes the item's tint — so a
-/// dot drawn into one comes out black or white rather than red. The composited
-/// image therefore has to be `.alwaysOriginal`, which also opts the icon out of
+/// dot drawn into one comes out black or white rather than its own colour. The
+/// composited image therefore has to be `.alwaysOriginal`, which also opts it
+/// out of
 /// the tint the tab bar would have applied, so this reproduces that tint by
 /// hand: the `AccentColor` asset when the tab is selected and `UIColor.label`
 /// when it is not, both matched against the system's own rendering. To keep that
@@ -87,8 +88,16 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
 /// keeps the plain template asset and the system's own tinting; only a tab
 /// actually showing a dot uses the composited image.
 ///
-/// The dot stays `systemRed`, the colour of the badge it replaces, rather than
-/// the accent purple of the old hand-drawn `Circle`.
+/// The dot is `DamusPurple`, which is also what the old hand-drawn `Circle`
+/// used. The native badge could only ever be the system notification red —
+/// recolouring it meant reaching into `UITabBarAppearance`, the same global
+/// appearance state Liquid Glass styles — so drawing the dot ourselves is what
+/// makes the brand colour available again.
+///
+/// Note that `DamusPurple` and `AccentColor` currently hold the same value, so
+/// on the *selected* tab the dot matches the icon it sits beside; it stays
+/// legible because the dot is solid and the icons are strokes. Should that stop
+/// reading as a hint, this is the place to give the dot its own colour.
 struct TimelineTabItem: ViewModifier {
     let timeline: Timeline
     @ObservedObject var notification_status: NotificationStatusModel
@@ -158,7 +167,11 @@ struct TimelineTabItem: ViewModifier {
             base.withTintColor(tint, renderingMode: .alwaysOriginal)
                 .draw(in: CGRect(origin: CGPoint(x: inset, y: inset), size: base.size))
 
-            UIColor.systemRed.resolvedColor(with: traits).setFill()
+            // Falls back to `systemPurple` so a missing asset stays in the same
+            // family rather than reverting to the notification red this
+            // deliberately moved away from.
+            (UIColor(named: "DamusPurple") ?? .systemPurple)
+                .resolvedColor(with: traits).setFill()
             context.cgContext.fillEllipse(
                 in: CGRect(x: canvas.width - dot, y: 0, width: dot, height: dot)
             )
