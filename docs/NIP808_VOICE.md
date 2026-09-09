@@ -262,6 +262,8 @@ quote and a verified repost. Include attachments present only in tags, repeat
 the same URL in the transcript, reopen cached rows, disable rich previews,
 and toggle media loading. Confirm independent media appears once in the
 carousel and the primary recording never appears as an image/video preview.
+Compare the gap above the reaction bar with ordinary posts for single-photo,
+multiple-photo and video voice posts, including revealed and blurred attachments.
 Check both light/dark mode and large text. Signed-wire/rendering XCTest fixtures
 cover the shared data path; visual media loading and settings checks remain
 manual because this Windows workspace cannot run SwiftUI or an iOS simulator.

@@ -286,6 +286,8 @@ struct NoteContentView: View {
 
         }
         .padding(.top, artifacts.content.attributed.characters.count == 0 ? 7 : 0)
+        // Keep voice attachments clear of the reaction bar, matching the normal post gap.
+        .padding(.bottom, event.known_kind == .voice && !artifacts.media.isEmpty && !options.contains(.no_media) ? 8 : 0)
     }
 
     var has_previews: Bool {
