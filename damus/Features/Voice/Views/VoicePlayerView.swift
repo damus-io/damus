@@ -182,7 +182,8 @@ struct VoicePlayerView: View {
                         in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             if let error { Text(error).font(.caption).foregroundColor(.secondary).accessibilityIdentifier("voice.mediaError") }
         }
-        .padding(.vertical, 8)
+        // The parent post stack supplies the spacing below the player.
+        .padding(.top, 8)
         .onDisappear {
             requestID = UUID()
             task?.cancel()
