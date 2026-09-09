@@ -1411,22 +1411,39 @@ final class SearchHighlightContrastTests: XCTestCase {
     /// at 1.88:1, so neither theme is allowed to regress.
     func test_highlighted_text_is_readable_on_the_match_fill() {
         for (name, style) in styles {
-            let fill = resolved(DamusColors.highlight, style)
-            let text = resolved(DamusColors.highlightedText, style)
+            let fill = resolved(DamusColors.searchMatch, style)
+            let text = resolved(DamusColors.searchMatchText, style)
             let ratio = contrast(text, on: fill)
             XCTAssertGreaterThanOrEqual(ratio, 4.5,
                 "\(name) mode highlighted text is \(ratio):1 on its fill, below the 4.5:1 AA floor")
         }
     }
 
-    /// The ratio above is only the on-screen ratio if the fill is opaque. A
+    /// A match you cannot find is no better than one you cannot read. The first
+    /// pass at this fixed the text by reusing the NIP-84 prose wash, which
+    /// dropped the fill to 1.48:1 against a black page — legible, but it barely
+    /// registered as a mark while scanning results.
+    func test_the_match_fill_is_visible_against_the_page() {
+        let pages: [(String, UIUserInterfaceStyle, UIColor)] = [
+            ("light", .light, .white),
+            ("dark", .dark, .black),
+        ]
+        for (name, style, page) in pages {
+            let fill = resolved(DamusColors.searchMatch, style)
+            let ratio = contrast(fill, on: page)
+            XCTAssertGreaterThanOrEqual(ratio, 3.0,
+                "\(name) mode match fill is \(ratio):1 against the page, below the 3:1 non-text floor")
+        }
+    }
+
+    /// The ratios above are only the on-screen ratios if the fill is opaque. A
     /// translucent fill composites against whatever is behind it, which is how
     /// the reported collision got in: a 0.78-alpha magenta over black landed on
     /// the same color as the hashtag text drawn on top of it.
     func test_the_match_fill_is_opaque() {
         for (name, style) in styles {
             var alpha: CGFloat = 0
-            resolved(DamusColors.highlight, style).getRed(nil, green: nil, blue: nil, alpha: &alpha)
+            resolved(DamusColors.searchMatch, style).getRed(nil, green: nil, blue: nil, alpha: &alpha)
             XCTAssertEqual(alpha, 1.0, accuracy: 0.001,
                 "\(name) mode match fill is translucent, so its contrast depends on the backdrop")
         }
@@ -1446,7 +1463,7 @@ final class SearchHighlightContrastTests: XCTestCase {
                                    highlightTerms: ["memes"])
 
         let highlighted = view.highlightedContent(content).attributed
-        let expected = DamusColors.highlightedText
+        let expected = DamusColors.searchMatchText
 
         var checked = 0
         for run in highlighted.runs where run.backgroundColor != nil {
