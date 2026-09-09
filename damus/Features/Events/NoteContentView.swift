@@ -287,7 +287,7 @@ struct NoteContentView: View {
         }
         .padding(.top, artifacts.content.attributed.characters.count == 0 ? 7 : 0)
         // A small inset separates voice attachments from the reaction bar's own top padding.
-        .padding(.bottom, event.known_kind == .voice && !artifacts.media.isEmpty && !options.contains(.no_media) ? 3 : 0)
+        .padding(.bottom, event.known_kind == .voice && !artifacts.media.isEmpty && !options.contains(.no_media) ? 2 : 0)
     }
 
     var has_previews: Bool {
