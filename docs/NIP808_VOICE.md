@@ -10,12 +10,19 @@ before pressing **Post**. Releasing the microphone never uploads or publishes.
 Reply and quote context stay in the sheet. Mention, link and photo buttons to the
 left of the mic remain available after recording; added items can be reviewed and removed.
 
-Apple Speech is the only transcription service. Both local language support
-(`supportsOnDeviceRecognition`) and `requiresOnDeviceRecognition` are required.
-Permission denial or unavailable local recognition leaves Text usable. A failed
-transcription retains the recording only in this open composer for retry; it never invents transcript text.
-Recording and recognition stop on interruption, backgrounding, navigation or
-account changes, with late completions fenced by the take and account.
+Apple Speech is the only transcription service. With Xcode 26 or newer, supported
+iOS 26 devices use `SpeechTranscriber(locale:preset: .transcription)` with
+`SpeechAnalyzer`, matching Nosis's configuration. Each take gets fresh modules;
+input and final results must both finish successfully. Language assets are installed
+through `AssetInventory` on first use if needed. Only those models download from
+Apple; audio is never uploaded for transcription. Installed models work offline.
+Older OS versions, unsupported hardware and languages use `SFSpeechRecognizer`
+only when `supportsOnDeviceRecognition` is true, with `requiresOnDeviceRecognition`
+always enabled. A supported modern model's runtime failure does not silently switch
+engines. Permission denial or unavailable recognition leaves Text usable; failed
+transcription retains the recording in the open composer for retry.
+Both paths enforce cancellation, a completion timeout and the same transcript limits.
+See Apple's [SpeechAnalyzer overview](https://developer.apple.com/documentation/speech/speechanalyzer).
 
 ## Upload server
 
@@ -31,10 +38,17 @@ the service; an HTTP error allows retry while the composer remains open.
 
 Post sends the finalized AAC/MP4 and prepared JPEG bytes to `PUT /upload`. It uses signed kind
 `24242` authorization scoped to the upload verb, byte hash, server hostname
-and expiration, encoded as unpadded Base64URL. The returned URL, SHA-256, MIME
-and size must match the local bytes. The exact returned URL is retained,
-including an opaque path or query string. Receiving posts accepts arbitrary
-valid HTTPS primary media URLs; the upload setting does not restrict reading.
+and expiration, encoded as unpadded Base64URL. The receipt's SHA-256 and size
+must match the locally decoded file and exact request body. Locally verified
+audio-only MP4 may be reported as `audio/mp4`, `audio/m4a`, `audio/x-m4a`,
+`video/mp4`, `application/mp4`, or an unknown/missing type. Receipt MIME parameters
+do not change that verified container. Damus signs canonical `audio/mp4` metadata
+for these bytes; incompatible formats still fail. Hash, size and type failures
+have separate errors. This receipt compatibility does not relax incoming signed
+media validation or the rejection of actual video tracks in primary audio.
+The exact returned HTTPS URL is retained, including opaque paths and queries.
+Receiving posts accepts arbitrary valid HTTPS primary media URLs; the upload
+setting does not restrict reading.
 
 ## Protocol
 
@@ -131,7 +145,11 @@ The shared row above the transcript uses a rounded adaptive background, a scrubb
 a 1x/2x/3x speed button, and a fixed 52-point play/pause/loading button with the
 same Damus gradient as the microphone and feed compose button. There is no
 "Voice post" label or duration counter. The existing idle-scrub start behavior
-and playback seeking remain available.
+and playback seeking remain available. The composer uses those same controls
+above its transcription and attachments, across the full width of the sheet.
+The compact review heading can wrap for larger text. Preview loading, seeking
+and pause/resume operate on local files without uploading; Post, a new take,
+format changes and dismissal stop pending or active preview playback.
 
 `VoicePlaybackRate` matches Nosis's effective speeds exactly: **1x = 1.0,
 2x = 1.4, 3x = 1.7**. Damus starts at 2x and keeps the selection across rows
@@ -176,6 +194,9 @@ formats voice posts/reposts without importing recording or playback services.
 | Read-side tag-only/mixed photo, video and link attachments; primary exclusion; cached order; verified reposts | `VoiceAttachmentReferences`, `NoteContent`, `NoteContentView`, `ImageMetadata`; executable composition checks and `VoiceIntegrationTests.testVoiceAttachmentsRenderFromWireTagsContentAndVerifiedReposts` |
 | Private text and uncached quote restoration | DraftsModel; added `DraftTests` cases |
 | Exact Nosis playback speeds; keep pause, position and selection across rows | `VoicePlaybackRate`, `VoicePlayback`, `VoiceAudioFiles`; executable composition checks and `VoiceMediaServicesTests.testPlaybackSpeedSurvivesPauseSeekingAndChangingRows` |
+| Local composer preview seeking, cancellation, format changes and cleanup | `VoiceComposerModelTests.testPreviewSeeksPausesAndStopsWhenSwitchingToText`, `testCancelledPreviewCannotPlayAfterTheComposerIsDiscarded` |
+| Compatible Blossom MP4 receipt types with exact bytes and canonical outgoing tags | `VoiceMediaServicesTests.testMP4UploadReceiptsAcceptCompatibleContainerLabelsAndUnknownTypes`, forged-receipt and signed-upload tests |
+| Async transcription success, failure, timeout and late cancellation | `VoiceSpeechJobTests.testAsyncRecognitionValidatesFinalTextAndPropagatesFailure`, `testAsyncRecognitionTimeoutCancelsTheOperation`, `testAsyncRecognitionCancellationRejectsLateSuccess` |
 | App/extension/test source membership | `scripts/check_voice_sources.py`; final Xcode build remains required |
 
 ## Verification status
@@ -206,7 +227,8 @@ mkdir -p build/voice-checks
 The source checker always checks voice files and accepts extra changed Swift
 paths as positional arguments. It checks project membership and parses syntax.
 
-On a Mac, use the actual Xcode app project (not the root Swift package). Choose
+On a Mac, build with Xcode 26 or newer to include the iOS 26 transcriber.
+Use the actual Xcode app project (not the root Swift package). Choose
 an installed simulator UDID from `xcrun simctl list devices available`, set
 `VOICE_SIM_UDID`, and use a dedicated DerivedData directory. Configure normal
 development signing for device builds. `just build` / `just test` are the
@@ -242,9 +264,19 @@ Inspect each complete log and its `.exit` file; an absent exit file means the ru
 has not reported completion. Keep build/test invocations sequential on the same
 DerivedData. Existing private/giftwrap, repost, thread and draft tests must pass.
 
-On supported physical devices, verify offline local recognition, unavailable
-languages, denied permissions, route/interruption/background handling and
-absence of audio restoration after termination. Hold the mic and move onto the
+On a small phone, review a new post, reply and quote in light/dark mode and larger
+text sizes. Verify the heading is readable and the full-width player appears above
+the transcript and attachments. Scrub before playback, cancel loading, pause, change
+speed and resume; the player must match the feed and start at the session's selected
+speed. These visual checks remain manual because this Windows workspace cannot
+run SwiftUI or an iOS simulator.
+
+On supported iOS 26 hardware, verify the modern transcriber with installed assets
+in airplane mode, a first-use language download, an unavailable model while offline,
+and a second take after cancellation. Also verify the on-device legacy path on
+older hardware/OS versions. Check unavailable languages, denied permissions,
+route/interruption/background handling and no audio restoration after termination.
+Hold the mic and move onto the
 trash, back out, and onto it again before releasing; check hover feedback, no
 transcription after trash release, rapid repeated holds, and the VoiceOver
 Start/Stop/Discard actions. These touch, haptic and microphone checks require a

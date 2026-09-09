@@ -49,6 +49,62 @@ final class VoiceComposerModelTests: XCTestCase {
         try await eventually { !f.model.busy }
     }
 
+    /// Local review supports the feed's seeking and playback ownership without publishing.
+    func testPreviewSeeksPausesAndStopsWhenSwitchingToText() async throws {
+        let f = try await fixture()
+        try await record(f)
+        let draft = try XCTUnwrap(f.model.draft)
+        let take = try XCTUnwrap(draft.takeID)
+        let playback = VoicePlayback.shared
+        let speed = playback.playbackRate
+        defer { while playback.playbackRate != speed { playback.cyclePlaybackRate() } }
+        f.model.seekPreview(0.25)
+        f.model.preview()
+        XCTAssertTrue(f.model.previewLoading)
+        XCTAssertTrue(f.model.canSend)
+        try await eventually { !f.model.previewLoading }
+        XCTAssertNil(f.model.error)
+        XCTAssertEqual(playback.owner, take.uuidString)
+        XCTAssertTrue(playback.isPlaying)
+        XCTAssertGreaterThanOrEqual(playback.position, 0.25)
+        f.model.preview()
+        XCTAssertFalse(playback.isPlaying)
+        f.model.seekPreview(0.1)
+        XCTAssertEqual(playback.position, 0.1, accuracy: 0.03)
+        playback.cyclePlaybackRate()
+        XCTAssertFalse(playback.isPlaying)
+        f.model.preview()
+        XCTAssertTrue(playback.isPlaying)
+        f.model.changeMode(.text)
+        XCTAssertNil(playback.owner)
+        XCTAssertNil(playback.requestedOwner)
+        XCTAssertEqual(f.model.draft, draft)
+        let uploads = await f.uploader.calls, posts = await f.publisher.events.count
+        XCTAssertEqual(uploads, 0)
+        XCTAssertEqual(posts, 0)
+    }
+
+    /// Cancelling and closing before loading yields cannot let a late preview start playing.
+    func testCancelledPreviewCannotPlayAfterTheComposerIsDiscarded() async throws {
+        let f = try await fixture()
+        try await record(f)
+        let draft = try XCTUnwrap(f.model.draft)
+        let file = try await f.store.file(for: XCTUnwrap(draft.takeID), context: draft.context)
+        f.model.preview()
+        XCTAssertTrue(f.model.previewLoading)
+        f.model.preview()
+        XCTAssertFalse(f.model.previewLoading)
+        XCTAssertNil(VoicePlayback.shared.requestedOwner)
+        f.model.preview()
+        f.model.disappear()
+        await f.model.waitUntilClosed()
+        XCTAssertFalse(f.model.previewLoading)
+        XCTAssertNil(VoicePlayback.shared.owner)
+        XCTAssertNil(VoicePlayback.shared.requestedOwner)
+        XCTAssertNil(f.model.draft)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+    }
+
     func testReleaseFinalizesAndReviewsWithoutUploadOrPublication() async throws {
         let finish = VoiceTestGate()
         let f = try await fixture(recorder: ControlledVoiceRecorder(finishGate: finish))

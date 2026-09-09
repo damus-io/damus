@@ -698,20 +698,23 @@ struct PostView: View {
         }
     }
     
+    /// Audio reviews span the sheet; text keeps its existing avatar-and-editor layout.
     func Editor(deviceSize: GeometryProxy) -> some View {
         HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .top) {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                    
-                    VStack(alignment: .leading) {
-                        if let prompt_view {
-                            prompt_view()
-                        }
-                        if voice.mode == .audio {
+                Group {
+                    if voice.mode == .audio {
+                        VStack(alignment: .leading, spacing: 12) {
+                            if let prompt_view { prompt_view() }
                             VoiceTranscriptReview(model: voice)
-                        } else {
-                            TextEntry
+                        }
+                    } else {
+                        HStack(alignment: .top) {
+                            ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
+                            VStack(alignment: .leading) {
+                                if let prompt_view { prompt_view() }
+                                TextEntry
+                            }
                         }
                     }
                 }

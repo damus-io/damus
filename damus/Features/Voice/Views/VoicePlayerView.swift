@@ -134,6 +134,77 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 }
 
+/// Identical, theme-aware controls for published posts and the composer's local recording.
+struct VoicePlayerControls: View {
+    @Binding var position: TimeInterval
+    let duration: TimeInterval?
+    let ownsPlayback: Bool
+    let isPlaying: Bool
+    let loading: Bool
+    let playbackRate: VoicePlaybackRate
+    let toggle: () -> Void
+    let cycleRate: () -> Void
+    let onEditingChanged: (Bool) -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Slider(value: $position, in: 0...max(1, duration ?? 0), onEditingChanged: onEditingChanged)
+                .tint(DamusColors.adaptablePurpleForeground)
+                .disabled(!ownsPlayback && duration == nil)
+                .accessibilityLabel("Recording position")
+                .accessibilityHint(ownsPlayback ? "" : "Adjust to choose where playback starts")
+                .accessibilityIdentifier("voice.scrubber")
+            speedButton
+            playButton
+        }
+        .padding(.leading, 12)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .background(DamusColors.adaptablePurpleBackground.opacity(0.3),
+                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    /// Fixed sizes keep loading, play and pause from shifting the scrubber.
+    private var playButton: some View {
+        Button(action: toggle) {
+            ZStack {
+                Circle().fill(LINEAR_GRADIENT)
+                if loading {
+                    ProgressView().tint(.white)
+                } else {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+            .frame(width: 52, height: 52)
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loading ? "Cancel loading voice recording" :
+                            (isPlaying ? "Pause voice recording" : "Play voice recording"))
+        .accessibilityIdentifier("voice.play")
+    }
+
+    private var speedButton: some View {
+        Button(action: cycleRate) {
+            Text(playbackRate.label)
+                .font(.system(.body, design: .rounded).weight(.bold))
+                .monospacedDigit()
+                .foregroundColor(DamusColors.adaptableBlack)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Playback speed")
+        .accessibilityValue(playbackRate.label)
+        .accessibilityHint("Cycles through three playback speeds")
+        .accessibilityIdentifier("voice.speed")
+    }
+}
+
 /// Explicit playback only: merely displaying a post never downloads its recording.
 struct VoicePlayerView: View {
     let event: NostrEvent
@@ -165,22 +236,10 @@ struct VoicePlayerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Slider(value: Binding(get: { knob }, set: { scrub($0) }), in: 0...max(1, length ?? 0),
-                       onEditingChanged: { editing in scrubEnded(editing) })
-                    .tint(DamusColors.adaptablePurpleForeground)
-                    .disabled(!owns && length == nil)
-                    .accessibilityLabel("Recording position")
-                    .accessibilityHint(owns ? "" : "Adjust to choose where playback starts")
-                    .accessibilityIdentifier("voice.scrubber")
-                speedButton
-                playButton
-            }
-            .padding(.leading, 12)
-            .padding(.trailing, 8)
-            .padding(.vertical, 8)
-            .background(DamusColors.adaptablePurpleBackground.opacity(0.3),
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            VoicePlayerControls(position: Binding(get: { knob }, set: { scrub($0) }),
+                                duration: length, ownsPlayback: owns, isPlaying: owns && playback.isPlaying,
+                                loading: loading, playbackRate: playback.playbackRate,
+                                toggle: toggle, cycleRate: playback.cyclePlaybackRate, onEditingChanged: scrubEnded)
             if let error { Text(error).font(.caption).foregroundColor(.secondary).accessibilityIdentifier("voice.mediaError") }
         }
         // The parent post stack supplies the spacing below the player.
@@ -192,46 +251,6 @@ struct VoicePlayerView: View {
             pendingSeek = nil
             if owns || playback.requestedOwner == identity { playback.stop() }
         }
-    }
-
-    /// Fixed control sizes keep loading, play and pause from shifting the scrubber.
-    private var playButton: some View {
-        Button(action: toggle) {
-            ZStack {
-                Circle().fill(LINEAR_GRADIENT)
-                if loading {
-                    ProgressView().tint(.white)
-                } else {
-                    Image(systemName: owns && playback.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-            }
-            .frame(width: 52, height: 52)
-            .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(loading ? "Cancel loading voice recording" :
-                            (owns && playback.isPlaying ? "Pause voice recording" : "Play voice recording"))
-        .accessibilityIdentifier("voice.play")
-    }
-
-    private var speedButton: some View {
-        Button(action: playback.cyclePlaybackRate) {
-            Text(playback.playbackRate.label)
-                .font(.system(.body, design: .rounded).weight(.bold))
-                .monospacedDigit()
-                .foregroundColor(DamusColors.adaptableBlack)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-                .frame(width: 44, height: 44)
-                .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Playback speed")
-        .accessibilityValue(playback.playbackRate.label)
-        .accessibilityHint("Cycles through three playback speeds")
-        .accessibilityIdentifier("voice.speed")
     }
 
     /// Pause or resume while this row plays, cancel while it loads, otherwise start from the knob.

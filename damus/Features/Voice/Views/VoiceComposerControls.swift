@@ -1,5 +1,4 @@
 import SwiftUI
-import Speech
 import UIKit
 
 /// Readable transcript review replaces the normal tappable text editor in Audio mode.
@@ -10,13 +9,22 @@ struct VoiceTranscriptReview: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
+            HStack(alignment: .center, spacing: 12) {
+                ProfilePicView(pubkey: model.state.pubkey, size: PFP_SIZE, highlight: .none,
+                               profiles: model.state.profiles, disable_animation: model.state.settings.disable_animation,
+                               damusState: model.state)
                 Text(model.status).font(.subheadline).foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityIdentifier("voice.status")
-                Spacer()
-                Button { settingsPresented = true } label: { Image(systemName: "gearshape") }
-                    .accessibilityLabel("Voice recording settings")
-                    .disabled(model.busy)
+                Button { settingsPresented = true } label: {
+                    Image(systemName: "gearshape").frame(width: 44, height: 44)
+                }
+                .accessibilityLabel("Voice recording settings")
+                .disabled(model.busy)
+            }
+            if let take = model.draft?.takeID {
+                VoiceRecordingPreview(model: model, takeID: take).id(take)
             }
             if let text = model.draft?.transcript {
                 Text(text).textSelection(.enabled)
@@ -29,11 +37,8 @@ struct VoiceTranscriptReview: View {
             VoiceAttachmentReview(model: model)
             if model.draft?.takeID != nil || model.draft?.pendingTakeID != nil {
                 HStack {
-                    if model.draft?.takeID != nil {
-                        Button { model.preview() } label: { Label("Listen", systemImage: "play.circle") }
-                        if model.draft?.transcript == nil && model.draft?.eventJSON == nil {
-                            Button("Retry transcription") { model.retryTranscription() }
-                        }
+                    if model.draft?.takeID != nil && model.draft?.transcript == nil && model.draft?.eventJSON == nil {
+                        Button("Retry transcription") { model.retryTranscription() }
                     }
                     Spacer()
                     if model.draft?.eventJSON == nil {
@@ -61,6 +66,29 @@ struct VoiceTranscriptReview: View {
             Button("Yes, discard", role: .destructive) { model.discard() }
             Button("Keep editing", role: .cancel) {}
         }
+    }
+}
+
+/// The draft player uses local bytes and the shared feed controls, above the transcription.
+private struct VoiceRecordingPreview: View {
+    @ObservedObject var model: VoiceComposerModel
+    let takeID: UUID
+    @ObservedObject private var playback = VoicePlayback.shared
+
+    private var owns: Bool { playback.owner == takeID.uuidString }
+
+    var body: some View {
+        VoicePlayerControls(
+            position: Binding(get: { owns ? playback.position : model.previewPosition }, set: model.seekPreview),
+            duration: owns ? playback.duration : model.draft?.duration,
+            ownsPlayback: owns, isPlaying: owns && playback.isPlaying,
+            loading: model.previewLoading, playbackRate: playback.playbackRate,
+            toggle: model.preview, cycleRate: playback.cyclePlaybackRate,
+            onEditingChanged: { editing in
+                if !editing && !owns && !model.previewLoading { model.preview() }
+            })
+        .disabled(model.busy)
+        .onDisappear(perform: model.stopPreview)
     }
 }
 
@@ -304,6 +332,7 @@ private struct VoiceRecordingSettings: View {
     @Environment(\.dismiss) private var dismiss
     @State private var server = ""
     @State private var locale = Locale.current.identifier
+    @State private var locales = [Locale.current.identifier]
     @State private var error: String?
 
     var body: some View {
@@ -320,11 +349,11 @@ private struct VoiceRecordingSettings: View {
                 }
                 Section("On-device transcription") {
                     Picker("Language", selection: $locale) {
-                        ForEach(SFSpeechRecognizer.supportedLocales().map(\.identifier).sorted(), id: \.self) { identifier in
+                        ForEach(Array(Set(locales + [locale])).sorted(), id: \.self) { identifier in
                             Text(Locale.current.localizedString(forIdentifier: identifier) ?? identifier).tag(identifier)
                         }
                     }
-                    Text("Apple recognition runs on this device. Availability depends on your device and language; there is no cloud fallback.")
+                    Text("Transcription runs on this device. Supported iOS 26 devices use Apple's latest speech model. A language model may need to download before its first use; your recording is never sent for transcription.")
                         .font(.caption).foregroundColor(.secondary)
                 }
                 if let error { Text(error).foregroundColor(.red) }
@@ -344,6 +373,7 @@ private struct VoiceRecordingSettings: View {
                 }
             }
             .onAppear { server = model.state.settings.voice_blossom_server; locale = model.locale }
+            .task { locales = await AppleVoiceTranscriber.supportedLocaleIdentifiers() }
         }
     }
 }

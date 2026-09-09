@@ -13,6 +13,10 @@ final class VoiceComposerModel: ObservableObject {
     @Published private(set) var error: String?
     @Published private(set) var elapsed: TimeInterval = 0
     @Published private(set) var photoPreviews: [UUID: UIImage] = [:]
+    @Published private(set) var previewLoading = false
+    @Published private(set) var previewPosition: TimeInterval = 0
+    private var previewTask: Task<Void, Never>?
+    private var previewRequestID = UUID()
     @Published var confirmingDiscard = false
     @Published var locale = Locale.current.identifier
     let state: DamusState
@@ -100,7 +104,7 @@ final class VoiceComposerModel: ObservableObject {
             case .accepted: return "Accepted by \(draft?.acceptedRelays.count ?? 0) relay(s)."
             case .rejected: return "A relay rejected this post. You can retry."
             case .retryable: return "Delivery needs a retry."
-            default: return draft?.takeID == nil ? "Hold the microphone to record" : "Review your recording before posting"
+            default: return draft?.takeID == nil ? "Hold to record" : "Review recording"
             }
         }
     }
@@ -172,6 +176,7 @@ final class VoiceComposerModel: ObservableObject {
     func beginHold() {
         guard mode == .audio, supportsAction, visible, lease != nil, !holding, !busy,
               var draft, draft.eventJSON == nil else { return }
+        stopPreview()
         holding = true
         hoveringTrash = false
         error = nil
@@ -286,6 +291,7 @@ final class VoiceComposerModel: ObservableObject {
 
     func retryTranscription() {
         guard mode == .audio, visible, lease != nil, !busy, draft?.takeID != nil, draft?.eventJSON == nil else { return }
+        stopPreview()
         phase = .transcribing
         operation = Task {
             do { try await transcribeCurrent() } catch { finishFailure(error) }
@@ -398,6 +404,7 @@ final class VoiceComposerModel: ObservableObject {
     /// Only Post uploads media and hands the exact signed event to the relay queue.
     func send() async {
         guard canSend, var saved = draft, let keypair = state.keypair.to_full() else { return }
+        stopPreview()
         error = nil
         phase = saved.eventJSON == nil ? .uploading : .publishing
         operation = Task {
@@ -451,21 +458,52 @@ final class VoiceComposerModel: ObservableObject {
         await operation?.value
     }
 
+    /// Review local, verified bytes with the same playback owner and speeds as feed posts.
+    /// Preview loading is independent of composing, so Post and discard remain responsive.
     func preview() {
-        guard mode == .audio, visible, lease != nil, !busy, let saved = draft, let take = saved.takeID else { return }
+        guard mode == .audio, visible, state.voiceLifetime.isActive, lease != nil, !busy,
+              let saved = draft, let take = saved.takeID else { return }
+        if previewLoading { stopPreview(); return }
         if VoicePlayback.shared.owner == take.uuidString { VoicePlayback.shared.toggle(); return }
         do { try VoicePlayback.shared.beginRequest(owner: take.uuidString) }
-        catch { finishFailure(error); return }
-        phase = .loading
-        operation = Task {
+        catch { self.error = error.localizedDescription; return }
+        let request = UUID()
+        previewRequestID = request
+        previewLoading = true
+        error = nil
+        previewTask = Task {
             do {
                 let file = try await store.file(for: take, context: saved.context)
                 let audio = try await VoiceAudioFiles.shared.inspect(file, expectedHash: saved.sha256)
                 try checkActive()
-                guard draft?.id == saved.id, draft?.takeID == take, mode == .audio else { throw CancellationError() }
-                try VoicePlayback.shared.play(audio, owner: take.uuidString, video: state.video)
-                phase = .ready
-            } catch { finishFailure(error) }
+                guard previewRequestID == request, draft?.id == saved.id,
+                      draft?.takeID == take, mode == .audio else { throw CancellationError() }
+                try VoicePlayback.shared.play(audio, owner: take.uuidString, video: state.video, from: previewPosition)
+            } catch is CancellationError {}
+            catch { if previewRequestID == request { self.error = error.localizedDescription } }
+            if previewRequestID == request {
+                previewLoading = false
+                previewPosition = 0
+            }
+        }
+    }
+
+    /// Scrub playing audio immediately, or retain a start position while local bytes load.
+    func seekPreview(_ time: TimeInterval) {
+        guard time.isFinite, mode == .audio, visible, !busy, let take = draft?.takeID else { return }
+        if VoicePlayback.shared.owner == take.uuidString { VoicePlayback.shared.seek(time) }
+        else { previewPosition = min(max(0, time), draft?.duration ?? 0) }
+    }
+
+    /// A cancelled or hidden preview cannot take playback after another recording starts.
+    func stopPreview() {
+        previewRequestID = UUID()
+        previewTask?.cancel()
+        previewLoading = false
+        previewPosition = 0
+        if let owner = draft?.takeID?.uuidString,
+           VoicePlayback.shared.owner == owner || VoicePlayback.shared.requestedOwner == owner {
+            VoicePlayback.shared.stop()
         }
     }
 
@@ -490,6 +528,7 @@ final class VoiceComposerModel: ObservableObject {
     /// Backgrounding and format changes preserve only the currently open composition.
     func suspend() {
         guard closing == nil, phase != .publishing else { return }
+        stopPreview()
         VoicePlayback.shared.stop()
         // Empty preparation starts no media work. Let it settle across rapid format changes.
         if phase == .loading && draft == nil { return }
@@ -508,6 +547,8 @@ final class VoiceComposerModel: ObservableObject {
     private func beginCleanup(close: Bool) -> Task<Bool, Never> {
         if close { visible = false; closingRequested = true }
         if let closing { return closing }
+        let preview = previewTask
+        stopPreview()
         let pending = operation
         if phase != .publishing { pending?.cancel() }
         holding = false
@@ -517,6 +558,7 @@ final class VoiceComposerModel: ObservableObject {
         phase = .discarding
         closing = Task {
             await pending?.value
+            await preview?.value
             if writerOpen {
                 try? await recorder.finish()
                 writerOpen = false
