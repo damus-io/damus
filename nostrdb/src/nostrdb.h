@@ -596,8 +596,9 @@ int ndb_create_keypair(struct ndb_keypair *key);
 int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
 int ndb_note_verify(void *secp_ctx, unsigned char *scratch, size_t scratch_size, struct ndb_note *note);
 
-/* Bound the memory used to validate an untrusted embedded NIP-808 event. */
-#define NDB_VOICE_REPOST_SCRATCH_SIZE (2 * 1024 * 1024)
+/* Bound untrusted embedded NIP-808 validation to 2 MiB.
+ * Keep this a literal so Swift's Clang importer exposes the constant. */
+#define NDB_VOICE_REPOST_SCRATCH_SIZE 2097152
 
 /* Verify both signatures and the primary e/p/k tags of a kind-1809 repost.
  * Optional NIP-188 source tags are not the target. On success, copy the
