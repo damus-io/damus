@@ -181,8 +181,12 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     
+    /// Voice originals must have been verified by the background admission path.
     private func insert_repost(_ ev: NostrEvent, cache: EventCache) -> Bool {
-        guard let reposted_ev = ev.get_inner_event(cache: cache) else {
+        let original = ev.known_kind == .voice_repost
+            ? ev.get_cached_inner_event(cache: cache)
+            : ev.get_inner_event(cache: cache)
+        guard let reposted_ev = original else {
             return false
         }
         
@@ -223,11 +227,11 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     private func insert_event_immediate(_ ev: NostrEvent, cache: EventCache) -> Bool {
-        if ev.known_kind == .boost {
+        if ev.known_kind?.isRepost == true {
             return insert_repost(ev, cache: cache)
         } else if ev.known_kind == .like {
             return insert_reaction(ev)
-        } else if ev.known_kind == .text {
+        } else if ev.known_kind?.isPost == true {
             return insert_text(ev)
         }
         

@@ -51,6 +51,10 @@ class DraftArtifacts: Equatable {
     /// This will be the unique identifier in the NIP-37 note
     let id: String
 
+    /// Keep the captured parent while editing, and its authored tags after a restart.
+    var context_event: NostrEvent?
+    private var restored_event: NostrEvent?
+
     init(content: NSMutableAttributedString = NSMutableAttributedString(string: ""), media: [UploadedMedia] = [], references: [RefId], id: String, is_private_reply: Bool = false) {
         self.content = content
         self.media = media
@@ -94,9 +98,50 @@ class DraftArtifacts: Equatable {
         // the same reason every draft is — `owned_from_json` will not read a note back without an
         // `id` and a `sig` — and it is a signature on a note that lives only in the content string of
         // a local, PNS-encrypted draft event, never in nostrdb's note index and never on a relay.
+        restored_event = note
         return NIP37Draft(unwrapped_note: note, draft_id: self.id, is_private_reply: self.is_private_reply)
     }
     
+    static func quotedNoteID(_ reference: Bech32Object) -> NoteId? {
+        switch reference {
+        case .note(let id): return id
+        case .nevent(let event): return event.noteid
+        default: return nil
+        }
+    }
+
+    static func quoteID(in event: NostrEvent) -> NoteId? {
+        guard event.direct_replies() == nil else { return nil }
+        return event.tags.strings().lazy.compactMap { tag -> NoteId? in
+            guard tag.first == "q", tag.count > 1 else { return nil }
+            return NoteId(hex: tag[1])
+        }.first
+    }
+
+    /// Saving must not depend on the reply/quote target remaining in the database cache.
+    func to_nip37_draft(target: NoteId, is_quote: Bool, damus_state: DamusState) async throws -> NIP37Draft? {
+        if let parent = context_event?.id == target ? context_event : (try? damus_state.ndb.lookup_note_and_copy(target)) {
+            return try await to_nip37_draft(action: is_quote ? .quoting(parent) : .replying_to(parent), damus_state: damus_state)
+        }
+        guard let template = restored_event, let keypair = damus_state.keypair.to_full(),
+              is_quote ? Self.quoteID(in: template) == target : template.direct_replies() == target else { return nil }
+        let body = await build_post(state: damus_state, action: .posting(.user(damus_state.pubkey)), draft: self)
+        var content = body.content
+        let context_tags = template.tags.strings().filter { $0.first == (is_quote ? "q" : "e") }
+        if is_quote {
+            let blocks = parse_post_blocks(content: template.content)?.blocks ?? []
+            let reference = blocks.last { block in
+                guard case .mention(let mention) = block else { return false }
+                return Self.quotedNoteID(mention.ref.nip19) == target
+            }?.asString ?? "nostr:\(bech32_note_id(target))"
+            content += "\n\n" + reference
+        }
+        let post = NostrPost(content: content, kind: .text, tags: context_tags + body.tags)
+        guard let note = post.to_event(keypair: keypair, clientTag: damus_state.clientTagComponents) else { return nil }
+        restored_event = note
+        return NIP37Draft(unwrapped_note: note, draft_id: id, is_private_reply: is_private_reply)
+    }
+
     /// Instantiates a draft object from a NIP-37 draft
     /// - Parameters:
     ///   - nip37_draft: The NIP-37 draft object
@@ -125,7 +170,10 @@ class DraftArtifacts: Equatable {
         guard let parsed_blocks = parse_note_content(content: .init(note: event, keypair: damus_state.keypair)) else {
             return nil
         }
-        return Self.from(parsed_blocks: parsed_blocks, references: Array(event.references), draft_id: draft_id, damus_state: damus_state)
+        let artifacts = Self.from(parsed_blocks: parsed_blocks, references: Array(event.references),
+                                  draft_id: draft_id, damus_state: damus_state, quoted_note_id: Self.quoteID(in: event))
+        artifacts.restored_event = event
+        return artifacts
     }
     
     /// Load a draft artifacts object from parsed Nostr event blocks
@@ -136,10 +184,16 @@ class DraftArtifacts: Equatable {
     ///   - draft_id: The unique ID of the draft as per NIP-37
     ///   - damus_state: Damus state, used for fetching profile info in NostrDB
     /// - Returns: The draft that can be loaded into `PostView`.
-    static func from(parsed_blocks: Blocks, references: [RefId], draft_id: String, damus_state: DamusState) -> DraftArtifacts {
+    static func from(parsed_blocks: Blocks, references: [RefId], draft_id: String, damus_state: DamusState, quoted_note_id: NoteId? = nil) -> DraftArtifacts {
         let rich_text_content: NSMutableAttributedString = .init(string: "")
         var media: [UploadedMedia] = []
-        for block in parsed_blocks.blocks {
+        let quote_index = quoted_note_id.flatMap { id in
+            parsed_blocks.blocks.lastIndex { block in
+                guard case .mention(let mention) = block else { return false }
+                return Self.quotedNoteID(mention.ref.nip19) == id
+            }
+        }
+        for (index, block) in parsed_blocks.blocks.enumerated() {
             switch block {
             case .mention(let mention):
                 if let pubkey = mention.ref.nip19.pubkey() {
@@ -158,8 +212,8 @@ class DraftArtifacts: Equatable {
                         ]
                     )
                     rich_text_content.append(attributed_string)
-                } else if case .note(_) = mention.ref.nip19 {
-                    // These note references occur when we quote a note, and since that is tracked via `PostAction` in `PostView`, ignore it here to avoid attaching the same event twice in a note
+                } else if index == quote_index {
+                    // Remove only the selected quote; preserve other typed event references.
                     continue
                 } else {
                     // Other references
@@ -289,19 +343,7 @@ class Drafts: ObservableObject {
         guard let nip37_draft = NIP37Draft(draft_note: draft_note) else { return false }
         let drafted_note = nip37_draft.unwrapped_note
         guard let known_kind = drafted_note.known_kind else { return false }
-        guard let parsed_blocks = parse_note_content(content: .init(note: drafted_note, keypair: damus_state.keypair)) else { return false }
-
-        let draft_artifacts = DraftArtifacts.from(
-            parsed_blocks: parsed_blocks,
-            references: Array(drafted_note.references),
-            draft_id: nip37_draft.id,
-            damus_state: damus_state
-        )
-        // The lock has to come back on with the draft. A private reply reopening as a public one is
-        // the failure this feature must never have, so it rides on the wrapper rather than being
-        // re-derived from the drafted note — which, being byte-identical to a public reply, cannot
-        // say.
-        draft_artifacts.is_private_reply = nip37_draft.is_private_reply
+        guard let draft_artifacts = DraftArtifacts.from(nip37_draft: nip37_draft, damus_state: damus_state) else { return false }
 
         // Find out where to place this draft
         switch known_kind {
@@ -309,7 +351,7 @@ class Drafts: ObservableObject {
             if let replied_to_note_id = drafted_note.direct_replies() {
                 self.replies[replied_to_note_id] = draft_artifacts
             }
-            else if let quoted_note_id = Self.quoted_note_id(in: parsed_blocks) {
+            else if let quoted_note_id = DraftArtifacts.quoteID(in: drafted_note) {
                 self.quotes[quoted_note_id] = draft_artifacts
             }
             else {
@@ -324,15 +366,7 @@ class Drafts: ObservableObject {
         return true
     }
 
-    /// The note a draft quotes, if it quotes one.
-    private static func quoted_note_id(in blocks: Blocks) -> NoteId? {
-        for block in blocks.blocks {
-            if case .mention(let mention) = block, case .note(let note_id) = mention.ref.nip19 {
-                return note_id
-            }
-        }
-        return nil
-    }
+
 
     /// Saves the drafts tracked by this class persistently into NostrDB.
     func save(damus_state: DamusState) async {
@@ -359,12 +393,10 @@ class Drafts: ObservableObject {
             append(try? await post_artifacts.to_nip37_draft(action: .posting(.user(damus_state.pubkey)), damus_state: damus_state))
         }
         for (replied_to_note_id, reply_artifacts) in self.replies {
-            guard let replied_to_note = try? damus_state.ndb.lookup_note_and_copy(replied_to_note_id) else { continue }
-            append(try? await reply_artifacts.to_nip37_draft(action: .replying_to(replied_to_note), damus_state: damus_state))
+            append(try? await reply_artifacts.to_nip37_draft(target: replied_to_note_id, is_quote: false, damus_state: damus_state))
         }
         for (quoted_note_id, quote_note_artifacts) in self.quotes {
-            guard let quoted_note = try? damus_state.ndb.lookup_note_and_copy(quoted_note_id) else { continue }
-            append(try? await quote_note_artifacts.to_nip37_draft(action: .quoting(quoted_note), damus_state: damus_state))
+            append(try? await quote_note_artifacts.to_nip37_draft(target: quoted_note_id, is_quote: true, damus_state: damus_state))
         }
         for (highlight, highlight_note_artifacts) in self.highlights {
             append(try? await highlight_note_artifacts.to_nip37_draft(action: .highlighting(highlight), damus_state: damus_state))

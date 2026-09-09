@@ -41,7 +41,7 @@ final class AdvancedSearchQueryTests: XCTestCase {
     func test_kinds_are_never_empty() {
         var query = AdvancedSearchQuery(kinds: [])
         XCTAssertEqual(query.kinds, AdvancedSearchQuery.defaultKinds)
-        XCTAssertEqual(query.kinds, [.text, .longform])
+        XCTAssertEqual(query.kinds, [.text, .voice, .longform])
 
         query.kinds = []
         XCTAssertEqual(query.kinds, AdvancedSearchQuery.defaultKinds)
@@ -61,8 +61,8 @@ final class AdvancedSearchQueryTests: XCTestCase {
         XCTAssertEqual(AdvancedSearchQuery(kinds: [.text, .longform]).authorLimit, 32)
         XCTAssertEqual(AdvancedSearchQuery(kinds: [.text]).authorLimit, 64)
 
-        let authors = (0..<33).map({ i in Pubkey(Data(repeating: UInt8(i), count: 32)) })
-        XCTAssertFalse(AdvancedSearchQuery(authors: Array(authors.prefix(32))).exceedsAuthorLimit)
+        let authors = (0..<22).map({ i in Pubkey(Data(repeating: UInt8(i), count: 32)) })
+        XCTAssertFalse(AdvancedSearchQuery(authors: Array(authors.prefix(21))).exceedsAuthorLimit)
         XCTAssertTrue(AdvancedSearchQuery(authors: authors).exceedsAuthorLimit)
     }
 
@@ -188,7 +188,7 @@ final class AdvancedSearchPlannerTests: XCTestCase {
         }
 
         XCTAssertEqual(filter.authors, [author_a])
-        XCTAssertEqual(filter.kinds, [.text, .longform], "kinds must always be set, or the query falls to a full scan")
+        XCTAssertEqual(filter.kinds, [.text, .voice, .longform], "kinds must always be set, or the query falls to a full scan")
         XCTAssertNil(filter.search, "the index-walk strategy must not route onto nostrdb's SEARCH plan")
         XCTAssertEqual(maxResults, AdvancedSearchPlanner.indexWalkCandidateLimit)
         XCTAssertEqual(matcher, SearchContentMatcher(keywords: ["art"], phrases: []))
@@ -216,7 +216,7 @@ final class AdvancedSearchPlannerTests: XCTestCase {
 
         XCTAssertEqual(probe, "quick brown fox")
         XCTAssertNil(filter.authors)
-        XCTAssertEqual(filter.kinds, [.text, .longform])
+        XCTAssertEqual(filter.kinds, [.text, .voice, .longform])
         XCTAssertEqual(limit, Ndb.max_text_search_results)
         XCTAssertFalse(matcher.isEmpty, "the global strategy always verifies its hits")
     }
@@ -232,7 +232,7 @@ final class AdvancedSearchPlannerTests: XCTestCase {
         }
 
         XCTAssertEqual(filter.hashtag, ["nostr"])
-        XCTAssertEqual(filter.kinds, [.text, .longform])
+        XCTAssertEqual(filter.kinds, [.text, .voice, .longform])
         XCTAssertNil(filter.authors)
         XCTAssertNil(matcher, "a hashtag is enforced by the filter, so no note has to be opened")
     }
@@ -692,7 +692,11 @@ final class AdvancedSearchQueryDSLTests: XCTestCase {
         XCTAssertEqual(parse("kind:note art").query.kinds, [.text])
         XCTAssertEqual(parse("kind:longform art").query.kinds, [.longform])
         XCTAssertEqual(parse("kind:article art").query.kinds, [.longform])
-        XCTAssertEqual(parse("kind:note kind:longform art").query.kinds, AdvancedSearchQuery.defaultKinds)
+        XCTAssertEqual(parse("kind:note kind:longform art").query.kinds, [.text, .longform])
+        XCTAssertEqual(parse("kind:voice art").query.kinds, [.voice])
+        XCTAssertEqual(parse("kind:audio art").query.kinds, [.voice])
+        XCTAssertEqual(parse("kind:1808 art").query.kinds, [.voice])
+        XCTAssertEqual(parse("kind:note kind:voice kind:longform art").query.kinds, AdvancedSearchQuery.defaultKinds)
         XCTAssertEqual(parse("art").query.kinds, AdvancedSearchQuery.defaultKinds)
     }
 
@@ -1127,9 +1131,9 @@ final class AdvancedSearchConstraintTests: XCTestCase {
         }
     }
 
-    /// Dropping the content-type chip has to go back to searching both kinds, not
+    /// Dropping the content-type chip restores every indexed kind, rather than
     /// to searching none — which the model would refuse anyway.
-    func test_removing_the_kind_chip_restores_the_default_pair() {
+    func test_removing_the_kind_chip_restores_all_indexed_kinds() {
         let query = AdvancedSearchQuery(keywords: ["art"], kinds: [.text])
         XCTAssertEqual(AdvancedSearchConstraint.kinds([.text]).removed(from: query).kinds,
                        AdvancedSearchQuery.defaultKinds)

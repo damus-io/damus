@@ -170,13 +170,19 @@ func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> Image
 }
 
 
+/// Primary voice audio is verified by the voice player, never preloaded as image metadata.
 func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
+    let isVoice = ev.known_kind == .voice
+    let primaryURLs = isVoice ? Set(ev.tags.strings().filter { $0.first == "url" && $0.count > 1 }
+        .compactMap { URL(string: $0[1]) }) : Set<URL>()
     return ev.tags.reduce(into: [ImageMetadata]()) { meta, tag in
         guard tag.count >= 2, tag[0].matches_str("imeta"),
-              let data = ImageMetadata(tag: tag.strings()) else {
-            return
+              let data = ImageMetadata(tag: tag.strings()) else { return }
+        if isVoice {
+            guard !primaryURLs.contains(data.url) else { return }
+            let types = tag.strings().dropFirst().filter { $0.hasPrefix("m ") }.map { String($0.dropFirst(2)).lowercased() }
+            guard types.allSatisfy({ $0.hasPrefix("image/") }) else { return }
         }
-        
         meta.append(data)
     }
 }

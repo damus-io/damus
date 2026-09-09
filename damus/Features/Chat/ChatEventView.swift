@@ -373,7 +373,7 @@ struct ChatEventView: View {
     }
 
     var body: some View {
-        if [.boost, .zap, .longform].contains(where: { event.known_kind == $0 }) {
+        if [.boost, .voice_repost, .zap, .longform].contains(where: { event.known_kind == $0 }) {
             EmptyView()
         } else {
             self.content

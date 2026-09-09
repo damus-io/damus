@@ -261,6 +261,40 @@ class damusUITests: XCTestCase {
         guard app.buttons[AID.sign_in_confirm_button.rawValue].tapIfExists(timeout: 5) else { throw DamusUITestError.timeout_waiting_for_element }
     }
     
+    /// Uses the real sheet and accessibility tree without recording, uploading or posting.
+    func testAudioModeDismissesKeyboardAndPreservesTextDraft() throws {
+        try loginIfNotAlready()
+        let editor = try openEmptyPostComposer()
+        let format = app.segmentedControls["post.format"]
+        XCTAssertTrue(format.waitForExistence(timeout: 5))
+        XCTAssertTrue(format.buttons["Text"].isSelected)
+        editor.typeText("Keep this text draft")
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+
+        format.buttons["Audio"].tap()
+        let keyboardGone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: app.keyboards.firstMatch)
+        let editorGone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: editor)
+        wait(for: [keyboardGone, editorGone], timeout: 5)
+        let microphone = app.descendants(matching: .any)["voice.microphone"].firstMatch
+        XCTAssertTrue(microphone.waitForExistence(timeout: 5))
+        XCTAssertTrue(microphone.isHittable)
+        XCTAssertGreaterThan(microphone.frame.midY, app.frame.midY)
+        XCTAssertTrue(app.buttons["Post"].exists)
+        XCTAssertFalse(app.buttons["Post"].isEnabled)
+
+        format.buttons["Text"].tap()
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        XCTAssertEqual(editor.value as? String, "Keep this text draft")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+        app.buttons[AID.post_composer_cancel_button.rawValue].tap()
+        app.buttons[AID.post_button.rawValue].tap()
+        XCTAssertTrue(format.waitForExistence(timeout: 5))
+        XCTAssertTrue(format.buttons["Text"].isSelected)
+        XCTAssertEqual(editor.value as? String, "Keep this text draft")
+        clearPostComposer(editor)
+        app.buttons[AID.post_composer_cancel_button.rawValue].tap()
+    }
+
     /// Tests that typing in the post composer works correctly, specifically that
     /// the cursor position is maintained after typing each character.
     /// This guards against regressions like https://github.com/damus-io/damus/issues/3461

@@ -104,7 +104,7 @@ enum LocalNotificationType: String {
 
     static func from(nostr_kind: NostrKind) -> Self? {
         switch nostr_kind {
-            case .text:
+            case .text, .voice:
                 return .mention
             case .dm, .private_dm:
                 return .dm
@@ -114,6 +114,8 @@ enum LocalNotificationType: String {
                 return .mention
             case .zap:
                 return .zap
+            case .boost, .voice_repost:
+                return .repost
             default:
                 return nil
         }

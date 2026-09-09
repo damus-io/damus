@@ -519,13 +519,14 @@ enum AdvancedSearchQueryDSL {
 
     /// Maps a `kind:` value to a kind.
     ///
-    /// Only the two fulltext-indexed kinds are addressable, since nothing else can
-    /// be searched — the numeric forms are accepted because they are unambiguous,
-    /// not because other numbers work.
+    /// Only fulltext-indexed kinds are addressable; numeric aliases name the
+    /// same indexed content types.
     static func kind(from value: String) -> NostrKind? {
         switch value.lowercased() {
         case "note", "notes", "text", "post", "posts", "1":
             return .text
+        case "voice", "audio", "1808":
+            return .voice
         case "longform", "long-form", "long_form", "article", "articles", "30023":
             return .longform
         default:
@@ -538,6 +539,7 @@ enum AdvancedSearchQueryDSL {
     static func name(of kind: NostrKind) -> String? {
         switch kind {
         case .text: return "note"
+        case .voice: return "voice"
         case .longform: return "longform"
         default: return nil
         }

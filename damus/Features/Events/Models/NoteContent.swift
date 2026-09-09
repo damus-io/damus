@@ -31,6 +31,14 @@ struct NoteArtifactsSeparated: Equatable {
         return urls.compactMap { url in url.is_link }
     }
     
+    /// Exclude primary voice media from generic preview/download paths, retaining separate images.
+    func voiceSafe(for event: NostrEvent) -> NoteArtifactsSeparated {
+        guard event.known_kind == .voice else { return self }
+        let primaryURLs = Set(event.tags.strings().filter { $0.first == "url" && $0.count > 1 }.compactMap { URL(string: $0[1]) })
+        return NoteArtifactsSeparated(content: content, words: words,
+            urls: urls.filter { $0.is_video == nil && !primaryURLs.contains($0.url) }, invoices: invoices)
+    }
+
     static func just_content(_ content: String) -> NoteArtifactsSeparated {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
         return NoteArtifactsSeparated(content: txt, words: 0, urls: [], invoices: [])
@@ -73,7 +81,8 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
     
     do {
         return try NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blocks in
-            return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+            let artifacts = render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: ev.known_kind != .voice)
+            return .separated(artifacts.voiceSafe(for: ev))
         })
     }
     catch {

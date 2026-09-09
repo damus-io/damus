@@ -57,10 +57,10 @@ class EventsModel: ObservableObject {
         var filter: NostrFilter
         switch kind {
         case .kind(let k):
-            filter = NostrFilter(kinds: [k])
+            filter = NostrFilter(kinds: k.isRepost ? [.boost, .voice_repost] : [k])
             filter.referenced_ids = [target]
         case .quotes:
-            filter = NostrFilter(kinds: [.text])
+            filter = NostrFilter(kinds: NostrKind.postKinds)
             filter.quotes = [target]
         }
         filter.limit = 500
@@ -76,6 +76,10 @@ class EventsModel: ObservableObject {
                 case .event(let lender):
                     Task {
                         await lender.justUseACopy({ event in
+                            if event.known_kind == .voice_repost {
+                                let original = await Task.detached { event.get_inner_event() }.value
+                                guard let original, original.id == target, !Task.isCancelled else { return }
+                            }
                             if await events.insert(event) {
                                 DispatchQueue.main.async { self.objectWillChange.send() }
                             }

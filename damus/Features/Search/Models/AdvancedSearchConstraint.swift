@@ -25,7 +25,7 @@ enum AdvancedSearchConstraint: Equatable, Identifiable {
     case hashtag(String)
     case since(Date)
     case until(Date)
-    /// The content-type narrowing, present only when it is not the default pair.
+    /// The content-type narrowing, present only when it is not the default set.
     case kinds(Set<NostrKind>)
     /// Present only when it is not the default newest-first.
     case order(NdbSearchOrder)
@@ -47,8 +47,7 @@ enum AdvancedSearchConstraint: Equatable, Identifiable {
     /// `query` without this constraint.
     ///
     /// Removing a constraint restores the default rather than leaving a hole:
-    /// dropping the kind chip goes back to searching both kinds, not to searching
-    /// none, which the model would refuse anyway.
+    /// dropping the kind chip restores all indexed content types.
     func removed(from query: AdvancedSearchQuery) -> AdvancedSearchQuery {
         var query = query
         switch self {
@@ -88,6 +87,8 @@ enum AdvancedSearchConstraint: Equatable, Identifiable {
         case .kinds(let kinds):
             if kinds == [.text] {
                 return NSLocalizedString("notes only", comment: "Search filter chip indicating only short text notes are being searched.")
+            } else if kinds == [.voice] {
+                return NSLocalizedString("voice only", comment: "Search filter chip indicating only voice transcripts are being searched.")
             } else if kinds == [.longform] {
                 return NSLocalizedString("long-form only", comment: "Search filter chip indicating only long-form articles are being searched.")
             }

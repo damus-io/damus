@@ -22,6 +22,14 @@ struct NotificationFormatter {
             ]
         }
         switch event.known_kind {
+            case .voice:
+                guard !event.is_rumor else { return nil }
+                content.title = NSLocalizedString("Someone posted a voice note", comment: "Voice post notification title")
+                content.body = event.content
+            case .voice_repost:
+                guard let original = event.get_inner_event() else { return nil }
+                content.title = NSLocalizedString("Someone reposted a voice note", comment: "Verified voice repost notification title")
+                content.body = original.content
             case .text:
                 // Kind 1 is two different things. A rumor came out of a giftwrap addressed to us, so
                 // it is a private reply and must not be announced as a note anyone can see.

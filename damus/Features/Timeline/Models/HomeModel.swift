@@ -247,7 +247,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         }
 
         switch kind {
-        case .chat, .longform, .text, .highlight:
+        case .chat, .longform, .text, .voice, .highlight:
             handle_text_event(ev, context: context)
         case .contacts:
             handle_contact_event(ev: ev)
@@ -262,6 +262,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             damus_state.contactCards.loadEvent(ev, pubkey: damus_state.pubkey)
         case .boost:
             handle_boost_event(ev, context: context)
+        case .voice_repost:
+            handle_voice_repost_event(ev, context: context)
         case .like:
             handle_like_event(ev)
         case .dm:
@@ -280,7 +282,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             break
         case .nwc_response:
             handle_nwc_response(ev)
-        case .http_auth:
+        case .http_auth, .blossom_auth:
             break
         case .status:
             handle_status_event(ev)
@@ -453,6 +455,23 @@ class HomeModel: ContactsDelegate, ObservableObject {
         process_contact_event(state: self.damus_state, ev: ev)
     }
 
+    /// Verify a voice wrapper off the main thread before displaying or counting it.
+    @MainActor
+    private func handle_voice_repost_event(_ event: NostrEvent, context: SubscriptionContext) {
+        let owned = event.to_owned()
+        Task {
+            let original = await Task.detached(priority: .userInitiated) {
+                owned.get_inner_event()
+            }.value
+            guard let original, !Task.isCancelled else { return }
+            damus_state.events.insert(original)
+            handle_text_event(owned, context: context, verifiedRepostTarget: original.id)
+            if case .success = damus_state.boosts.add_event(owned, target: original.id) {
+                notify(.update_stats(note_id: original.id))
+            }
+        }
+    }
+
     func handle_boost_event(_ ev: NostrEvent, context: SubscriptionContext) {
         var boost_ev_id = ev.last_refid()
 
@@ -609,11 +628,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
         var our_private_dms_filter = NostrFilter(kinds: [.private_dm])
         our_private_dms_filter.authors = [ damus_state.pubkey ]
 
-        var notifications_filter_kinds: [NostrKind] = [
-            .text,
-            .boost,
-            .zap,
-        ]
+        var notifications_filter_kinds = NostrKind.timelineKinds + [.zap]
         if !damus_state.settings.onlyzaps_mode {
             notifications_filter_kinds.append(.like)
         }
@@ -778,9 +793,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
 
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil) {
         // TODO: separate likes?
-        var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost, .highlight
-        ]
+        var home_filter_kinds = NostrKind.timelineKinds + [.longform, .highlight]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
         }
@@ -861,7 +874,7 @@ class HomeModel: ContactsDelegate, ObservableObject {
             return
         }
 
-        var home_filter_kinds: [NostrKind] = [.text, .longform, .boost, .highlight]
+        var home_filter_kinds = NostrKind.timelineKinds + [.longform, .highlight]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
         }
@@ -923,7 +936,12 @@ class HomeModel: ContactsDelegate, ObservableObject {
     /// Rejects events from authors no longer in the favorites list (e.g. in-flight
     /// events arriving after a favorite was removed and the stream cancelled).
     @MainActor
-    func insert_favorite_event(_ ev: NostrEvent) {
+    func insert_favorite_event(_ ev: NostrEvent) async {
+        let ev = ev.known_kind == .voice_repost ? ev.to_owned() : ev
+        if ev.known_kind == .voice_repost {
+            let valid = await Task.detached { ev.get_inner_event() != nil }.value
+            guard valid, !Task.isCancelled else { return }
+        }
         guard should_show_event(state: damus_state, ev: ev) else { return }
         guard damus_state.contactCards.favorites.contains(ev.pubkey) else { return }
         // Only add to the global event cache if the event is new to the holder
@@ -1032,8 +1050,9 @@ class HomeModel: ContactsDelegate, ObservableObject {
     }
 
 
+    /// Insert posts or an already verified voice repost; retain its original for deduplication.
     @MainActor
-    func handle_text_event(_ ev: NostrEvent, context: SubscriptionContext) {
+    func handle_text_event(_ ev: NostrEvent, context: SubscriptionContext, verifiedRepostTarget: NoteId? = nil) {
         guard should_show_event(state: damus_state, ev: ev) else {
             return
         }
@@ -1056,7 +1075,8 @@ class HomeModel: ContactsDelegate, ObservableObject {
             // for reposts (issue #3165). Notifications should always show
             // reposts of YOUR posts, even if the same note was already
             // reposted by someone else in your home feed.
-            if ev.known_kind == .boost, let target = ev.get_inner_event()?.id {
+            let repostTarget = verifiedRepostTarget ?? (ev.known_kind == .boost ? ev.get_inner_event()?.id : nil)
+            if let target = repostTarget {
                 guard !already_reposted.contains(target) else {
                     Log.info("Skipping duplicate repost for event %s", for: .timeline, target.hex())
                     return
@@ -1499,11 +1519,11 @@ func determine_event_notifications(_ ev: NostrEvent) -> NewEventsBits {
         return [.zaps]
     }
     
-    if kind == .boost {
+    if kind.isRepost {
         return [.reposts]
     }
     
-    if kind == .text {
+    if kind.isPost {
         return [.mentions]
     }
     

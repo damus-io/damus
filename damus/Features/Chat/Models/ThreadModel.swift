@@ -91,21 +91,21 @@ class ThreadModel: ObservableObject {
         let thread_id = original_event.thread_id()
 
         ref_events.referenced_ids = [thread_id, original_event.id]
-        ref_events.kinds = [.text]
+        ref_events.kinds = NostrKind.postKinds
         ref_events.limit = 1000
         
         event_filter.ids = [thread_id, original_event.id]
         
         meta_events.referenced_ids = [original_event.id]
 
-        var kinds: [NostrKind] = [.zap, .text, .boost]
+        var kinds = NostrKind.timelineKinds + [.zap]
         if !damus_state.settings.onlyzaps_mode {
             kinds.append(.like)
         }
         meta_events.kinds = kinds
         meta_events.limit = 1000
 
-        quote_events.kinds = [.text]
+        quote_events.kinds = NostrKind.postKinds
         quote_events.quotes = [original_event.id]
         quote_events.limit = 1000
 
@@ -180,6 +180,14 @@ class ThreadModel: ObservableObject {
                 //let _ = self.damus_state.quote_reposts.add_event(ev, target: target)
             } else {
                 self.add_event(ev, keypair: damus_state.keypair)
+            }
+        }
+        else if ev.known_kind == .voice_repost {
+            let owned = ev.to_owned()
+            Task {
+                let inner = await Task.detached { owned.get_inner_event() }.value
+                guard let inner, inner.id == original_event.id, !Task.isCancelled else { return }
+                damus_state.boosts.add_event(owned, target: inner.id)
             }
         }
         else if ev.known_kind == .boost {

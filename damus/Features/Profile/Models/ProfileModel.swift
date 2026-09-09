@@ -74,7 +74,7 @@ class ProfileModel: ObservableObject, Equatable {
         print("subscribing to profile \(pubkey)")
         listener?.cancel()
         listener = Task {
-            var text_filter = NostrFilter(kinds: [.text, .longform, .highlight])
+            var text_filter = NostrFilter(kinds: NostrKind.postKinds + [.longform, .highlight])
             text_filter.authors = [pubkey]
             text_filter.limit = 500
             await bumpUpProgress()
@@ -84,7 +84,7 @@ class ProfileModel: ObservableObject, Equatable {
         }
         profileListener?.cancel()
         profileListener = Task {
-            var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
+            var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost, .voice_repost])
             var relay_list_filter = NostrFilter(kinds: [.relay_list], authors: [pubkey])
             profile_filter.authors = [pubkey]
             await bumpUpProgress()
@@ -110,7 +110,7 @@ class ProfileModel: ObservableObject, Equatable {
             return
         }
 
-        let conversation_kinds: [NostrKind] = [.text, .longform, .highlight]
+        let conversation_kinds = NostrKind.postKinds + [.longform, .highlight]
         let limit: UInt32 = 500
         let conversations_filter_them = NostrFilter(kinds: conversation_kinds, pubkeys: [damus.pubkey], limit: limit, authors: [pubkey])
         let conversations_filter_us = NostrFilter(kinds: conversation_kinds, pubkeys: [pubkey], limit: limit, authors: [damus.pubkey])
@@ -155,6 +155,19 @@ class ProfileModel: ObservableObject, Equatable {
     @MainActor
     func add_event(_ ev: NostrEvent) {
         guard ev.should_show_event else {
+            return
+        }
+
+        // Historical voice wrappers may predate native verification. Admit only
+        // verified wrappers, with crypto work outside the main actor.
+        if ev.known_kind == .voice_repost {
+            let owned = ev.to_owned()
+            Task {
+                let valid = await Task.detached { owned.get_inner_event() != nil }.value
+                guard valid, !Task.isCancelled else { return }
+                if self.events.insert(owned) { self.objectWillChange.send() }
+                self.seen_event.insert(owned.id)
+            }
             return
         }
 

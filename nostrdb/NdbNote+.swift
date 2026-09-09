@@ -9,11 +9,14 @@ import Foundation
 
 // Extension to make NdbNote compatible with NostrEvent's original API
 extension NdbNote {
+    /// Decode through the shared verifier; voice wrappers cannot bypass attribution checks.
     func parse_inner_event() -> NdbNote? {
-        return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
+        get_inner_event()
     }
 
+    /// Reuse an original already verified during background voice-event loading.
     func get_cached_inner_event(cache: EventCache) -> NdbNote? {
+        if known_kind == .voice_repost { return cached_voice_original }
         guard self.known_kind == .boost || self.known_kind == .highlight else {
             return nil
         }
@@ -33,18 +36,16 @@ extension NdbNote {
         return self.parse_inner_event()
     }
 
-    /// Returns the target event ID and relay hints for a repost (kind 6) event.
-    ///
-    /// Per NIP-18, reposts MUST include an `e` tag with the reposted event's ID,
-    /// and the tag MUST include a relay URL as its third entry.
-    ///
-    /// - Returns: A tuple of (noteId, relayHints) if this is a repost with a valid e tag, nil otherwise.
+    /// Return the original id and relay hints for a text or voice repost.
+    /// Voice wrappers require both signatures; call off the main thread.
     func repostTarget() -> (noteId: NoteId, relayHints: [RelayURL])? {
-        guard self.known_kind == .boost else { return nil }
+        guard known_kind?.isRepost == true else { return nil }
+        if known_kind == .voice_repost && !verify_voice_repost() { return nil }
 
         for tag in self.tags {
             guard tag.count >= 2 else { continue }
             guard tag[0].matches_char("e") else { continue }
+            if known_kind == .voice_repost, tag.count >= 5, tag[4].matches_str("repost-source") { continue }
             guard let noteIdData = tag[1].id() else { continue }
 
             let noteId = NoteId(noteIdData)

@@ -50,7 +50,8 @@ class LoadableNostrEventViewModel: ObservableObject {
     /// Resolve a NoteReference into a ThreadModelLoadingState describing how the referenced note should be presented.
     /// 
     /// For a `.note_id` reference this attempts to load the event (honoring optional relay hints) and maps event kinds as follows:
-    /// - `.text` or `.highlight` → `.loaded` with a `Route.Thread`.
+    /// - `.text`, `.voice`, `.highlight`, or `.longform` → a thread.
+    /// - `.voice_repost` → the verified original voice post's thread.
     /// - `.dm` → `.loaded` with a `Route.DMChat` for the corresponding DM model.
     /// - `.like` → follows the first referenced note ID (propagating the same relay hints) and resolves it recursively.
     /// - `.zap` or `.zap_request` → resolves a zap and, if found, returns `.loaded` with a `Route.Zaps`.
@@ -66,8 +67,12 @@ class LoadableNostrEventViewModel: ObservableObject {
             guard let ev = await self.loadEvent(noteId: note_id, relays: relays) else { return .not_found }
             guard let known_kind = ev.known_kind else { return .unknown_or_unsupported_kind }
             switch known_kind {
-            case .text, .highlight, .longform:
+            case .text, .voice, .highlight, .longform:
                 return .loaded(route: Route.Thread(thread: ThreadModel(event: ev, damus_state: damus_state)))
+            case .voice_repost:
+                let original = await Task.detached { ev.get_inner_event() }.value
+                guard let original else { return .not_found }
+                return .loaded(route: Route.Thread(thread: ThreadModel(event: original, damus_state: damus_state)))
             case .dm:
                 let dm_model = damus_state.dms.lookup_or_create(ev.pubkey)
                 return .loaded(route: Route.DMChat(dms: dm_model))
@@ -78,7 +83,7 @@ class LoadableNostrEventViewModel: ObservableObject {
             case .zap, .zap_request:
                 guard let zap = await get_zap(from: ev, state: damus_state) else { return .not_found }
                 return .loaded(route: Route.Zaps(target: zap.target))
-            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .nwc_request, .nwc_response, .http_auth, .status, .relay_list, .dm_relay_list, .follow_list, .interest_list, .contact_card, .live, .live_chat, .seal, .private_dm, .giftwrap:
+            case .contacts, .metadata, .delete, .boost, .chat, .mute_list, .list_deprecated, .draft, .nwc_request, .nwc_response, .http_auth, .blossom_auth, .status, .relay_list, .dm_relay_list, .follow_list, .interest_list, .contact_card, .live, .live_chat, .seal, .private_dm, .giftwrap:
                 return .unknown_or_unsupported_kind
             }
         case .naddr(let naddr):

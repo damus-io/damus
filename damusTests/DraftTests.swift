@@ -329,6 +329,77 @@ class DraftTests: XCTestCase {
     }
 
 
+    @MainActor
+    func testVoiceQuoteDraftPreservesUnrelatedReferencesAndSavesWithoutCachedTarget() async throws {
+        let state = try drafts_state()
+        let parent = try VoiceEventFixtures.note()
+        let other = try VoiceEventFixtures.note(kind: 1, content: "unrelated reference")
+        let nevent = Bech32Object.encode(.nevent(NEvent(event: parent, relays: [])))
+        let otherReference = "nostr:" + bech32_note_id(other.id)
+        let quote = try XCTUnwrap(NostrEvent(content: "keep \(otherReference)\n\nnostr:\(nevent)",
+            keypair: test_keypair, kind: 1, tags: [["q", parent.id.hex(), "", parent.pubkey.hex()], ["p", parent.pubkey.hex()]]))
+        let id = try seed_draft(quote, in: state)
+        state.drafts.load(from: state)
+        let restored = try XCTUnwrap(state.drafts.quotes[parent.id])
+        XCTAssertNil(try state.ndb.lookup_note_and_copy(parent.id))
+        XCTAssertTrue(restored.content.string.contains(otherReference))
+        XCTAssertFalse(restored.content.string.contains(nevent))
+        restored.content.append(NSAttributedString(string: "edited"))
+        await state.drafts.save(damus_state: state)
+        try poll(until: {
+            guard let stored = try self.stored_draft(id, in: state), let draft = NIP37Draft(draft_note: stored) else { return false }
+            return draft.unwrapped_note.content.contains("edited")
+        })
+        let stored = try XCTUnwrap(stored_draft(id, in: state))
+        let saved = try XCTUnwrap(NIP37Draft(draft_note: stored)).unwrapped_note
+        XCTAssertEqual(saved.content.components(separatedBy: nevent).count - 1, 1)
+        XCTAssertTrue(saved.content.contains(otherReference))
+        XCTAssertEqual(DraftArtifacts.quoteID(in: saved), parent.id)
+        let reloaded = Drafts()
+        reloaded.load(from: state)
+        XCTAssertTrue(try XCTUnwrap(reloaded.quotes[parent.id]).content.string.contains("edited"))
+    }
+
+    @MainActor
+    func testReplyDraftKeepsCapturedVoiceParentThenResavesFromPersistedTags() async throws {
+        let state = try drafts_state()
+        let parent = try VoiceEventFixtures.note()
+        let artifacts = DraftArtifacts(content: NSMutableAttributedString(string: "first text reply"),
+                                       references: [.pubkey(parent.pubkey)], id: UUID().uuidString, is_private_reply: true)
+        artifacts.context_event = parent
+        state.drafts.replies[parent.id] = artifacts
+        XCTAssertNil(try state.ndb.lookup_note_and_copy(parent.id))
+        await state.drafts.save(damus_state: state)
+        try poll(until: { (try? self.stored_draft(artifacts.id, in: state)) != nil })
+        let reloaded = Drafts()
+        reloaded.load(from: state)
+        let restored = try XCTUnwrap(reloaded.replies[parent.id])
+        XCTAssertNil(restored.context_event)
+        XCTAssertTrue(restored.is_private_reply)
+        restored.content = NSMutableAttributedString(string: "second text reply")
+        state.drafts.replies[parent.id] = restored
+        await state.drafts.save(damus_state: state)
+        try poll(until: {
+            guard let stored = try self.stored_draft(artifacts.id, in: state), let draft = NIP37Draft(draft_note: stored) else { return false }
+            return draft.unwrapped_note.content == "second text reply"
+        })
+        let saved = try XCTUnwrap(NIP37Draft(draft_note: XCTUnwrap(stored_draft(artifacts.id, in: state))))
+        XCTAssertTrue(saved.is_private_reply)
+        XCTAssertEqual(saved.unwrapped_note.direct_replies(), parent.id)
+    }
+
+    @MainActor
+    func testOrdinaryInlineEventReferenceStaysInPostDraft() throws {
+        let state = try drafts_state()
+        let target = try VoiceEventFixtures.note()
+        let reference = "nostr:" + Bech32Object.encode(.nevent(NEvent(event: target, relays: [])))
+        let event = try XCTUnwrap(NostrEvent(content: "read \(reference) later", keypair: test_keypair, kind: 1, tags: []))
+        _ = try seed_draft(event, in: state)
+        state.drafts.load(from: state)
+        XCTAssertEqual(state.drafts.post?.content.string, event.content)
+        XCTAssertTrue(state.drafts.quotes.isEmpty)
+    }
+
     // MARK: Helpers
 
     /// A `DamusState` on its own database, with our key registered with the ingester threads so it

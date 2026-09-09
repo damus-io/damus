@@ -38,7 +38,7 @@ class FollowPackModel: ObservableObject {
     
     func listenForUpdates(follow_pack_users: [Pubkey]) async {
         let to_relays = await damus_state.nostrNetwork.determineToRelays(filters: damus_state.relay_filters)
-        var filter = NostrFilter(kinds: [.text, .chat])
+        var filter = NostrFilter(kinds: NostrKind.postKinds + [.chat])
         filter.until = UInt32(Date.now.timeIntervalSince1970)
         filter.authors = follow_pack_users
         filter.limit = 500

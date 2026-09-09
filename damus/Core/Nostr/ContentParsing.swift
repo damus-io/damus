@@ -46,6 +46,8 @@ func interp_event_refs_without_mentions_ndb(_ ev_tags: References<NoteRef>) -> T
 
     for ref in ev_tags {
         if let marker = ref.marker {
+            // Marked tags override earlier positional references regardless of tag order.
+            if !any_marker { root_id = nil; reply_id = nil }
             any_marker = true
             switch marker {
             case .root: root_id = ref

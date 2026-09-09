@@ -171,6 +171,8 @@ struct NoteContentView: View {
     }
     
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
+        // Apply the same rule to any artifacts cached before voice support.
+        let artifacts = artifacts.voiceSafe(for: event)
         let contentToRender = highlightedContent(artifacts.content)
 
         return VStack(alignment: .leading) {
@@ -199,6 +201,11 @@ struct NoteContentView: View {
                         translateView
                     }
                 }
+            }
+
+            if event.known_kind == .voice, !options.contains(.no_media) {
+                VoicePlayerView(event: event, video: damus_state.video)
+                    .padding(.horizontal, with_padding ? 16 : 0)
             }
 
             if artifacts.media.count > 0 {

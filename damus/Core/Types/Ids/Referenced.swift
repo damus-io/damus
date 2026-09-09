@@ -76,6 +76,8 @@ struct NoteRef: IdType, TagConvertible, Equatable {
     /// Only parses pubkey from position 4 when a valid marker is present in position 3.
     static func from_tag(tag: TagSequence) -> NoteRef? {
         guard tag.count >= 2 else { return nil }
+        // NIP-188 repost-source tags identify notification provenance, not a thread edge.
+        if tag.count > 4, tag[4].matches_str("repost-source") { return nil }
 
         var i = tag.makeIterator()
 
@@ -95,6 +97,7 @@ struct NoteRef: IdType, TagConvertible, Equatable {
             relay = r.string()
             if tag.count >= 4, let m = i.next() {
                 marker = Marker(m)
+                if marker == nil, !m.string().isEmpty { return nil }
                 // Only parse pubkey when marker is recognized per NIP-10
                 if marker != nil, tag.count >= 5, let pk = i.next(), let pubkeyData = pk.id() {
                     pubkey = Pubkey(pubkeyData)

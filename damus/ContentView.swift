@@ -22,6 +22,8 @@ struct SelectWallet {
 
 enum Sheets: Identifiable {
     case post(PostAction)
+    case voice_drafts
+    case voice_draft(VoiceDraft)
     case report(ReportTarget)
     case event(NostrEvent)
     case profile_action(Pubkey)
@@ -47,6 +49,8 @@ enum Sheets: Identifiable {
         case .report: return "report"
         case .user_status: return "user_status"
         case .post(let action): return "post-" + (action.ev?.id.hex() ?? "")
+        case .voice_drafts: return "voice-drafts"
+        case .voice_draft(let draft): return "voice-draft-" + draft.id.uuidString
         case .event(let ev): return "event-" + ev.id.hex()
         case .profile_action(let pubkey): return "profile-action-" + pubkey.npub
         case .zap(let sheet): return "zap-" + hex_encode(sheet.target.id)
@@ -324,6 +328,10 @@ struct ContentView: View {
                 MaybeReportView(target: target)
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
+            case .voice_drafts:
+                VoiceDraftLibrary(state: damus_state!)
+            case .voice_draft(let draft):
+                VoiceDraftRestoreView(state: damus_state!, draft: draft)
             case .user_status:
                 UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.nostrNetwork.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
                     .presentationDragIndicator(.visible)
