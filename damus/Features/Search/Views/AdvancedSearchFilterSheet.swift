@@ -324,8 +324,8 @@ struct AdvancedSearchFilterSheet: View {
                              set: { on in
                                  var kinds = query.kinds
                                  if on { kinds.insert(kind) } else { kinds.remove(kind) }
-                                 // Assigning an empty set restores the default pair, so
-                                 // turning both off cannot produce a query that searches
+                                 // An empty selection restores all indexed content types, so
+                                 // turning every option off cannot produce a query that searches
                                  // nothing.
                                  query.kinds = kinds
                              })) {
@@ -425,11 +425,12 @@ struct AdvancedSearchFilterSheet: View {
     private var typeSection: some View {
         Section {
             kindToggle(.text, NSLocalizedString("Notes", comment: "Toggle for including short text notes in an advanced search."))
+            kindToggle(.voice, NSLocalizedString("Voice", comment: "Toggle for searching voice transcripts."))
             kindToggle(.longform, NSLocalizedString("Long-form", comment: "Toggle for including long-form articles in an advanced search."))
         } header: {
             Text("Content type", comment: "Section header for which kinds of note an advanced search covers.")
         } footer: {
-            Text("Only notes and long-form posts are indexed for search.", comment: "Explanation that only two note kinds can be searched.")
+            Text("Search text notes, voice transcripts, and long-form posts.", comment: "Content types available in search.")
         }
     }
 

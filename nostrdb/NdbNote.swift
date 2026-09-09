@@ -51,6 +51,19 @@ class NdbNote: Codable, Equatable, Hashable {
 
     // cached stuff (TODO: remove these)
     var decrypted_content: String? = nil
+
+    // Owned notes are immutable event snapshots. Retain only a verified original;
+    // borrowed LMDB notes are never cached because their backing pages can change.
+    private let voiceRepostLock = NSLock()
+    private var verifiedVoiceOriginal: NdbNote?
+
+    /// An already verified original; reading this never performs cryptographic work.
+    var cached_voice_original: NdbNote? {
+        guard owned, !is_rumor else { return nil }
+        voiceRepostLock.lock()
+        defer { voiceRepostLock.unlock() }
+        return verifiedVoiceOriginal
+    }
     
     private var inner_event: NdbNote? {
         get {
@@ -303,9 +316,10 @@ class NdbNote: Codable, Equatable, Hashable {
 
         var builder = ndb_builder()
         let buflen = MAX_NOTE_SIZE
-        let buf = malloc(buflen)
-
-        ndb_builder_init(&builder, buf, buflen)
+        guard let buf = malloc(buflen) else { return nil }
+        var bufferOwnedByBuilder = true
+        defer { if bufferOwnedByBuilder { free(buf) } }
+        guard ndb_builder_init(&builder, buf, buflen) > 0 else { return nil }
 
         var pk_raw = noteConstructionMaterial.pubkey.bytes
 
@@ -315,7 +329,7 @@ class NdbNote: Codable, Equatable, Hashable {
 
         var ok = true
         for tag in tags {
-            ndb_builder_new_tag(&builder);
+            guard ndb_builder_new_tag(&builder) > 0 else { return nil }
             for elem in tag {
                 ok = elem.withCString({ eptr in
                     return ndb_builder_push_tag_str(&builder, eptr, Int32(elem.utf8.count)) > 0
@@ -337,7 +351,7 @@ class NdbNote: Codable, Equatable, Hashable {
         var len: Int32 = 0
         
         switch noteConstructionMaterial {
-        case .keypair(let keypair):
+        case .keypair:
             var the_kp: ndb_keypair? = nil
             
             if let sec = noteConstructionMaterial.privkey {
@@ -345,7 +359,7 @@ class NdbNote: Codable, Equatable, Hashable {
                 memcpy(&kp.secret.0, sec.id.bytes, 32);
                 
                 if ndb_create_keypair(&kp) <= 0 {
-                    print("bad keypair")
+                    return nil
                 } else {
                     the_kp = kp
                 }
@@ -358,7 +372,7 @@ class NdbNote: Codable, Equatable, Hashable {
             }
             
             if len <= 0 {
-                free(buf)
+
                 return nil
             }
         case .manual(_, let signature, let noteId):
@@ -372,33 +386,29 @@ class NdbNote: Codable, Equatable, Hashable {
                 len = ndb_builder_finalize(&builder, &n.ptr, nil)
                 guard len > 0 else { throw InitError.generic }
                 
-                let scratch_buf_len = MAX_NOTE_SIZE
-                let scratch_buf = malloc(scratch_buf_len)
-                defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
-                
-                // Verify the signature against the pubkey and the computed ID, to verify the validity of the whole note
-                var ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))
-                
-                guard ndb_note_verify(&ctx, scratch_buf, scratch_buf_len, n.ptr) == 1 else { throw InitError.generic }
+                let scratch = UnsafeMutablePointer<UInt8>.allocate(capacity: MAX_NOTE_SIZE)
+                defer { scratch.deallocate() }
+                guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY)) else {
+                    throw InitError.generic
+                }
+                defer { secp256k1_context_destroy(ctx) }
+
+                // Pass the context itself, not the address of an optional pointer.
+                guard ndb_note_verify(UnsafeMutableRawPointer(ctx), scratch, MAX_NOTE_SIZE, n.ptr) == 1 else {
+                    throw InitError.generic
+                }
             }
             catch {
-                free(buf)
+
                 return nil
             }
         }
 
-        //guard let n else { return nil }
-
+        guard let resized = realloc(buf, Int(len)) else { return nil }
+        bufferOwnedByBuilder = false
         self.owned = true
         self.count = Int(len)
-        //self.note = n
-        let r = realloc(buf, Int(len))
-        guard let r else {
-            free(buf)
-            return nil
-        }
-
-        self.note = ndb_note_ptr(ptr: OpaquePointer(r))
+        self.note = ndb_note_ptr(ptr: OpaquePointer(resized))
         self.key = nil
     }
 
@@ -426,39 +436,47 @@ class NdbNote: Codable, Equatable, Hashable {
         // `ndb_note_verify` would reject it anyway; bail out rather than burn a secp context.
         if self.is_rumor { return false }
 
-        let scratch_buf_len = MAX_NOTE_SIZE
-        let scratch_buf = malloc(scratch_buf_len)
-        defer { free(scratch_buf) }  // Ensure we deallocate as soon as we leave this scope, regardless of the outcome
-        
-        // Verify the signature against the pubkey and the computed ID, to verify the validity of the whole note
-        var ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY))
-        guard ndb_note_verify(&ctx, scratch_buf, scratch_buf_len, self.note.ptr) == 1 else { return false }
-        
-        return true
+        let scratch = UnsafeMutablePointer<UInt8>.allocate(capacity: MAX_NOTE_SIZE)
+        defer { scratch.deallocate() }
+        guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY)) else { return false }
+        defer { secp256k1_context_destroy(ctx) }
+        return ndb_note_verify(UnsafeMutableRawPointer(ctx), scratch, MAX_NOTE_SIZE, note.ptr) == 1
     }
 
     static func owned_from_json_cstr(json: UnsafePointer<CChar>, json_len: UInt32, bufsize: Int = 2 << 18) -> NdbNote? {
-        let data = malloc(bufsize)
-        //guard var json_cstr = json.cString(using: .utf8) else { return nil }
-
-        //json_cs
+        guard bufsize > 0, bufsize <= Int(Int32.max), json_len <= UInt32(Int32.max),
+              let data = malloc(bufsize) else { return nil }
         var note = ndb_note_ptr()
-
         let len = ndb_note_from_json(json, Int32(json_len), &note.ptr, data, Int32(bufsize))
-
-        if len == 0 {
-            free(data)
-            return nil
-        }
-
-        // Create new Data with just the valid bytes
-        guard let new_note = realloc(data, Int(len)) else { return nil }
-        let new_note_ptr = ndb_note_ptr(ptr: OpaquePointer(new_note))
-        return NdbNote(note: new_note_ptr, size: Int(len), owned: true, key: nil)
+        guard len > 0 else { free(data); return nil }
+        guard let resized = realloc(data, Int(len)) else { free(data); return nil }
+        return NdbNote(note: ndb_note_ptr(ptr: OpaquePointer(resized)), size: Int(len), owned: true, key: nil)
     }
     
+    /// Decode an embedded event, enforcing NIP-808 attribution and both signatures
+    /// for voice reposts. Call from background event loading, before UI presentation.
     func get_inner_event() -> NdbNote? {
-        return self.inner_event
+        guard known_kind == .voice_repost else { return self.inner_event }
+        if let cached = cached_voice_original { return cached }
+        guard verify_voice_repost(), let original = self.inner_event else { return nil }
+        if owned {
+            voiceRepostLock.lock()
+            verifiedVoiceOriginal = original
+            voiceRepostLock.unlock()
+        }
+        return original
+    }
+
+    /// Share the native ingestion/counting verifier with Swift receive paths.
+    /// This performs cryptographic work and must run off the main thread.
+    func verify_voice_repost() -> Bool {
+        guard known_kind == .voice_repost, !is_rumor else { return false }
+        let size = Int(NDB_VOICE_REPOST_SCRATCH_SIZE)
+        let scratch = UnsafeMutablePointer<UInt8>.allocate(capacity: size)
+        defer { scratch.deallocate() }
+        guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_VERIFY)) else { return false }
+        defer { secp256k1_context_destroy(ctx) }
+        return ndb_note_verify_voice_repost(UnsafeMutableRawPointer(ctx), scratch, size, note.ptr, nil) == 1
     }
 }
 
@@ -466,7 +484,7 @@ class NdbNote: Codable, Equatable, Hashable {
 extension NdbNote {
     var is_textlike: Bool {
         switch known_kind {
-        case .text, .chat, .longform, .highlight, .live, .live_chat:
+        case .text, .voice, .chat, .longform, .highlight, .live, .live_chat:
             true
         default:
             false
@@ -474,7 +492,7 @@ extension NdbNote {
     }
 
     var is_quote_repost: NoteId? {
-        guard kind == 1, let quoted_note_id = referenced_quote_ids.first else {
+        guard known_kind?.isPost == true, let quoted_note_id = referenced_quote_ids.first else {
             return nil
         }
         return quoted_note_id.note_id
@@ -485,16 +503,19 @@ extension NdbNote {
     }
 
     var too_big: Bool {
+        // A voice repost includes JSON escaping and metadata around the transcript.
+        if known_kind == .voice_repost { return content_len > 128 * 1024 }
         return known_kind != .longform && self.content_len > 16000
     }
 
     var should_show_event: Bool {
+        if is_rumor && (known_kind == .voice || known_kind == .voice_repost) { return false }
         return !too_big
     }
     
     func is_hellthread(max_pubkeys: Int) -> Bool {
         switch known_kind {
-        case .text, .boost, .like, .zap:
+        case .text, .voice, .boost, .voice_repost, .like, .zap:
             Set(referenced_pubkeys).count > max_pubkeys
         default:
             false
@@ -559,11 +580,10 @@ extension NdbNote {
         return nil
     }
     
+    /// A repost's e tag identifies its original; it is not a threaded reply.
     func thread_reply() -> ThreadReply? {
-        if self.known_kind != .highlight {
-            return ThreadReply(tags: self.tags)
-        }
-        return nil
+        guard known_kind != .highlight, known_kind?.isRepost != true else { return nil }
+        return ThreadReply(tags: self.tags)
     }
     
     func highlighted_note_id() -> NoteId? {

@@ -33,7 +33,9 @@ struct EventView: View {
 
     var body: some View {
         VStack {
-            if event.known_kind == .boost {
+            if event.known_kind == .voice_repost {
+                VoiceRepostedEvent(damus: damus, event: event, options: options)
+            } else if event.known_kind == .boost {
                 if let inner_ev = event.get_inner_event(cache: damus.events) {
                     RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
                 } else if let target = event.repostTarget() {

@@ -37,7 +37,7 @@ class SearchModel: ObservableObject {
     func subscribe() {
         // since 1 month
         search.limit = self.limit
-        search.kinds = [.text, .like, .longform, .highlight, .follow_list]
+        search.kinds = NostrKind.postKinds + [.like, .longform, .highlight, .follow_list]
 
         //likes_filter.ids = ref_events.referenced_ids!
         listener?.cancel()

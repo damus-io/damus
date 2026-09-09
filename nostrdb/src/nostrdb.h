@@ -282,6 +282,8 @@ enum ndb_common_kind {
 	NDB_CKIND_LIST,
 	NDB_CKIND_LONGFORM,
 	NDB_CKIND_STATUS,
+	NDB_CKIND_VOICE,
+	NDB_CKIND_VOICE_REPOST,
 	NDB_CKIND_COUNT, // should always be last
 };
 
@@ -593,6 +595,18 @@ int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char
 int ndb_create_keypair(struct ndb_keypair *key);
 int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
 int ndb_note_verify(void *secp_ctx, unsigned char *scratch, size_t scratch_size, struct ndb_note *note);
+
+/* Bound untrusted embedded NIP-808 validation to 2 MiB.
+ * Keep this a literal so Swift's Clang importer exposes the constant. */
+#define NDB_VOICE_REPOST_SCRATCH_SIZE 2097152
+
+/* Verify both signatures and the primary e/p/k tags of a kind-1809 repost.
+ * Optional NIP-188 source tags are not the target. On success, copy the
+ * original id to target_id when non-NULL. No pointer into scratch escapes.
+ * The caller supplies a verification context and the bounded scratch buffer. */
+int ndb_note_verify_voice_repost(void *secp_ctx, unsigned char *scratch,
+				size_t scratch_size, struct ndb_note *note,
+				unsigned char *target_id);
 
 // NDB
 int ndb_init(struct ndb **ndb, const char *dbdir, const struct ndb_config *);

@@ -125,6 +125,10 @@ class UserSettingsStore: ObservableObject {
     
     @StringSetting(key: "default_media_uploader", default_value: .nostrBuild)
     var default_media_uploader: MediaUploader
+
+    /// Account-scoped nostr.build Blossom endpoint, used only after the user presses Post.
+    @Setting(key: "voice_blossom_server", default_value: "https://blossom.band")
+    var voice_blossom_server: String
     
     @Setting(key: "show_wallet_selector", default_value: false)
     var show_wallet_selector: Bool

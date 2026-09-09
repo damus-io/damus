@@ -21,11 +21,14 @@ struct RepostAction: View {
                 dismiss()
                 
                 Task {
-                    guard let keypair = self.damus_state.keypair.to_full(),
-                          let boost = await make_boost_event(keypair: keypair, boosted: self.event, relayURL: damus_state.nostrNetwork.relaysForEvent(event: self.event).first) else {
-                        return
-                    }
-                    
+                    guard let keypair = damus_state.keypair.to_full(), !event.is_rumor,
+                          damus_state.voiceLifetime.isActive else { return }
+                    let original = event
+                    let relay = await damus_state.nostrNetwork.relaysForEvent(event: original).first
+                    let boost = await Task.detached {
+                        make_boost_event(keypair: keypair, boosted: original, relayURL: relay)
+                    }.value
+                    guard let boost, !Task.isCancelled, damus_state.voiceLifetime.isActive else { return }
                     await damus_state.nostrNetwork.postbox.send(boost)
                 }
             } label: {

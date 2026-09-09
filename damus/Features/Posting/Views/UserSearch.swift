@@ -10,6 +10,10 @@ import SwiftUI
 struct UserSearch: View {
     let damus_state: DamusState
     let search: String
+    /// Optional structured selection for composers that do not edit an attributed text field.
+    var onSelect: ((Pubkey) -> Void)? = nil
+    /// Allows asynchronous callers to supply already queried results.
+    var results: [Pubkey]? = nil
     @Binding var focusWordAttributes: (String?, NSRange?)
     @Binding var newCursorIndex: Int?
 
@@ -17,10 +21,11 @@ struct UserSearch: View {
     @EnvironmentObject var tagModel: TagModel
     
     var users: [Pubkey] {
-        return search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
+        return results ?? search_profiles(profiles: damus_state.profiles, contacts: damus_state.contacts, search: search)
     }
     
     func on_user_tapped(pk: Pubkey) {
+        if let onSelect { onSelect(pk); return }
         let profile = try? damus_state.profiles.lookup(id: pk)
         let user_tag = user_tag_attr_string(profile: profile, pubkey: pk)
 

@@ -62,7 +62,14 @@ struct NoteContentView: View {
         if damus_state.settings.undistractMode {
             return .separated(.just_content(Undistractor.makeGibberish(text: event.get_content(damus_state.keypair))))
         }
-        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
+        let artifacts = self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
+        // Resolve cached and tag-only attachments after applying the content-hiding setting.
+        if case .separated(let separated) = artifacts {
+            let resolved = separated.voiceSafe(for: event)
+            guard event.known_kind == .voice, !options.contains(.no_media) else { return .separated(resolved) }
+            return .separated(resolved.hidingImageAttachmentURLs())
+        }
+        return artifacts
     }
     
     init(damus_state: DamusState, event: NostrEvent, blur_images: Bool, size: EventViewKind, options: EventViewOptions, highlightTerms: [String] = []) {
@@ -97,18 +104,26 @@ struct NoteContentView: View {
             return nil
         }
 
-        // If either
-        // (1) the blur images setting is enabled
-        // (2) the media previews setting is disabled
-        // (3) this note content view does not display media
-        // then do not show media in the link preview.
+        let separated: NoteArtifactsSeparated?
+        if case .separated(let artifacts) = note_artifacts {
+            separated = artifacts
+        } else {
+            separated = nil
+        }
+        if event.known_kind == .voice {
+            // A cached preview must still refer to an independent attachment, never primary audio.
+            guard let url = cached.meta.originalURL ?? cached.meta.url,
+                  let links = separated?.links,
+                  links.contains(where: { VoiceAttachmentReferences.identity($0) == VoiceAttachmentReferences.identity(url) }) else { return nil }
+        }
+
+        // Respect the existing blur, preview and media-suppression settings.
         if blur_images || !damus_state.settings.media_previews || self.options.contains(.no_media) {
             return linkPreviewWithNoMedia(cached)
         }
 
-        // If media is already being shown, do not show media in the link preview
-        // to avoid taking up additional screen space.
-        if case let .separated(separated) = note_artifacts, !separated.media.isEmpty && !self.options.contains(.no_media) {
+        // Avoid repeating a preview image when this post already displays attached media.
+        if let separated, !separated.media.isEmpty && !self.options.contains(.no_media) {
             return linkPreviewWithNoMedia(cached)
         }
 
@@ -170,10 +185,40 @@ struct NoteContentView: View {
         EmptyView()
     }
     
+    /// Tag-only links remain readable even when rich previews are disabled or unavailable.
+    private func voiceAttachmentLinks(artifacts: NoteArtifactsSeparated) -> some View {
+        let inlineURLs = Set(artifacts.content.attributed.runs.compactMap { $0.link }
+            .map(VoiceAttachmentReferences.identity))
+        let links = VoiceAttachmentReferences(tags: event.tags.strings()).attachments.filter {
+            $0.kind == .link && !inlineURLs.contains(VoiceAttachmentReferences.identity($0.url))
+        }
+        return VStack(alignment: .leading, spacing: 8) {
+            ForEach(links, id: \.url) { attachment in
+                Link(destination: attachment.url) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Image(systemName: "link").accessibilityHidden(true)
+                        Text(verbatim: attachment.title ?? attachment.url.absoluteString)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    .foregroundStyle(DamusColors.adaptablePurpleForeground)
+                }
+                .accessibilityHint(attachment.url.absoluteString)
+            }
+        }
+        .padding(.horizontal, with_padding ? 16 : 0)
+    }
+
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
+        // note_artifacts supplies resolved attachments and respects undistract mode.
         let contentToRender = highlightedContent(artifacts.content)
 
         return VStack(alignment: .leading) {
+            if event.known_kind == .voice, !options.contains(.no_media) {
+                VoicePlayerView(event: event, video: damus_state.video)
+                    .padding(.horizontal, with_padding ? 16 : 0)
+            }
+
             if artifacts.content.attributed.characters.count != 0 {
                 if size == .selected {
                     if with_padding {
@@ -229,6 +274,10 @@ struct NoteContentView: View {
                 }
             }
 
+            if event.known_kind == .voice, !damus_state.settings.undistractMode {
+                voiceAttachmentLinks(artifacts: artifacts)
+            }
+
             if has_previews {
                 if with_padding {
                     previewView(links: artifacts.links).padding(.horizontal)
@@ -239,6 +288,8 @@ struct NoteContentView: View {
 
         }
         .padding(.top, artifacts.content.attributed.characters.count == 0 ? 7 : 0)
+        // A small inset separates voice attachments from the reaction bar's own top padding.
+        .padding(.bottom, event.known_kind == .voice && !artifacts.media.isEmpty && !options.contains(.no_media) ? 2 : 0)
     }
 
     var has_previews: Bool {

@@ -43,7 +43,7 @@ class NIP05DomainEventsModel: ObservableObject {
     
     func streamItems() async {
         filter.limit = self.limit
-        filter.kinds = [.text, .longform, .highlight]
+        filter.kinds = NostrKind.postKinds + [.longform, .highlight]
 
         var authors = Set<Pubkey>()
         for pubkey in await state.contacts.get_friend_of_friends_list() {

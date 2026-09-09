@@ -45,6 +45,10 @@ enum NostrKind: UInt32, Codable {
     /// conversations by the rumor's `created_at`, never the wrap's.
     case giftwrap = 1059
     case live_chat = 1311
+    /// A public NIP-808 recording with its signed transcript and media reference.
+    case voice = 1808
+    /// A NIP-808 repost embedding the complete signed original voice event.
+    case voice_repost = 1809
     case mute_list = 10000
     case relay_list = 10002
     /// A NIP-17 DM inbox relay list: the relays a user wants their private messages delivered to.
@@ -66,6 +70,8 @@ enum NostrKind: UInt32, Codable {
     case highlight = 9802
     case nwc_request = 23194
     case nwc_response = 23195
+    /// A BUD-11 authorization event for a scoped Blossom operation.
+    case blossom_auth = 24242
     case http_auth = 27235
     case live = 30311
     case status = 30315
@@ -74,6 +80,18 @@ enum NostrKind: UInt32, Codable {
 }
 
 extension NostrKind {
+    /// Kinds that participate in ordinary text/voice conversations.
+    static let postKinds: [NostrKind] = [.text, .voice]
+
+    /// Posts and their native repost wrappers, for timeline subscriptions.
+    static let timelineKinds: [NostrKind] = [.text, .boost, .voice, .voice_repost]
+
+    /// A text or transcribed voice post; privacy is checked on the event separately.
+    var isPost: Bool { self == .text || self == .voice }
+
+    /// A repost wrapper whose actions must target its original event.
+    var isRepost: Bool { self == .boost || self == .voice_repost }
+
     /// How far into the past NIP-59 randomizes a ``giftwrap``'s `created_at`.
     ///
     /// NIP-59 says the wrap's timestamp "SHOULD be tweaked to thwart time-analysis attacks", up to two

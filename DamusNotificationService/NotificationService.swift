@@ -47,6 +47,17 @@ class NotificationService: UNNotificationServiceExtension {
         Log.debug("Got nostr event push notification from pubkey %s", for: .push_notifications, nostr_event.pubkey.hex())
         
         Task {
+            if nostr_event.known_kind == .voice || nostr_event.known_kind == .voice_repost {
+                let verified = await Task.detached(priority: .userInitiated) {
+                    guard !nostr_event.is_rumor else { return false }
+                    return nostr_event.known_kind == .voice
+                        ? nostr_event.verify() : nostr_event.get_inner_event() != nil
+                }.value
+                guard verified else {
+                    contentHandler(UNNotificationContent())
+                    return
+                }
+            }
             guard let state = await NotificationExtensionState() else {
                 Log.debug("Failed to open nostrdb", for: .push_notifications)
 
@@ -163,7 +174,7 @@ class NotificationService: UNNotificationServiceExtension {
             // rather than deleted because with the setting on the app does render those
             // conversations, and a rendered conversation that never notifies is its own bug.
             let dm_supported = kind == .dm && state.settings.enable_legacy_nip04_dms
-            if !(kind == .text || kind == .private_dm || dm_supported) {
+            if !(kind == .text || kind == .voice || kind == .private_dm || dm_supported) {
                 contentHandler(improvedContent)
                 return
             }

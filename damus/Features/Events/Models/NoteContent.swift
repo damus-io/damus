@@ -31,6 +31,33 @@ struct NoteArtifactsSeparated: Equatable {
         return urls.compactMap { url in url.is_link }
     }
     
+    /// Resolve NIP-808 attachments while excluding primary audio from generic media paths.
+    func voiceSafe(for event: NostrEvent) -> NoteArtifactsSeparated {
+        guard event.known_kind == .voice else { return self }
+        // Reading attributed links also repairs artifacts cached with videos filtered out.
+        let contentURLs = content.attributed.runs.compactMap { $0.link }
+        let references = VoiceAttachmentReferences(tags: event.tags.strings(), contentURLs: contentURLs, cachedURLs: urls.map(\.url))
+        let resolved = references.attachments.map { attachment -> UrlType in
+            switch attachment.kind {
+            case .image: return .media(.image(attachment.url))
+            case .video: return .media(.video(attachment.url))
+            case .link: return .link(attachment.url)
+            }
+        }
+        return NoteArtifactsSeparated(content: content, words: words, urls: resolved, invoices: invoices)
+    }
+
+    /// Derive display text without changing cached content, attachment URLs, or inline profile badges.
+    func hidingImageAttachmentURLs() -> NoteArtifactsSeparated {
+        let imageURLs = images
+        guard !imageURLs.isEmpty else { return self }
+        let items = content.items.map { item -> CompatibleText.Item in
+            guard case .attributed_string(let attributed) = item else { return item }
+            return .attributed_string(VoiceAttachmentReferences.hidingImageURLs(in: attributed, imageURLs: imageURLs))
+        }
+        return NoteArtifactsSeparated(content: CompatibleText(items: items), words: words, urls: urls, invoices: invoices)
+    }
+
     static func just_content(_ content: String) -> NoteArtifactsSeparated {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
         return NoteArtifactsSeparated(content: txt, words: 0, urls: [], invoices: [])
@@ -73,12 +100,13 @@ func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profile
     
     do {
         return try NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: keypair, borrow: { blocks in
-            return .separated(render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: true))
+            let artifacts = render_blocks(blocks: blocks, profiles: profiles, can_hide_last_previewable_refs: ev.known_kind != .voice)
+            return .separated(artifacts.voiceSafe(for: ev))
         })
     }
     catch {
         // TODO: Improve error handling in the future, bubbling it up so that the view can decide how display errors. Keep legacy behavior for now.
-        return .separated(.just_content(ev.get_content(keypair)))
+        return .separated(NoteArtifactsSeparated.just_content(ev.get_content(keypair)).voiceSafe(for: ev))
     }
 }
 

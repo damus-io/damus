@@ -93,7 +93,8 @@ func decode_image_metadata(_ parts: [String]) -> ImageMetadata? {
             continue
         }
         
-        let ps = part.split(separator: " ")
+        // NIP-92 values such as alt text contain spaces; split the field name only.
+        let ps = part.split(separator: " ", maxSplits: 1)
         
         guard ps.count == 2 else {
             return nil
@@ -170,13 +171,20 @@ func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> Image
 }
 
 
+/// Use the same voice attachment classification as rendering and exclude primary audio.
 func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
+    let imageURLs: Set<String>? = ev.known_kind == .voice
+        ? Set(VoiceAttachmentReferences(tags: ev.tags.strings()).attachments
+            .filter { $0.kind == .image }.map { VoiceAttachmentReferences.identity($0.url) })
+        : nil
+    var seen = Set<String>()
     return ev.tags.reduce(into: [ImageMetadata]()) { meta, tag in
         guard tag.count >= 2, tag[0].matches_str("imeta"),
-              let data = ImageMetadata(tag: tag.strings()) else {
-            return
+              let data = ImageMetadata(tag: tag.strings()) else { return }
+        if let imageURLs {
+            let key = VoiceAttachmentReferences.identity(data.url)
+            guard imageURLs.contains(key), seen.insert(key).inserted else { return }
         }
-        
         meta.append(data)
     }
 }
@@ -196,7 +204,7 @@ func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
         cache.store_img_metadata(url: meta.url, meta: state)
         
         guard let blurhash = state.meta.blurhash else {
-            return
+            continue
         }
         
         Task {

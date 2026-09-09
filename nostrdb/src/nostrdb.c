@@ -2216,9 +2216,8 @@ static int ndb_write_note_relay_kind_index(
 // writes the relay note kind index and the note_id -> relay db
 static int ndb_write_note_relay_indexes(struct ndb_txn *txn, struct ndb_relay_kind_key *key)
 {
-	ndb_write_note_relay_kind_index(txn, key);
-	ndb_write_note_relay(txn, key->note_key, key->relay, key->relay_len);
-	return 1;
+	return ndb_write_note_relay_kind_index(txn, key) &&
+	       ndb_write_note_relay(txn, key->note_key, key->relay, key->relay_len);
 }
 
 static int ndb_write_note_pubkey_index(struct ndb_txn *txn, struct ndb_note *note,
@@ -2393,68 +2392,50 @@ static unsigned char *ndb_note_last_id_tag(struct ndb_note *note, char type)
 	return last;
 }
 
-/* get reply information from a note */
+/* NIP-10 marked references take precedence over positional legacy tags.
+ * Empty markers remain positional; NIP-188 source references are not replies. */
 static void ndb_parse_reply(struct ndb_note *note, struct ndb_note_reply *note_reply)
 {
-	unsigned char *root, *reply, *mention, *id;
+	unsigned char *root = NULL, *reply = NULL, *mention = NULL, *id;
+	unsigned char *legacy_root = NULL, *legacy_reply = NULL;
 	const char *marker;
 	struct ndb_iterator iter;
 	struct ndb_str str;
 	uint16_t count;
-	int any_marker, first;
+	int marked = 0;
 
-	any_marker = 0;
-	first = 1;
-	root = NULL;
-	reply = NULL;
-	mention = NULL;
-
-	// get the liked event id (last id)
 	ndb_tags_iterate_start(note, &iter);
 	while (ndb_tags_iterate_next(&iter)) {
-		if (root && reply && mention)
-			break;
-
-		marker = NULL;
 		count = ndb_tag_count(iter.tag);
-
-		if (count < 2)
-			continue;
-
+		if (count < 2) continue;
 		str = ndb_tag_str(note, iter.tag, 0);
-		if (!(str.flag == NDB_PACKED_STR && str.str[0] == 'e'))
-			continue;
-
+		if (str.flag == NDB_PACKED_ID || strcmp(str.str, "e")) continue;
 		str = ndb_tag_str(note, iter.tag, 1);
-		if (str.flag != NDB_PACKED_ID)
-			continue;
+		if (str.flag != NDB_PACKED_ID) continue;
 		id = str.id;
-
-		/* if we have the marker, assign it */
+		if (count > 4) {
+			str = ndb_tag_str(note, iter.tag, 4);
+			if (str.flag != NDB_PACKED_ID && !strcmp(str.str, "repost-source")) continue;
+		}
+		marker = NULL;
 		if (count >= 4) {
 			str = ndb_tag_str(note, iter.tag, 3);
-			if (str.flag == NDB_PACKED_STR)
-				marker = str.str;
+			if (str.flag == NDB_PACKED_ID) continue;
+			marker = str.str;
 		}
-
-		if (marker) {
-			any_marker = true;
-			if (!strcmp(marker, "root"))
-				root = id;
-			else if (!strcmp(marker, "reply"))
-				reply = id;
-			else if (!strcmp(marker, "mention"))
-				mention = id;
-		} else if (!any_marker && first) {
-			root = id;
-			first = 0;
-		} else if (!any_marker && !reply) {
-			reply = id;
+		if (!marker || !*marker) {
+			if (!legacy_root) legacy_root = id;
+			else legacy_reply = id;
+		} else if (!strcmp(marker, "root")) {
+			root = id; marked = 1;
+		} else if (!strcmp(marker, "reply")) {
+			reply = id; marked = 1;
+		} else if (!strcmp(marker, "mention")) {
+			mention = id; marked = 1;
 		}
 	}
-
-	note_reply->reply = reply;
-	note_reply->root = root;
+	note_reply->root = marked ? root : legacy_root;
+	note_reply->reply = marked ? reply : legacy_reply;
 	note_reply->mention = mention;
 }
 
@@ -2501,7 +2482,7 @@ int ndb_count_replies(struct ndb_txn *txn, const unsigned char *note_id, uint16_
 	v.mv_data = NULL;
 	v.mv_size = 0;
 
-	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+	if ((rc = mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)))
 		goto cleanup;
 
 	do {
@@ -2515,7 +2496,7 @@ int ndb_count_replies(struct ndb_txn *txn, const unsigned char *note_id, uint16_
 			break;
 		if (!(note = ndb_get_note_by_key(txn, note_key, &size)))
 			continue;
-		if (ndb_note_kind(note) != 1)
+		if (ndb_note_kind(note) != 1 && ndb_note_kind(note) != 1808)
 			continue;
 
 		ndb_parse_reply(note, &reply);
@@ -2534,11 +2515,11 @@ int ndb_count_replies(struct ndb_txn *txn, const unsigned char *note_id, uint16_
 			(*thread_replies)++;
 		}
 
-	} while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0);
+	} while ((rc = mdb_cursor_get(cur, &k, &v, MDB_NEXT)) == 0);
 
 cleanup:
 	mdb_cursor_close(cur);
-	return 1;
+	return rc == 0 || rc == MDB_NOTFOUND;
 }
 
 /* count all of the reactions for a note */
@@ -2573,7 +2554,7 @@ int ndb_rebuild_reaction_metadata(struct ndb_txn *txn, const unsigned char *note
 	v.mv_data = NULL;
 	v.mv_size = 0;
 
-	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+	if ((rc = mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)))
 		goto cleanup;
 
 	do {
@@ -2609,11 +2590,11 @@ int ndb_rebuild_reaction_metadata(struct ndb_txn *txn, const unsigned char *note
 		}
 
 		(*count)++;
-	} while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0);
+	} while ((rc = mdb_cursor_get(cur, &k, &v, MDB_NEXT)) == 0);
 
 cleanup:
 	mdb_cursor_close(cur);
-	return 1;
+	return rc == 0 || rc == MDB_NOTFOUND;
 }
 
 static int ndb_count_reposts(struct ndb_txn *txn, const unsigned char *note_id, uint16_t *count)
@@ -2626,6 +2607,9 @@ static int ndb_count_reposts(struct ndb_txn *txn, const unsigned char *note_id, 
 	struct ndb_note *note;
 	uint64_t note_key, kind;
 	char buffer[41]; /* 1 + 32 + 8 */
+	unsigned char target[32], *scratch = NULL;
+	secp256k1_context *secp = NULL;
+	int ok = 1;
 
 	*count = 0;
 	db = txn->lmdb->dbs[NDB_DB_NOTE_TAGS];
@@ -2645,7 +2629,7 @@ static int ndb_count_reposts(struct ndb_txn *txn, const unsigned char *note_id, 
 	v.mv_data = NULL;
 	v.mv_size = 0;
 
-	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+	if ((rc = mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)))
 		goto cleanup;
 
 	do {
@@ -2661,24 +2645,45 @@ static int ndb_count_reposts(struct ndb_txn *txn, const unsigned char *note_id, 
 		if (!(note = ndb_get_note_by_key(txn, note_key, NULL)))
 			continue;
 		kind = ndb_note_kind(note);
-		if (!(kind == 6 || kind == 16))
+		if (!(kind == 6 || kind == 16 || kind == 1809))
 			continue;
+		if (kind == 1809) {
+			/* Validate old stored wrappers too, and never count a source e tag. */
+			if (!scratch) {
+				scratch = malloc(NDB_VOICE_REPOST_SCRATCH_SIZE);
+				secp = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
+				if (!scratch || !secp) {
+					ok = 0;
+					goto cleanup;
+				}
+			}
+			if (!ndb_note_verify_voice_repost(secp, scratch,
+					NDB_VOICE_REPOST_SCRATCH_SIZE, note, target) ||
+			    memcmp(target, note_id, 32))
+				continue;
+		}
 		(*count)++;
-	} while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0);
+	} while ((rc = mdb_cursor_get(cur, &k, &v, MDB_NEXT)) == 0);
 
 cleanup:
+	free(scratch);
+	if (secp) secp256k1_context_destroy(secp);
 	mdb_cursor_close(cur);
-	return 1;
+	return ok && (rc == 0 || rc == MDB_NOTFOUND);
 }
 
-/* count all of the quote reposts for a note id */
+static unsigned char *ndb_note_first_tag_id(struct ndb_note *note, char tag);
+
+/* Count the same post kinds and primary q tag as fresh ingestion. */
 static int ndb_count_quotes(struct ndb_txn *txn, const unsigned char *note_id, uint16_t *count)
 {
 	MDB_val k, v;
 	MDB_cursor *cur;
 	MDB_dbi db;
 	int rc;
-	unsigned char *keybuf;
+	unsigned char *keybuf, *quoted;
+	struct ndb_note *note;
+	uint64_t note_key, kind;
 	char buffer[41]; /* 1 + 32 + 8 */
 
 	*count = 0;
@@ -2699,7 +2704,7 @@ static int ndb_count_quotes(struct ndb_txn *txn, const unsigned char *note_id, u
 	v.mv_data = NULL;
 	v.mv_size = 0;
 
-	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE))
+	if ((rc = mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)))
 		goto cleanup;
 
 	for (;;) {
@@ -2710,20 +2715,22 @@ static int ndb_count_quotes(struct ndb_txn *txn, const unsigned char *note_id, u
 			break;
 		if (memcmp(&keybuf[1], note_id, 32) != 0)
 			break;
-		/* TODO(jb55): technically we should check to see if this is a kind 1.
-		 * there could be other kinds with q tags that reference this note
-		 *
-		 * Starting to think we should have tag-kind index
-		 */
-		(*count)++;
+		memcpy(&note_key, v.mv_data, sizeof(note_key));
+		note = ndb_get_note_by_key(txn, note_key, NULL);
+		if (note) {
+			kind = ndb_note_kind(note);
+			quoted = ndb_note_first_tag_id(note, 'q');
+			if ((kind == 1 || kind == 1808 || kind == 30023) &&
+			    quoted && !memcmp(quoted, note_id, 32)) (*count)++;
+		}
 
-		if (mdb_cursor_get(cur, &k, &v, MDB_NEXT))
+		if ((rc = mdb_cursor_get(cur, &k, &v, MDB_NEXT)))
 			break;
 	}
 
 cleanup:
 	mdb_cursor_close(cur);
-	return 1;
+	return rc == 0 || rc == MDB_NOTFOUND;
 }
 
 /* count quotes and add them to a metadata builder.
@@ -3223,6 +3230,8 @@ static int ndb_migrate_utf8_profile_names(struct ndb_txn *txn)
 	return ret;
 }
 
+static int ndb_migrate_voice_posts(struct ndb_txn *txn);
+
 static struct ndb_migration MIGRATIONS[] = {
 	{ .fn = ndb_migrate_user_search_indices },
 	{ .fn = ndb_migrate_lower_user_search_indices },
@@ -3230,6 +3239,7 @@ static struct ndb_migration MIGRATIONS[] = {
 	{ .fn = ndb_migrate_profile_indices },
 	{ .fn = ndb_migrate_metadata },
 	{ .fn = ndb_migrate_search_key_cmp_fix },
+	{ .fn = ndb_migrate_voice_posts },
 };
 
 
@@ -3272,6 +3282,78 @@ int ndb_note_verify(void *ctx, unsigned char *scratch, size_t scratch_size,
 					 &xonly_pubkey) > 0;
 	if (!ok) return 0;
 
+	return 1;
+}
+
+/* Compare a tag element without treating a packed id as a C string. */
+static int ndb_tag_string_equals(struct ndb_note *note, struct ndb_tag *tag,
+				 int index, const char *expected)
+{
+	struct ndb_str str;
+	if (index >= ndb_tag_count(tag)) return 0;
+	str = ndb_tag_str(note, tag, index);
+	return str.flag != NDB_PACKED_ID && !strcmp(str.str, expected);
+}
+
+/* NIP-808 has two independent signatures and a single unambiguous target.
+ * Parse/verify the embedded original in disjoint halves of bounded scratch. */
+int ndb_note_verify_voice_repost(void *ctx, unsigned char *scratch,
+				size_t scratch_size, struct ndb_note *note,
+				unsigned char *target_id)
+{
+	struct ndb_note *inner;
+	struct ndb_iterator iter;
+	struct ndb_str name, value;
+	unsigned char *event_id = NULL, *author = NULL;
+	size_t half;
+	int kind_seen = 0, len;
+
+	if (!ctx || !scratch || ndb_note_kind(note) != 1809 ||
+	    ndb_note_is_rumor(note) ||
+	    scratch_size < NDB_VOICE_REPOST_SCRATCH_SIZE ||
+	    ndb_note_content_length(note) == 0 ||
+	    ndb_note_content_length(note) > 512 * 1024)
+		return 0;
+	if (!ndb_note_verify(ctx, scratch, scratch_size, note))
+		return 0;
+
+	ndb_tags_iterate_start(note, &iter);
+	while (ndb_tags_iterate_next(&iter)) {
+		if (!ndb_tag_count(iter.tag)) continue;
+		name = ndb_tag_str(note, iter.tag, 0);
+		if (name.flag == NDB_PACKED_ID) continue;
+		if (!strcmp(name.str, "k")) {
+			if (!ndb_tag_string_equals(note, iter.tag, 1, "1808")) return 0;
+			kind_seen = 1;
+			continue;
+		}
+		if (strcmp(name.str, "e") && strcmp(name.str, "p")) continue;
+		if (ndb_tag_count(iter.tag) < 2) return 0;
+		/* NIP-188 places the p marker at 3 and the e marker at 4. */
+		if (ndb_tag_string_equals(note, iter.tag,
+			name.str[0] == 'p' ? 3 : 4, "repost-source")) continue;
+		value = ndb_tag_str(note, iter.tag, 1);
+		if (value.flag != NDB_PACKED_ID) return 0;
+		if (name.str[0] == 'e') {
+			if (event_id && memcmp(event_id, value.id, 32)) return 0;
+			event_id = value.id;
+		} else {
+			if (author && memcmp(author, value.id, 32)) return 0;
+			author = value.id;
+		}
+	}
+	if (!event_id || !author || !kind_seen) return 0;
+
+	half = NDB_VOICE_REPOST_SCRATCH_SIZE / 2;
+	len = ndb_note_from_json(ndb_note_content(note),
+		ndb_note_content_length(note), &inner, scratch, half);
+	if (len <= 0 || ndb_note_kind(inner) != 1808 ||
+	    ndb_note_is_rumor(inner) ||
+	    memcmp(event_id, ndb_note_id(inner), 32) ||
+	    memcmp(author, ndb_note_pubkey(inner), 32) ||
+	    !ndb_note_verify(ctx, scratch + half, half, inner))
+		return 0;
+	if (target_id) memcpy(target_id, event_id, 32);
 	return 1;
 }
 
@@ -3771,8 +3853,13 @@ static int ndb_ingester_process_note(secp256k1_context *secp,
 		}
 	}
 
-	// we didn't find anything. let's send it
-	// to the writer thread
+	/* Voice reposts never inherit a skip-verification import policy: the
+	 * embedded event and its attribution must be verified before ingestion. */
+	if (note->kind == 1809 &&
+	    !ndb_note_verify_voice_repost(secp, scratch, scratch_size, note, NULL))
+		return 0;
+
+	// Send the validated note to the writer thread.
 	note = realloc(note, note_size);
 	assert(((uint64_t)note % 4) == 0);
 
@@ -3787,7 +3874,7 @@ static int ndb_ingester_process_note(secp256k1_context *secp,
 		prot_queue_push(ingester->writer_inbox, &msg);
 
 		return 1;
-	} else if (note->kind == 6) {
+	} else if (note->kind == 6 || note->kind == 1809) {
 		// process the repost if we have a repost event
 		//ndb_debug("processing kind 6 repost\n");
 		// dup the relay string
@@ -6260,6 +6347,8 @@ static int ndb_write_word_to_index(struct ndb_txn *txn, const char *word,
 		return 0;
 	}
 
+	/* Oversized words are intentionally unindexed; database failures are not. */
+	if (keysize > mdb_env_get_maxkeysize(txn->lmdb->env)) return 0;
 	k.mv_data = buffer;
 	k.mv_size = keysize;
 
@@ -6271,7 +6360,7 @@ static int ndb_write_word_to_index(struct ndb_txn *txn, const char *word,
 	if ((rc = mdb_put(txn->mdb_txn, text_db, &k, &v, 0))) {
 		ndb_debug("write note text index to db failed: %s\n",
 				mdb_strerror(rc));
-		return 0;
+		return -1;
 	}
 
 	return 1;
@@ -6325,23 +6414,19 @@ struct ndb_word_writer_ctx
 	struct ndb_txn *txn;
 	struct ndb_note *note;
 	uint64_t note_id;
+	int failed;
 };
 
 static int ndb_fulltext_word_writer(void *ctx,
 		const char *word, int word_len, int words)
 {
 	struct ndb_word_writer_ctx *wctx = ctx;
-
-	if (!ndb_write_word_to_index(wctx->txn, word, word_len, words,
-				     wctx->note->created_at, wctx->note_id)) {
-		// too big to write this one, just skip it
-		ndb_debug("failed to write word '%.*s' to index\n", word_len, word);
-
-		return 0;
-	}
-
-	//fprintf(stderr, "wrote '%.*s' to note text index\n", word_len, word);
-	return 1;
+	int rc;
+	if (wctx->failed) return 0;
+	rc = ndb_write_word_to_index(wctx->txn, word, word_len, words,
+				     wctx->note->created_at, wctx->note_id);
+	if (rc < 0) wctx->failed = 1;
+	return rc > 0;
 }
 
 static int ndb_write_note_fulltext_index(struct ndb_txn *txn,
@@ -6365,10 +6450,9 @@ static int ndb_write_note_fulltext_index(struct ndb_txn *txn,
 	ctx.txn = txn;
 	ctx.note = note;
 	ctx.note_id = note_id;
-
+	ctx.failed = 0;
 	ndb_parse_words(&cur, &ctx, ndb_fulltext_word_writer);
-
-	return 1;
+	return !ctx.failed;
 }
 
 static int ndb_parse_search_words(void *ctx, const char *word_str, int word_len, int word_index)
@@ -6835,7 +6919,8 @@ int ndb_text_search(struct ndb_txn *txn, const char *query,
 	return ndb_text_search_with(txn, query, results, config, NULL);
 }
 
-static void ndb_write_blocks(struct ndb_txn *txn, uint64_t note_key,
+/* Return write failure so migrations can abort rather than advance a partial index. */
+static int ndb_write_blocks(struct ndb_txn *txn, uint64_t note_key,
 			     struct ndb_blocks *blocks)
 {
 	int rc;
@@ -6853,8 +6938,9 @@ static void ndb_write_blocks(struct ndb_txn *txn, uint64_t note_key,
 	if ((rc = mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE_BLOCKS], &key, &val, 0))) {
 		ndb_debug("write version to note_blocks failed: %s\n",
 				mdb_strerror(rc));
-		return;
+		return 0;
 	}
+	return 1;
 }
 
 static int ndb_write_new_blocks(struct ndb_txn *txn, struct ndb_note *note,
@@ -6873,8 +6959,7 @@ static int ndb_write_new_blocks(struct ndb_txn *txn, struct ndb_note *note,
 		return 0;
 	}
 
-	ndb_write_blocks(txn, note_key, blocks);
-	return 1;
+	return ndb_write_blocks(txn, note_key, blocks);
 }
 
 
@@ -7090,48 +7175,37 @@ static int ndb_increment_repost_metadata(
 	return 1;
 }
 
-static void ndb_process_repost_stats(struct ndb_txn *txn, struct ndb_note *note, unsigned char *scratch, size_t scratch_size)
+/* Count a voice repost only for its cryptographically verified original. */
+static int ndb_process_repost_stats(secp256k1_context *secp,
+		struct ndb_txn *txn, struct ndb_note *note,
+		unsigned char *scratch, size_t scratch_size)
 {
-	unsigned char *reposted_note_id;
-	reposted_note_id = ndb_note_first_tag_id(note, 'e');
-
-	/* find q tag to see if we are quoting anything */
-	if (reposted_note_id) {
-		ndb_increment_repost_metadata(txn, reposted_note_id, scratch, scratch_size);
+	unsigned char target[32], *reposted_note_id;
+	if (ndb_note_kind(note) == 1809) {
+		if (!ndb_note_verify_voice_repost(secp, scratch, scratch_size, note, target))
+			return 1; /* Invalid legacy wrappers never contribute a count. */
+		reposted_note_id = target;
+	} else {
+		reposted_note_id = ndb_note_first_tag_id(note, 'e');
 	}
+	return !reposted_note_id || ndb_increment_repost_metadata(txn, reposted_note_id, scratch, scratch_size);
 }
 
 /* process quote and reply count metadata */
-static void ndb_process_note_stats(
-		struct ndb_txn *txn,
-		struct ndb_note *note,
-		unsigned char *scratch,
-		size_t scratch_size)
+static int ndb_process_note_stats(
+		struct ndb_txn *txn, struct ndb_note *note,
+		unsigned char *scratch, size_t scratch_size)
 {
 	unsigned char *quoted_note_id, *reply_id;
 	struct ndb_note_reply reply;
-
-	reply_id = NULL;
-
-	/* find q tag to see if we are quoting anything */
-	if ((quoted_note_id = ndb_note_first_tag_id(note, 'q'))) {
-		ndb_increment_quote_metadata(txn, quoted_note_id, scratch, scratch_size);
-	}
-
+	quoted_note_id = ndb_note_first_tag_id(note, 'q');
+	if (quoted_note_id && !ndb_increment_quote_metadata(txn, quoted_note_id, scratch, scratch_size))
+		return 0;
 	ndb_parse_reply(note, &reply);
-	if (ndb_is_reply_to_root(&reply)) {
-		reply_id = reply.root;
-	} else {
-		reply_id = reply.reply;
-	}
-
-	if (reply_id) {
-		ndb_increment_direct_reply_metadata(txn, reply_id, scratch, scratch_size);
-	}
-
-	if (reply.root) {
-		ndb_increment_thread_reply_metadata(txn, reply.root, scratch, scratch_size);
-	}
+	reply_id = ndb_is_reply_to_root(&reply) ? reply.root : reply.reply;
+	if (reply_id && !ndb_increment_direct_reply_metadata(txn, reply_id, scratch, scratch_size))
+		return 0;
+	return !reply.root || ndb_increment_thread_reply_metadata(txn, reply.root, scratch, scratch_size);
 }
 
 static int handle_reprocessed_giftwrap(
@@ -7177,7 +7251,7 @@ static int handle_reprocessed_giftwrap(
 	return ndb_writer_queue_msg(writer_inbox, &msg);
 }
 
-static uint64_t ndb_write_note(secp256k1_context *secp,
+static uint64_t ndb_write_note_impl(secp256k1_context *secp,
 			       struct ndb_txn *txn,
 			       struct ndb_writer_note *note,
 			       unsigned char *scratch, size_t scratch_size,
@@ -7250,17 +7324,18 @@ static uint64_t ndb_write_note(secp256k1_context *secp,
 		return 0;
 	}
 
-	ndb_write_note_id_index(txn, note->note, note_key);
-	ndb_write_note_kind_index(txn, note->note, note_key);
-	ndb_write_note_tag_index(txn, note->note, note_key);
-	ndb_write_note_pubkey_index(txn, note->note, note_key);
-	ndb_write_note_pubkey_kind_index(txn, note->note, note_key);
+	if (!ndb_write_note_id_index(txn, note->note, note_key) ||
+	    !ndb_write_note_kind_index(txn, note->note, note_key) ||
+	    !ndb_write_note_tag_index(txn, note->note, note_key) ||
+	    !ndb_write_note_pubkey_index(txn, note->note, note_key) ||
+	    !ndb_write_note_pubkey_kind_index(txn, note->note, note_key))
+		return 0;
 
-	if (ndb_relay_kind_key_init(&relay_key, note_key, kind, ndb_note_created_at(note->note), note->relay))
-		ndb_write_note_relay_indexes(txn, &relay_key);
+	if (ndb_relay_kind_key_init(&relay_key, note_key, kind, ndb_note_created_at(note->note), note->relay) &&
+	    !ndb_write_note_relay_indexes(txn, &relay_key)) return 0;
 
-	// only parse content and do fulltext index on text and longform notes
-	if (kind == 1 || kind == 30023) {
+	// Voice transcripts share the text/longform content indexes and counters.
+	if (kind == 1 || kind == 1808 || kind == 30023) {
 		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_FULLTEXT)) {
 			if (!ndb_write_note_fulltext_index(txn, note->note, note_key))
 				return 0;
@@ -7268,14 +7343,15 @@ static uint64_t ndb_write_note(secp256k1_context *secp,
 
 		// write note blocks
 		if (!ndb_flag_set(ndb_flags, NDB_FLAG_NO_NOTE_BLOCKS)) {
-			ndb_write_new_blocks(txn, note->note, note_key, scratch, scratch_size);
+			if (!ndb_write_new_blocks(txn, note->note, note_key, scratch, scratch_size))
+				return 0;
 		}
 
-		ndb_process_note_stats(txn, note->note, scratch, scratch_size);
+		if (!ndb_process_note_stats(txn, note->note, scratch, scratch_size)) return 0;
 	} else if (kind == 7 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
 		ndb_write_reaction_stats(txn, note->note, scratch, scratch_size);
-	} else if (kind == 6 || kind == 16) {
-		ndb_process_repost_stats(txn, note->note, scratch, scratch_size);
+	} else if (kind == 6 || kind == 16 || kind == 1809) {
+		if (!ndb_process_repost_stats(secp, txn, note->note, scratch, scratch_size)) return 0;
 	} else if (kind == 9735 && !ndb_flag_set(ndb_flags, NDB_FLAG_NO_STATS)) {
 		ndb_write_unverified_zap_stats(txn, note->note, scratch, scratch_size);
 	}
@@ -7283,6 +7359,141 @@ static uint64_t ndb_write_note(secp256k1_context *secp,
 	// A promote rewrote an existing note_key in place (plaintext -> sealed rumor);
 	// return 0 so the writer doesn't notify subscriptions for the same content.
 	return promoted ? 0 : note_key;
+}
+
+/* Keep a new voice note and all of its indices/counts atomic within the writer
+ * batch. Failure must leave no id that would suppress a later relay retry. */
+static uint64_t ndb_write_note(secp256k1_context *secp,
+		struct ndb_txn *txn, struct ndb_writer_note *note,
+		unsigned char *scratch, size_t scratch_size, uint32_t flags,
+		struct prot_queue *writer_inbox)
+{
+	struct ndb_txn child = *txn;
+	MDB_txn *raw;
+	uint64_t key;
+	int kind = ndb_note_kind(note->note);
+	if ((kind != 1808 && kind != 1809) || note->overwrite_note_id ||
+	    ndb_get_notekey_by_id(txn, ndb_note_id(note->note)))
+		return ndb_write_note_impl(secp, txn, note, scratch, scratch_size, flags, writer_inbox);
+	if (mdb_txn_begin(txn->lmdb->env, txn->mdb_txn, 0, &raw)) return 0;
+	child.mdb_txn = raw;
+	key = ndb_write_note_impl(secp, &child, note, scratch, scratch_size, flags, writer_inbox);
+	if (!key) { mdb_txn_abort(raw); return 0; }
+	return mdb_txn_commit(raw) == 0 ? key : 0;
+}
+
+/* Recompute only the counts entry, preserving zap data, flags and custom
+ * metadata. Recalculation, unlike incrementing, makes backfill idempotent. */
+static int ndb_refresh_voice_counts(struct ndb_txn *txn, unsigned char *id,
+				    unsigned char *scratch, size_t scratch_size)
+{
+	uint16_t direct, quotes, reposts;
+	uint32_t thread, reactions;
+	struct ndb_note_meta *meta;
+	struct ndb_note_meta_entry *entry;
+	MDB_val key, val;
+
+	if (!ndb_count_replies(txn, id, &direct, &thread) ||
+	    !ndb_count_quotes(txn, id, &quotes) ||
+	    !ndb_count_reposts(txn, id, &reposts) ||
+	    !ndb_rebuild_reaction_metadata(txn, id, NULL, &reactions))
+		return 0;
+	meta = ndb_get_note_meta(txn, id);
+	if (!meta && !direct && !thread && !quotes && !reposts && !reactions)
+		return 1;
+	if (ndb_note_meta_clone_with_entry(&meta, &entry, NDB_NOTE_META_COUNTS,
+		NULL, scratch, scratch_size) == NDB_META_CLONE_FAILED)
+		return 0;
+	ndb_note_meta_counts_set(entry, reactions, quotes, direct, thread, reposts);
+	key.mv_data = id;
+	key.mv_size = 32;
+	val.mv_data = meta;
+	val.mv_size = ndb_note_meta_total_size(meta);
+	return mdb_put(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_META], &key, &val, 0) == 0;
+}
+
+/* Backfill existing voice notes without rewriting their ids or tags. The
+ * caller's migration transaction rolls all work back if any step fails.
+ * First recover signed originals from old wrappers; then index transcripts
+ * and recompute affected counts, including targets absent from the cache. */
+static int ndb_migrate_voice_posts(struct ndb_txn *txn)
+{
+	MDB_cursor *cur = NULL;
+	MDB_val k, v;
+	struct ndb_note *note = NULL, *inner;
+	struct ndb_writer_note writer_note;
+	struct ndb_iterator iter;
+	struct ndb_str tag, value;
+	unsigned char target[32];
+	unsigned char *scratch = malloc(NDB_VOICE_REPOST_SCRATCH_SIZE);
+	unsigned char *parsed = malloc(NDB_VOICE_REPOST_SCRATCH_SIZE);
+	secp256k1_context *secp = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
+	uint64_t note_key;
+	int pass, rc, len, ok = 0;
+
+	if (!scratch || !parsed || !secp) goto cleanup;
+	for (pass = 0; pass < 2; pass++) {
+		if (mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[NDB_DB_NOTE], &cur))
+			goto cleanup;
+		while ((rc = mdb_cursor_get(cur, &k, &v, MDB_NEXT)) == 0) {
+			inner = v.mv_data;
+			if (ndb_note_kind(inner) != 1808 && ndb_note_kind(inner) != 1809)
+				continue;
+			/* LMDB writes may invalidate mv_data; retain the entire source. */
+			note = malloc(v.mv_size);
+			if (!note) goto cleanup;
+			memcpy(note, inner, v.mv_size);
+			memcpy(&note_key, k.mv_data, sizeof(note_key));
+			if (pass == 0 && ndb_note_kind(note) == 1809 &&
+			    ndb_note_verify_voice_repost(secp, scratch,
+				NDB_VOICE_REPOST_SCRATCH_SIZE, note, target) &&
+			    !ndb_get_notekey_by_id(txn, target)) {
+				len = ndb_note_from_json(ndb_note_content(note),
+					ndb_note_content_length(note), &inner, parsed,
+					NDB_VOICE_REPOST_SCRATCH_SIZE);
+				if (len <= 0) goto cleanup;
+				ndb_writer_note_init(&writer_note, inner, len, NULL, 0);
+				if (!ndb_write_note(secp, txn, &writer_note, scratch,
+					NDB_VOICE_REPOST_SCRATCH_SIZE, 0, NULL)) goto cleanup;
+			}
+			if (pass == 1 && ndb_note_kind(note) == 1808) {
+				if (!ndb_refresh_voice_counts(txn, ndb_note_id(note), scratch,
+					NDB_VOICE_REPOST_SCRATCH_SIZE)) goto cleanup;
+				if (!ndb_write_note_fulltext_index(txn, note, note_key) ||
+				    !ndb_write_new_blocks(txn, note, note_key, scratch,
+					NDB_VOICE_REPOST_SCRATCH_SIZE)) goto cleanup;
+				ndb_tags_iterate_start(note, &iter);
+				while (ndb_tags_iterate_next(&iter)) {
+					if (ndb_tag_count(iter.tag) < 2) continue;
+					tag = ndb_tag_str(note, iter.tag, 0);
+					if (tag.flag == NDB_PACKED_ID ||
+					    (strcmp(tag.str, "e") && strcmp(tag.str, "q"))) continue;
+					value = ndb_tag_str(note, iter.tag, 1);
+					if (value.flag == NDB_PACKED_ID &&
+					    !ndb_refresh_voice_counts(txn, value.id, scratch,
+						NDB_VOICE_REPOST_SCRATCH_SIZE)) goto cleanup;
+				}
+			}
+			if (pass == 1 && ndb_note_kind(note) == 1809 &&
+			    ndb_note_verify_voice_repost(secp, scratch,
+				NDB_VOICE_REPOST_SCRATCH_SIZE, note, target) &&
+			    !ndb_refresh_voice_counts(txn, target, scratch,
+				NDB_VOICE_REPOST_SCRATCH_SIZE)) goto cleanup;
+			free(note);
+			note = NULL;
+		}
+		mdb_cursor_close(cur);
+		cur = NULL;
+		if (rc != MDB_NOTFOUND) goto cleanup;
+	}
+	ok = 1;
+cleanup:
+	if (cur) mdb_cursor_close(cur);
+	if (secp) secp256k1_context_destroy(secp);
+	free(note);
+	free(parsed);
+	free(scratch);
+	return ok;
 }
 
 static int ndb_ingest_rumor(secp256k1_context *secp,
@@ -12107,6 +12318,8 @@ enum ndb_common_kind ndb_kind_to_common_kind(int kind)
 		case 5:     return NDB_CKIND_DELETE;
 		case 6:     return NDB_CKIND_REPOST;
 		case 7:     return NDB_CKIND_REACTION;
+		case 1808:  return NDB_CKIND_VOICE;
+		case 1809:  return NDB_CKIND_VOICE_REPOST;
 		case 9735:  return NDB_CKIND_ZAP;
 		case 9734:  return NDB_CKIND_ZAP_REQUEST;
 		case 23194: return NDB_CKIND_NWC_REQUEST;
@@ -12138,6 +12351,8 @@ const char *ndb_kind_name(enum ndb_common_kind ck)
 		case NDB_CKIND_LIST:         return "list";
 		case NDB_CKIND_LONGFORM:     return "longform";
 		case NDB_CKIND_STATUS:       return "status";
+		case NDB_CKIND_VOICE:        return "voice";
+		case NDB_CKIND_VOICE_REPOST: return "voice_repost";
 		case NDB_CKIND_COUNT:        return "unknown";
 	}
 

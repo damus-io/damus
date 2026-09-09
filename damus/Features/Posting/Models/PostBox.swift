@@ -53,9 +53,28 @@ enum CancelSendErr {
     case too_late
 }
 
+/// Delivery evidence for submitted voice posts. A transport attempt is never an acceptance.
+enum PostBoxDelivery {
+    case queued
+    case dispatched(RelayURL)
+    case accepted(RelayURL)
+    case rejected(RelayURL, String)
+    case noRelays
+}
+
+private final class VoicePostDelivery {
+    let isActive: @Sendable () -> Bool
+    let update: @Sendable (PostBoxDelivery) async -> Void
+    init(isActive: @escaping @Sendable () -> Bool, update: @escaping @Sendable (PostBoxDelivery) async -> Void) {
+        self.isActive = isActive
+        self.update = update
+    }
+}
+
 actor PostBox {
     private let pool: RelayPool
     var events: [NoteId: PostedEvent]
+    private var voiceDeliveries: [NoteId: VoicePostDelivery] = [:]
 
     init(pool: RelayPool) {
         self.pool = pool
@@ -90,8 +109,20 @@ actor PostBox {
     
     func try_flushing_events() async {
         let now = Int64(Date().timeIntervalSince1970)
-        for kv in events {
-            let event = kv.value
+        for event in Array(events.values) {
+            if let delivery = voiceDeliveries[event.event.id] {
+                guard delivery.isActive() else {
+                    voiceDeliveries.removeValue(forKey: event.event.id)
+                    events.removeValue(forKey: event.event.id)
+                    continue
+                }
+                if event.remaining.isEmpty {
+                    event.remaining = await pool.our_descriptors.filter { $0.info.canWrite }.map {
+                        Relayer(relay: $0.url, attempts: 0, retry_after: 10)
+                    }
+                    if event.remaining.isEmpty { continue }
+                }
+            }
             
             // some are delayed
             if let after = event.flush_after, Date.now.timeIntervalSince1970 < after.timeIntervalSince1970 {
@@ -108,16 +139,21 @@ actor PostBox {
         }
     }
 
-    func handle_event(relay_id: RelayURL, _ ev: NostrConnectionEvent) {
-        guard case .nostr_event(let resp) = ev else {
-            return
+    func handle_event(relay_id: RelayURL, _ ev: NostrConnectionEvent) async {
+        guard case .nostr_event(.ok(let result)) = ev else { return }
+        if let delivery = voiceDeliveries[result.event_id] {
+            guard events[result.event_id]?.remaining.contains(where: { $0.relay == relay_id }) == true else { return }
+            if result.ok {
+                await delivery.update(.accepted(relay_id))
+            } else {
+                await delivery.update(.rejected(relay_id, result.msg))
+                // Keep the same signed event available for retry; rejection is not on_flush success.
+                return
+            }
         }
-        
-        guard case .ok(let cr) = resp else {
-            return
-        }
-        
-        remove_relayer(relay_id: relay_id, event_id: cr.event_id)
+        // Voice reposts use the normal queue, but a negative OK is still a rejection.
+        if !result.ok, events[result.event_id]?.event.known_kind == .voice_repost { return }
+        remove_relayer(relay_id: relay_id, event_id: result.event_id)
     }
 
     @discardableResult
@@ -143,17 +179,21 @@ actor PostBox {
         let after_count = ev.remaining.count
         if ev.remaining.count == 0 {
             self.events.removeValue(forKey: event_id)
+            self.voiceDeliveries.removeValue(forKey: event_id)
         }
         return prev_count != after_count
     }
     
     private func flush_event(_ event: PostedEvent, to_relay: Relayer? = nil) async {
+        let voiceDelivery = voiceDeliveries[event.event.id]
         var relayers = event.remaining
         if let to_relay {
             relayers = [to_relay]
         }
         
         for relayer in relayers {
+            guard events[event.event.id] === event else { return }
+            if let voiceDelivery, !voiceDelivery.isActive() { return }
             relayer.attempts += 1
             relayer.last_attempt = Int64(Date().timeIntervalSince1970)
             relayer.retry_after *= 1.5
@@ -162,8 +202,27 @@ actor PostBox {
             } else {
                 print("could not find relay when flushing: \(relayer.relay)")
             }
+            if let voiceDelivery, !voiceDelivery.isActive() { return }
             await pool.send(.event(event.event), to: [relayer.relay], skip_ephemeral: event.skip_ephemeral)
+            if let voiceDelivery { await voiceDelivery.update(.dispatched(relayer.relay)) }
         }
+    }
+
+    /// The caller must persist the exact signed voice event before requesting this handoff.
+    func sendVoice(_ event: NostrEvent, isActive: @escaping @Sendable () -> Bool,
+                   update: @escaping @Sendable (PostBoxDelivery) async -> Void) async {
+        guard event.known_kind == .voice, !event.is_rumor, isActive() else { return }
+        voiceDeliveries[event.id] = VoicePostDelivery(isActive: isActive, update: update)
+        await update(.queued)
+        let relays = await pool.our_descriptors.filter { $0.info.canWrite }.map { $0.url }
+        guard isActive() else { voiceDeliveries.removeValue(forKey: event.id); return }
+        if let pending = events[event.id] {
+            if pending.remaining.isEmpty { pending.remaining = relays.map { Relayer(relay: $0, attempts: 0, retry_after: 10) } }
+            await flush_event(pending)
+        } else {
+            await send(event, to: relays)
+        }
+        if relays.isEmpty { await update(.noRelays) }
     }
 
     func send(_ event: NostrEvent, to: [RelayURL]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil, on_flush: OnFlush? = nil) async {

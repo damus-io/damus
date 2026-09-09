@@ -12,6 +12,8 @@ import EmojiPicker
 
 class DamusState: HeadlessDamusState, ObservableObject {
     let keypair: Keypair
+    /// Invalidated synchronously at logout to fence voice signing and relay retries.
+    let voiceLifetime = VoiceAccountLifetime()
     let likes: EventCounter
     let boosts: EventCounter
     let quote_reposts: EventCounter
@@ -194,6 +196,7 @@ class DamusState: HeadlessDamusState, ObservableObject {
     }
 
     func close() {
+        voiceLifetime.invalidate()
         print("txn: damus close")
         Task {
             try await self.push_notification_client.revoke_token()

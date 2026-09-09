@@ -34,7 +34,7 @@ enum FilterState : Int {
     func filter(ev: NostrEvent) -> Bool {
         switch self {
         case .posts:
-            return ev.known_kind == .boost || ev.known_kind == .highlight || !ev.is_reply()
+            return ev.known_kind?.isRepost == true || ev.known_kind == .highlight || !ev.is_reply()
         case .posts_and_replies:
             return true
         case .conversations:
@@ -87,7 +87,7 @@ func hashtag_spam_filter(ev: NostrEvent, max_hashtags: Int) -> Bool {
 @MainActor
 func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
     return { ev in
-        guard ev.known_kind == .boost else { return true }
+        guard ev.known_kind?.isRepost == true else { return true }
         // This needs to use cached because it can be way too slow otherwise
         guard let inner_ev = ev.get_cached_inner_event(cache: damus_state.events) else { return true }
         return should_show_event(state: damus_state, ev: inner_ev)

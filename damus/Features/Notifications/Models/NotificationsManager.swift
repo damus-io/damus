@@ -136,15 +136,15 @@ func generate_local_notification_object(ndb: Ndb, from ev: NostrEvent, state: He
         return LocalNotification(type: .private_reply, event: ev, target: .note(ev), content: ev.content)
     }
 
-    if type == .text,
+    if type.isPost, !ev.is_rumor,
        state.settings.mention_notification
     {
         return try? NdbBlockGroup.borrowBlockGroup(event: ev, using: ndb, and: state.keypair, borrow: { blockGroup in
             return generate_text_mention_notification(ndb: ndb, from: ev, state: state, blockGroup: blockGroup)
         })
-    } else if type == .boost,
+    } else if type.isRepost,
               state.settings.repost_notification,
-              let inner_ev = ev.get_inner_event()
+              let inner_ev = (type == .voice_repost ? ev.cached_voice_original : ev.get_inner_event())
     {
         
         let content_preview = render_notification_content_preview(ndb: ndb, ev: inner_ev, profiles: state.profiles, keypair: state.keypair)

@@ -33,7 +33,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func get_base_filter() -> NostrFilter {
-        var filter = NostrFilter(kinds: [.text, .chat])
+        var filter = NostrFilter(kinds: NostrKind.postKinds + [.chat])
         filter.limit = self.limit
         filter.until = UInt32(Date.now.timeIntervalSince1970)
         return filter
@@ -133,8 +133,9 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
 
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost,
-            let bev = ev.get_inner_event(cache: cache),
+        let original = ev.known_kind == .voice_repost ? ev.cached_voice_original
+            : (ev.known_kind == .boost ? ev.get_inner_event(cache: cache) : nil)
+        if let bev = original,
             let has_fresh_profiles = try? profiles.has_fresh_profile(id: bev.pubkey),
             !has_fresh_profiles {
             pubkeys.insert(bev.pubkey)

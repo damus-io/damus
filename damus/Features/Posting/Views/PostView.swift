@@ -62,9 +62,12 @@ enum PostAction {
     }
 }
 
+@MainActor
 struct PostView: View {
     
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
+    @StateObject private var voice: VoiceComposerModel
+    @State private var postTextAfterDiscard = false
     @State var uploadedMedias: [UploadedMedia] = []
     @State var references: [RefId] = []
     /// Pubkeys that should be filtered out from the references
@@ -120,6 +123,7 @@ struct PostView: View {
         initial_text_suffix: String? = nil
     ) {
         self.action = action
+        self._voice = StateObject(wrappedValue: VoiceComposerModel(state: damus_state, action: action))
         self.damus_state = damus_state
         self.prompt_view = prompt_view
         self.placeholder_messages = placeholder_messages ?? [POST_PLACEHOLDER]
@@ -129,7 +133,14 @@ struct PostView: View {
 
     @Environment(\.dismiss) var dismiss
 
+    /// Text keeps its existing draft; audio must complete confirmed cleanup before dismissal.
     func cancel() {
+        postTextAfterDiscard = false
+        guard voice.requestDismiss() else { return }
+        Task { if await voice.discardAndClose() { finishCancel() } }
+    }
+
+    private func finishCancel() {
         notify(.post(.cancel))
         cancelUploadTasks()
         cancelProfileFetchTasks()
@@ -284,6 +295,21 @@ struct PostView: View {
     }
 
     func send_post() async {
+        if voice.mode == .audio {
+            guard !sending_privately, !private_reply_required, voice.supportsAction else { return }
+            if voice.draft?.phase == .accepted {
+                if await voice.finishAccepted() { dismiss() }
+            } else {
+                await voice.send()
+            }
+            return
+        }
+        // Posting text also leaves this sheet; switching formats must not bypass audio discard.
+        if voice.needsDiscardConfirmation {
+            postTextAfterDiscard = true
+            _ = voice.requestDismiss()
+            return
+        }
         let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
         if sending_privately, case .replying_to(let replying_to) = action {
@@ -307,6 +333,10 @@ struct PostView: View {
     }
 
     var posting_disabled: Bool {
+        if voice.dismissalLocked { return true }
+        if voice.mode == .audio {
+            return sending_privately || private_reply_required || (voice.draft?.phase != .accepted && !voice.canSend)
+        }
         // A pubkey-only login can read a private reply but cannot seal one, and there is no public
         // reply for this composer to fall back to. The reply affordance is already absent for that
         // case (``NoteActions/available(on:keypair:)``), so this composer should be unreachable —
@@ -445,7 +475,9 @@ struct PostView: View {
         Button(action: {
             Task { await self.send_post() }
         }, label: {
-            if sending_privately {
+            if voice.mode == .audio {
+                Text(voice.draft?.phase == .accepted ? "Done" : (voice.draft?.eventJSON == nil ? "Post" : "Retry Post"))
+            } else if sending_privately {
                 HStack(spacing: 5) {
                     Image(systemName: "lock.fill")
                     Text("Send Privately", comment: "Button to send a reply that is encrypted to its recipient rather than posted publicly.")
@@ -525,8 +557,11 @@ struct PostView: View {
             draft.references = references
             draft.filtered_pubkeys = filtered_pubkeys
             draft.is_private_reply = sending_privately
+            draft.context_event = action.ev
         } else {
             let artifacts = DraftArtifacts(content: post, media: uploadedMedias, references: references, id: UUID().uuidString, is_private_reply: sending_privately)
+            artifacts.context_event = action.ev
+            artifacts.filtered_pubkeys = filtered_pubkeys
             set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
         self.autoSaveModel.needsSaving()
@@ -587,33 +622,35 @@ struct PostView: View {
     }
     
     var TopBar: some View {
-        VStack {
-            HStack(spacing: 5.0) {
-                Button(action: {
-                    self.cancel()
-                }, label: {
-                    Text("Cancel", comment: "Button to cancel out of posting a note.")
-                        .padding(10)
-                })
+        VStack(spacing: 10) {
+            HStack(spacing: 5) {
+                Button(action: cancel) {
+                    Text(voice.draft?.eventJSON == nil ? "Cancel" : "Close", comment: "Close the composer; confirm discarding unpublished audio.").padding(10)
+                }
                 .buttonStyle(NeutralButtonStyle())
                 .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_cancel_button.rawValue)
-                
-                if let error {
-                    Text(error)
-                        .foregroundColor(.red)
-                }
-
+                .disabled(voice.dismissalLocked)
+                if let error { Text(error).foregroundColor(.red) }
                 Spacer()
-
                 PostButton
             }
-            
-            Divider()
-                .foregroundColor(DamusColors.neutral3)
-                .padding(.top, 5)
+            if voice.supportsAction && !sending_privately && !private_reply_required {
+                Picker("Post format", selection: Binding(get: { voice.mode }, set: { value in
+                    voice.changeMode(value)
+                    focusWordAttributes = (nil, nil)
+                    // Keep keyboard focus local to the composer, including in app extensions.
+                    focus = value == .text
+                })) {
+                    Text("Text").tag(VoiceComposerModel.Mode.text)
+                    Text("Audio").tag(VoiceComposerModel.Mode.audio)
+                }
+                .pickerStyle(.segmented)
+                .disabled(voice.dismissalLocked)
+                .accessibilityIdentifier("post.format")
+            }
+            Divider().foregroundColor(DamusColors.neutral3)
         }
-        .frame(height: 30)
-        .padding()
+        .padding(.horizontal)
         .padding(.top, 15)
     }
 
@@ -661,27 +698,36 @@ struct PostView: View {
         }
     }
     
+    /// Audio reviews span the sheet; text keeps its existing avatar-and-editor layout.
     func Editor(deviceSize: GeometryProxy) -> some View {
         HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .top) {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
-                    
-                    VStack(alignment: .leading) {
-                        if let prompt_view {
-                            prompt_view()
+                Group {
+                    if voice.mode == .audio {
+                        VStack(alignment: .leading, spacing: 12) {
+                            if let prompt_view { prompt_view() }
+                            VoiceTranscriptReview(model: voice)
                         }
-                        TextEntry
+                    } else {
+                        HStack(alignment: .top) {
+                            ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation, damusState: damus_state)
+                            VStack(alignment: .leading) {
+                                if let prompt_view { prompt_view() }
+                                TextEntry
+                            }
+                        }
                     }
                 }
                 .id("post")
                 
-                PVImageCarouselView(media: $uploadedMedias,
-                                    mediaUnderProgress: $mediaUploadUnderProgress,
-                                    imageUploadModel: image_upload,
-                                    deviceWidth: deviceSize.size.width)
+                if voice.mode == .text {
+                    PVImageCarouselView(media: $uploadedMedias,
+                                        mediaUnderProgress: $mediaUploadUnderProgress,
+                                        imageUploadModel: image_upload,
+                                        deviceWidth: deviceSize.size.width)
                         .onChange(of: uploadedMedias) { media in
                             post_changed(post: post, media: media)
+                        }
                 }
                 
                 if case .quoting(let ev) = action {
@@ -718,8 +764,8 @@ struct PostView: View {
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
-                let searching = get_searching_string(focusWordAttributes.0)
-                let searchingHashTag = get_searching_hashTag(focusWordAttributes.0)
+                let searching = voice.mode == .text ? get_searching_string(focusWordAttributes.0) : nil
+                let searchingHashTag = voice.mode == .text ? get_searching_hashTag(focusWordAttributes.0) : nil
                 TopBar
                 
                 ScrollViewReader { scroller in
@@ -745,7 +791,9 @@ struct PostView: View {
                 }
                 
                 // This if-block observes @ for tagging
-                if let searching {
+                if voice.mode == .audio {
+                    VoiceRecordingBar(model: voice)
+                } else if let searching {
                     UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                         .environmentObject(tagModel)
@@ -767,6 +815,22 @@ struct PostView: View {
                 }
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
+            .background(VoiceComposerDismissGuard(blocked: voice.needsDiscardConfirmation || voice.dismissalLocked, onAttempt: cancel))
+            .alert("Are you sure you want to discard this audio post before posting it?", isPresented: $voice.confirmingDiscard) {
+                Button("Yes, discard", role: .destructive) {
+                    Task {
+                        guard await voice.discardAndClose() else { return }
+                        if postTextAfterDiscard {
+                            postTextAfterDiscard = false
+                            await send_post()
+                        } else { finishCancel() }
+                    }
+                }
+                Button("Keep editing", role: .cancel) {
+                    postTextAfterDiscard = false
+                    voice.keepEditing()
+                }
+            }
             .sheet(isPresented: $attach_media) {
                 MediaPicker(mediaPickerEntry: .postView, onMediaSelected: { image_upload_confirm = true }) { media in
                     self.preUploadedMedia.append(media)
@@ -855,10 +919,21 @@ struct PostView: View {
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.focus = true
+                    self.focus = voice.mode == .text
                 }
             }
+            .onChange(of: sending_privately) { isPrivate in
+                if isPrivate { voice.changeMode(.text) }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                voice.suspend()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) { notification in
+                if let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                   AVAudioSession.InterruptionType(rawValue: raw) == .began { voice.suspend() }
+            }
             .onDisappear {
+                voice.disappear()
                 if isEmpty() {
                     clear_draft()
                 }
@@ -1104,6 +1179,9 @@ private func isAlphanumeric(_ char: Character) -> Bool {
 /// Generates NIP-10 compliant e-tags for replies.
 /// Format: `["e", <event-id>, <relay-url>, <marker>, <pubkey>]`
 func nip10_reply_tags(replying_to: NostrEvent, keypair: Keypair, relayURL: RelayURL?) -> [[String]] {
+    if replying_to.known_kind == .voice {
+        return VoiceEventBuilder.replyTags(parent: replying_to, relay: relayURL?.absoluteString ?? "")
+    }
     guard let nip10 = replying_to.thread_reply() else {
         // we're replying to a post that isn't in a thread,
         // just add a single reply-to-root tag

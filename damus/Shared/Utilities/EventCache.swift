@@ -245,8 +245,8 @@ class EventCache {
 }
 
 func should_translate(event: NostrEvent, our_keypair: Keypair, note_lang: String?) -> Bool {
-    // don't translate reposts, longform, etc
-    if event.kind != 1 {
+    // Translate ordinary post bodies, including the signed voice transcript.
+    if event.known_kind?.isPost != true {
         return false;
     }
 
@@ -418,7 +418,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
 
         // only separated artifacts have previews
         if case .separated(let sep) = arts {
-            let preview = await load_preview(artifacts: sep)
+            let preview = await load_preview(artifacts: sep.voiceSafe(for: plan.event))
             DispatchQueue.main.async {
                 if let preview {
                     plan.data.preview_model.state = .loaded(preview)

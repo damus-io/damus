@@ -59,6 +59,14 @@ import SwiftUI
     @Published var is_playing = false {
         didSet {
             if oldValue == is_playing { return }
+            if is_playing {
+                if VoicePlayback.shared.isRecording {
+                    is_playing = false
+                    player.pause()
+                    return
+                }
+                VoicePlayback.shared.stop()
+            }
             // When scrubbing, the playback control is temporarily decoupled, so don't play/pause our `AVPlayer`
             // When scrubbing stops, the `is_editing_current_time` handler will automatically play/pause depending on `is_playing`
             if is_editing_current_time { return }
@@ -211,11 +219,11 @@ import SwiftUI
     }
     
     private func observeVideoIsPlaying() {
-        videoIsPlayingObserver = player.observe(\.rate, changeHandler: { [weak self] (player, change) in
-            guard let self else { return }
-            guard let new_rate = change.newValue else { return }
+        videoIsPlayingObserver = player.observe(\.rate, options: [.new], changeHandler: { [weak self] (_, _) in
             DispatchQueue.main.async {
-                self.is_playing = new_rate > 0
+                guard let self else { return }
+                // Read the live rate; a queued callback may describe a player we already paused.
+                self.is_playing = self.player.rate > 0
             }
         })
     }
@@ -234,6 +242,7 @@ import SwiftUI
     }
     
     @objc private func did_play_to_end() {
+        guard is_playing, !VoicePlayback.shared.isRecording else { player.pause(); return }
         player.seek(to: CMTime.zero)
         player.play()
     }

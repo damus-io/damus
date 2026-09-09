@@ -114,8 +114,8 @@ struct AdvancedSearchQuery: Equatable {
     // MARK: - nostrdb limits
 
     /// The kinds nostrdb fulltext-indexes, and so the only ones worth searching:
-    /// text notes and long-form posts (`nostrdb.c:5525`).
-    static let defaultKinds: Set<NostrKind> = [.text, .longform]
+    /// text notes, voice transcripts, and long-form posts.
+    static let defaultKinds: Set<NostrKind> = [.text, .voice, .longform]
 
     /// nostrdb's `NDB_MAX_AUTHOR_KIND_SCANNERS` (`nostrdb/src/nostrdb.c:96`),
     /// mirrored here because it is a `#define` in the `.c` and so invisible to

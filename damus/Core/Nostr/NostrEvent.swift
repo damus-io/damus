@@ -487,7 +487,20 @@ func random_bytes(count: Int) -> Data {
     return Data(bytes: bytes, count: count)
 }
 
+/// Build the native repost kind for the original event. Call off the main thread
+/// when reposting voice: the embedded original is verified before signing.
 func make_boost_event(keypair: FullKeypair, boosted: NostrEvent, relayURL: RelayURL?) -> NostrEvent? {
+    guard !boosted.is_rumor else { return nil }
+    if boosted.known_kind == .voice {
+        guard boosted.verify() else { return nil }
+        let tags = [
+            ["e", boosted.id.hex(), relayURL?.absoluteString ?? ""],
+            ["p", boosted.pubkey.hex()],
+            ["k", "1808"]
+        ]
+        return NostrEvent(content: event_to_json(ev: boosted), keypair: keypair.to_keypair(),
+                          kind: NostrKind.voice_repost.rawValue, tags: tags)
+    }
     var tags = Array(boosted.referenced_pubkeys).map({ pk in pk.tag })
 
     var eTagBuilder = ["e", boosted.id.hex()]
@@ -526,6 +539,8 @@ func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = 
 
     tags.append(eTagBuilder)
     tags.append(pTagBuilder)
+    // NIP-25 identifies a voice reaction's original event kind.
+    if liked.known_kind == .voice { tags.append(["k", "1808"]) }
 
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }

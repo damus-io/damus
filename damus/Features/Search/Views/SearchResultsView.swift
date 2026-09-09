@@ -299,33 +299,25 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
-@MainActor
-func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> [Pubkey] {
-    // Search by hex pubkey.
+/// Query the existing nostrdb profile index; asynchronous callers run this off the main actor.
+func search_profile_ids(profiles: Profiles, search: String) -> [Pubkey] {
     if let pubkey = hex_decode_pubkey(search),
-       (try? profiles.lookup_key_by_pubkey(pubkey)) != nil
-    {
+       (try? profiles.lookup_key_by_pubkey(pubkey)) != nil {
         return [pubkey]
     }
-
-    // Search by npub pubkey.
     if search.starts(with: "npub"),
        let bech32_key = decode_bech32_key(search),
-       case Bech32Key.pub(let pk) = bech32_key,
-       (try? profiles.lookup_key_by_pubkey(pk)) != nil
-    {
-        return [pk]
+       case Bech32Key.pub(let pubkey) = bech32_key,
+       (try? profiles.lookup_key_by_pubkey(pubkey)) != nil {
+        return [pubkey]
     }
+    return (try? profiles.search(search, limit: 128)) ?? []
+}
 
-    return (try? profiles.search(search, limit: 128).sorted { a, b in
-        let aFriendTypePriority = get_friend_type(contacts: contacts, pubkey: a)?.priority ?? 0
-        let bFriendTypePriority = get_friend_type(contacts: contacts, pubkey: b)?.priority ?? 0
-
-        if aFriendTypePriority > bFriendTypePriority {
-            // `a` should be sorted before `b`
-            return true
-        } else {
-            return false
-        }
-    }) ?? []
+@MainActor
+func search_profiles(profiles: Profiles, contacts: Contacts, search: String) -> [Pubkey] {
+    search_profile_ids(profiles: profiles, search: search).sorted { a, b in
+        (get_friend_type(contacts: contacts, pubkey: a)?.priority ?? 0) >
+            (get_friend_type(contacts: contacts, pubkey: b)?.priority ?? 0)
+    }
 }
