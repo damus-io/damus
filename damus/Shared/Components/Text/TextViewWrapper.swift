@@ -49,7 +49,16 @@ struct TextViewWrapper: UIViewRepresentable {
         uiView.linkTextAttributes = linkAttributes
     }
 
+    /// Pushes the SwiftUI-side attributed text into the text view and restores the
+    /// caret position, which UIKit resets whenever `attributedText` is re-assigned.
+    ///
+    /// Every text/selection change made here is programmatic, so the coordinator's
+    /// selection tracking is suppressed for the duration of this update: the delegate
+    /// callbacks fired by these changes must not be recorded as user-driven caret moves.
     func updateUIView(_ uiView: UITextView, context: Context) {
+        context.coordinator.isApplyingProgrammaticChange = true
+        defer { context.coordinator.isApplyingProgrammaticChange = false }
+
         // Save the current selection BEFORE making any changes
         // This is critical because setting attributedText causes UITextView to reset the cursor position
         let savedRange = uiView.selectedRange
@@ -108,6 +117,11 @@ struct TextViewWrapper: UIViewRepresentable {
         let initialTextSuffix: String?
         var initialTextSuffixWasAdded: Bool = false
         var convertMentionRef: ((Pubkey) -> NSMutableAttributedString?)? = nil
+        /// True while `updateUIView` applies programmatic text/selection changes.
+        ///
+        /// `textViewDidChangeSelection` checks this flag so that delegate callbacks
+        /// fired by those changes are not recorded as user-driven caret moves.
+        var isApplyingProgrammaticChange: Bool = false
         static let ESCAPE_SEQUENCES = ["\n", "@", "  ", ", ", ". ", "! ", "? ", "; ", "#"]
 
         init(attributedText: Binding<NSMutableAttributedString>,
@@ -146,6 +160,20 @@ struct TextViewWrapper: UIViewRepresentable {
             // placeholder removal, height change). The getFocusWordForMention callback
             // sets newCursorIndex to nil, forcing reliance on savedRange which may be
             // stale. Explicitly tracking cursor position here ensures correct restoration.
+            updateCursorPosition(textView.selectedRange.location)
+        }
+
+        /// Keeps the tracked cursor position in sync when the user moves the caret
+        /// without editing the text (e.g. by tapping mid-text).
+        ///
+        /// Without this, the position recorded at the last text change goes stale,
+        /// and the next view update (e.g. one triggered by an iOS keyboard switch)
+        /// would re-apply it, jumping the caret to the end of the text (issue #3545).
+        ///
+        /// Programmatic selection changes are ignored while `isApplyingProgrammaticChange`
+        /// is set, as are range selections, which a single index cannot represent.
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            guard !isApplyingProgrammaticChange, textView.selectedRange.length == 0 else { return }
             updateCursorPosition(textView.selectedRange.location)
         }
 

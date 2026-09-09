@@ -319,6 +319,42 @@ final class PostViewTests: XCTestCase {
         XCTAssertTrue(shouldChange, "shouldChangeTextIn should return true for regular text")
     }
 
+    /// Tests that moving the caret without editing text updates the tracked cursor
+    /// position, so a later view update does not restore a stale position (issue #3545)
+    func testSelectionChangeUpdatesTrackedCursorPosition() {
+        let content = NSMutableAttributedString(string: "Hello world")
+        let bindingContent: Binding<NSMutableAttributedString> = Binding(get: { content }, set: { _ in })
+
+        var trackedCursorPosition: Int? = nil
+        let coordinator = TextViewWrapper.Coordinator(
+            attributedText: bindingContent,
+            getFocusWordForMention: nil,
+            updateCursorPosition: { trackedCursorPosition = $0 },
+            initialTextSuffix: nil,
+            convertMentionRef: nil
+        )
+
+        let textView = UITextView()
+        textView.attributedText = content
+
+        // Simulate the user tapping to place the caret mid-text
+        textView.selectedRange = NSRange(location: 5, length: 0)
+        coordinator.textViewDidChangeSelection(textView)
+        XCTAssertEqual(trackedCursorPosition, 5, "A user-driven caret move should update the tracked cursor position")
+
+        // Range selections cannot be represented by a single index, so they are not tracked
+        trackedCursorPosition = nil
+        textView.selectedRange = NSRange(location: 2, length: 3)
+        coordinator.textViewDidChangeSelection(textView)
+        XCTAssertNil(trackedCursorPosition, "Range selections should not update the tracked cursor position")
+
+        // Programmatic selection changes made by updateUIView should not be recorded
+        coordinator.isApplyingProgrammaticChange = true
+        textView.selectedRange = NSRange(location: 8, length: 0)
+        coordinator.textViewDidChangeSelection(textView)
+        XCTAssertNil(trackedCursorPosition, "Programmatic selection changes should not update the tracked cursor position")
+    }
+
     /// Tests that client tags are added to events when provided.
     func testToEventAddsClientTagWhenProvided() {
         let post = NostrPost(content: "gm")
