@@ -47,6 +47,17 @@ struct NoteArtifactsSeparated: Equatable {
         return NoteArtifactsSeparated(content: content, words: words, urls: resolved, invoices: invoices)
     }
 
+    /// Derive display text without changing cached content, attachment URLs, or inline profile badges.
+    func hidingImageAttachmentURLs() -> NoteArtifactsSeparated {
+        let imageURLs = images
+        guard !imageURLs.isEmpty else { return self }
+        let items = content.items.map { item -> CompatibleText.Item in
+            guard case .attributed_string(let attributed) = item else { return item }
+            return .attributed_string(VoiceAttachmentReferences.hidingImageURLs(in: attributed, imageURLs: imageURLs))
+        }
+        return NoteArtifactsSeparated(content: CompatibleText(items: items), words: words, urls: urls, invoices: invoices)
+    }
+
     static func just_content(_ content: String) -> NoteArtifactsSeparated {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
         return NoteArtifactsSeparated(content: txt, words: 0, urls: [], invoices: [])

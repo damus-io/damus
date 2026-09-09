@@ -71,6 +71,49 @@ struct VoiceAttachmentReferences {
         return parts.string ?? url.absoluteString
     }
 
+    /// Hide raw image URLs represented by attachments, retaining other links and their attributes.
+    /// Remove an image-only line with its separator so it does not leave an empty paragraph.
+    static func hidingImageURLs(in content: AttributedString, imageURLs: [URL]) -> AttributedString {
+        let images = Set(imageURLs.map(identity))
+        let ranges = content.runs.compactMap { run -> Range<AttributedString.Index>? in
+            guard let url = run.link, images.contains(identity(url)),
+                  String(content[run.range].characters) == url.absoluteString else { return nil }
+            return run.range
+        }
+        guard !ranges.isEmpty else { return content }
+
+        var result = content
+        for range in ranges.reversed() {
+            let characters = result.characters
+            var start = range.lowerBound
+            var end = range.upperBound
+            while start > characters.startIndex {
+                let previous = characters.index(before: start)
+                guard characters[previous].isWhitespace, !characters[previous].isNewline else { break }
+                start = previous
+            }
+            while end < characters.endIndex, characters[end].isWhitespace, !characters[end].isNewline {
+                end = characters.index(after: end)
+            }
+            let startsLine = start == characters.startIndex || characters[characters.index(before: start)].isNewline
+            let endsLine = end == characters.endIndex || characters[end].isNewline
+            guard startsLine && endsLine else {
+                result.removeSubrange(range)
+                continue
+            }
+            if end < characters.endIndex {
+                end = characters.index(after: end)
+            } else if start > characters.startIndex {
+                start = characters.index(before: start)
+            }
+            result.removeSubrange(start..<end)
+        }
+        while let last = result.characters.last, last.isWhitespace {
+            result.removeSubrange(result.characters.index(before: result.endIndex)..<result.endIndex)
+        }
+        return result
+    }
+
     /// Attachments follow ordinary web media rules; local files and other schemes cannot embed.
     private static func remoteURL(_ value: String) -> URL? {
         guard value == value.trimmingCharacters(in: .whitespacesAndNewlines),

@@ -4,6 +4,43 @@ import Foundation
 /// This verifies gesture, playback-rate and media-tag rules, not UIKit delivery or iOS lifecycle.
 @main
 enum VoiceCompositionChecks {
+    /// Image attachments replace their raw URL text without removing mentions or ordinary links.
+    static func checkImageLinkDisplay() {
+        let photo = URL(string: "https://media.example/photo.jpg?token=AbC%2F123")!
+        let secondPhoto = URL(string: "https://media.example/second-photo")!
+        let article = URL(string: "https://example.com/route")!
+        func linked(_ text: String, _ url: URL) -> AttributedString {
+            var value = AttributedString(text)
+            value.link = url
+            return value
+        }
+        let firstMention = linked("@First person", URL(string: "damus:nostr:npub-first")!)
+        let secondMention = linked("@Second person 💡", URL(string: "damus:nostr:npub-second")!)
+        let expected = AttributedString("New horizons. Test one.\n\n") + firstMention + AttributedString("\n") + secondMention
+        let original = expected + AttributedString("\n") + linked(photo.absoluteString, photo)
+        let hidden = VoiceAttachmentReferences.hidingImageURLs(in: original, imageURLs: [photo])
+        precondition(hidden == expected)
+        precondition(String(original.characters).contains(photo.absoluteString))
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: hidden, imageURLs: [photo]) == hidden)
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: original, imageURLs: []) == original)
+
+        let mixed = linked(photo.absoluteString, photo) + AttributedString("\nCaption 🌌\n")
+            + linked(secondPhoto.absoluteString, secondPhoto) + AttributedString("\n")
+            + linked(article.absoluteString, article)
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: mixed, imageURLs: [photo, secondPhoto])
+            == AttributedString("Caption 🌌\n") + linked(article.absoluteString, article))
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: linked(photo.absoluteString, photo), imageURLs: [photo]).characters.isEmpty)
+        let labeled = linked("Photo credit", photo)
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: labeled, imageURLs: [photo]) == labeled)
+
+        let alias = URL(string: "https://MEDIA.example:443/photo.jpg?token=AbC%2F123#preview")!
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: linked(alias.absoluteString, alias), imageURLs: [photo]).characters.isEmpty)
+        let otherQuery = URL(string: "https://media.example/photo.jpg?token=Different")!
+        let otherLink = linked(otherQuery.absoluteString, otherQuery)
+        precondition(VoiceAttachmentReferences.hidingImageURLs(in: otherLink, imageURLs: [photo]) == otherLink)
+        print("PASS: image URLs hidden; transcript, mention attributes, ordinary links and labeled links retained; multiple images, exact queries, aliases and idempotence checked.")
+    }
+
     /// Exercise the actual read-side parser with NIP-808/NIP-92 wire fields.
     static func checkAttachments() throws {
         let recording = URL(string: "https://media.example/recording.mp4?token=A%2FB")!
@@ -66,6 +103,7 @@ enum VoiceCompositionChecks {
     }
 
     static func main() throws {
+        checkImageLinkDisplay()
         try checkAttachments()
         precondition(VoicePlaybackRate.allCases.map(\.label) == ["1x", "2x", "3x"])
         precondition(VoicePlaybackRate.allCases.map(\.playerRate) == [Float(1.0), Float(1.4), Float(1.7)])

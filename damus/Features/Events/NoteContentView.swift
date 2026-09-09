@@ -65,7 +65,9 @@ struct NoteContentView: View {
         let artifacts = self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
         // Resolve cached and tag-only attachments after applying the content-hiding setting.
         if case .separated(let separated) = artifacts {
-            return .separated(separated.voiceSafe(for: event))
+            let resolved = separated.voiceSafe(for: event)
+            guard event.known_kind == .voice, !options.contains(.no_media) else { return .separated(resolved) }
+            return .separated(resolved.hidingImageAttachmentURLs())
         }
         return artifacts
     }

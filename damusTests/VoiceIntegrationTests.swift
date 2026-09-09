@@ -2,6 +2,44 @@ import XCTest
 @testable import damus
 
 final class VoiceIntegrationTests: XCTestCase {
+    /// A displayed photo replaces its raw URL without changing the event or text-only previews.
+    @MainActor
+    func testVoiceImageURLIsHiddenWhileTranscriptMentionsAndPhotoRemain() throws {
+        let state = make_test_damus_state()
+        let photo = "https://media.example/" + String(repeating: "a", count: 64) + ".jpg"
+        let firstMention = "nostr:" + generate_new_keypair().pubkey.npub
+        let secondMention = "nostr:" + generate_new_keypair().pubkey.npub
+        let source = "New horizons. Test one.\n\n\(firstMention)\n\(secondMention)\n\(photo)"
+        let tags = [["imeta", "url " + photo, "m image/jpeg", "dim 1168x784"]]
+        let event = try XCTUnwrap(NostrEvent(content: source, keypair: test_keypair, kind: 1808, tags: tags))
+        let rendered = render_immediately_available_note_content(ndb: state.ndb, ev: event, profiles: state.profiles, keypair: state.keypair)
+        guard case .separated(let raw) = rendered else { return XCTFail("Voice content needs separated artifacts") }
+        XCTAssertTrue(String(raw.content.attributed.characters).contains(photo))
+        let mentionLinks = raw.content.attributed.runs.compactMap(\.link).filter { $0.scheme == "damus" }
+        XCTAssertEqual(mentionLinks.count, 2)
+        let previousUndistract = state.settings.undistractMode
+        defer { state.settings.undistractMode = previousUndistract }
+        state.settings.undistractMode = false
+        state.events.get_cache_data(event.id).artifacts_model.state = .loaded(rendered)
+
+        let view = NoteContentView(damus_state: state, event: event, blur_images: false, size: .normal, options: [])
+        guard case .separated(let displayed) = view.note_artifacts else { return XCTFail("Row lost voice content") }
+        XCTAssertTrue(String(displayed.content.attributed.characters).hasPrefix("New horizons. Test one.\n\n"))
+        XCTAssertFalse(String(displayed.content.attributed.characters).contains(photo))
+        XCTAssertEqual(displayed.content.attributed.runs.compactMap(\.link), mentionLinks)
+        XCTAssertEqual(displayed.images.map(\.absoluteString), [photo])
+        XCTAssertEqual(event.content, source)
+        XCTAssertTrue(String(raw.content.attributed.characters).contains(photo), "Display filtering must not mutate the shared cache")
+
+        let textOnly = NoteContentView(damus_state: state, event: event, blur_images: false, size: .normal, options: [.no_media])
+        guard case .separated(let preview) = textOnly.note_artifacts else { return XCTFail("Text-only row lost content") }
+        XCTAssertEqual(preview.content, raw.content)
+
+        let withBadge = NoteArtifactsSeparated(content: CompatibleText(items: raw.content.items + [.icon(named: "star", offset: 0)]),
+            words: raw.words, urls: raw.urls, invoices: raw.invoices)
+        XCTAssertEqual(withBadge.hidingImageAttachmentURLs().content.items.last, withBadge.content.items.last)
+    }
+
     func testNegativeRelayOKKeepsPendingEventUntilRealAcceptance() async throws {
         let keys = generate_new_keypair()
         var draft = try VoiceEventFixtures.draft(keys: keys)

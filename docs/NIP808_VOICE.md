@@ -141,6 +141,11 @@ recording metadata does not hide otherwise valid, independent attachments.
 nostrdb already preserves these tags, so attachment rendering needs no new
 database migration.
 
+When a voice row includes image attachments, their raw URLs are omitted from the
+displayed text. Transcript text, mentions, profile badges and ordinary links stay
+visible; text-only rows retain the image links. This display filtering does not
+modify the signed event or cached content.
+
 The shared row above the transcript uses a rounded adaptive background, a scrubber,
 a 1x/2x/3x speed button, and a fixed 52-point play/pause/loading button with the
 same Damus gradient as the microphone and feed compose button. There is no
