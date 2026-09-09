@@ -219,7 +219,7 @@ struct VoicePlayerView: View {
     @State private var identity = UUID().uuidString
     /// Decoded length from the first play; outlives `stop()` so a finished row keeps its length.
     @State private var measuredDuration: TimeInterval?
-    /// Where an idle scrub was released; playback starts there once the recording is ready.
+    /// An idle scrub selects where the next explicit Play starts the recording.
     @State private var pendingSeek: TimeInterval?
 
     init(event: NostrEvent, video: DamusVideoCoordinator) {
@@ -236,10 +236,11 @@ struct VoicePlayerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Releasing the scrubber must not start a published post, even during a scroll gesture.
             VoicePlayerControls(position: Binding(get: { knob }, set: { scrub($0) }),
                                 duration: length, ownsPlayback: owns, isPlaying: owns && playback.isPlaying,
                                 loading: loading, playbackRate: playback.playbackRate,
-                                toggle: toggle, cycleRate: playback.cyclePlaybackRate, onEditingChanged: scrubEnded)
+                                toggle: toggle, cycleRate: playback.cyclePlaybackRate, onEditingChanged: { _ in })
             if let error { Text(error).font(.caption).foregroundColor(.secondary).accessibilityIdentifier("voice.mediaError") }
         }
         // The parent post stack supplies the spacing below the player.
@@ -260,15 +261,9 @@ struct VoicePlayerView: View {
         start()
     }
 
-    /// The knob is a start position until this row owns playback, then a live seek.
+    /// Select a start position or seek the current player without starting or resuming playback.
     private func scrub(_ time: TimeInterval) {
         if owns { playback.seek(time) } else { pendingSeek = time }
-    }
-
-    /// Releasing an idle knob starts playback there; a scrub during loading waits for the recording.
-    private func scrubEnded(_ editing: Bool) {
-        guard !editing, !owns, !loading else { return }
-        start()
     }
 
     private func cancelLoad() {

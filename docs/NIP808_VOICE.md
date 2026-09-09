@@ -149,8 +149,12 @@ modify the signed event or cached content.
 The shared row above the transcript uses a rounded adaptive background, a scrubber,
 a 1x/2x/3x speed button, and a fixed 52-point play/pause/loading button with the
 same Damus gradient as the microphone and feed compose button. There is no
-"Voice post" label or duration counter. The existing idle-scrub start behavior
-and playback seeking remain available. The composer uses those same controls
+"Voice post" label or duration counter. Published voice posts load and start audio
+only after an explicit Play action. Scrubbing an idle post selects the start
+position for the next Play; releasing the scrubber never starts audio. Seeking
+a paused post leaves it paused. Scrolling away still cancels pending playback
+and stops active playback; returning to the post leaves it idle.
+The composer uses those same controls
 above its transcription and attachments, across the full width of the sheet.
 The compact review heading can wrap for larger text. Preview loading, seeking
 and pause/resume operate on local files without uploading; Post, a new take,
@@ -268,6 +272,16 @@ Then run the composer UI test and the full existing suite before release:
 Inspect each complete log and its `.exit` file; an absent exit file means the run
 has not reported completion. Keep build/test invocations sequential on the same
 DerivedData. Existing private/giftwrap, repost, thread and draft tests must pass.
+
+For published voice posts, open the app and scroll through feed, profile, reply,
+quote and repost rows. Touch and release the idle scrubber, including during a
+vertical scroll, and change speed: neither loading nor playback should start.
+Choose a position, tap Play, and verify audio starts there. Pause and scrub to
+confirm it stays paused. Scroll away during loading and during playback, then
+return: the request should be cancelled or playback stopped, with no automatic
+restart. Cover both cached and previously unplayed recordings. This gesture
+regression uses manual device coverage because the UI suite does not currently
+provide a seeded published voice row for deterministic timeline interaction.
 
 On a small phone, review a new post, reply and quote in light/dark mode and larger
 text sizes. Verify the heading is readable and the full-width player appears above
