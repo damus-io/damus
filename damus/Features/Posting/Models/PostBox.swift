@@ -53,7 +53,7 @@ enum CancelSendErr {
     case too_late
 }
 
-/// Delivery evidence for durable voice drafts. A transport attempt is never an acceptance.
+/// Delivery evidence for submitted voice posts. A transport attempt is never an acceptance.
 enum PostBoxDelivery {
     case queued
     case dispatched(RelayURL)

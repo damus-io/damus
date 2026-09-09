@@ -2,7 +2,7 @@ import XCTest
 @testable import damus
 
 final class VoiceIntegrationTests: XCTestCase {
-    func testNegativeRelayOKRetainsDurableEventUntilRealAcceptance() async throws {
+    func testNegativeRelayOKKeepsPendingEventUntilRealAcceptance() async throws {
         let keys = generate_new_keypair()
         var draft = try VoiceEventFixtures.draft(keys: keys)
         let event = try VoiceEventBuilder.build(draft, keypair: keys)
@@ -21,7 +21,7 @@ final class VoiceIntegrationTests: XCTestCase {
         await box.send(event, to: [relay], delay: 3600)
         await box.sendVoice(event, isActive: { true }) { update in
             do { try await store.recordDelivery(update, for: sent) }
-            catch { XCTFail("Failed to persist delivery: \(error)") }
+            catch { XCTFail("Failed to update delivery: \(error)") }
         }
         await box.handle_event(relay_id: unrelated, .nostr_event(.ok(CommandResult(event_id: event.id, ok: true, msg: "unrelated"))))
         let unknownACK = try await store.load(context: sent.context)
@@ -42,7 +42,7 @@ final class VoiceIntegrationTests: XCTestCase {
         XCTAssertEqual(accepted?.eventJSON, sent.eventJSON)
     }
 
-    func testNoRelaysAndAccountClosureLeaveRecoverableSignedDraft() async throws {
+    func testClosingCompositionKeepsSubmittedDeliveryUntilAccountCloses() async throws {
         let keys = generate_new_keypair()
         var draft = try VoiceEventFixtures.draft(keys: keys)
         let event = try VoiceEventBuilder.build(draft, keypair: keys)
@@ -57,19 +57,23 @@ final class VoiceIntegrationTests: XCTestCase {
         let box = PostBox(pool: RelayPool(ndb: nil))
         await box.sendVoice(event, isActive: { lifetime.isActive }) { update in
             do { try await store.recordDelivery(update, for: sent) }
-            catch { XCTFail("Failed to persist delivery: \(error)") }
+            catch { XCTFail("Failed to update delivery: \(error)") }
         }
         let queued = try await store.load(context: sent.context)
         XCTAssertEqual(queued?.phase, .retryable)
         XCTAssertTrue(try XCTUnwrap(queued).acceptedRelays.isEmpty)
+        try await store.discard(sent, lease: lease)
+        await store.release(context: sent.context, owner: lease.id)
+        let stillQueued = await box.events[event.id]
+        XCTAssertEqual(stillQueued?.event.id, event.id)
         lifetime.invalidate()
         await box.try_flushing_events()
         let pending = await box.events[event.id]
         XCTAssertNil(pending)
-        let restored = try await VoiceDraftStore(root: root).load(context: sent.context)
-        XCTAssertEqual(restored?.eventJSON, sent.eventJSON)
-        XCTAssertEqual(restored?.receipt, sent.receipt)
-        XCTAssertEqual(try VoiceEventBuilder.restoredEvent(XCTUnwrap(restored)).id, event.id)
+        let restored = await VoiceDraftStore(root: root).load(context: sent.context)
+        XCTAssertNil(restored)
+        let closed = await store.load(context: sent.context)
+        XCTAssertNil(closed)
     }
 
     func testPrimaryAudioCannotUseGenericVideoImageOrPreviewPaths() throws {

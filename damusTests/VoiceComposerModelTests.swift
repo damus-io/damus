@@ -1,5 +1,6 @@
 import AVFoundation
 import XCTest
+import UIKit
 @testable import damus
 
 @MainActor
@@ -13,7 +14,7 @@ final class VoiceComposerModelTests: XCTestCase {
         let store = VoiceDraftStore(root: root)
         let publisher = ControlledVoicePublisher(store: store)
         let model = VoiceComposerModel(state: state, action: action, store: store, recorder: recorder,
-                                       transcriber: transcriber, uploader: uploader, publisher: publisher)
+                                       transcriber: transcriber, uploader: uploader, photoUploader: ControlledVoicePhotoUploader(), publisher: publisher)
         let fixture = VoiceComposerFixture(model: model, state: state, store: store, root: root,
                                             recorder: recorder, transcriber: transcriber, uploader: uploader, publisher: publisher)
         addTeardownBlock { @MainActor in
@@ -68,7 +69,7 @@ final class VoiceComposerModelTests: XCTestCase {
         XCTAssertEqual(sends, 0)
     }
 
-    func testExplicitPostPersistsReceiptAndReusesExactEventOnRetry() async throws {
+    func testExplicitPostRetainsReceiptAndReusesExactEventOnRetry() async throws {
         let f = try await fixture()
         try await record(f)
         await f.model.send()
@@ -152,7 +153,8 @@ final class VoiceComposerModelTests: XCTestCase {
         XCTAssertEqual(finishes, 1)
         XCTAssertEqual(calls, 0)
         XCTAssertNotEqual(f.model.phase, .recording)
-        XCTAssertNotNil(f.model.draft?.pendingTakeID)
+        XCTAssertNil(f.model.draft?.pendingTakeID)
+        XCTAssertFalse(f.model.needsDiscardConfirmation)
     }
 
     func testInterruptionFinalizesWithoutTranscribingAndReplacementWaitsForWriter() async throws {
@@ -171,7 +173,7 @@ final class VoiceComposerModelTests: XCTestCase {
         XCTAssertNil(f.model.draft?.transcript)
     }
 
-    func testAccountChangeDuringUploadRetainsReceiptWithoutSigningOrSending() async throws {
+    func testAccountChangeDuringUploadRejectsLateReceiptWithoutSigningOrSending() async throws {
         let upload = VoiceTestGate()
         let f = try await fixture(uploader: ControlledVoiceUploader(gate: upload))
         try await record(f)
@@ -181,7 +183,7 @@ final class VoiceComposerModelTests: XCTestCase {
         await upload.open()
         await sending.value
         let draft = try XCTUnwrap(f.model.draft)
-        XCTAssertNotNil(draft.receipt)
+        XCTAssertNil(draft.receipt)
         XCTAssertNil(draft.eventJSON)
         let sent = await f.publisher.events
         XCTAssertTrue(sent.isEmpty)
@@ -189,7 +191,7 @@ final class VoiceComposerModelTests: XCTestCase {
         XCTAssertEqual(saved?.receipt, draft.receipt)
     }
 
-    func testReopeningWaitsForDismissedComposersFinalizationAndRecoversTake() async throws {
+    func testReopeningWaitsForDismissedComposersFinalizationAndStartsEmpty() async throws {
         let finish = VoiceTestGate()
         let f = try await fixture(recorder: ControlledVoiceRecorder(finishGate: finish))
         f.model.beginHold()
@@ -200,48 +202,264 @@ final class VoiceComposerModelTests: XCTestCase {
         reopened.changeMode(.audio)
         XCTAssertEqual(reopened.phase, .loading)
         await finish.open()
-        try await eventually { reopened.draft?.takeID != nil && !reopened.busy }
+        try await eventually { reopened.draft != nil && !reopened.busy }
         XCTAssertNil(reopened.draft?.transcript)
+        XCTAssertNil(reopened.draft?.takeID)
         reopened.disappear()
+        await reopened.waitUntilClosed()
     }
 
-    func testSameComposerCanReappearDuringAndAfterClosing() async throws {
+    func testClosingCannotBeReopenedWithOldAudio() async throws {
         let f = try await fixture()
         try await record(f)
-        let saved = try XCTUnwrap(f.model.draft)
+        let old = try XCTUnwrap(f.model.draft)
+        let file = try await f.store.file(for: XCTUnwrap(old.takeID), context: old.context)
         f.model.disappear()
         f.model.load()
-        await f.model.waitUntilClosed()
-        XCTAssertEqual(f.model.draft?.id, saved.id)
-        XCTAssertTrue(f.model.canSend)
-        f.model.disappear()
         await f.model.waitUntilClosed()
         XCTAssertNil(f.model.draft)
-        f.model.load()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        f.model.changeMode(.audio)
         try await eventually { f.model.draft != nil && !f.model.busy }
-        XCTAssertEqual(f.model.draft?.takeID, saved.takeID)
-        XCTAssertEqual(f.model.draft?.transcript, saved.transcript)
-        XCTAssertTrue(f.model.canSend)
+        XCTAssertNotEqual(f.model.draft?.id, old.id)
+        XCTAssertNil(f.model.draft?.takeID)
+        XCTAssertNil(f.model.draft?.transcript)
+        XCTAssertFalse(f.model.canSend)
     }
 
-    func testPendingPublicationAndReceiptSurviveStoreRestart() async throws {
+    func testRapidFormatChangesAndSuspensionDoNotCancelEmptyAudioPreparation() async throws {
+        let f = try await fixture()
+        for _ in 0..<10 {
+            let closed = await f.model.discardAndClose()
+            XCTAssertTrue(closed)
+            f.model.changeMode(.audio)
+            XCTAssertEqual(f.model.phase, .loading)
+            // No actor yield: preparation has not finished before format/background changes.
+            f.model.changeMode(.text)
+            f.model.suspend()
+            f.model.changeMode(.audio)
+            try await eventually { f.model.draft != nil && !f.model.busy }
+            XCTAssertEqual(f.model.mode, .audio)
+            XCTAssertTrue(f.model.canEditAttachments)
+            XCTAssertNil(f.model.draft?.takeID)
+            XCTAssertFalse(f.model.canSend)
+        }
+        try await record(f)
+        XCTAssertTrue(f.model.canSend)
+        let uploads = await f.uploader.calls, sends = await f.publisher.events.count
+        XCTAssertEqual(uploads, 0)
+        XCTAssertEqual(sends, 0)
+    }
+
+    func testStoreRestartHasNoRestorableAudioOrAutomaticPublication() async throws {
         let f = try await fixture()
         try await record(f)
         await f.model.send()
-        let saved = try XCTUnwrap(f.model.draft)
-        f.model.disappear()
-        let restartedStore = VoiceDraftStore(root: f.root)
-        let restartedPublisher = ControlledVoicePublisher(store: restartedStore)
-        let reopened = VoiceComposerModel(state: f.state, action: .posting(.none), store: restartedStore,
-                                          recorder: f.recorder, transcriber: f.transcriber, uploader: f.uploader, publisher: restartedPublisher)
-        reopened.changeMode(.audio)
-        try await eventually { reopened.draft != nil && !reopened.busy }
-        XCTAssertEqual(reopened.draft?.eventJSON, saved.eventJSON)
-        await reopened.send()
-        let uploads = await f.uploader.calls, events = await restartedPublisher.events
+        let old = try XCTUnwrap(f.model.draft)
+        XCTAssertNotNil(old.eventJSON)
+        XCTAssertTrue(f.model.requestDismiss()) // Already submitted; closing is not retraction.
+        let closed = await f.model.discardAndClose()
+        XCTAssertTrue(closed)
+        let restarted = VoiceDraftStore(root: f.root)
+        let restored = await restarted.load(context: old.context)
+        XCTAssertNil(restored)
+        let uploads = await f.uploader.calls, events = await f.publisher.events
         XCTAssertEqual(uploads, 1)
-        XCTAssertEqual(events, [saved.eventJSON!])
-        reopened.disappear()
+        XCTAssertEqual(events.count, 1)
+    }
+
+    func testDiscardConfirmationKeepsEditingOrDeletesOnlyOnConfirmation() async throws {
+        let f = try await fixture()
+        XCTAssertTrue(f.model.requestDismiss())
+        try await record(f)
+        f.model.addMention(test_pubkey)
+        XCTAssertTrue(f.model.addLink("https://example.com/article"))
+        let draft = try XCTUnwrap(f.model.draft)
+        let file = try await f.store.file(for: XCTUnwrap(draft.takeID), context: draft.context)
+        XCTAssertFalse(f.model.requestDismiss())
+        XCTAssertTrue(f.model.confirmingDiscard)
+        f.model.keepEditing()
+        XCTAssertFalse(f.model.confirmingDiscard)
+        XCTAssertEqual(f.model.draft, draft)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
+        f.model.changeMode(.text)
+        XCTAssertFalse(f.model.requestDismiss()) // Switching format cannot bypass confirmation.
+        let closed = await f.model.discardAndClose()
+        XCTAssertTrue(closed)
+        XCTAssertNil(f.model.draft)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        let current = await f.store.load(context: draft.context)
+        XCTAssertNil(current)
+    }
+
+    func testTrashReleaseWaitsForWriterAndNeverTranscribesThenAllowsNewTake() async throws {
+        let finish = VoiceTestGate()
+        let f = try await fixture(recorder: ControlledVoiceRecorder(finishGate: finish))
+        f.model.beginHold()
+        try await eventually { f.model.phase == .recording }
+        let old = try XCTUnwrap(f.model.draft)
+        let file = try await f.store.file(for: XCTUnwrap(old.pendingTakeID), context: old.context)
+        f.model.releaseHold(discard: true)
+        f.model.releaseHold()
+        f.model.beginHold()
+        XCTAssertEqual(f.model.phase, .discarding)
+        await finish.open()
+        try await eventually { !f.model.busy }
+        let finishes = await f.recorder.finishes, transcriptions = await f.transcriber.calls
+        XCTAssertEqual(finishes, 1)
+        XCTAssertEqual(transcriptions, 0)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        XCTAssertFalse(f.model.needsDiscardConfirmation)
+        try await record(f)
+        XCTAssertNotEqual(f.model.draft?.takeID, old.pendingTakeID)
+        XCTAssertEqual(f.model.draft?.transcript, "Transcript from this take")
+    }
+
+    func testDiscardDuringFinalizationDoesNotDoubleFinishOrTranscribe() async throws {
+        let finish = VoiceTestGate()
+        let f = try await fixture(recorder: ControlledVoiceRecorder(finishGate: finish))
+        f.model.beginHold()
+        try await eventually { f.model.phase == .recording }
+        let old = try XCTUnwrap(f.model.draft)
+        let file = try await f.store.file(for: XCTUnwrap(old.pendingTakeID), context: old.context)
+        f.model.releaseHold()
+        try await eventually { await f.recorder.finishes == 1 }
+        f.model.discard()
+        await finish.open()
+        try await eventually { !f.model.busy }
+        let finishes = await f.recorder.finishes, transcriptions = await f.transcriber.calls
+        XCTAssertEqual(finishes, 1)
+        XCTAssertEqual(transcriptions, 0)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        XCTAssertNil(f.model.draft?.takeID)
+    }
+
+    func testDiscardRejectsLateTranscriptAndUploadResults() async throws {
+        let speech = VoiceTestGate()
+        let spoken = try await fixture(transcriber: ControlledVoiceTranscriber(gate: speech))
+        spoken.model.beginHold()
+        try await eventually { spoken.model.phase == .recording }
+        spoken.model.releaseHold()
+        try await eventually { await spoken.transcriber.calls == 1 }
+        let oldID = spoken.model.draft?.id
+        spoken.model.discard()
+        await speech.open()
+        try await eventually { !spoken.model.busy }
+        XCTAssertNotEqual(spoken.model.draft?.id, oldID)
+        XCTAssertNil(spoken.model.draft?.transcript)
+
+        let upload = VoiceTestGate()
+        let f = try await fixture(uploader: ControlledVoiceUploader(gate: upload))
+        try await record(f)
+        let old = try XCTUnwrap(f.model.draft)
+        let file = try await f.store.file(for: XCTUnwrap(old.takeID), context: old.context)
+        let sending = Task { await f.model.send() }
+        try await eventually { await f.uploader.calls == 1 }
+        f.model.discard()
+        await upload.open()
+        await sending.value
+        try await eventually { !f.model.busy }
+        XCTAssertNil(f.model.draft?.receipt)
+        XCTAssertNil(f.model.draft?.eventJSON)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        let events = await f.publisher.events
+        XCTAssertTrue(events.isEmpty)
+    }
+
+    private func photo() -> Data {
+        UIGraphicsImageRenderer(size: CGSize(width: 20, height: 10)).jpegData(withCompressionQuality: 0.9) { context in
+            UIColor.blue.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 20, height: 10))
+        }
+    }
+
+    func testAttachmentsCanBeAddedRemovedAndPublishedAfterRecording() async throws {
+        let f = try await fixture()
+        try await record(f)
+        let take = f.model.draft?.takeID
+        let composition = try XCTUnwrap(f.model.draft?.id)
+        let data = photo()
+        f.model.addPhotos([{ data }, { data }], compositionID: composition)
+        XCTAssertFalse(f.model.canSend)
+        try await eventually { !f.model.busy }
+        XCTAssertEqual(f.model.attachments.photos.count, 2)
+        let removed = try XCTUnwrap(f.model.attachments.photos.first)
+        let context = try XCTUnwrap(f.model.draft?.context)
+        let removedFile = try await f.store.photoFile(for: removed.id, context: context)
+        f.model.removePhoto(removed.id)
+        try await eventually { !f.model.busy }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: removedFile.path))
+        f.model.addMention(test_pubkey)
+        f.model.removeMention(test_pubkey.hex())
+        XCTAssertTrue(f.model.attachments.mentions.isEmpty)
+        f.model.addMention(test_pubkey)
+        XCTAssertTrue(f.model.addLink("https://example.com/removed"))
+        f.model.removeLink("https://example.com/removed")
+        XCTAssertTrue(f.model.attachments.links.isEmpty)
+        XCTAssertTrue(f.model.addLink("https://example.com/article"))
+        XCTAssertFalse(f.model.addLink("javascript:alert(1)"))
+        XCTAssertEqual(f.model.draft?.takeID, take)
+        await f.model.send()
+        let pending = try XCTUnwrap(f.model.draft)
+        let event = try VoiceEventBuilder.pendingEvent(pending)
+        XCTAssertTrue(event.content.contains("nostr:" + test_pubkey.npub))
+        XCTAssertTrue(event.content.contains("https://example.com/article"))
+        XCTAssertEqual(event.tags.strings().filter { $0.first == "imeta" }.count, 1)
+        XCTAssertEqual(event_image_metadata(ev: event).count, 1)
+        XCTAssertEqual(try VoiceMediaReference(tags: event.tags.strings()).sha256, pending.sha256)
+    }
+
+    func testDismissDuringPhotoLoadingCannotRestoreAttachments() async throws {
+        let f = try await fixture()
+        let gate = VoiceTestGate()
+        addTeardownBlock { await gate.open() }
+        let data = photo()
+        let id = try XCTUnwrap(f.model.draft?.id)
+        f.model.addPhotos([{ await gate.wait(); return data }], compositionID: id)
+        f.model.disappear()
+        await gate.open()
+        await f.model.waitUntilClosed()
+        XCTAssertNil(f.model.draft)
+        XCTAssertTrue(f.model.photoPreviews.isEmpty)
+        f.model.changeMode(.audio)
+        try await eventually { f.model.draft != nil && !f.model.busy }
+        f.model.addPhotos([{ data }], compositionID: id) // Stale picker callback.
+        XCTAssertTrue(f.model.attachments.isEmpty)
+    }
+
+    func testCleanupFailureKeepsComposerOpenAndAllowsRetry() async throws {
+        let f = try await fixture()
+        try await record(f)
+        let id = f.model.draft?.id
+        // Replace the fixture's directory with a file to force a real filesystem failure.
+        try FileManager.default.removeItem(at: f.root)
+        try Data("obstruction".utf8).write(to: f.root)
+        let failed = await f.model.discardAndClose()
+        XCTAssertFalse(failed)
+        XCTAssertEqual(f.model.draft?.id, id)
+        XCTAssertEqual(f.model.mode, .audio)
+        XCTAssertNotNil(f.model.error)
+        try FileManager.default.removeItem(at: f.root)
+        let retried = await f.model.discardAndClose()
+        XCTAssertTrue(retried)
+        XCTAssertNil(f.model.draft)
+    }
+
+    func testRecordingGestureUsesFinalPositionAndCancelsExactlyOnce() {
+        var gesture = VoiceRecordingGesture()
+        let mic = CGPoint(x: 38, y: 38)
+        let trash = VoiceRecordingGesture.trashCenter
+        gesture.begin()
+        gesture.move(to: trash)
+        XCTAssertTrue(gesture.isOverTrash)
+        gesture.move(to: mic)
+        XCTAssertFalse(gesture.isOverTrash)
+        XCTAssertEqual(gesture.end(at: mic), .finish)
+        XCTAssertNil(gesture.end(at: trash))
+        gesture.begin()
+        XCTAssertEqual(gesture.end(at: trash), .discard)
+        gesture.begin()
+        XCTAssertEqual(gesture.end(at: mic, cancelled: true), .discard)
     }
 }
 
@@ -337,9 +555,16 @@ private actor ControlledVoicePublisher: VoicePublishing {
     private(set) var events: [String] = []
     init(store: VoiceDraftStore) { self.store = store }
     func publish(_ draft: VoiceDraft, state: DamusState) async throws {
-        _ = try VoiceEventBuilder.restoredEvent(draft)
-        try await store.requireSavedEvent(draft)
+        _ = try VoiceEventBuilder.pendingEvent(draft)
+        try await store.requireCurrentEvent(draft)
         events.append(try XCTUnwrap(draft.eventJSON))
         try await store.recordDelivery(.noRelays, for: draft)
+    }
+}
+
+private actor ControlledVoicePhotoUploader: VoicePhotoUploading {
+    func uploadPhoto(file: URL, server: String, keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> String {
+        let bytes = try Data(contentsOf: file)
+        return "https://blossom.band/" + VoiceAudioFiles.digest(bytes) + ".jpg"
     }
 }

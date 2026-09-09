@@ -1,6 +1,6 @@
 import Foundation
 
-/// NIP-808 authoring rules. Call off the main thread: targets and restored events are verified.
+/// NIP-808 authoring rules. Call off the main thread: targets and pending events are verified.
 enum VoiceEventBuilder {
     /// Ignore marked source/mention references; retain explicit and legacy thread roots.
     static func replyTags(parent: NostrEvent, relay: String = "") -> [[String]] {
@@ -30,7 +30,7 @@ enum VoiceEventBuilder {
               text.utf8.count <= 12_000, let receipt = draft.receipt,
               receipt.reference.sha256 == draft.sha256, receipt.size == draft.size, receipt.size > 0,
               let duration = draft.duration, duration.isFinite, duration > 0 else {
-            throw VoiceFailure("The voice draft is not ready to publish. Your recording is saved.")
+            throw VoiceFailure("The audio post is not ready to publish. Keep the composer open to finish it.")
         }
         let media = try VoiceMediaReference(url: receipt.reference.url, sha256: receipt.reference.sha256,
                                            mimeType: receipt.reference.mimeType, duration: duration)
@@ -47,6 +47,11 @@ enum VoiceEventBuilder {
             }
         }
         if let recipient = draft.context.recipient { tags.append(["p", recipient]) }
+        let attachments = try (draft.attachments ?? VoicePostAttachments()).payload()
+        for tag in attachments.tags where !tags.contains(tag) { tags.append(tag) }
+        if !attachments.content.isEmpty { content += "\n\n" + attachments.content.joined(separator: "\n") }
+        guard content.utf8.count <= 32_000 else { throw VoiceFailure("The transcript and attachments are too long for one post.") }
+        _ = try VoiceMediaReference(tags: tags)
         return (content, tags)
     }
 
@@ -63,13 +68,13 @@ enum VoiceEventBuilder {
         return event
     }
 
-    /// Retries reuse the exact signed JSON after checking every authored field against its draft.
-    static func restoredEvent(_ draft: VoiceDraft) throws -> NostrEvent {
+    /// Retries within the open composer reuse the exact signed JSON and all attachment fields.
+    static func pendingEvent(_ draft: VoiceDraft) throws -> NostrEvent {
         guard let json = draft.eventJSON, let data = json.data(using: .utf8),
               let event = try? JSONDecoder().decode(NostrEvent.self, from: data),
               event.known_kind == .voice, !event.is_rumor, event.pubkey.hex() == draft.context.account,
               event.verify() else {
-            throw VoiceFailure("The saved pending post could not be verified. Its recording is preserved.")
+            throw VoiceFailure("The pending post could not be verified.")
         }
         let expected = try payload(draft)
         guard event.content == expected.content,

@@ -1,78 +1,79 @@
 # NIP-808 verification record
 
-Date: 2026-09-08. Damus baseline: `cb01a16882491b81f519dd3b3a8cde0273277415`.
-The feature is implemented in the working tree. Apple SDK compilation and
-device behavior are not established by this Windows/WSL verification.
+Date: 2026-09-09. UX revision baseline: `d307eeff8c38dcf508a5cb56c85eb9f16c93c43d`.
+This revision removes audio restoration, adds confirmed disposal and slide-to-trash
+recording, and adds mention/link/photo attachments to the existing voice composer.
+Apple SDK compilation, XCTest execution and device behavior remain unverified
+in this Windows workspace.
 
 ## Executed checks
 
 | Check | Environment | Result and retained local evidence |
 | --- | --- | --- |
-| Native compile and regression executable | Ubuntu under WSL; GCC 13.3.0; Python 3.12; resolved Damus libsecp256k1 sources | **PASS**, exit 0. `python3 nostrdb/Test/run_voice_native_tests.py`. [Log](../.build/voice-checks/native-linux-2.log), [exit status](../.build/voice-checks/native-linux-2.exit). |
-| All changed/new Swift source syntax | Windows Swift 6.3.2, `swiftc -frontend -parse` | **PASS**, 62 files, exit 0. Source checker plus the 42 changed Swift paths. [Log](../.build/voice-checks/sources-2.log), [exit status](../.build/voice-checks/sources-2.exit). |
-| Xcode project source registration | Python source checker | **PASS**: all 13 voice files once each in app/share/highlighter; all seven new XCTest files in damusTests; required notification-extension dependencies; unique project object IDs; source files resolve. |
-| Patch whitespace | Git `diff --check` | **PASS**, exit 0 after final source changes. |
-| Scope and provider audit | FUSION search/read and Git status | Nosis remains clean. The source specification was not edited. Upload settings and defaults select nostr.build's Blossom service only. |
-| Passive diagnostics | FUSION blank snapshot, run 149 | **Not a clean build result**: 403 errors / 44 warnings, unchanged from the pre-check snapshot. 402 C errors concern missing headers/configuration in the Windows language service; one SourceKit error is missing NostrKit in the unchanged Nosis checkout. Swift service opens only its first 400 files. Actual native compilation above passed with explicit include paths. |
+| Actual gesture and media-reference executable | Windows Swift 6.3.2, Windows SDK, Swift 5 language mode | **PASS**, compile/link/run exit 0. Builds the production `VoiceRecordingGesture.swift` and `VoiceMediaReference.swift` with `scripts/check_voice_composition.swift`, without framework substitutes. [Log](../.build/voice-checks/ux-composition.log), [exit status](../.build/voice-checks/ux-composition.exit). |
+| Swift syntax | Windows Swift 6.3.2, `swiftc -frontend -parse` | **PASS**, 30 relevant files, exit 0. Includes production voice sources, seven Voice XCTest files, modified composer/search/UI-test files and the executable fixture. [Log](../.build/voice-checks/ux-sources.log), [exit status](../.build/voice-checks/ux-sources.exit). Final initialization correction: see the later [source-check log](../.build/voice-checks/ux-sources-final.log) and [exit status](../.build/voice-checks/ux-sources-final.exit). |
+| Xcode source registration | `scripts/check_voice_sources.py` | **PASS**: all 16 voice production files exactly once in app/share/highlighter; seven Voice XCTest files; required notification dependencies; unique object IDs and valid source paths. |
+| Patch whitespace | Git `diff --check` | **PASS**, exit 0 after final source cleanup. |
+| Scope and source audit | FUSION reads/searches and Git diff/status | No audio-library routes or restoration remain. Text draft storage is unchanged. Nosis and the source specification are unchanged. |
+| Passive diagnostics | FUSION blank snapshot, run 212, age two minutes | **Not a build result**: 97 errors and 8 warnings, all in the unchanged Nosis checkout, concerning C/header/platform configuration. The snapshot does not establish Damus Swift type correctness; Swift service coverage is unavailable for this target. |
 
-Logs live in ignored build storage and are local evidence, not committed artifacts.
+Logs are retained in ignored build storage and are local evidence, not committed artifacts.
+The executable checked entering/leaving the trash target, release-position handling,
+interrupted and duplicate releases, 100 repeated holds, the hit boundary, and
+photo metadata isolation from the primary audio reference. Conflicting image/audio
+references and unsafe local media URLs are rejected.
 
-The native executable used four disposable databases and actual signed fixtures.
-It verified outer and embedded signature rejection, original/source identity,
-legacy and marked thread parsing, fresh voice ingestion, embedded-original
-recovery, transcript full-text/block indexing, exact mixed reply/thread/quote/
-repost counts, preservation of private text counts and existing zap/seen metadata,
-migration rollback and retry, five independently injected new-write failures,
-duplicate ingestion, repeat migration and reopening.
+The native C/nostrdb regression run from the initial voice implementation is recorded
+in this document's earlier Git revision. No C or database schema code changed in
+this UX revision, and that native regression executable was not rerun here.
 
-The log's `migration v6 -> v7 failed` line is expected: that fixture deliberately
-makes the blocks database write fail, checks that version/index/count/original
-changes rolled back, restores the handle and successfully retries.
+## Regression coverage added or updated
 
-The initial native build exposed runner include/source-selection mistakes and
-two fixture hex-encoding calls; those were corrected. The first executable run
-then found a real new parser defect: only inline-packed strings were accepted,
-skipping longer reply/source markers. The parser was corrected to accept both
-string representations; the complete regression executable then passed.
-The final Swift syntax check also includes the composer reappearance ownership
-fix and its added regression case.
+These XCTest and UI-test fixtures were syntax checked, but **not executed** here.
 
-Native MinGW was attempted but lacks the POSIX regex dependency used by CCAN.
-The successful native evidence is the Ubuntu run. No Windows-native C build,
-sanitizer run, XCTest execution or iOS app build is claimed.
+| Requirement | Code and fixtures |
+| --- | --- |
+| Text drafts survive Cancel and reopening; Text stays the default | Existing PostView draft save/restore paths retained; `damusUITests.testAudioModeDismissesKeyboardAndPreservesTextDraft` covers text preservation across both audio dismissal decisions. |
+| Exact confirmation, Keep editing, confirmed deletion and empty-composer exit | PostView, `VoiceComposerDismissGuard`, `VoiceComposerModel`; model/UI fixtures cover Cancel, interactive sheet dismissal, mode changes, both decisions and a real filesystem deletion failure followed by retry. |
+| No audio restoration or library | `VoiceDraftStore` owns temporary files for one live composition, with no manifest writes; store fixtures cover reopening, account/context isolation, legacy unsigned cleanup and preservation of signed/unreadable/unrelated legacy records. Library source, routes and target entries are removed. |
+| Stop owned work before deletion; ignore late completions | Recorder/transcriber/picker/upload cancellation and lease ownership in `VoiceComposerModel`; fixtures cover permission, finalization, recognition, upload, photo loading, duplicate releases and stale composition IDs. An initialization regression repeats rapid Text/Audio/background changes, then records successfully without automatic upload. |
+| Hold and slide left to trash, then release | UIKit touch control uses `VoiceRecordingGesture`; its production state machine was executed above. Model fixtures verify discarded holds do not transcribe and a later hold still works. Physical touch/haptic behavior is pending. |
+| Add, review and remove mentions, links and photos after recording | `VoiceAttachmentViews`, `VoicePostAttachments`, `VoicePhotoFiles`; model/protocol/media fixtures cover modification, JPEG preparation, independent imeta fields and exact upload receipt validation. |
+| NIP-808 standalone/reply/quote/repost interoperability | `VoiceProtocolTests` signs fixtures for standalone posts and replies/quotes to text and voice, with mentions, links and multiple photos. Checks retain primary audio hash/MIME/duration, thread or quote context, and the signed original in kind 1809. |
+| Explicit Post and safe retries | No release-to-upload path. Receipts and exact signed event stay only in the open composition. Publisher/store fixtures cover relay acceptance, stale ACKs and retry identity. Closing local files does not retract an already submitted PostBox event. |
 
-## Apple checks still required before release
+The existing nostrdb event/block indexing, profile index and media renderer support
+these signed attachment tags. Voice mention searches reuse the profile index off
+the main thread; no new database layout or parallel attachment store was needed.
 
-- Build the `damus` scheme in `damus.xcodeproj`, including share/highlighter and
-  notification extensions. This establishes Apple API/type/link compatibility.
-- Run the seven new Voice XCTest suites, changed Draft/AdvancedSearch suites
-  and existing private reply/giftwrap, thread, event and repost suites.
-- Run the new composer UI test and inspect direct/reply/quote/repost voice
-  rendering, retained context, keyboard behavior, accessible controls, and
-  transcript preservation when media is unavailable.
-- On supported physical devices, verify real microphone permissions, offline
-  on-device Speech support per locale, audio routes, interruptions, backgrounding
-  and termination/restart recovery. Simulator support is not assumed.
-- Exercise the upload integration with an authorized nostr.build account/take
-  before release. All automated HTTP and relay scenarios use mocks or local
-  disposable fixtures; no real upload or public Nostr event was sent.
+## Apple checks still required
 
-The [feature guide](NIP808_VOICE.md#reproduce-automated-checks) supplies exact
-background build/test commands and the requirement-to-code/fixture map.
-These platform checks are explicit release gates, not reported successes.
+Use the [feature guide's exact background build/test commands](NIP808_VOICE.md#reproduce-automated-checks)
+from the Damus Xcode project on a Mac, with an installed simulator UDID:
 
-## Final scope audit
+- Build the damus scheme and its share, highlighter and notification extensions.
+- Run the seven Voice XCTest suites, Draft/AdvancedSearch regressions, the composer
+  UI test, and the existing private/giftwrap, thread, event and repost suites.
+- On a supported physical device, check hold/slide/back-out/release, hover haptics,
+  rapid repeated holds, VoiceOver Start/Stop/Discard, permissions, offline local
+  Speech, interruptions, backgrounding and absence of restoration after relaunch.
+- Exercise attachment rendering for standalone, replied, quoted and reposted audio.
+  Keep signed transcript/links/images visible when audio cannot be played.
 
-The completed recon findings were checked against the final code: old database
-backfill is included, both repost signatures are verified, media uses the exact
-signed URL with hash/container/decode checks, Audio has no editable text surface
-or release-to-publish path, local-only Speech is enforced, private Text behavior
-is preserved, and a durable account/context owner retains recordings, receipts
-and signed events through publication failures.
+Apple SDK type checking, UIKit presentation/touch behavior, real audio/Speech and
+extension linking cannot be established by syntax parsing. These checks remain
+explicit Mac/device follow-up work. No live upload or public Nostr post was sent.
 
-Text remains the initial composer mode. Voice uses the existing post surface,
-nostrdb and relay pipeline; separate local files hold only unsent audio recovery
-state. No dependency, minimum-OS, Git-account or Mac-build configuration changes
-were introduced beyond feature target membership and permission descriptions.
-An independently appearing untracked root `Package.resolved` was preserved.
-No commit, push or live publication was performed.
+## Scope audit
+
+Audio always requires an explicit Post. Apple on-device Speech and the nostr.build
+Blossom upload service remain the only supported transcription/upload choices.
+Unpublished audio and photos are deleted on confirmed close; normal text draft
+persistence is unchanged. Old submitted records are not silently removed or exposed
+as a library. Closing a submitted composition removes local media without cancelling
+PostBox delivery while its account remains active.
+
+No dependencies, minimum OS, Git account, signing or package-resolution changes
+were made. The unrelated untracked root `Package.resolved` is excluded from this
+commit. No pull request is created; the revision belongs on the fork's `voice-notes`
+branch for Mac testing.

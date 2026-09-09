@@ -1,5 +1,7 @@
 import XCTest
 import AVFoundation
+import UIKit
+import ImageIO
 @testable import damus
 
 /// Real AAC fixtures exercise the production hash/container/decoder path; HTTP is local and deterministic.
@@ -162,6 +164,53 @@ final class VoiceMediaServicesTests: XCTestCase {
                             newRequest: URLRequest(url: URL(string: "http://media.example/audio")!)) { XCTAssertNil($0) }
         download.urlSession(session, task: task, willPerformHTTPRedirection: response,
                             newRequest: URLRequest(url: URL(string: "https://media.example/audio")!)) { XCTAssertNotNil($0) }
+    }
+
+    @MainActor
+    func testPreparedPhotoUploadValidatesExactJPEGReceiptAndKeepsLocalFileOnFailure() async throws {
+        let root = try directory()
+        let file = root.appendingPathComponent("photo.jpg")
+        let input = UIGraphicsImageRenderer(size: CGSize(width: 20, height: 10)).jpegData(withCompressionQuality: 0.9) { context in
+            UIColor.blue.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 20, height: 10))
+        }
+        let prepared = try await VoicePhotoFiles.shared.prepare(input, to: file)
+        let bytes = try Data(contentsOf: file)
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(bytes as CFData, nil))
+        let metadata = try XCTUnwrap(CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any])
+        let width = try XCTUnwrap(metadata[kCGImagePropertyPixelWidth] as? NSNumber)
+        let height = try XCTUnwrap(metadata[kCGImagePropertyPixelHeight] as? NSNumber)
+        XCTAssertEqual(prepared.dim, "\(width.intValue)x\(height.intValue)")
+        XCTAssertNil(metadata[kCGImagePropertyGPSDictionary])
+        for variant in 0..<6 {
+            let lifetime = VoiceAccountLifetime()
+            let transport = VoiceHTTPFixture { request in
+                XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "image/jpeg")
+                XCTAssertEqual(request.httpBody, bytes)
+                XCTAssertEqual(request.url?.absoluteString, "https://blossom.band/upload")
+                var object: [String: Any] = ["url": "https://blossom.band/opaque?image=exact",
+                    "sha256": VoiceAudioFiles.digest(bytes), "size": bytes.count, "type": "image/jpeg"]
+                if variant == 1 { object["sha256"] = String(repeating: "b", count: 64) }
+                if variant == 2 { object["size"] = bytes.count + 1 }
+                if variant == 3 { object["type"] = "audio/mp4" }
+                if variant == 4 { object["url"] = "http://blossom.band/photo" }
+                if variant == 5 { lifetime.invalidate() } // Response arrives after account cancellation.
+                return (try JSONSerialization.data(withJSONObject: object),
+                        HTTPURLResponse(url: request.url!, statusCode: 201, httpVersion: nil, headerFields: nil)!)
+            }
+            let uploader = VoiceBlossomUploader(transport: transport)
+            do {
+                let url = try await uploader.uploadPhoto(file: file, server: "", keypair: generate_new_keypair(), lifetime: lifetime)
+                XCTAssertEqual(variant, 0)
+                XCTAssertEqual(url, "https://blossom.band/opaque?image=exact")
+            } catch {
+                XCTAssertNotEqual(variant, 0, "\(error)")
+                if variant == 5 { XCTAssertTrue(error is CancellationError) }
+            }
+            XCTAssertEqual(try Data(contentsOf: file), bytes)
+            let attempts = await transport.history()
+            XCTAssertFalse(try XCTUnwrap(attempts.first).redirects)
+        }
     }
 }
 

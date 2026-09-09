@@ -11,9 +11,18 @@
 		808D00000000000000000FA4 /* VoiceSpeechJobTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D000000000000000000CC /* VoiceSpeechJobTests.swift */; };
 		808D00000000000000000FA5 /* VoiceComposerModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D000000000000000000CD /* VoiceComposerModelTests.swift */; };
 		808D00000000000000000FA6 /* VoiceIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D000000000000000000CE /* VoiceIntegrationTests.swift */; };
-		808D000000000000000003F4 /* VoiceDraftLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D00000000000000000070 /* VoiceDraftLibrary.swift */; };
-		808D000000000000000007DC /* VoiceDraftLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D00000000000000000070 /* VoiceDraftLibrary.swift */; };
-		808D00000000000000000BC4 /* VoiceDraftLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D00000000000000000070 /* VoiceDraftLibrary.swift */; };
+		808E00000000000000000065 /* VoicePostAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000001 /* VoicePostAttachments.swift */; };
+		808E00000000000000000066 /* VoiceRecordingGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000002 /* VoiceRecordingGesture.swift */; };
+		808E00000000000000000067 /* VoicePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000003 /* VoicePhotoFiles.swift */; };
+		808E00000000000000000068 /* VoiceAttachmentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000004 /* VoiceAttachmentViews.swift */; };
+		808E000000000000000000C9 /* VoicePostAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000001 /* VoicePostAttachments.swift */; };
+		808E000000000000000000CA /* VoiceRecordingGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000002 /* VoiceRecordingGesture.swift */; };
+		808E000000000000000000CB /* VoicePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000003 /* VoicePhotoFiles.swift */; };
+		808E000000000000000000CC /* VoiceAttachmentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000004 /* VoiceAttachmentViews.swift */; };
+		808E0000000000000000012D /* VoicePostAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000001 /* VoicePostAttachments.swift */; };
+		808E0000000000000000012E /* VoiceRecordingGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000002 /* VoiceRecordingGesture.swift */; };
+		808E0000000000000000012F /* VoicePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000003 /* VoicePhotoFiles.swift */; };
+		808E00000000000000000130 /* VoiceAttachmentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808E00000000000000000004 /* VoiceAttachmentViews.swift */; };
 		808D00000000000000000FA0 /* VoiceMediaReferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D000000000000000000C8 /* VoiceMediaReferenceTests.swift */; };
 		808D00000000000000000FA1 /* VoiceDraftStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D000000000000000000C9 /* VoiceDraftStoreTests.swift */; };
 		808D00000000000000000FA2 /* VoiceMediaServicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D000000000000000000CA /* VoiceMediaServicesTests.swift */; };
@@ -2250,7 +2259,10 @@
 		808D000000000000000000CC /* VoiceSpeechJobTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceSpeechJobTests.swift; path = "damusTests/VoiceSpeechJobTests.swift"; sourceTree = SOURCE_ROOT; };
 		808D000000000000000000CD /* VoiceComposerModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceComposerModelTests.swift; path = "damusTests/VoiceComposerModelTests.swift"; sourceTree = SOURCE_ROOT; };
 		808D000000000000000000CE /* VoiceIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceIntegrationTests.swift; path = "damusTests/VoiceIntegrationTests.swift"; sourceTree = SOURCE_ROOT; };
-		808D00000000000000000070 /* VoiceDraftLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceDraftLibrary.swift; path = "damus/Features/Voice/Views/VoiceDraftLibrary.swift"; sourceTree = SOURCE_ROOT; };
+		808E00000000000000000001 /* VoicePostAttachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoicePostAttachments.swift; path = "damus/Features/Voice/Models/VoicePostAttachments.swift"; sourceTree = SOURCE_ROOT; };
+		808E00000000000000000002 /* VoiceRecordingGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceRecordingGesture.swift; path = "damus/Features/Voice/Models/VoiceRecordingGesture.swift"; sourceTree = SOURCE_ROOT; };
+		808E00000000000000000003 /* VoicePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoicePhotoFiles.swift; path = "damus/Features/Voice/Services/VoicePhotoFiles.swift"; sourceTree = SOURCE_ROOT; };
+		808E00000000000000000004 /* VoiceAttachmentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceAttachmentViews.swift; path = "damus/Features/Voice/Views/VoiceAttachmentViews.swift"; sourceTree = SOURCE_ROOT; };
 		808D000000000000000000C8 /* VoiceMediaReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceMediaReferenceTests.swift; path = "damusTests/VoiceMediaReferenceTests.swift"; sourceTree = SOURCE_ROOT; };
 		808D000000000000000000C9 /* VoiceDraftStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceDraftStoreTests.swift; path = "damusTests/VoiceDraftStoreTests.swift"; sourceTree = SOURCE_ROOT; };
 		808D000000000000000000CA /* VoiceMediaServicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceMediaServicesTests.swift; path = "damusTests/VoiceMediaServicesTests.swift"; sourceTree = SOURCE_ROOT; };
@@ -3368,7 +3380,10 @@
 				808D0000000000000000006D /* VoiceRepostedEvent.swift */,
 				808D0000000000000000006E /* VoicePlayerView.swift */,
 				808D0000000000000000006F /* VoiceComposerControls.swift */,
-				808D00000000000000000070 /* VoiceDraftLibrary.swift */,
+				808E00000000000000000001 /* VoicePostAttachments.swift */,
+				808E00000000000000000002 /* VoiceRecordingGesture.swift */,
+				808E00000000000000000003 /* VoicePhotoFiles.swift */,
+				808E00000000000000000004 /* VoiceAttachmentViews.swift */,
 				808D000000000000000000C8 /* VoiceMediaReferenceTests.swift */,
 				808D000000000000000000C9 /* VoiceDraftStoreTests.swift */,
 				808D000000000000000000CA /* VoiceMediaServicesTests.swift */,
@@ -6315,7 +6330,10 @@
 				808D000000000000000003F1 /* VoiceRepostedEvent.swift in Sources */,
 				808D000000000000000003F2 /* VoicePlayerView.swift in Sources */,
 				808D000000000000000003F3 /* VoiceComposerControls.swift in Sources */,
-				808D000000000000000003F4 /* VoiceDraftLibrary.swift in Sources */,
+				808E00000000000000000065 /* VoicePostAttachments.swift in Sources */,
+				808E00000000000000000066 /* VoiceRecordingGesture.swift in Sources */,
+				808E00000000000000000067 /* VoicePhotoFiles.swift in Sources */,
+				808E00000000000000000068 /* VoiceAttachmentViews.swift in Sources */,
 				DAB705000000000000000001 /* TusProtocol.swift in Sources */,
 				DAB705000000000000000003 /* TusUploadRecord.swift in Sources */,
 				DAB705000000000000000071 /* PurpleVideoModels.swift in Sources */,
@@ -7071,7 +7089,10 @@
 				808D000000000000000007D9 /* VoiceRepostedEvent.swift in Sources */,
 				808D000000000000000007DA /* VoicePlayerView.swift in Sources */,
 				808D000000000000000007DB /* VoiceComposerControls.swift in Sources */,
-				808D000000000000000007DC /* VoiceDraftLibrary.swift in Sources */,
+				808E000000000000000000C9 /* VoicePostAttachments.swift in Sources */,
+				808E000000000000000000CA /* VoiceRecordingGesture.swift in Sources */,
+				808E000000000000000000CB /* VoicePhotoFiles.swift in Sources */,
+				808E000000000000000000CC /* VoiceAttachmentViews.swift in Sources */,
 				D7C175900000000000000014 /* NIP17Conversation.swift in Sources */,
 				5EA2C4000000000000000029 /* AdvancedSearchFilterSheet.swift in Sources */,
 				5EA2C4000000000000000025 /* AdvancedSearchDatePreset.swift in Sources */,
@@ -7721,7 +7742,10 @@
 				D73E5E332C6A97F4007EB227 /* ZappingNotify.swift in Sources */,
 				D73E5F8E2C6AA6F3007EB227 /* InvoiceView.swift in Sources */,
 				D73E5F7C2C6A9D4F007EB227 /* ContentView.swift in Sources */,
-				808D00000000000000000BC4 /* VoiceDraftLibrary.swift in Sources */,
+				808E0000000000000000012D /* VoicePostAttachments.swift in Sources */,
+				808E0000000000000000012E /* VoiceRecordingGesture.swift in Sources */,
+				808E0000000000000000012F /* VoicePhotoFiles.swift in Sources */,
+				808E00000000000000000130 /* VoiceAttachmentViews.swift in Sources */,
 				D73E5E342C6A97F4007EB227 /* MuteNotify.swift in Sources */,
 				D73E5E352C6A97F4007EB227 /* RelaysChangedNotify.swift in Sources */,
 				D73E5E362C6A97F4007EB227 /* MuteThreadNotify.swift in Sources */,

@@ -25,10 +25,10 @@ actor AppleVoiceTranscriber: VoiceTranscribing {
         }
         try Task.checkCancellation()
         guard permission == .authorized else {
-            throw VoiceFailure("Allow Speech Recognition in Settings to transcribe locally. Your recording has been saved.")
+            throw VoiceFailure("Allow Speech Recognition in Settings to transcribe locally. Keep this composer open to retry.")
         }
         guard recognizer.supportsOnDeviceRecognition, recognizer.isAvailable else {
-            throw VoiceFailure("On-device transcription is currently unavailable. Your recording has been saved for retry.")
+            throw VoiceFailure("On-device transcription is currently unavailable. Keep this composer open to retry.")
         }
         let request = SFSpeechURLRecognitionRequest(url: url)
         request.requiresOnDeviceRecognition = true
@@ -64,7 +64,7 @@ final class AppleSpeechJob: @unchecked Sendable {
             group.addTask { try await self.waitForResult() }
             group.addTask {
                 try await Task.sleep(nanoseconds: UInt64(max(0, timeout) * 1_000_000_000))
-                throw VoiceFailure("On-device transcription timed out. Your recording has been saved for retry.")
+                throw VoiceFailure("On-device transcription timed out. Keep this composer open to retry.")
             }
             defer { group.cancelAll() }
             guard let text = try await group.next() else { throw CancellationError() }

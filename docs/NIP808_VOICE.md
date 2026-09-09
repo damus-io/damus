@@ -4,14 +4,16 @@ Voice posts use the existing Damus composer, event views, relay network and nost
 Open a new post, reply or quote and select **Audio** at the top of the draft sheet.
 Text is initially selected. Audio dismisses the keyboard and replaces the text
 editor with transcript review; hold the microphone at the bottom to record.
-Release finalizes the file and transcribes it. Listen, record again or discard
+Normal release finalizes the file and transcribes it. Slide left onto the trash
+and release to delete the recording; slide back out to finish normally. Listen, record again or discard
 before pressing **Post**. Releasing the microphone never uploads or publishes.
-Reply and quote context stay in the sheet.
+Reply and quote context stay in the sheet. Mention, link and photo buttons to the
+left of the mic remain available after recording; added items can be reviewed and removed.
 
 Apple Speech is the only transcription service. Both local language support
 (`supportsOnDeviceRecognition`) and `requiresOnDeviceRecognition` are required.
 Permission denial or unavailable local recognition leaves Text usable. A failed
-transcription retains the recording for retry; it never invents transcript text.
+transcription retains the recording only in this open composer for retry; it never invents transcript text.
 Recording and recognition stop on interruption, backgrounding, navigation or
 account changes, with late completions fenced by the take and account.
 
@@ -25,9 +27,9 @@ As checked on 2026-09-08, the [official service page](https://blossom.band/)
 offers free image/audio/video uploads up to **20 MiB per file**, and paid
 subdomains with a **100 MiB service limit**. Damus applies its own smaller
 audio processing limits below. Service availability and quotas are enforced by
-the service; an HTTP error remains a recoverable draft error.
+the service; an HTTP error allows retry while the composer remains open.
 
-Post sends the finalized AAC/MP4 bytes to `PUT /upload`. It uses signed kind
+Post sends the finalized AAC/MP4 and prepared JPEG bytes to `PUT /upload`. It uses signed kind
 `24242` authorization scoped to the upload verb, byte hash, server hostname
 and expiration, encoded as unpadded Base64URL. The returned URL, SHA-256, MIME
 and size must match the local bytes. The exact returned URL is retained,
@@ -43,6 +45,7 @@ with the implementation review. The integration implements these rules:
 | Event | Content and tags |
 | --- | --- |
 | Voice post, `1808` | Signed transcript; `url`, `blossom` with actual SHA-256 and MIME, and measured `duration`. New recordings use `audio/mp4`. |
+| Attachments on `1808` | NIP-27 `nostr:npub` mentions plus `p`; web links in content plus `r`; photo URLs in content plus a separate NIP-92 `imeta` for each JPEG. Photo MIME/dimensions/blurhash never replace primary audio metadata. |
 | Voice reply | Same media tags plus NIP-10 immediate parent, known root and author `p` tags; text and voice may be mixed at any depth. |
 | Voice quote | Primary `q`, author `p` and `nostr:nevent` in the signed content; no fabricated reply relationship. |
 | Voice repost, `1809` | Full signed original `1808` in content; matching original `e`, author `p` and `k=1808`. |
@@ -68,24 +71,35 @@ The migration is transactional and repeatable, retaining zap metadata and flags.
 New voice writes use a child transaction so a failed index/count write cannot
 leave an event ID that suppresses retry. Existing private text counts remain.
 
-Unsent audio uses versioned account-scoped manifests and UUID-named files under
-Application Support. These are draft files, not a second event database.
-Exclusive context ownership serializes closing/restoring the same draft.
-**Saved Audio** in the public composer restores recordings and pending posts,
-including their captured reply/quote target when it is no longer cached.
+Unpublished audio is scoped to one open composer. Its in-memory snapshot and
+temporary files are separated by session, account and post/reply/quote context.
+Closing or discarding waits for owned recording, recognition, photo-loading and
+upload work before deleting local audio and photos. Late callbacks cannot restore
+the closed composition. A new sheet starts empty in Text mode; normal Damus text
+drafts keep their existing save/restore behavior.
 
-The upload receipt is saved before signing; the complete signed event is saved
-before handoff to PostBox. Retry reuses that receipt and exact signed event.
-Queueing, dispatch, acceptance, rejection and no-relay status are distinct.
-Only a matching positive relay OK records acceptance. Offline and zero-relay
-posts remain recoverable and are locally ingested independently of dispatch.
-An account switch prevents stale work from signing or publishing.
+Cancel and interactive sheet dismissal ask:
+**Are you sure you want to discard this audio post before posting it?**
+**Keep editing** retains the current recording and attachments.
+**Yes, discard** deletes them and then closes; failed deletion keeps the sheet open.
+Changing to Text within the same sheet does not bypass this confirmation when
+leaving or posting text. The review trash button discards audio while keeping the
+sheet open. Empty audio compositions close normally.
 
-An accepted draft can be cleared explicitly. A pending signed draft is retained
-because already-dispatched events cannot reliably be recalled. Discard and
-replacement delete only files owned by that draft. Text drafts preserve their
-existing private flags and quote references. Private/rumor contexts do not offer
-a public audio posting path.
+The exact upload receipts and signed event remain available for retries only while
+that composition is open. Only Post uploads and submits. Queueing, dispatch,
+acceptance, rejection and no-relay status are distinct; only a matching positive
+relay OK means acceptance. PostBox retains an explicitly submitted event while the
+account remains active, even after closing local composition files. Close does not
+retract a submitted event or offer misleading discard wording for it. Account
+invalidation prevents stale work from signing or publishing. No audio restoration
+or library is provided after relaunch.
+
+Old unsigned audio manifests/files are retired for the active account when Audio
+opens. Submitted or unreadable old records and unrelated account/text data are
+preserved, without exposing restoration. Leftover temporary compositions from an
+interrupted process are removed when the next process first prepares audio storage.
+Private/rumor contexts do not offer a public audio posting path.
 
 ## Playback and application bounds
 
@@ -107,7 +121,10 @@ player and recorder; interrupted or abandoned requests cannot start a new player
 | Media download / full decode | 120 / 30 seconds |
 | Received decoded duration | 30 minutes |
 | Concurrent downloads / inspections | 2 / 2 |
-| Transcript | 12,000 characters |
+| Transcript | 12,000 UTF-8 bytes |
+| Transcript plus attachment references | 32,000 UTF-8 bytes |
+| Attached photos | 8; 20 MiB and 40 megapixels each before JPEG preparation |
+| Mention / web-link attachments | 100 / 20 |
 
 These are application limits, not claims about universal Apple Speech limits.
 The deployment target remains iOS 16. The notification extension verifies and
@@ -122,8 +139,10 @@ formats voice posts/reposts without importing recording or playback services.
 | All feeds, search, actions, threads, deep links and notification targets | `NostrKind` categories; Home/Profile/Thread/Events/Search models; shared event views; notification service; `AdvancedSearchTests`, `VoiceIntegrationTests` |
 | Exact URL/hash/MIME, conflicting tags, cover isolation, no MP4 bypass | `VoiceMediaReference`, `VoiceAudioFiles`, `NoteContent`; `VoiceMediaReferenceTests`, `VoiceMediaServicesTests`, `VoiceIntegrationTests` |
 | Hold/finalize/transcribe/review/Post; cancellation, permission, timeout and stale callbacks | `VoiceComposerModel`, Apple recorder/transcriber; `VoiceComposerModelTests`, `VoiceSpeechJobTests` |
-| Durable account/context/take ownership; receipt and exact event retry; relay OK semantics | `VoiceDraftStore`, `VoicePublisher`, PostBox; `VoiceDraftStoreTests`, `VoiceComposerModelTests`, `VoiceIntegrationTests` |
-| Text default, keyboard removal/restoration and bottom microphone | PostView and VoiceComposerControls; `damusUITests.testAudioModeDismissesKeyboardAndPreservesTextDraft` |
+| Temporary account/context/take ownership; confirmed discard and no restoration; exact event retry; relay OK semantics | `VoiceDraftStore`, `VoicePublisher`, PostBox; `VoiceDraftStoreTests`, `VoiceComposerModelTests`, `VoiceIntegrationTests` |
+| Text default, text draft preservation, attachment controls and both dismissal decisions | PostView and VoiceComposerControls; `damusUITests.testAudioModeDismissesKeyboardAndPreservesTextDraft` |
+| Trash enter/leave, final position, duplicate/cancelled releases and repeat holds | `VoiceRecordingGesture`, `VoiceComposerModelTests`, executable `scripts/check_voice_composition.swift`; real touch/VoiceOver checks on device |
+| NIP-27/NIP-92 attachment payloads and photo receipt validation | `VoicePostAttachments`, `VoiceEventBuilder`, `VoicePhotoFiles`, `VoiceBlossomUploader`; protocol/composer/media service tests |
 | Private text and uncached quote restoration | DraftsModel; added `DraftTests` cases |
 | App/extension/test source membership | `scripts/check_voice_sources.py`; final Xcode build remains required |
 
@@ -173,6 +192,13 @@ After the build exits successfully, run the focused regression suites:
 (xcodebuild -project damus.xcodeproj -scheme damus -configuration Debug -destination "platform=iOS Simulator,id=$VOICE_SIM_UDID" -derivedDataPath build/VoiceDerivedData test -only-testing:damusTests/VoiceMediaReferenceTests -only-testing:damusTests/VoiceProtocolTests -only-testing:damusTests/VoiceDraftStoreTests -only-testing:damusTests/VoiceMediaServicesTests -only-testing:damusTests/VoiceSpeechJobTests -only-testing:damusTests/VoiceComposerModelTests -only-testing:damusTests/VoiceIntegrationTests -only-testing:damusTests/DraftTests -only-testing:damusTests/AdvancedSearchTests; printf '%s' "$?" > build/voice-checks/tests.exit) > build/voice-checks/tests.log 2>&1 &
 ```
 
+A portable executable check compiles the actual gesture and media-reference sources:
+
+```bash
+swiftc damus/Features/Voice/Models/VoiceRecordingGesture.swift damus/Features/Voice/Models/VoiceMediaReference.swift scripts/check_voice_composition.swift -o build/voice-checks/composition-checks
+build/voice-checks/composition-checks
+```
+
 Then run the composer UI test and the full existing suite before release:
 
 ```bash
@@ -185,7 +211,11 @@ DerivedData. Existing private/giftwrap, repost, thread and draft tests must pass
 
 On supported physical devices, verify offline local recognition, unavailable
 languages, denied permissions, route/interruption/background handling and
-recovery after termination. Inspect direct, replied, quoted and reposted voice
+absence of audio restoration after termination. Hold the mic and move onto the
+trash, back out, and onto it again before releasing; check hover feedback, no
+transcription after trash release, rapid repeated holds, and the VoiceOver
+Start/Stop/Discard actions. These touch, haptic and microphone checks require a
+physical Apple device: Windows cannot execute UIKit or inject device Speech input. Inspect direct, replied, quoted and reposted voice
 rows, including invalid media/transcript-only presentation and VoiceOver actions.
 Use captured/mock relay and HTTP responses for automated tests. Live provider
 upload/account verification requires a separately authorized real upload.

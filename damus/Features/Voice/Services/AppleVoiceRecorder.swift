@@ -11,7 +11,7 @@ private final class VoiceRecorderDelegate: NSObject, AVAudioRecorderDelegate, @u
     init(completion: @escaping @Sendable (Result<Void, Error>) -> Void) { self.completion = completion }
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         if flag { completion(.success(())) }
-        else { completion(.failure(VoiceFailure("Recording was interrupted. The saved take can be reviewed or replaced."))) }
+        else { completion(.failure(VoiceFailure("Recording was interrupted. Review or replace this take before posting."))) }
     }
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
         completion(.failure(error ?? VoiceFailure("The recording could not be finalized.")))
@@ -83,7 +83,7 @@ actor AppleVoiceRecorder: VoiceRecording {
                 group.addTask { try await self.awaitFinish(generation: id) }
                 group.addTask {
                     try await Task.sleep(nanoseconds: 5_000_000_000)
-                    throw VoiceFailure("The audio writer did not finish. The saved take will be checked when reopened.")
+                    throw VoiceFailure("The audio writer did not finish. Review or replace this recording before posting.")
                 }
                 defer { group.cancelAll() }
                 _ = try await group.next()

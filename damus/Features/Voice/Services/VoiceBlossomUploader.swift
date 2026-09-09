@@ -4,8 +4,13 @@ protocol VoiceUploading: Sendable {
     func upload(file: URL, server: String, keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> VoiceUploadReceipt
 }
 
+/// Photo uploads share the same Blossom authorization and receipt checks as recordings.
+protocol VoicePhotoUploading: Sendable {
+    func uploadPhoto(file: URL, server: String, keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> String
+}
+
 /// nostr.build Blossom uploads with BUD-02 and BUD-11 authorization.
-actor VoiceBlossomUploader: VoiceUploading {
+actor VoiceBlossomUploader: VoiceUploading, VoicePhotoUploading {
     static let defaultServer = "https://blossom.band"
     private let files: VoiceAudioFiles
     private let transport: any VoiceHTTPTransport
@@ -49,19 +54,47 @@ actor VoiceBlossomUploader: VoiceUploading {
     func upload(file: URL, server: String, keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> VoiceUploadReceipt {
         let origin = try Self.origin(server)
         let audio = try await files.inspect(file)
-        if origin.host?.lowercased() == "blossom.band", audio.size > 20 * 1024 * 1024 {
-            throw VoiceFailure("The recording exceeds nostr.build's free upload limit of 20 MiB. Your recording is saved.")
+        let descriptor = try await uploadBytes(file: file, origin: origin, sha256: audio.sha256,
+                                               size: audio.size, mime: "audio/mp4", keypair: keypair, lifetime: lifetime)
+        return try Self.validate(descriptor, server: origin.absoluteString, sha256: audio.sha256, size: audio.size, duration: audio.duration)
+    }
+
+    /// Prepared photos are JPEGs; receipt metadata must describe exactly those bytes.
+    func uploadPhoto(file: URL, server: String, keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> String {
+        let origin = try Self.origin(server)
+        let size = try file.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        guard size > 0, size <= 20 * 1024 * 1024 else { throw VoiceFailure("The photo exceeds the upload limit.") }
+        let handle = try FileHandle(forReadingFrom: file)
+        defer { try? handle.close() }
+        let data = try handle.read(upToCount: size + 1) ?? Data()
+        guard data.count == size, data.starts(with: [0xff, 0xd8, 0xff]) else { throw VoiceFailure("The prepared photo is invalid.") }
+        let hash = VoiceAudioFiles.digest(data)
+        let descriptor = try await uploadBytes(file: file, origin: origin, sha256: hash, size: size,
+                                               mime: "image/jpeg", keypair: keypair, lifetime: lifetime)
+        guard descriptor.sha256 == hash, descriptor.size == size,
+              descriptor.type.map(VoiceMediaReference.normalizedMIME) == "image/jpeg",
+              VoiceMediaReference.isHTTPSURL(descriptor.url) else {
+            throw VoiceFailure("The upload receipt does not match the photo's bytes and image type.")
+        }
+        return descriptor.url
+    }
+
+    /// Bounded, nonredirecting BUD-02 upload with BUD-11 authorization for the exact file.
+    private func uploadBytes(file: URL, origin: URL, sha256: String, size: Int, mime: String,
+                             keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> Descriptor {
+        if origin.host?.lowercased() == "blossom.band", size > 20 * 1024 * 1024 {
+            throw VoiceFailure("This file exceeds nostr.build's free upload limit of 20 MiB.")
         }
         try Task.checkCancellation()
         guard lifetime.isActive else { throw CancellationError() }
         let now = UInt32(Date().timeIntervalSince1970)
         let tags = [
             ["t", "upload"],
-            ["x", audio.sha256],
+            ["x", sha256],
             ["expiration", String(UInt64(now) + 300)],
             ["server", origin.host!.lowercased()]
         ]
-        guard let auth = NostrEvent(content: "Upload this voice recording", keypair: keypair.to_keypair(),
+        guard let auth = NostrEvent(content: "Upload media for this voice post", keypair: keypair.to_keypair(),
                                     kind: NostrKind.blossom_auth.rawValue, tags: tags, createdAt: now - 1) else {
             throw VoiceFailure("The upload authorization could not be signed.")
         }
@@ -71,23 +104,23 @@ actor VoiceBlossomUploader: VoiceUploading {
         var request = URLRequest(url: origin.appendingPathComponent("upload"))
         request.httpMethod = "PUT"
         request.setValue("Nostr " + authorization, forHTTPHeaderField: "Authorization")
-        request.setValue(audio.sha256, forHTTPHeaderField: "X-SHA-256")
-        request.setValue("audio/mp4", forHTTPHeaderField: "Content-Type")
+        request.setValue(sha256, forHTTPHeaderField: "X-SHA-256")
+        request.setValue(mime, forHTTPHeaderField: "Content-Type")
         let handle = try FileHandle(forReadingFrom: file)
         defer { try? handle.close() }
-        request.httpBody = try handle.read(upToCount: audio.size + 1) ?? Data()
-        // Bound the second read and reject changes since media verification.
-        guard request.httpBody?.count == audio.size, VoiceAudioFiles.digest(request.httpBody!) == audio.sha256 else {
-            throw VoiceFailure("The recording changed before upload. Please retry.")
+        request.httpBody = try handle.read(upToCount: size + 1) ?? Data()
+        guard request.httpBody?.count == size, VoiceAudioFiles.digest(request.httpBody!) == sha256 else {
+            throw VoiceFailure("The file changed before upload. Please retry.")
         }
         try Task.checkCancellation()
         guard lifetime.isActive else { throw CancellationError() }
         let (data, response) = try await transport.send(request, limit: 64 * 1024, redirects: false)
-        guard data.count <= 64 * 1024 else { throw VoiceFailure("The upload receipt exceeds the size limit. Your recording is saved.") }
+        try Task.checkCancellation()
+        guard lifetime.isActive else { throw CancellationError() }
+        guard data.count <= 64 * 1024 else { throw VoiceFailure("The upload receipt exceeds the size limit.") }
         guard response.statusCode == 200 || response.statusCode == 201 else {
-            throw VoiceFailure("The Blossom server rejected the upload (HTTP \(response.statusCode)). Your recording is saved.")
+            throw VoiceFailure("The Blossom server rejected the upload (HTTP \(response.statusCode)). Keep the composer open to retry.")
         }
-        let descriptor = try JSONDecoder().decode(Descriptor.self, from: data)
-        return try Self.validate(descriptor, server: origin.absoluteString, sha256: audio.sha256, size: audio.size, duration: audio.duration)
+        return try JSONDecoder().decode(Descriptor.self, from: data)
     }
 }

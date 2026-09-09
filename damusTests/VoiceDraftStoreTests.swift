@@ -29,25 +29,28 @@ final class VoiceDraftStoreTests: XCTestCase {
         return draft
     }
 
-    func testRestartRetainsAudioReceiptAndExactSignedEvent() async throws {
+    func testClosingDeletesTemporaryMediaAndRestartHasNoDraft() async throws {
         let root = try root()
         let store = VoiceDraftStore(root: root)
-        let draft = try fixture(published: true)
+        let draft = try fixture()
         let lease = try await store.acquire(context: draft.context)
-        let audio = try await store.file(for: draft.takeID!, context: draft.context)
+        let audio = try await store.file(for: XCTUnwrap(draft.takeID), context: draft.context)
+        let photo = try await store.photoFile(for: UUID(), context: draft.context)
         try Data("take bytes".utf8).write(to: audio)
-        let saved = try await store.save(draft, lease: lease)
-        try await store.recordDelivery(.noRelays, for: saved)
-        let reopened = VoiceDraftStore(root: root)
-        let restored = try await reopened.load(context: draft.context)
-        XCTAssertEqual(restored?.eventJSON, saved.eventJSON)
-        XCTAssertEqual(restored?.receipt, saved.receipt)
-        XCTAssertEqual(restored?.phase, .retryable)
-        XCTAssertEqual(try Data(contentsOf: audio), Data("take bytes".utf8))
-        let inventory = try await reopened.inventory(account: draft.context.account)
-        XCTAssertEqual(inventory.drafts.map(\.id), [draft.id])
-        let otherAccount = try await reopened.inventory(account: String(repeating: "b", count: 64))
-        XCTAssertTrue(otherAccount.drafts.isEmpty)
+        try Data("photo bytes".utf8).write(to: photo)
+        try await store.save(draft, lease: lease)
+        let files = try FileManager.default.contentsOfDirectory(atPath: audio.deletingLastPathComponent().path)
+        XCTAssertEqual(Set(files), Set([audio.lastPathComponent, photo.lastPathComponent]))
+        let restarted = await VoiceDraftStore(root: root).load(context: draft.context)
+        XCTAssertNil(restarted)
+        try await store.discard(draft, lease: lease)
+        await store.release(context: draft.context, owner: lease.id)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: audio.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: photo.path))
+        let next = try await store.acquire(context: draft.context)
+        let current = await store.load(context: draft.context)
+        XCTAssertNil(current)
+        await store.release(context: draft.context, owner: next.id)
     }
 
     func testStaleComposerSaveCannotEraseAcceptanceOrTreatRejectionAsSuccess() async throws {
@@ -90,7 +93,7 @@ final class VoiceDraftStoreTests: XCTestCase {
         XCTAssertTrue(current?.relayResults.isEmpty == true)
     }
 
-    func testAReplacementTakeKeepsThePreviousFileUntilTheNewManifestIsSaved() async throws {
+    func testReplacementKeepsPreviousFileUntilSnapshotIsUpdated() async throws {
         let store = VoiceDraftStore(root: try root())
         var draft = try fixture()
         let lease = try await store.acquire(context: draft.context)
@@ -114,15 +117,65 @@ final class VoiceDraftStoreTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: pendingURL), Data("new take".utf8))
     }
 
-    func testPendingPublicationCannotBeDiscarded() async throws {
+    func testClosingSubmittedCompositionPreventsLateAcknowledgementsRecreatingIt() async throws {
         let store = VoiceDraftStore(root: try root())
-        let draft = try fixture(published: true)
+        let sent = try fixture(published: true)
+        let lease = try await store.acquire(context: sent.context)
+        try await store.save(sent, lease: lease)
+        try await store.discard(sent, lease: lease)
+        try await store.recordDelivery(.accepted(XCTUnwrap(RelayURL("wss://relay.example"))), for: sent)
+        let current = await store.load(context: sent.context)
+        XCTAssertNil(current)
+    }
+
+    func testDiscardIsIsolatedByAccountAndComposerContext() async throws {
+        let store = VoiceDraftStore(root: try root())
+        let first = try fixture(), other = try fixture()
+        let reply = VoiceDraft(context: VoiceContext(account: first.context.account, kind: .reply,
+                              targetID: String(repeating: "a", count: 64), targetJSON: nil), locale: "en-US")
+        let a = try await store.acquire(context: first.context)
+        let b = try await store.acquire(context: other.context)
+        let c = try await store.acquire(context: reply.context)
+        try await store.save(first, lease: a)
+        try await store.save(other, lease: b)
+        try await store.save(reply, lease: c)
+        try await store.discard(first, lease: a)
+        let keptOther = await store.load(context: other.context)
+        let keptReply = await store.load(context: reply.context)
+        XCTAssertEqual(keptOther?.id, other.id)
+        XCTAssertEqual(keptReply?.id, reply.id)
+        do { try await store.discard(other, lease: a); XCTFail("Wrong owner discarded another account") }
+        catch is CancellationError {}
+    }
+
+    func testLegacyCleanupRemovesOnlyUnpublishedAudioForThisAccount() async throws {
+        let root = try root()
+        let legacy = root.appendingPathComponent("legacy")
+        let draft = try fixture()
+        let account = legacy.appendingPathComponent(draft.context.account)
+        let unpublished = account.appendingPathComponent(String(repeating: "a", count: 64))
+        let submitted = account.appendingPathComponent(String(repeating: "b", count: 64))
+        let unreadable = account.appendingPathComponent(String(repeating: "c", count: 64))
+        let unrelated = account.appendingPathComponent("text-drafts")
+        let other = legacy.appendingPathComponent(String(repeating: "d", count: 64))
+        for folder in [unpublished, submitted, unreadable, unrelated, other] {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try Data("unchanged".utf8).write(to: folder.appendingPathComponent("recording.m4a"))
+        }
+        try JSONEncoder().encode(draft).write(to: unpublished.appendingPathComponent("draft.json"))
+        var sent = draft
+        sent.eventJSON = "Already submitted event"
+        try JSONEncoder().encode(sent).write(to: submitted.appendingPathComponent("draft.json"))
+        try Data("invalid json".utf8).write(to: unreadable.appendingPathComponent("draft.json"))
+        let store = VoiceDraftStore(root: root.appendingPathComponent("current"), legacyRoot: legacy)
         let lease = try await store.acquire(context: draft.context)
-        try await store.save(draft, lease: lease)
-        do { try await store.discard(draft, lease: lease); XCTFail("Pending publication was deleted") }
-        catch is VoiceFailure {}
-        let restored = try await store.load(context: draft.context)
-        XCTAssertEqual(restored?.eventJSON, draft.eventJSON)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: unpublished.path))
+        for folder in [submitted, unreadable, unrelated, other] {
+            XCTAssertEqual(try Data(contentsOf: folder.appendingPathComponent("recording.m4a")), Data("unchanged".utf8))
+        }
+        let restored = await store.load(context: draft.context)
+        XCTAssertNil(restored)
+        await store.release(context: draft.context, owner: lease.id)
     }
 
     func testAReleasedLeaseCannotWriteAfterAnotherComposerAcquiresTheContext() async throws {

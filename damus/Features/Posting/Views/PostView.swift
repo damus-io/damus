@@ -67,7 +67,7 @@ struct PostView: View {
     
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
     @StateObject private var voice: VoiceComposerModel
-    private let restoring_voice: Bool
+    @State private var postTextAfterDiscard = false
     @State var uploadedMedias: [UploadedMedia] = []
     @State var references: [RefId] = []
     /// Pubkeys that should be filtered out from the references
@@ -120,11 +120,9 @@ struct PostView: View {
         damus_state: DamusState,
         prompt_view: (() -> AnyView)? = nil,
         placeholder_messages: [String]? = nil,
-        initial_text_suffix: String? = nil,
-        restoring_voice: Bool = false
+        initial_text_suffix: String? = nil
     ) {
         self.action = action
-        self.restoring_voice = restoring_voice
         self._voice = StateObject(wrappedValue: VoiceComposerModel(state: damus_state, action: action))
         self.damus_state = damus_state
         self.prompt_view = prompt_view
@@ -135,8 +133,14 @@ struct PostView: View {
 
     @Environment(\.dismiss) var dismiss
 
+    /// Text keeps its existing draft; audio must complete confirmed cleanup before dismissal.
     func cancel() {
-        voice.disappear()
+        postTextAfterDiscard = false
+        guard voice.requestDismiss() else { return }
+        Task { if await voice.discardAndClose() { finishCancel() } }
+    }
+
+    private func finishCancel() {
         notify(.post(.cancel))
         cancelUploadTasks()
         cancelProfileFetchTasks()
@@ -300,6 +304,12 @@ struct PostView: View {
             }
             return
         }
+        // Posting text also leaves this sheet; switching formats must not bypass audio discard.
+        if voice.needsDiscardConfirmation {
+            postTextAfterDiscard = true
+            _ = voice.requestDismiss()
+            return
+        }
         let new_post = await build_post(state: self.damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: self.references, filtered_pubkeys: filtered_pubkeys)
 
         if sending_privately, case .replying_to(let replying_to) = action {
@@ -323,6 +333,7 @@ struct PostView: View {
     }
 
     var posting_disabled: Bool {
+        if voice.dismissalLocked { return true }
         if voice.mode == .audio {
             return sending_privately || private_reply_required || (voice.draft?.phase != .accepted && !voice.canSend)
         }
@@ -614,15 +625,11 @@ struct PostView: View {
         VStack(spacing: 10) {
             HStack(spacing: 5) {
                 Button(action: cancel) {
-                    Text("Cancel", comment: "Button to cancel out of posting a note.").padding(10)
+                    Text(voice.draft?.eventJSON == nil ? "Cancel" : "Close", comment: "Close the composer; confirm discarding unpublished audio.").padding(10)
                 }
                 .buttonStyle(NeutralButtonStyle())
                 .accessibilityIdentifier(AppAccessibilityIdentifiers.post_composer_cancel_button.rawValue)
-                if voice.supportsAction && !sending_privately && !private_reply_required {
-                    Button("Saved audio") { notify(.present_sheet(.voice_drafts)) }
-                        .font(.subheadline).disabled(voice.busy)
-                        .accessibilityIdentifier("voice.savedDrafts")
-                }
+                .disabled(voice.dismissalLocked)
                 if let error { Text(error).foregroundColor(.red) }
                 Spacer()
                 PostButton
@@ -638,6 +645,7 @@ struct PostView: View {
                     Text("Audio").tag(VoiceComposerModel.Mode.audio)
                 }
                 .pickerStyle(.segmented)
+                .disabled(voice.dismissalLocked)
                 .accessibilityIdentifier("post.format")
             }
             Divider().foregroundColor(DamusColors.neutral3)
@@ -804,6 +812,22 @@ struct PostView: View {
                 }
             }
             .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
+            .background(VoiceComposerDismissGuard(blocked: voice.needsDiscardConfirmation || voice.dismissalLocked, onAttempt: cancel))
+            .alert("Are you sure you want to discard this audio post before posting it?", isPresented: $voice.confirmingDiscard) {
+                Button("Yes, discard", role: .destructive) {
+                    Task {
+                        guard await voice.discardAndClose() else { return }
+                        if postTextAfterDiscard {
+                            postTextAfterDiscard = false
+                            await send_post()
+                        } else { finishCancel() }
+                    }
+                }
+                Button("Keep editing", role: .cancel) {
+                    postTextAfterDiscard = false
+                    voice.keepEditing()
+                }
+            }
             .sheet(isPresented: $attach_media) {
                 MediaPicker(mediaPickerEntry: .postView, onMediaSelected: { image_upload_confirm = true }) { media in
                     self.preUploadedMedia.append(media)
@@ -869,7 +893,6 @@ struct PostView: View {
             }
             .onAppear() {
                 let loaded_draft = load_draft()
-                if restoring_voice && !sending_privately && !private_reply_required { voice.changeMode(.audio) }
                 
                 switch action {
                     case .replying_to(let replying_to):

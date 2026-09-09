@@ -44,10 +44,10 @@ final class VoiceProtocolTests: XCTestCase {
         XCTAssertEqual(event.content, draft.transcript)
         XCTAssertFalse(event.is_reply())
         draft.eventJSON = event_to_json(ev: event)
-        for _ in 0..<16 { XCTAssertEqual(try VoiceEventBuilder.restoredEvent(draft).id, event.id) }
+        for _ in 0..<16 { XCTAssertEqual(try VoiceEventBuilder.pendingEvent(draft).id, event.id) }
         let encoded = try JSONEncoder().encode(draft)
         let restored = try JSONDecoder().decode(VoiceDraft.self, from: encoded)
-        XCTAssertEqual(try VoiceEventBuilder.restoredEvent(restored).id, event.id)
+        XCTAssertEqual(try VoiceEventBuilder.pendingEvent(restored).id, event.id)
         XCTAssertEqual(restored.receipt?.reference.url, "https://blossom.band/opaque?download=exact")
     }
 
@@ -154,25 +154,27 @@ final class VoiceProtocolTests: XCTestCase {
         XCTAssertNil(make_boost_event(keypair: keys, boosted: forgedInner, relayURL: nil))
     }
 
-    func testRestoredDraftRejectsChangedTranscriptDurationReceiptOrContext() throws {
+    func testPendingPostRejectsChangedTranscriptDurationReceiptOrContext() throws {
         let keys = generate_new_keypair()
         var saved = try VoiceEventFixtures.draft(keys: keys)
         saved.eventJSON = event_to_json(ev: try VoiceEventBuilder.build(saved, keypair: keys))
         var changed = saved; changed.transcript = "Different transcript"
-        XCTAssertThrowsError(try VoiceEventBuilder.restoredEvent(changed))
+        XCTAssertThrowsError(try VoiceEventBuilder.pendingEvent(changed))
         changed = saved; changed.duration = 123
-        XCTAssertThrowsError(try VoiceEventBuilder.restoredEvent(changed))
+        XCTAssertThrowsError(try VoiceEventBuilder.pendingEvent(changed))
         changed = saved; changed.sha256 = String(repeating: "b", count: 64)
-        XCTAssertThrowsError(try VoiceEventBuilder.restoredEvent(changed))
+        XCTAssertThrowsError(try VoiceEventBuilder.pendingEvent(changed))
         changed = saved; changed.takeID = nil
-        XCTAssertThrowsError(try VoiceEventBuilder.restoredEvent(changed))
+        XCTAssertThrowsError(try VoiceEventBuilder.pendingEvent(changed))
         changed = saved; changed.pendingTakeID = UUID()
-        XCTAssertThrowsError(try VoiceEventBuilder.restoredEvent(changed))
+        XCTAssertThrowsError(try VoiceEventBuilder.pendingEvent(changed))
+        changed = saved; changed.attachments = VoicePostAttachments(links: ["https://example.com/changed"])
+        XCTAssertThrowsError(try VoiceEventBuilder.pendingEvent(changed))
         let other = generate_new_keypair()
         XCTAssertThrowsError(try VoiceEventBuilder.build(saved, keypair: other))
     }
 
-    func testProfileRecipientSurvivesRestartAndIsNotAReply() throws {
+    func testProfileRecipientIsPreservedAndIsNotAReply() throws {
         let keys = generate_new_keypair(), recipient = generate_new_keypair().pubkey.hex()
         let draft = try VoiceEventFixtures.draft(keys: keys, recipient: recipient)
         let restored = try JSONDecoder().decode(VoiceDraft.self, from: JSONEncoder().encode(draft))
@@ -180,5 +182,61 @@ final class VoiceProtocolTests: XCTestCase {
         XCTAssertTrue(event.tags.strings().contains(["p", recipient]))
         XCTAssertFalse(event.tags.strings().contains { $0.first == "e" })
         XCTAssertNotEqual(restored.context.key, "post")
+    }
+
+    func testAttachmentsPreservePrimaryAudioAndThreadOrQuoteContext() throws {
+        let keys = generate_new_keypair()
+        let mentioned = generate_new_keypair().pubkey
+        let photos = [
+            VoicePhotoAttachment(id: UUID(), url: "https://media.example/one.jpg", dim: "640x480", blurhash: nil),
+            VoicePhotoAttachment(id: UUID(), url: "https://media.example/two.jpg", dim: "320x240", blurhash: nil)
+        ]
+        for kind: VoiceContext.Kind in [.post, .reply, .quote] {
+            for parentKind: UInt32 in [1, 1808] {
+                let parent = try VoiceEventFixtures.note(kind: parentKind)
+                var draft = try VoiceEventFixtures.draft(keys: keys, kind: kind, target: kind == .post ? nil : parent)
+                draft.attachments = VoicePostAttachments(mentions: [mentioned.hex()], links: ["https://example.com/article"], photos: photos)
+                let event = try VoiceEventBuilder.build(draft, keypair: keys)
+                let tags = event.tags.strings()
+                XCTAssertTrue(event.verify())
+                XCTAssertTrue(event.content.hasPrefix(try XCTUnwrap(draft.transcript)))
+                XCTAssertTrue(event.content.contains("nostr:" + mentioned.npub))
+                XCTAssertTrue(tags.contains(["p", mentioned.hex()]))
+                XCTAssertTrue(tags.contains(["r", "https://example.com/article"]))
+                XCTAssertEqual(tags.filter { $0.first == "url" }.count, 1)
+                XCTAssertEqual(tags.filter { $0.first == "blossom" }.count, 1)
+                XCTAssertEqual(tags.filter { $0.first == "imeta" }.count, 2)
+                XCTAssertEqual(try VoiceMediaReference(tags: tags).sha256, draft.sha256)
+                XCTAssertEqual(event_image_metadata(ev: event).map(\.url.absoluteString), photos.compactMap(\.url))
+                for photo in photos { XCTAssertTrue(event.content.contains(try XCTUnwrap(photo.url))) }
+                switch kind {
+                case .post: XCTAssertFalse(event.is_reply())
+                case .reply:
+                    XCTAssertEqual(event.direct_reply_ref()?.note_id, parent.id)
+                    XCTAssertEqual(event.thread_id(), parent.id)
+                case .quote:
+                    XCTAssertFalse(event.is_reply())
+                    XCTAssertEqual(event.referenced_quote_ids.first?.note_id, parent.id)
+                }
+                draft.eventJSON = event_to_json(ev: event)
+                XCTAssertEqual(try VoiceEventBuilder.pendingEvent(draft).id, event.id)
+                let repost = try XCTUnwrap(make_boost_event(keypair: keys, boosted: event, relayURL: nil))
+                XCTAssertEqual(repost.known_kind, .voice_repost)
+                XCTAssertEqual(repost.get_inner_event()?.tags.strings(), tags)
+            }
+        }
+    }
+
+    func testAttachmentsRejectUnuploadedOrConflictingPhotosAndInvalidLinks() throws {
+        let keys = generate_new_keypair()
+        var draft = try VoiceEventFixtures.draft(keys: keys)
+        draft.attachments = VoicePostAttachments(photos: [VoicePhotoAttachment(id: UUID(), url: nil, dim: "10x10", blurhash: nil)])
+        XCTAssertThrowsError(try VoiceEventBuilder.build(draft, keypair: keys))
+        draft.attachments?.photos[0].url = draft.receipt?.reference.url
+        XCTAssertThrowsError(try VoiceEventBuilder.build(draft, keypair: keys))
+        for link in ["file:///private/audio.m4a", "javascript:alert(1)", "https://user:password@example.com"] {
+            XCTAssertThrowsError(try VoicePostAttachments.webURL(link))
+        }
+        XCTAssertEqual(try VoicePostAttachments.webURL(" https://example.com/?q=1 "), "https://example.com/?q=1")
     }
 }
