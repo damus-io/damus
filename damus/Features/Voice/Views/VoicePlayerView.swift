@@ -31,8 +31,9 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published private(set) var isPlaying = false
     @Published private(set) var position: TimeInterval = 0
     @Published private(set) var duration: TimeInterval = 0
-    /// Shared across rows for this session; stopping or changing posts keeps the chosen speed.
-    @Published private(set) var playbackRate: VoicePlaybackRate = .x1
+    /// Defaults to 2x and stays shared across rows for this session.
+    /// Stopping or changing posts keeps the chosen speed.
+    @Published private(set) var playbackRate: VoicePlaybackRate = .x2
     private var player: AVAudioPlayer?
     private var timer: Timer?
     private var previousSession: (AVAudioSession.Category, AVAudioSession.Mode, AVAudioSession.CategoryOptions)?

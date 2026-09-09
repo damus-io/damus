@@ -68,14 +68,14 @@ final class VoiceMediaServicesTests: XCTestCase {
         let playback = VoicePlayback()
         defer { playback.stop() }
 
-        XCTAssertEqual(playback.playbackRate, .x1)
+        XCTAssertEqual(playback.playbackRate, .x2)
         playback.cyclePlaybackRate()
         XCTAssertFalse(playback.isPlaying, "Choosing a speed must not start playback")
         try playback.beginRequest(owner: "first")
         playback.cyclePlaybackRate()
         XCTAssertNil(playback.owner, "Changing speed during loading must not claim a player")
         try playback.play(first, owner: "first", video: nil)
-        XCTAssertEqual(first.player.rate, 1.7, accuracy: 0.0001)
+        XCTAssertEqual(first.player.rate, 1.0, accuracy: 0.0001)
         XCTAssertTrue(playback.isPlaying)
 
         playback.seek(0.25)
@@ -83,12 +83,12 @@ final class VoiceMediaServicesTests: XCTestCase {
         let pausedPosition = first.player.currentTime
         XCTAssertFalse(playback.isPlaying)
         playback.cyclePlaybackRate()
-        XCTAssertEqual(first.player.rate, 1.0, accuracy: 0.0001)
+        XCTAssertEqual(first.player.rate, 1.4, accuracy: 0.0001)
         XCTAssertFalse(first.player.isPlaying, "Changing speed must leave paused audio paused")
         XCTAssertEqual(first.player.currentTime, pausedPosition, accuracy: 0.001)
         playback.toggle()
         playback.cyclePlaybackRate()
-        XCTAssertEqual(first.player.rate, 1.4, accuracy: 0.0001)
+        XCTAssertEqual(first.player.rate, 1.7, accuracy: 0.0001)
         XCTAssertTrue(first.player.isPlaying)
         XCTAssertGreaterThanOrEqual(first.player.currentTime, pausedPosition)
 
@@ -96,12 +96,12 @@ final class VoiceMediaServicesTests: XCTestCase {
         XCTAssertFalse(first.player.isPlaying)
         try playback.play(second, owner: "second", video: nil, from: 0.4)
         XCTAssertEqual(playback.owner, "second")
-        XCTAssertEqual(second.player.rate, 1.4, accuracy: 0.0001)
+        XCTAssertEqual(second.player.rate, 1.7, accuracy: 0.0001)
         XCTAssertGreaterThanOrEqual(second.player.currentTime, 0.4)
         playback.stop()
-        XCTAssertEqual(playback.playbackRate, .x2)
-        playback.cyclePlaybackRate()
         XCTAssertEqual(playback.playbackRate, .x3)
+        playback.cyclePlaybackRate()
+        XCTAssertEqual(playback.playbackRate, .x1)
         XCTAssertFalse(second.player.isPlaying)
         XCTAssertNil(playback.owner)
     }

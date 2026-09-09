@@ -134,7 +134,7 @@ same Damus gradient as the microphone and feed compose button. There is no
 and playback seeking remain available.
 
 `VoicePlaybackRate` matches Nosis's effective speeds exactly: **1x = 1.0,
-2x = 1.4, 3x = 1.7**. Damus starts at 1x and keeps the selection across rows
+2x = 1.4, 3x = 1.7**. Damus starts at 2x and keeps the selection across rows
 for the app session. Speed changes do not download audio, reset the position,
 or resume a paused recording. They also apply to a recording still loading.
 As in Nosis, playback uses `AVAudioPlayer.enableRate`, enabled before
