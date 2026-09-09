@@ -41,14 +41,28 @@ actor VoiceBlossomUploader: VoiceUploading, VoicePhotoUploading {
         return url
     }
 
-    /// Receipts must describe these exact bytes. Never replace an opaque URL with a hash-derived URL.
-    static func validate(_ descriptor: Descriptor, server: String, sha256: String, size: Int, duration: TimeInterval) throws -> VoiceUploadReceipt {
-        guard descriptor.sha256 == sha256, descriptor.size == size,
-              descriptor.type.map(VoiceMediaReference.normalizedMIME) == "audio/mp4" else {
-            throw VoiceFailure("The upload receipt does not match the recording's bytes and audio type.")
+    /// Only locally decoded, audio-only MP4 bytes reach this validation. Servers may label
+    /// that container as M4A, MP4 video, or unknown; the exact hash and size still must match.
+    /// Canonicalize the outgoing audio tag, preserving the server's URL verbatim.
+    private static func validate(_ descriptor: Descriptor, server: String, audio: PreparedVoiceAudio) throws -> VoiceUploadReceipt {
+        guard descriptor.sha256 == audio.sha256 else {
+            throw VoiceFailure("nostr.build returned a different recording hash. Keep this composer open and try Post again.")
         }
-        let reference = try VoiceMediaReference(url: descriptor.url, sha256: sha256, mimeType: "audio/mp4", duration: duration)
-        return VoiceUploadReceipt(server: server, reference: reference, size: size)
+        guard descriptor.size == audio.size else {
+            throw VoiceFailure("nostr.build returned a different recording size (\(descriptor.size) instead of \(audio.size) bytes). Keep this composer open and try Post again.")
+        }
+        // HTTP MIME parameters do not change the already verified container.
+        let mime = descriptor.type.map { value in
+            VoiceMediaReference.normalizedMIME(String(value.prefix { $0 != ";" }))
+        }
+        switch mime {
+        case nil, "", "audio/mp4", "audio/m4a", "audio/x-m4a", "video/mp4", "application/mp4", "application/octet-stream":
+            break
+        default:
+            throw VoiceFailure("nostr.build returned an incompatible recording type (\(String((mime ?? "unknown").prefix(80)))). Keep this composer open and try Post again.")
+        }
+        let reference = try VoiceMediaReference(url: descriptor.url, sha256: audio.sha256, mimeType: "audio/mp4", duration: audio.duration)
+        return VoiceUploadReceipt(server: server, reference: reference, size: audio.size)
     }
 
     func upload(file: URL, server: String, keypair: FullKeypair, lifetime: VoiceAccountLifetime) async throws -> VoiceUploadReceipt {
@@ -56,7 +70,7 @@ actor VoiceBlossomUploader: VoiceUploading, VoicePhotoUploading {
         let audio = try await files.inspect(file)
         let descriptor = try await uploadBytes(file: file, origin: origin, sha256: audio.sha256,
                                                size: audio.size, mime: "audio/mp4", keypair: keypair, lifetime: lifetime)
-        return try Self.validate(descriptor, server: origin.absoluteString, sha256: audio.sha256, size: audio.size, duration: audio.duration)
+        return try Self.validate(descriptor, server: origin.absoluteString, audio: audio)
     }
 
     /// Prepared photos are JPEGs; receipt metadata must describe exactly those bytes.
@@ -106,6 +120,8 @@ actor VoiceBlossomUploader: VoiceUploading, VoicePhotoUploading {
         request.setValue("Nostr " + authorization, forHTTPHeaderField: "Authorization")
         request.setValue(sha256, forHTTPHeaderField: "X-SHA-256")
         request.setValue(mime, forHTTPHeaderField: "Content-Type")
+        request.setValue(String(size), forHTTPHeaderField: "Content-Length")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         let handle = try FileHandle(forReadingFrom: file)
         defer { try? handle.close() }
         request.httpBody = try handle.read(upToCount: size + 1) ?? Data()

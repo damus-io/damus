@@ -156,6 +156,8 @@ final class VoiceMediaServicesTests: XCTestCase {
         XCTAssertEqual(sent.request.httpMethod, "PUT")
         XCTAssertEqual(sent.request.httpBody, try Data(contentsOf: source))
         XCTAssertEqual(sent.request.value(forHTTPHeaderField: "Content-Type"), "audio/mp4")
+        XCTAssertEqual(sent.request.value(forHTTPHeaderField: "Content-Length"), String(sent.request.httpBody!.count))
+        XCTAssertEqual(sent.request.value(forHTTPHeaderField: "Accept"), "application/json")
         XCTAssertFalse(sent.redirects)
         XCTAssertEqual(receipt.reference.url, exactURL)
         XCTAssertEqual(receipt.reference.sha256, VoiceAudioFiles.digest(try Data(contentsOf: source)))
@@ -176,6 +178,38 @@ final class VoiceMediaServicesTests: XCTestCase {
         XCTAssertTrue(auth.tags.strings().contains(["t", "upload"]))
     }
 
+    /// Server container labels must not reject exact, locally verified M4A bytes.
+    func testMP4UploadReceiptsAcceptCompatibleContainerLabelsAndUnknownTypes() async throws {
+        let root = try directory()
+        let source = root.appendingPathComponent("source.m4a")
+        try writeAAC(to: source)
+        let original = try Data(contentsOf: source)
+        let hash = VoiceAudioFiles.digest(original)
+        let files = VoiceAudioFiles(cacheRoot: root.appendingPathComponent("cache"))
+        let types: [String?] = ["audio/mp4", "audio/x-m4a", "audio/m4a", "video/mp4", "application/mp4",
+                                " Audio/X-M4A; codecs=mp4a.40.2 ", "application/octet-stream", nil, ""]
+        for (index, mime) in types.enumerated() {
+            let url = "https://blossom.band/\(hash).m4a?receipt=a%2Fb"
+            let transport = VoiceHTTPFixture { request in
+                var object: [String: Any] = ["url": url, "sha256": hash, "size": original.count]
+                if let mime { object["type"] = mime }
+                return (try JSONSerialization.data(withJSONObject: object),
+                        HTTPURLResponse(url: request.url!, statusCode: index.isMultiple(of: 2) ? 201 : 200, httpVersion: nil, headerFields: nil)!)
+            }
+            let uploader = VoiceBlossomUploader(files: files, transport: transport)
+            let receipt = try await uploader.upload(file: source, server: "", keypair: generate_new_keypair(), lifetime: VoiceAccountLifetime())
+            XCTAssertEqual(receipt.reference.mimeType, "audio/mp4")
+            XCTAssertEqual(receipt.reference.sha256, hash)
+            XCTAssertEqual(receipt.reference.url, url)
+            XCTAssertEqual(receipt.size, original.count)
+            XCTAssertEqual(try VoiceMediaReference(tags: receipt.reference.tags), receipt.reference)
+            let calls = await transport.history()
+            let sent = try XCTUnwrap(calls.first)
+            XCTAssertEqual(sent.request.httpBody, original)
+            XCTAssertEqual(try Data(contentsOf: source), original)
+        }
+    }
+
     func testServerRejectionAndForgedReceiptsKeepLocalRecording() async throws {
         let root = try directory()
         let source = root.appendingPathComponent("source.m4a")
@@ -187,9 +221,9 @@ final class VoiceMediaServicesTests: XCTestCase {
                 let bytes = request.httpBody!
                 var object: [String: Any] = ["url": "https://blossom.band/audio", "sha256": VoiceAudioFiles.digest(bytes),
                                              "size": bytes.count, "type": "audio/mp4"]
-                if variant == 0 { object["sha256"] = String(repeating: "b", count: 64) }
-                if variant == 1 { object["size"] = bytes.count + 1 }
-                if variant == 2 { object["type"] = "video/mp4" }
+                if variant == 0 { object["sha256"] = String(repeating: "b", count: 64); object["type"] = "application/octet-stream" }
+                if variant == 1 { object["size"] = bytes.count + 1; object["type"] = "audio/x-m4a" }
+                if variant == 2 { object["type"] = "audio/mpeg" }
                 if variant == 3 { object["url"] = "http://blossom.band/audio" }
                 return (try JSONSerialization.data(withJSONObject: object),
                         HTTPURLResponse(url: request.url!, statusCode: variant == 4 ? 403 : 200, httpVersion: nil, headerFields: nil)!)
@@ -198,7 +232,12 @@ final class VoiceMediaServicesTests: XCTestCase {
             do {
                 _ = try await uploader.upload(file: source, server: "https://blossom.band", keypair: generate_new_keypair(), lifetime: VoiceAccountLifetime())
                 XCTFail("Invalid upload response was accepted: \(variant)")
-            } catch { XCTAssertEqual(try Data(contentsOf: source), original) }
+            } catch {
+                XCTAssertEqual(try Data(contentsOf: source), original)
+                if variant == 0 { XCTAssertTrue(error.localizedDescription.contains("hash")) }
+                if variant == 1 { XCTAssertTrue(error.localizedDescription.contains("size")) }
+                if variant == 2 { XCTAssertTrue(error.localizedDescription.contains("type")) }
+            }
         }
     }
 
