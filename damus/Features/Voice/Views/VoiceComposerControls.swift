@@ -62,42 +62,87 @@ struct VoiceTranscriptReview: View {
 }
 
 /// A sheet-bottom microphone with press/release and equivalent VoiceOver actions.
+/// Drawn in the compose button's family: the same gradient orb, Damus red while recording.
 struct VoiceRecordingBar: View {
     @ObservedObject var model: VoiceComposerModel
     @GestureState private var pressing = false
+    @State private var pulsing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var recording: Bool { model.phase == .recording }
+    private var elapsed: String { Duration.seconds(model.elapsed).formatted(.time(pattern: .minuteSecond)) }
+
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             Divider()
-            if model.phase == .recording {
-                Text(Duration.seconds(model.elapsed).formatted(.time(pattern: .minuteSecond)))
-                    .monospacedDigit().foregroundColor(.red)
+            VStack(spacing: 8) {
+                microphone
+                caption
             }
-            Image(systemName: model.phase == .recording ? "waveform" : "mic.fill")
-                .font(.system(size: 32))
-                .foregroundColor(.white)
-                .frame(width: 76, height: 76)
-                .background(model.phase == .recording ? Color.red : Color.accentColor)
-                .clipShape(Circle())
-                .contentShape(Circle())
-                .gesture(DragGesture(minimumDistance: 0)
-                    .updating($pressing) { _, state, _ in state = true }
-                    .onChanged { _ in model.beginHold() }
-                    .onEnded { _ in model.releaseHold() })
-                .onChange(of: pressing) { value in if !value { model.releaseHold() } }
-                .accessibilityElement()
-                .accessibilityAddTraits(.isButton)
-                .accessibilityLabel(model.phase == .recording ? "Stop recording" : "Start voice recording")
-                .accessibilityHint("Hold to record, then release to transcribe on this device. Posting is a separate action.")
-                .accessibilityIdentifier("voice.microphone")
-                .accessibilityAction {
-                    if model.phase == .recording { model.releaseHold() } else { model.beginHold() }
-                }
-                .disabled((model.busy && model.phase != .recording && model.phase != .requestingPermission) || model.draft?.eventJSON != nil)
-                .opacity(model.draft?.eventJSON != nil ? 0.4 : 1)
-            Text(model.draft?.takeID == nil ? "Hold to record" : "Hold to record a new take")
-                .font(.caption).foregroundColor(.secondary)
+            .padding(.top, 6)
         }
         .padding(.bottom, 12)
+    }
+
+    private var microphone: some View {
+        ZStack {
+            if recording { pulse }
+            ZStack {
+                Circle().fill(LINEAR_GRADIENT)
+                Circle().fill(DamusColors.danger).opacity(recording ? 1 : 0)
+            }
+            .shadow(color: (recording ? DamusColors.danger : DamusColors.purple).opacity(0.38), radius: 8, x: 0, y: 6)
+            Image(systemName: recording ? "waveform" : "mic.fill")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(.white)
+        }
+        .frame(width: 58, height: 58)
+        .scaleEffect(pressing ? 0.95 : 1)
+        .animation(.easeOut(duration: 0.15), value: pressing)
+        .animation(.easeInOut(duration: 0.2), value: recording)
+        .contentShape(Circle())
+        .gesture(DragGesture(minimumDistance: 0)
+            .updating($pressing) { _, state, _ in state = true }
+            .onChanged { _ in model.beginHold() }
+            .onEnded { _ in model.releaseHold() })
+        .onChange(of: pressing) { value in if !value { model.releaseHold() } }
+        .accessibilityElement()
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(recording ? "Stop recording" : "Start voice recording")
+        .accessibilityHint("Hold to record, then release to transcribe on this device. Posting is a separate action.")
+        .accessibilityIdentifier("voice.microphone")
+        .accessibilityAction {
+            if recording { model.releaseHold() } else { model.beginHold() }
+        }
+        .disabled((model.busy && model.phase != .recording && model.phase != .requestingPermission) || model.draft?.eventJSON != nil)
+        .opacity(model.draft?.eventJSON != nil ? 0.4 : 1)
+    }
+
+    /// An expanding, fading ring; a still halo when the system asks for reduced motion.
+    private var pulse: some View {
+        Circle()
+            .stroke(DamusColors.danger.opacity(0.5), lineWidth: 4)
+            .scaleEffect(reduceMotion ? 1.15 : (pulsing ? 1.4 : 1))
+            .opacity(reduceMotion ? 0.6 : (pulsing ? 0 : 1))
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeOut(duration: 1.4).repeatForever(autoreverses: false)) { pulsing = true }
+            }
+            .onDisappear { pulsing = false }
+    }
+
+    /// The timer shares the caption line so the orb never moves under a held finger.
+    private var caption: some View {
+        HStack(spacing: 6) {
+            if recording {
+                Text(elapsed).monospacedDigit().fontWeight(.semibold).foregroundColor(DamusColors.danger)
+                Text("Release to stop").foregroundColor(.secondary)
+            } else {
+                Text(model.draft?.takeID == nil ? "Hold to record" : "Hold to record a new take")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .font(.caption)
     }
 }
 
