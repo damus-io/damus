@@ -80,7 +80,7 @@ def main():
     repo = Path(__file__).resolve().parents[1]
     production = sorted((repo / 'damus/Features/Voice').rglob('*.swift'))
     tests = sorted((repo / 'damusTests').glob('Voice*Tests.swift'))
-    if len(production) != 16 or len(tests) != 7:
+    if len(production) != 17 or len(tests) != 7:
         parser.error('Unexpected voice file inventory; review target expectations')
     check_targets(repo, production, tests)
     if not args.swiftc:

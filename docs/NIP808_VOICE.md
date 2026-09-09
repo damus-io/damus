@@ -110,6 +110,19 @@ generic image/link/video preview paths, including MP4 video rendering.
 Playback is shared across voice rows and cooperates with the existing video
 player and recorder; interrupted or abandoned requests cannot start a new player.
 
+The shared row below the transcript uses a rounded adaptive background, a scrubber,
+a 1x/2x/3x speed button, and a fixed 52-point play/pause/loading button with the
+same Damus gradient as the microphone and feed compose button. There is no
+"Voice post" label or duration counter. The existing idle-scrub start behavior
+and playback seeking remain available.
+
+`VoicePlaybackRate` matches Nosis's effective speeds exactly: **1x = 1.0,
+2x = 1.4, 3x = 1.7**. Damus starts at 1x and keeps the selection across rows
+for the app session. Speed changes do not download audio, reset the position,
+or resume a paused recording. They also apply to a recording still loading.
+As in Nosis, playback uses `AVAudioPlayer.enableRate`, enabled before
+`prepareToPlay`. Apple documents that [rate adjustment preserves pitch](https://developer.apple.com/documentation/avfaudio/avaudioplayer/rate).
+
 | Bound | Value |
 | --- | --- |
 | Recording | 5 minutes |
@@ -144,6 +157,7 @@ formats voice posts/reposts without importing recording or playback services.
 | Trash enter/leave, final position, duplicate/cancelled releases and repeat holds | `VoiceRecordingGesture`, `VoiceComposerModelTests`, executable `scripts/check_voice_composition.swift`; real touch/VoiceOver checks on device |
 | NIP-27/NIP-92 attachment payloads and photo receipt validation | `VoicePostAttachments`, `VoiceEventBuilder`, `VoicePhotoFiles`, `VoiceBlossomUploader`; protocol/composer/media service tests |
 | Private text and uncached quote restoration | DraftsModel; added `DraftTests` cases |
+| Exact Nosis playback speeds; keep pause, position and selection across rows | `VoicePlaybackRate`, `VoicePlayback`, `VoiceAudioFiles`; executable composition checks and `VoiceMediaServicesTests.testPlaybackSpeedSurvivesPauseSeekingAndChangingRows` |
 | App/extension/test source membership | `scripts/check_voice_sources.py`; final Xcode build remains required |
 
 ## Verification status
@@ -192,10 +206,10 @@ After the build exits successfully, run the focused regression suites:
 (xcodebuild -project damus.xcodeproj -scheme damus -configuration Debug -destination "platform=iOS Simulator,id=$VOICE_SIM_UDID" -derivedDataPath build/VoiceDerivedData test -only-testing:damusTests/VoiceMediaReferenceTests -only-testing:damusTests/VoiceProtocolTests -only-testing:damusTests/VoiceDraftStoreTests -only-testing:damusTests/VoiceMediaServicesTests -only-testing:damusTests/VoiceSpeechJobTests -only-testing:damusTests/VoiceComposerModelTests -only-testing:damusTests/VoiceIntegrationTests -only-testing:damusTests/DraftTests -only-testing:damusTests/AdvancedSearchTests; printf '%s' "$?" > build/voice-checks/tests.exit) > build/voice-checks/tests.log 2>&1 &
 ```
 
-A portable executable check compiles the actual gesture and media-reference sources:
+A portable executable check compiles the actual gesture, playback-rate and media-reference sources:
 
 ```bash
-swiftc damus/Features/Voice/Models/VoiceRecordingGesture.swift damus/Features/Voice/Models/VoiceMediaReference.swift scripts/check_voice_composition.swift -o build/voice-checks/composition-checks
+swiftc damus/Features/Voice/Models/VoiceRecordingGesture.swift damus/Features/Voice/Models/VoicePlaybackRate.swift damus/Features/Voice/Models/VoiceMediaReference.swift scripts/check_voice_composition.swift -o build/voice-checks/composition-checks
 build/voice-checks/composition-checks
 ```
 
@@ -217,6 +231,10 @@ transcription after trash release, rapid repeated holds, and the VoiceOver
 Start/Stop/Discard actions. These touch, haptic and microphone checks require a
 physical Apple device: Windows cannot execute UIKit or inject device Speech input. Inspect direct, replied, quoted and reposted voice
 rows, including invalid media/transcript-only presentation and VoiceOver actions.
+Check the player in light and dark mode, narrow quoted rows and larger text sizes:
+its controls should stay stable through loading/play/pause, and each speed button
+tap should cycle 1x/2x/3x without starting idle audio. Listen at each speed, scrub
+before and during playback, pause/change speed/resume, and switch posts.
 Use captured/mock relay and HTTP responses for automated tests. Live provider
 upload/account verification requires a separately authorized real upload.
 

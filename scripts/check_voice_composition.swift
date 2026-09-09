@@ -1,10 +1,23 @@
 import Foundation
 
 /// Compiled with the actual platform-independent production sources, without app/framework stubs.
-/// This verifies gesture decisions and media-tag invariants, not UIKit touch delivery or iOS lifecycle.
+/// This verifies gesture, playback-rate and media-tag rules, not UIKit delivery or iOS lifecycle.
 @main
 enum VoiceCompositionChecks {
     static func main() throws {
+        precondition(VoicePlaybackRate.allCases.map(\.label) == ["1x", "2x", "3x"])
+        precondition(VoicePlaybackRate.allCases.map(\.playerRate) == [Float(1.0), Float(1.4), Float(1.7)])
+        var rate = VoicePlaybackRate.x1
+        for _ in 0..<100 {
+            rate.cycle()
+            precondition(rate == .x2 && rate.playerRate == 1.4)
+            rate.cycle()
+            precondition(rate == .x3 && rate.playerRate == 1.7)
+            rate.cycle()
+            precondition(rate == .x1 && rate.playerRate == 1.0)
+        }
+        print("PASS: actual playback-rate source: Nosis 1x/2x/3x labels map to 1.0/1.4/1.7; 100 complete cycles.")
+
         var gesture = VoiceRecordingGesture()
         let mic = CGPoint(x: 38, y: 38)
         let trash = VoiceRecordingGesture.trashCenter

@@ -205,6 +205,8 @@ actor VoiceAudioFiles {
             frames += AVAudioFramePosition(buffer.frameLength)
         }
         let player = try AVAudioPlayer(data: data)
+        // AVAudioPlayer preserves pitch; rate adjustment must be enabled before preparation.
+        player.enableRate = true
         guard player.prepareToPlay() else { throw VoiceFailure("The recording cannot be played on this device.") }
         return PreparedVoiceAudio(player: player, duration: Double(frames) / format.sampleRate, sha256: hash, size: size)
     }

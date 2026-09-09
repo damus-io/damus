@@ -31,11 +31,13 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published private(set) var isPlaying = false
     @Published private(set) var position: TimeInterval = 0
     @Published private(set) var duration: TimeInterval = 0
+    /// Shared across rows for this session; stopping or changing posts keeps the chosen speed.
+    @Published private(set) var playbackRate: VoicePlaybackRate = .x1
     private var player: AVAudioPlayer?
     private var timer: Timer?
     private var previousSession: (AVAudioSession.Category, AVAudioSession.Mode, AVAudioSession.CategoryOptions)?
 
-    override private init() {
+    override init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(interrupted(_:)), name: AVAudioSession.interruptionNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routeChanged(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
@@ -58,6 +60,7 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
             self.owner = owner
             self.duration = audio.duration
             audio.player.delegate = self
+            audio.player.rate = playbackRate.playerRate
             if start > 0 { seek(start) }
             guard audio.player.play() else { throw VoiceFailure("The recording could not start playing.") }
             isPlaying = true
@@ -65,6 +68,12 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 Task { @MainActor in self?.position = self?.player?.currentTime ?? 0 }
             }
         } catch { stop(); throw error }
+    }
+
+    /// Apply a new speed in place, without resuming paused audio or starting an idle row.
+    func cyclePlaybackRate() {
+        playbackRate.cycle()
+        player?.rate = playbackRate.playerRate
     }
 
     func toggle() {
@@ -152,30 +161,25 @@ struct VoicePlayerView: View {
     private var length: TimeInterval? { owns ? playback.duration : (measuredDuration ?? statedDuration) }
     /// Idle and loading rows show the pending start position; a playing row tracks the player.
     private var knob: TimeInterval { owns ? playback.position : (pendingSeek ?? 0) }
-    private var lengthLabel: String {
-        length.map { Duration.seconds($0).formatted(.time(pattern: .minuteSecond)) } ?? "–:––"
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Button(action: toggle) {
-                    if loading { ProgressView() }
-                    else { Image(systemName: owns && playback.isPlaying ? "pause.circle.fill" : "play.circle.fill").font(.title) }
-                }
-                .accessibilityLabel(owns && playback.isPlaying ? "Pause voice recording" : "Play voice recording")
-                .accessibilityIdentifier("voice.play")
-                Text("Voice post")
+            HStack(spacing: 8) {
                 Slider(value: Binding(get: { knob }, set: { scrub($0) }), in: 0...max(1, length ?? 0),
                        onEditingChanged: { editing in scrubEnded(editing) })
+                    .tint(DamusColors.adaptablePurpleForeground)
                     .disabled(!owns && length == nil)
                     .accessibilityLabel("Recording position")
                     .accessibilityHint(owns ? "" : "Adjust to choose where playback starts")
                     .accessibilityIdentifier("voice.scrubber")
-                Text(lengthLabel)
-                    .monospacedDigit()
-                    .accessibilityLabel(length == nil ? "Length unknown" : lengthLabel)
+                speedButton
+                playButton
             }
+            .padding(.leading, 12)
+            .padding(.trailing, 8)
+            .padding(.vertical, 8)
+            .background(DamusColors.adaptablePurpleBackground.opacity(0.3),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             if let error { Text(error).font(.caption).foregroundColor(.secondary).accessibilityIdentifier("voice.mediaError") }
         }
         .padding(.vertical, 8)
@@ -186,6 +190,46 @@ struct VoicePlayerView: View {
             pendingSeek = nil
             if owns || playback.requestedOwner == identity { playback.stop() }
         }
+    }
+
+    /// Fixed control sizes keep loading, play and pause from shifting the scrubber.
+    private var playButton: some View {
+        Button(action: toggle) {
+            ZStack {
+                Circle().fill(LINEAR_GRADIENT)
+                if loading {
+                    ProgressView().tint(.white)
+                } else {
+                    Image(systemName: owns && playback.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+            .frame(width: 52, height: 52)
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(loading ? "Cancel loading voice recording" :
+                            (owns && playback.isPlaying ? "Pause voice recording" : "Play voice recording"))
+        .accessibilityIdentifier("voice.play")
+    }
+
+    private var speedButton: some View {
+        Button(action: playback.cyclePlaybackRate) {
+            Text(playback.playbackRate.label)
+                .font(.system(.body, design: .rounded).weight(.bold))
+                .monospacedDigit()
+                .foregroundColor(DamusColors.adaptableBlack)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Playback speed")
+        .accessibilityValue(playback.playbackRate.label)
+        .accessibilityHint("Cycles through three playback speeds")
+        .accessibilityIdentifier("voice.speed")
     }
 
     /// Pause or resume while this row plays, cancel while it loads, otherwise start from the knob.

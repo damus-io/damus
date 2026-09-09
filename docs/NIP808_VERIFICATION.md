@@ -90,3 +90,25 @@ The merged tree passed source membership and Swift syntax checks for all 30 file
 [log](../.build/voice-checks/merge-sources.log),
 [exit status](../.build/voice-checks/merge-sources.exit), exit 0.
 The Apple SDK and physical-device limitations above still apply.
+
+## Playback controls and speed
+
+Player revision baseline: `3bf35c11da20b6f9378acb21c251d9c2a76c7e52`.
+The shared player now replaces its duration counter with 1x/2x/3x controls,
+removes the shifting title label, and uses a fixed 52-point gradient play button
+inside a background that adapts to light/dark mode. The effective speeds
+match Nosis's `PlaybackRate.playerRate`: 1.0, 1.4 and 1.7.
+
+- **PASS:** production rate/gesture/media-reference executable, compile/link/run
+  exit 0; exact labels and rates, 100 speed cycles and previous gesture/tag checks.
+  [Log](../.build/voice-checks/speed-composition.log), [exit](../.build/voice-checks/speed-composition.exit).
+- **PASS:** 17 voice sources in app/share/highlighter, seven XCTest files, unique
+  project IDs, notification dependencies and Swift syntax for 25 files, exit 0.
+  [Log](../.build/voice-checks/speed-sources.log), [exit](../.build/voice-checks/speed-sources.exit).
+- **PASS:** final source/diff review and patch whitespace checks.
+- **Added, not executed here:** real AAC playback regression for speed selection
+  while idle/loading/playing/paused, preserved seek position, changing rows and
+  stopping. Download/cache fixtures also require rate-enabled prepared players.
+- **Mac/device checks pending:** Apple SDK build, XCTest execution, light/dark
+  presentation in feeds/profiles/quotes, control stability, VoiceOver and listening
+  at each speed. The Windows checks do not establish these runtime outcomes.

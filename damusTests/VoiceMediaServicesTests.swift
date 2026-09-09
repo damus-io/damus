@@ -42,7 +42,9 @@ final class VoiceMediaServicesTests: XCTestCase {
         XCTAssertEqual(first.size, bytes.count)
         XCTAssertGreaterThan(first.duration, 0.5)
         XCTAssertLessThan(first.duration, 2)
-        _ = try await files.remote(reference)
+        XCTAssertTrue(first.player.enableRate, "Rate control must be enabled before the verified player is prepared")
+        let cached = try await files.remote(reference)
+        XCTAssertTrue(cached.player.enableRate)
         var calls = await transport.history()
         XCTAssertEqual(calls.count, 1, "A verified cache hit should not fetch again")
         try Data("tampered".utf8).write(to: cache.appendingPathComponent(hash))
@@ -52,6 +54,56 @@ final class VoiceMediaServicesTests: XCTestCase {
         XCTAssertEqual(calls.count, 2, "A matching cache filename cannot authorize changed bytes")
         XCTAssertEqual(calls.first?.request.url?.absoluteString, url)
         XCTAssertEqual(try Data(contentsOf: cache.appendingPathComponent(hash)), bytes)
+    }
+
+    /// Exercise the real prepared player, including changes before loading and while paused.
+    @MainActor
+    func testPlaybackSpeedSurvivesPauseSeekingAndChangingRows() async throws {
+        let root = try directory()
+        let source = root.appendingPathComponent("speed.m4a")
+        try writeAAC(to: source)
+        let files = VoiceAudioFiles(cacheRoot: root.appendingPathComponent("cache"))
+        let first = try await files.inspect(source)
+        let second = try await files.inspect(source)
+        let playback = VoicePlayback()
+        defer { playback.stop() }
+
+        XCTAssertEqual(playback.playbackRate, .x1)
+        playback.cyclePlaybackRate()
+        XCTAssertFalse(playback.isPlaying, "Choosing a speed must not start playback")
+        try playback.beginRequest(owner: "first")
+        playback.cyclePlaybackRate()
+        XCTAssertNil(playback.owner, "Changing speed during loading must not claim a player")
+        try playback.play(first, owner: "first", video: nil)
+        XCTAssertEqual(first.player.rate, 1.7, accuracy: 0.0001)
+        XCTAssertTrue(playback.isPlaying)
+
+        playback.seek(0.25)
+        playback.toggle()
+        let pausedPosition = first.player.currentTime
+        XCTAssertFalse(playback.isPlaying)
+        playback.cyclePlaybackRate()
+        XCTAssertEqual(first.player.rate, 1.0, accuracy: 0.0001)
+        XCTAssertFalse(first.player.isPlaying, "Changing speed must leave paused audio paused")
+        XCTAssertEqual(first.player.currentTime, pausedPosition, accuracy: 0.001)
+        playback.toggle()
+        playback.cyclePlaybackRate()
+        XCTAssertEqual(first.player.rate, 1.4, accuracy: 0.0001)
+        XCTAssertTrue(first.player.isPlaying)
+        XCTAssertGreaterThanOrEqual(first.player.currentTime, pausedPosition)
+
+        try playback.beginRequest(owner: "second")
+        XCTAssertFalse(first.player.isPlaying)
+        try playback.play(second, owner: "second", video: nil, from: 0.4)
+        XCTAssertEqual(playback.owner, "second")
+        XCTAssertEqual(second.player.rate, 1.4, accuracy: 0.0001)
+        XCTAssertGreaterThanOrEqual(second.player.currentTime, 0.4)
+        playback.stop()
+        XCTAssertEqual(playback.playbackRate, .x2)
+        playback.cyclePlaybackRate()
+        XCTAssertEqual(playback.playbackRate, .x3)
+        XCTAssertFalse(second.player.isPlaying)
+        XCTAssertNil(playback.owner)
     }
 
     func testMatchingHashCannotMakeHTMLOrWrongContainerPlayable() async throws {
