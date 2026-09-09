@@ -77,3 +77,16 @@ No dependencies, minimum OS, Git account, signing or package-resolution changes
 were made. The unrelated untracked root `Package.resolved` is excluded from this
 commit. No pull request is created; the revision belongs on the fork's `voice-notes`
 branch for Mac testing.
+
+## Fork branch integration
+
+Pulled fork commits `35996106` (persistent player scrubber) and `8116a0f6`
+(microphone styling). The microphone conflict preserves the gradient, pulse and
+reduced-motion behavior alongside attachment controls and slide-to-trash. Its
+58-point artwork sits inside the unchanged 76-point touch area, keeping the
+tested trash coordinates stable. The timer remains below the controls.
+
+The merged tree passed source membership and Swift syntax checks for all 30 files:
+[log](../.build/voice-checks/merge-sources.log),
+[exit status](../.build/voice-checks/merge-sources.exit), exit 0.
+The Apple SDK and physical-device limitations above still apply.

@@ -43,7 +43,8 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     /// Prepared audio owns the verified bytes, including during cache eviction.
-    func play(_ audio: PreparedVoiceAudio, owner: String, video: DamusVideoCoordinator?) throws {
+    /// `start` lets a row begin partway through, so an idle scrub is a start position.
+    func play(_ audio: PreparedVoiceAudio, owner: String, video: DamusVideoCoordinator?, from start: TimeInterval = 0) throws {
         guard !isRecording, requestedOwner == owner else { throw CancellationError() }
         stop()
         requestedOwner = owner
@@ -57,6 +58,7 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
             self.owner = owner
             self.duration = audio.duration
             audio.player.delegate = self
+            if start > 0 { seek(start) }
             guard audio.player.play() else { throw VoiceFailure("The recording could not start playing.") }
             isPlaying = true
             timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
@@ -126,29 +128,53 @@ final class VoicePlayback: NSObject, ObservableObject, AVAudioPlayerDelegate {
 struct VoicePlayerView: View {
     let event: NostrEvent
     let video: DamusVideoCoordinator
+    /// The post's `duration` tag: the only length known before its recording is fetched.
+    private let statedDuration: TimeInterval?
     @ObservedObject private var playback = VoicePlayback.shared
     @State private var loading = false
     @State private var error: String?
     @State private var task: Task<Void, Never>?
     @State private var requestID = UUID()
     @State private var identity = UUID().uuidString
+    /// Decoded length from the first play; outlives `stop()` so a finished row keeps its length.
+    @State private var measuredDuration: TimeInterval?
+    /// Where an idle scrub was released; playback starts there once the recording is ready.
+    @State private var pendingSeek: TimeInterval?
+
+    init(event: NostrEvent, video: DamusVideoCoordinator) {
+        self.event = event
+        self.video = video
+        statedDuration = (try? VoiceMediaReference(tags: event.tags.strings()))?.statedDuration
+    }
+
+    private var owns: Bool { playback.owner == identity }
+    /// The tag is advisory; the decoded file's length replaces it once heard.
+    private var length: TimeInterval? { owns ? playback.duration : (measuredDuration ?? statedDuration) }
+    /// Idle and loading rows show the pending start position; a playing row tracks the player.
+    private var knob: TimeInterval { owns ? playback.position : (pendingSeek ?? 0) }
+    private var lengthLabel: String {
+        length.map { Duration.seconds($0).formatted(.time(pattern: .minuteSecond)) } ?? "–:––"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Button(action: toggle) {
                     if loading { ProgressView() }
-                    else { Image(systemName: playback.owner == identity && playback.isPlaying ? "pause.circle.fill" : "play.circle.fill").font(.title) }
+                    else { Image(systemName: owns && playback.isPlaying ? "pause.circle.fill" : "play.circle.fill").font(.title) }
                 }
-                .accessibilityLabel(playback.owner == identity && playback.isPlaying ? "Pause voice recording" : "Play voice recording")
+                .accessibilityLabel(owns && playback.isPlaying ? "Pause voice recording" : "Play voice recording")
                 .accessibilityIdentifier("voice.play")
                 Text("Voice post")
-                if playback.owner == identity {
-                    Slider(value: Binding(get: { playback.position }, set: { playback.seek($0) }), in: 0...max(1, playback.duration))
-                        .accessibilityLabel("Recording position")
-                    Text(Duration.seconds(playback.duration).formatted(.time(pattern: .minuteSecond)))
-                        .monospacedDigit()
-                }
+                Slider(value: Binding(get: { knob }, set: { scrub($0) }), in: 0...max(1, length ?? 0),
+                       onEditingChanged: { editing in scrubEnded(editing) })
+                    .disabled(!owns && length == nil)
+                    .accessibilityLabel("Recording position")
+                    .accessibilityHint(owns ? "" : "Adjust to choose where playback starts")
+                    .accessibilityIdentifier("voice.scrubber")
+                Text(lengthLabel)
+                    .monospacedDigit()
+                    .accessibilityLabel(length == nil ? "Length unknown" : lengthLabel)
             }
             if let error { Text(error).font(.caption).foregroundColor(.secondary).accessibilityIdentifier("voice.mediaError") }
         }
@@ -157,20 +183,41 @@ struct VoicePlayerView: View {
             requestID = UUID()
             task?.cancel()
             loading = false
-            if playback.owner == identity || playback.requestedOwner == identity { playback.stop() }
+            pendingSeek = nil
+            if owns || playback.requestedOwner == identity { playback.stop() }
         }
     }
 
-    /// Fence loading completions to this row, and verify signatures before fetching media.
+    /// Pause or resume while this row plays, cancel while it loads, otherwise start from the knob.
     private func toggle() {
-        if playback.owner == identity { playback.toggle(); return }
-        if loading {
-            requestID = UUID(); task?.cancel(); loading = false
-            if playback.requestedOwner == identity { playback.stop() }
-            return
-        }
+        if owns { playback.toggle(); return }
+        if loading { cancelLoad(); return }
+        start()
+    }
+
+    /// The knob is a start position until this row owns playback, then a live seek.
+    private func scrub(_ time: TimeInterval) {
+        if owns { playback.seek(time) } else { pendingSeek = time }
+    }
+
+    /// Releasing an idle knob starts playback there; a scrub during loading waits for the recording.
+    private func scrubEnded(_ editing: Bool) {
+        guard !editing, !owns, !loading else { return }
+        start()
+    }
+
+    private func cancelLoad() {
+        requestID = UUID()
+        task?.cancel()
+        loading = false
+        pendingSeek = nil
+        if playback.requestedOwner == identity { playback.stop() }
+    }
+
+    /// Fence loading completions to this row, and verify signatures before fetching media.
+    private func start() {
         do { try playback.beginRequest(owner: identity) }
-        catch { self.error = error.localizedDescription; return }
+        catch { self.error = error.localizedDescription; pendingSeek = nil; return }
         let request = UUID()
         requestID = request
         loading = true
@@ -186,10 +233,11 @@ struct VoicePlayerView: View {
                 let audio = try await VoiceAudioFiles.shared.remote(reference)
                 try Task.checkCancellation()
                 guard requestID == request else { return }
-                try playback.play(audio, owner: identity, video: video)
+                try playback.play(audio, owner: identity, video: video, from: pendingSeek ?? 0)
+                measuredDuration = audio.duration
             } catch is CancellationError {}
             catch { if requestID == request { self.error = error.localizedDescription } }
-            if requestID == request { loading = false }
+            if requestID == request { loading = false; pendingSeek = nil }
         }
     }
 }

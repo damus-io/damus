@@ -64,77 +64,121 @@ struct VoiceTranscriptReview: View {
     }
 }
 
-/// The microphone owns a continuous touch even when the finger moves into the trash target.
+/// The compose button's gradient style with continuous touch ownership for slide-to-trash.
 struct VoiceRecordingBar: View {
     @ObservedObject var model: VoiceComposerModel
     @State private var overTrash = false
+    @State private var pressing = false
+    @State private var pulsing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var recording: Bool { model.phase == .recording || model.phase == .requestingPermission }
+    private var elapsed: String { Duration.seconds(model.elapsed).formatted(.time(pattern: .minuteSecond)) }
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             Divider()
-            if model.phase == .recording {
-                Text(Duration.seconds(model.elapsed).formatted(.time(pattern: .minuteSecond)))
-                    .monospacedDigit().foregroundColor(.red)
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    VoiceAttachmentButtons(model: model)
+                        .opacity(recording ? 0 : 1)
+                        .allowsHitTesting(!recording)
+                    microphone
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 16)
+                caption
             }
-            HStack(spacing: 12) {
-                VoiceAttachmentButtons(model: model)
-                    .opacity(recording ? 0 : 1)
-                    .allowsHitTesting(!recording)
-                microphone
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 16)
-            Text(recording ? (overTrash ? "Release to discard" : "Slide left to discard") :
-                    (model.draft?.takeID == nil ? "Hold to record" : "Hold to record a new take"))
-                .font(.caption).foregroundColor(overTrash ? .red : .secondary)
+            .padding(.top, 6)
         }
         .padding(.bottom, 12)
     }
 
     private var microphone: some View {
-        Image(systemName: recording ? "waveform" : "mic.fill")
-            .font(.system(size: 32)).foregroundColor(.white)
-            .frame(width: 76, height: 76)
-            .background(recording ? Color.red : Color.accentColor)
-            .clipShape(Circle())
-            .overlay {
-                VoiceRecordingTouchArea(
-                    onBegin: { overTrash = false; model.beginHold() },
-                    onHover: { value in
-                        if value && !overTrash { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
-                        overTrash = value
-                        model.updateTrashHover(value)
-                    },
-                    onRelease: { result in
-                        overTrash = false
-                        model.releaseHold(discard: result == .discard)
-                    })
-                    .allowsHitTesting((!model.busy || recording) && model.draft?.eventJSON == nil)
+        ZStack {
+            if model.phase == .recording { pulse }
+            ZStack {
+                Circle().fill(LINEAR_GRADIENT)
+                Circle().fill(DamusColors.danger).opacity(recording ? 1 : 0)
             }
-            .overlay {
-                if recording {
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(overTrash ? .white : .red)
-                        .frame(width: 60, height: 60)
-                        .background(overTrash ? Color.red : Color.red.opacity(0.12), in: Circle())
-                        .scaleEffect(overTrash ? 1.1 : 1)
-                        .offset(x: -96)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                }
+            .shadow(color: (recording ? DamusColors.danger : DamusColors.purple).opacity(0.38), radius: 8, x: 0, y: 6)
+            Image(systemName: recording ? "waveform" : "mic.fill")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(.white)
+        }
+        .frame(width: 58, height: 58)
+        .scaleEffect(pressing ? 0.95 : 1)
+        .animation(.easeOut(duration: 0.15), value: pressing)
+        .animation(.easeInOut(duration: 0.2), value: recording)
+        // Keep the tested touch coordinates fixed while only the button artwork animates.
+        .frame(width: 76, height: 76)
+        .overlay {
+            VoiceRecordingTouchArea(
+                onBegin: { pressing = true; overTrash = false; model.beginHold() },
+                onHover: { value in
+                    if value && !overTrash { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+                    overTrash = value
+                    model.updateTrashHover(value)
+                },
+                onRelease: { result in
+                    pressing = false
+                    overTrash = false
+                    model.releaseHold(discard: result == .discard)
+                })
+                .allowsHitTesting((!model.busy || recording) && model.draft?.eventJSON == nil)
+        }
+        .overlay {
+            if recording {
+                Image(systemName: "trash.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(overTrash ? .white : DamusColors.danger)
+                    .frame(width: 60, height: 60)
+                    .background(overTrash ? DamusColors.danger : DamusColors.danger.opacity(0.12), in: Circle())
+                    .scaleEffect(overTrash ? 1.1 : 1)
+                    .offset(x: -96)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityAddTraits(.isButton)
-            .accessibilityLabel(recording ? "Stop recording" : "Start voice recording")
-            .accessibilityHint("Hold to record. Release to transcribe, or slide left onto the trash to discard. Press Post separately.")
-            .accessibilityIdentifier("voice.microphone")
-            .accessibilityAction {
-                if recording { model.releaseHold() } else { model.beginHold() }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(recording ? "Stop recording" : "Start voice recording")
+        .accessibilityHint("Hold to record. Release to transcribe, or slide left onto the trash to discard. Press Post separately.")
+        .accessibilityIdentifier("voice.microphone")
+        .accessibilityAction {
+            if recording { model.releaseHold() } else { model.beginHold() }
+        }
+        .accessibilityAction(named: Text("Discard recording")) { model.cancelHold() }
+        .onChange(of: recording) { active in
+            if !active { pressing = false; overTrash = false }
+        }
+        .opacity(model.draft?.eventJSON != nil ? 0.4 : 1)
+    }
+
+    /// An expanding, fading ring; a still halo when the system asks for reduced motion.
+    private var pulse: some View {
+        Circle()
+            .stroke(DamusColors.danger.opacity(0.5), lineWidth: 4)
+            .scaleEffect(reduceMotion ? 1.15 : (pulsing ? 1.4 : 1))
+            .opacity(reduceMotion ? 0.6 : (pulsing ? 0 : 1))
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeOut(duration: 1.4).repeatForever(autoreverses: false)) { pulsing = true }
             }
-            .accessibilityAction(named: Text("Discard recording")) { model.cancelHold() }
-            .opacity(model.draft?.eventJSON != nil ? 0.4 : 1)
+            .onDisappear { pulsing = false }
+    }
+
+    /// Keep the timer in the caption so starting a recording does not move the touch area.
+    private var caption: some View {
+        HStack(spacing: 6) {
+            if recording {
+                Text(elapsed).monospacedDigit().fontWeight(.semibold).foregroundColor(DamusColors.danger)
+            }
+            Text(recording ? (overTrash ? "Release to discard" : "Slide left to discard") :
+                    (model.draft?.takeID == nil ? "Hold to record" : "Hold to record a new take"))
+                .foregroundColor(overTrash ? DamusColors.danger : .secondary)
+        }
+        .font(.caption)
     }
 }
 
