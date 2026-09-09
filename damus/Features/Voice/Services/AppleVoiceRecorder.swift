@@ -98,7 +98,7 @@ actor AppleVoiceRecorder: VoiceRecording {
     private func awaitFinish(generation id: UUID) async throws {
         try await withTaskCancellationHandler(operation: {
             try Task.checkCancellation()
-            try await withCheckedThrowingContinuation { continuation in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 guard id == generation else { continuation.resume(throwing: CancellationError()); return }
                 if let completion {
                     recorder = nil
