@@ -76,7 +76,7 @@ struct EventShell<Content: View>: View {
                 content
 
                 if let mention = get_mention(ndb: state.ndb) {
-                    MentionView(damus_state: state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints)
+                    MentionView(damus_state: state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints, authorPubkey: mention.authorPubkey)
                 }
                 
                 if has_action_bar {
@@ -108,7 +108,7 @@ struct EventShell<Content: View>: View {
             if !options.contains(.no_mentions),
                let mention = get_mention(ndb: state.ndb)
             {
-                MentionView(damus_state: state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints)
+                MentionView(damus_state: state, mention: .note(mention.noteId, index: mention.index), relayHints: mention.relayHints, authorPubkey: mention.authorPubkey)
                     .padding(.horizontal)
             }
             
