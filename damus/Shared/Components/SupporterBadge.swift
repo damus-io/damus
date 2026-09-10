@@ -12,37 +12,36 @@ struct SupporterBadge: View {
     let purple_account: DamusPurple.Account?
     let style: Style
     let text_color: Color
-    var badge_variant: BadgeVariant {
-        if purple_account?.attributes.contains(.memberForMoreThanOneYear) == true {
-            return .oneYearSpecial
+    /// Number of stars to display: 1 per year of membership, capped at 10.
+    var star_count: Int {
+        guard let duration = purple_account?.active_membership_duration else {
+            return 1
         }
-        else {
-            return .normal
-        }
+        let years = Int(duration / DamusPurple.Account.one_year)
+        return min(max(years + 1, 1), 10)
     }
-    
+
     init(percent: Int?, purple_account: DamusPurple.Account? = nil, style: Style, text_color: Color = .secondary) {
         self.percent = percent
         self.purple_account = purple_account
         self.style = style
         self.text_color = text_color
     }
-    
+
     let size: CGFloat = 17
-    
+
     var body: some View {
         HStack {
             if let purple_account, purple_account.active == true {
                 HStack(spacing: 1) {
-                    switch self.badge_variant {
-                    case .normal:
+                    if star_count > 1 {
+                        MultiStar(count: star_count, size: size)
+                    } else {
                         StarShape()
-                            .frame(width:size, height:size)
+                            .frame(width: size, height: size)
                             .foregroundStyle(GoldGradient)
-                    case .oneYearSpecial:
-                        DoubleStar(size: size)
                     }
-                    
+
                     if self.style == .full,
                        let ordinal = self.purple_account?.ordinal() {
                         Text(ordinal)
@@ -63,18 +62,26 @@ struct SupporterBadge: View {
                     .foregroundStyle(GoldGradient)
             }
         }
+        .accessibilityLabel(accessibilityDescription)
     }
-    
+
+    private var accessibilityDescription: Text {
+        if purple_account?.active == true {
+            let years = star_count - 1
+            if years > 0 {
+                return Text("Purple supporter, \(years)-year member", comment: "Accessibility label for multi-star tenure badge")
+            }
+            return Text("Purple supporter", comment: "Accessibility label for standard purple badge")
+        }
+        if let percent {
+            return Text("Supporter, \(percent) percent", comment: "Accessibility label for non-purple supporter badge")
+        }
+        return Text("")
+    }
+
     enum Style {
         case full       // Shows the entire badge with a purple subscriber number if present
         case compact    // Does not show purple subscriber number. Only shows the star (if applicable)
-    }
-    
-    enum BadgeVariant {
-        /// A normal badge that people are used to
-        case normal
-        /// A special badge for users who have been members for more than a year
-        case oneYearSpecial
     }
 }
 
@@ -86,7 +93,7 @@ struct StarShape: Shape {
         let radius: CGFloat = min(rect.width, rect.height) / 2
         let points = 5
         let adjustment: CGFloat = .pi / 2
-        
+
         for i in 0..<points * 2 {
             let angle = (CGFloat(i) * .pi / CGFloat(points)) - adjustment
             let pointRadius = i % 2 == 0 ? radius : radius * 0.4
@@ -102,80 +109,91 @@ struct StarShape: Shape {
     }
 }
 
-struct DoubleStar: View {
+/// Multi-star badge for tenure Purple members. Displays `count` overlapping stars.
+struct MultiStar: View {
+    let count: Int
     let size: CGFloat
     var starOffset: CGFloat = 5
-    
+
     var body: some View {
         if #available(iOS 17.0, *) {
-            DoubleStarShape(starOffset: starOffset)
+            MultiStarShape(count: count, starOffset: starOffset)
                 .frame(width: size, height: size)
                 .foregroundStyle(GoldGradient)
-                .padding(.trailing, starOffset)
+                .padding(.trailing, starOffset * CGFloat(count - 1))
         } else {
-            Fallback(size: size, starOffset: starOffset)
+            Fallback(count: count, size: size, starOffset: starOffset)
         }
     }
-    
+
     @available(iOS 17.0, *)
-    struct DoubleStarShape: Shape {
+    struct MultiStarShape: Shape {
+        var count: Int
         var strokeSize: CGFloat = 3
         var starOffset: CGFloat
 
         func path(in rect: CGRect) -> Path {
-            let normalSizedStarPath = StarShape().path(in: rect)
-            let largerStarPath = StarShape().path(in: rect.insetBy(dx: -strokeSize, dy: -strokeSize))
-            
-            let finalPath = normalSizedStarPath
-                .subtracting(
-                    largerStarPath.offsetBy(dx: starOffset, dy: 0)
-                )
-                .union(
-                    normalSizedStarPath.offsetBy(dx: starOffset, dy: 0)
-                )
-            
-            return finalPath
+            let star = StarShape().path(in: rect)
+            let largerStar = StarShape().path(in: rect.insetBy(dx: -strokeSize, dy: -strokeSize))
+
+            var result = star.subtracting(largerStar.offsetBy(dx: starOffset, dy: 0))
+
+            for i in 1..<count {
+                let offset = starOffset * CGFloat(i)
+                let starAtOffset = star.offsetBy(dx: offset, dy: 0)
+                if i < count - 1 {
+                    result = result.union(
+                        starAtOffset.subtracting(largerStar.offsetBy(dx: starOffset * CGFloat(i + 1), dy: 0))
+                    )
+                } else {
+                    result = result.union(starAtOffset)
+                }
+            }
+
+            return result
         }
     }
-    
-    /// A fallback view for those who cannot run iOS 17
+
+    /// Fallback for iOS 16 and below.
     struct Fallback: View {
+        var count: Int
         var size: CGFloat
         var starOffset: CGFloat
-        
+
         var body: some View {
             HStack {
                 StarShape()
                     .frame(width: size, height: size)
                     .foregroundStyle(GoldGradient)
-                
-                StarShape()
-                    .fill(GoldGradient)
-                    .overlay(
-                        StarShape()
-                            .stroke(Color.damusAdaptableWhite, lineWidth: 1)
-                    )
-                    .frame(width: size + 1, height: size + 1)
-                    .padding(.leading, -size - starOffset)
+
+                ForEach(1..<count, id: \.self) { _ in
+                    StarShape()
+                        .fill(GoldGradient)
+                        .overlay(
+                            StarShape()
+                                .stroke(Color.damusAdaptableWhite, lineWidth: 1)
+                        )
+                        .frame(width: size + 1, height: size + 1)
+                        .padding(.leading, -size - starOffset)
+                }
             }
-            .padding(.trailing, -3)
+            .padding(.trailing, CGFloat(count - 1) * -3)
         }
     }
 }
-
 
 
 func support_level_color(_ percent: Int) -> Color {
     if percent == 0 {
         return .gray
     }
-    
+
     let percent_f = Double(percent) / 100.0
     let cutoff = 0.5
     let h = cutoff + (percent_f * cutoff); // Hue (note 0.2 = Green, see huge chart below)
     let s = 0.9; // Saturation
     let b = 0.9; // Brightness
-    
+
     return Color(hue: h, saturation: s, brightness: b)
 }
 
@@ -188,18 +206,18 @@ struct SupporterBadge_Previews: PreviewProvider {
                 .frame(width: 50)
         }
     }
-    
+
     static func Purple(_ subscriber_number: Int) -> some View {
         HStack(alignment: .center) {
             SupporterBadge(
                 percent: nil,
-                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: subscriber_number, active: true, attributes: []),
+                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: subscriber_number, active: true, active_membership_duration: 0),
                 style: .full
             )
                 .frame(width: 100)
         }
     }
-    
+
     static var previews: some View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
@@ -225,52 +243,19 @@ struct SupporterBadge_Previews: PreviewProvider {
     }
 }
 
-#Preview("1 yr badge") {
-    VStack {
-        HStack(alignment: .center) {
-            SupporterBadge(
-                percent: nil,
-                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, attributes: []),
-                style: .full
-            )
-                .frame(width: 100)
-        }
-        
-        HStack(alignment: .center) {
-            SupporterBadge(
-                percent: nil,
-                purple_account: DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, attributes: [.memberForMoreThanOneYear]),
-                style: .full
-            )
-                .frame(width: 100)
-        }
-        
-        Text(verbatim: "Double star (just shape itself, with alt background color, to show it adapts to background well)")
-            .multilineTextAlignment(.center)
-        
-        if #available(iOS 17.0, *) {
-            HStack(alignment: .center) {
-                DoubleStar.DoubleStarShape(starOffset: 5)
-                    .frame(width: 17, height: 17)
-                    .padding(.trailing, -8)
+#Preview("Tenure badges") {
+    let account = { (years: Double) in
+        DamusPurple.Account(pubkey: test_pubkey, created_at: .now, expiry: .now.addingTimeInterval(10000), subscriber_number: 3, active: true, active_membership_duration: years * DamusPurple.Account.one_year + 1)
+    }
+    ScrollView {
+        VStack(alignment: .leading) {
+            ForEach(0..<10, id: \.self) { year in
+                HStack {
+                    SupporterBadge(percent: nil, purple_account: account(Double(year)), style: .full)
+                    Text("\(year)+ year\(year == 1 ? "" : "s") — \(year + 1) star\(year == 0 ? "" : "s")")
+                        .font(.caption)
+                }
             }
-            .background(Color.blue)
         }
-        
-        Text(verbatim: "Double star (fallback for iOS 16 and below)")
-
-        HStack(alignment: .center) {
-            DoubleStar.Fallback(size: 17, starOffset: 5)
-        }
-        
-        Text(verbatim: "Double star (fallback for iOS 16 and below, with alt color limitation shown)")
-            .multilineTextAlignment(.center)
-        
-        HStack(alignment: .center) {
-            DoubleStar.Fallback(size: 17, starOffset: 5)
-        }
-        .background(Color.blue)
     }
 }
-
-
