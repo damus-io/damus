@@ -68,7 +68,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
 
 func render_immediately_available_note_content(ndb: Ndb, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
     if ev.known_kind == .longform {
-        return .longform(LongformContent(ev.content))
+        return .longform(LongformContent(ev.content, profiles: profiles))
     }
     
     do {
@@ -385,10 +385,12 @@ struct LongformContent {
         return max(1, Int(ceil(Double(words) / 200.0)))
     }
 
-    init(_ markdown: String) {
+    init(_ markdown: String, profiles: Profiles) {
+        let sanitized = LongformContent.sanitizeUnicodeSeparators(markdown)
+        let mentionsResolved = LongformContent.resolveNostrMentions(in: sanitized, profiles: profiles)
         // Pre-process markdown to ensure images are block-level (have blank lines around them)
         // This prevents images from being parsed as inline within text paragraphs
-        let processedMarkdown = LongformContent.ensureBlockLevelImages(markdown)
+        let processedMarkdown = LongformContent.ensureBlockLevelImages(mentionsResolved)
         let blocks = [BlockNode].init(markdown: processedMarkdown)
         self.markdown = MarkdownContent(blocks: blocks)
         self.words = count_markdown_words(blocks: blocks)
@@ -555,6 +557,57 @@ struct LongformContent {
             .compactMap { Range($0.range, in: markdown) })
 
         return ranges
+    }
+
+    /// Wraps bare `nostr:` NIP-27 references as markdown links so MarkdownUI renders them as tappable.
+    static func resolveNostrMentions(in markdown: String, profiles: Profiles) -> String {
+        let pattern = #"nostr:(npub1|note1|nevent1|nprofile1|naddr1)[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return markdown
+        }
+
+        let excludedRanges = findExcludedRanges(in: markdown)
+        let matches = regex.matches(in: markdown, options: [], range: NSRange(markdown.startIndex..., in: markdown))
+
+        var result = markdown
+        for match in matches.reversed() {
+            guard let range = Range(match.range, in: result) else { continue }
+
+            if excludedRanges.contains(where: { $0.overlaps(range) }) { continue }
+
+            // Skip if already inside a markdown link URL: preceded by "]("
+            if range.lowerBound > result.index(result.startIndex, offsetBy: 1),
+               result[result.index(range.lowerBound, offsetBy: -2)..<range.lowerBound] == "](" {
+                continue
+            }
+
+            let nostrURI = String(result[range])
+            let bech32 = String(nostrURI.dropFirst(6))
+            guard let decoded = Bech32Object.parse(bech32) else { continue }
+
+            let displayText: String
+            switch decoded {
+            case .npub(let pk):
+                displayText = "@\(getDisplayName(pk: pk, profiles: profiles))"
+            case .nprofile(let nprofile):
+                displayText = "@\(getDisplayName(pk: nprofile.author, profiles: profiles))"
+            case .note, .nevent, .naddr:
+                displayText = abbrev_identifier(bech32)
+            default:
+                continue
+            }
+
+            result.replaceSubrange(range, with: "[\(displayText)](\(nostrURI))")
+        }
+
+        return result
+    }
+
+    /// Replaces Unicode line/paragraph separators (U+2028, U+2029) that cause unexpected breaks in SwiftUI Text.
+    static func sanitizeUnicodeSeparators(_ markdown: String) -> String {
+        return markdown
+            .replacingOccurrences(of: "\u{2028}", with: " ")
+            .replacingOccurrences(of: "\u{2029}", with: "\n\n")
     }
 }
 
