@@ -37,12 +37,17 @@ struct LongformMarkdownView: View {
                 }
                 .markdownImageProvider(.kingfisher(disable_animation: disableAnimation))
                 .markdownInlineImageProvider(.kingfisher)
+                // Use markdownTextStyle rather than foregroundStyle on the container so that the
+                // color is applied only to inline text rendered by MarkdownUI and does NOT
+                // propagate into image views, which would cause an unwanted color tint on images.
+                .markdownTextStyle(\.text) {
+                    ForegroundColor(sepiaEnabled ? DamusColors.sepiaText(for: colorScheme) : .primary)
+                }
                 .frame(maxWidth: 600, alignment: .leading)
                 .padding([.leading, .trailing])
             Spacer(minLength: 0)
         }
         .padding(.top)
         .background(sepiaEnabled ? DamusColors.sepiaBackground(for: colorScheme) : Color.clear)
-        .foregroundStyle(sepiaEnabled ? DamusColors.sepiaText(for: colorScheme) : Color.primary)
     }
 }
