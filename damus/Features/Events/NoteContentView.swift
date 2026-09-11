@@ -237,8 +237,24 @@ struct NoteContentView: View {
                 }
             }
 
+            if let cashtags = cashtagsToShow {
+                if with_padding {
+                    CashtagPriceCardsView(cashtags: cashtags).padding(.horizontal)
+                } else {
+                    CashtagPriceCardsView(cashtags: cashtags)
+                }
+            }
+
         }
         .padding(.top, artifacts.content.attributed.characters.count == 0 ? 7 : 0)
+    }
+
+    /// Cashtags (e.g. `$BTC`) in this note, or nil when price cards are
+    /// disabled, previews are suppressed, or the note has none.
+    var cashtagsToShow: [Cashtag]? {
+        guard damus_state.settings.show_price_cards, has_previews else { return nil }
+        let tags = Cashtag.extract(from: event.get_content(damus_state.keypair))
+        return tags.isEmpty ? nil : tags
     }
 
     var has_previews: Bool {

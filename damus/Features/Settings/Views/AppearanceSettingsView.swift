@@ -122,6 +122,9 @@ struct AppearanceSettingsView: View {
                 
                 Toggle(NSLocalizedString("Media previews", comment: "Setting to show media"), isOn: $settings.media_previews)
                     .toggleStyle(.switch)
+
+                Toggle(NSLocalizedString("Price cards for $tickers", comment: "Setting to show a price card under notes that mention a cashtag like $BTC"), isOn: $settings.show_price_cards)
+                    .toggleStyle(.switch)
                 
                 Picker(NSLocalizedString("Image uploader", comment: "Prompt selection of user's image uploader"),
                        selection: $settings.default_media_uploader) {
