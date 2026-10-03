@@ -419,6 +419,10 @@ class UserSettingsStore: ObservableObject {
     /// Whether the app should show the GIF feature (Damus Labs)
     @Setting(key: "labs_experiment_gifs", default_value: false)
     var enable_gifs_feature: Bool
+
+    /// Whether notes mentioning a cashtag like `$BTC` show a price card (Damus Labs)
+    @Setting(key: "labs_experiment_price_cards", default_value: false)
+    var enable_price_cards_feature: Bool
     
     // MARK: Internal, hidden settings
     

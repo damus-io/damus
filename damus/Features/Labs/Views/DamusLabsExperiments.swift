@@ -14,10 +14,12 @@ struct DamusLabsExperiments: View {
     @State var show_live_explainer: Bool = false
     @State var show_favorites_explainer: Bool = false
     @State var show_gifs_explainer: Bool = false
+    @State var show_price_cards_explainer: Bool = false
     
     let live_label = NSLocalizedString("Live", comment: "Label for a toggle that enables an experimental feature")
     let favorites_label = NSLocalizedString("Favorites", comment: "Label for a toggle that enables an experimental feature")
     let gifs_label = NSLocalizedString("GIFs", comment: "Label for a toggle that enables an experimental feature")
+    let price_cards_label = NSLocalizedString("Price Cards", comment: "Label for a toggle that enables an experimental feature")
     
     var body: some View {
         ScrollView {
@@ -47,6 +49,7 @@ struct DamusLabsExperiments: View {
                 LabsToggleView(toggleName: live_label, systemImage: "record.circle", isOn: $settings.live, showInfo: $show_live_explainer)
                 LabsToggleView(toggleName: favorites_label, systemImage: "heart.fill", isOn: $settings.enable_favourites_feature, showInfo: $show_favorites_explainer)
                 LabsToggleView(toggleName: gifs_label, systemImage: "smiley", isOn: $settings.enable_gifs_feature, showInfo: $show_gifs_explainer)
+                LabsToggleView(toggleName: price_cards_label, systemImage: "chart.line.uptrend.xyaxis", isOn: $settings.enable_price_cards_feature, showInfo: $show_price_cards_explainer)
 
             }
             .padding([.trailing, .leading], 20)
@@ -75,6 +78,12 @@ struct DamusLabsExperiments: View {
                 labName: gifs_label,
                 systemImage: "",
                 labDescription: NSLocalizedString("This will allow you to easily add GIFs to your posts. You will see the GIF icon in the attachment bar when creating a post. Tapping it will show featured GIFs for Purple subscribers, and you can also search for GIFs.", comment: "Damus Labs feature explanation"))
+        }
+        .sheet(isPresented: $show_price_cards_explainer) {
+            LabsExplainerView(
+                labName: price_cards_label,
+                systemImage: "chart.line.uptrend.xyaxis",
+                labDescription: NSLocalizedString("This will show a small price card, with the current price, 24h change and a sparkline, under notes that mention a ticker like $BTC. Prices are fetched from ciphering.io, a third-party service, which will see the tickers you view and your IP address. Up to 3 cards are shown per note.", comment: "Damus Labs feature explanation"))
         }
     }
 }

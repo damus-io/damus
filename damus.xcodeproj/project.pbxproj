@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05FC071BB8FC2A1A63AEFF56 /* CashtagPriceCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14953B4AE2A301A940E35645 /* CashtagPriceCardView.swift */; };
+		CB4BCAA58E3752439E2673E3 /* CashtagPriceCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14953B4AE2A301A940E35645 /* CashtagPriceCardView.swift */; };
+		2AF093D327B65A5A210D453B /* CashtagPriceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47670EC43C811AACCDF4D3D /* CashtagPriceService.swift */; };
+		31EAD075023F7F7BDA19CCE7 /* CashtagPriceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47670EC43C811AACCDF4D3D /* CashtagPriceService.swift */; };
+		D1AD88975D908F6A4CD0F4D1 /* Cashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF03BCD580B843AB9119DC8 /* Cashtag.swift */; };
+		40D31C5A88629128E22165F3 /* Cashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF03BCD580B843AB9119DC8 /* Cashtag.swift */; };
+		8514543E091B03E1CD78C9A8 /* CashtagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC72E03CF0EC87DE180278A0 /* CashtagTests.swift */; };
+		3B575F3B150DACB140BAE637 /* CashtagPriceCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14953B4AE2A301A940E35645 /* CashtagPriceCardView.swift */; };
+		BB7E27A6FC1B2EB7F4C46130 /* CashtagPriceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47670EC43C811AACCDF4D3D /* CashtagPriceService.swift */; };
+		8F69716586AFF44CCC368D9D /* Cashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF03BCD580B843AB9119DC8 /* Cashtag.swift */; };
 		5EA2C4000000000000000028 /* AdvancedSearchFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */; };
 		5EA2C4000000000000000029 /* AdvancedSearchFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */; };
 		5EA2C400000000000000002A /* AdvancedSearchFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */; };
@@ -2200,6 +2210,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CC72E03CF0EC87DE180278A0 /* CashtagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashtagTests.swift; sourceTree = "<group>"; };
+		14953B4AE2A301A940E35645 /* CashtagPriceCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashtagPriceCardView.swift; sourceTree = "<group>"; };
+		F47670EC43C811AACCDF4D3D /* CashtagPriceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashtagPriceService.swift; sourceTree = "<group>"; };
+		5EF03BCD580B843AB9119DC8 /* Cashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cashtag.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000027 /* AdvancedSearchFilterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchFilterSheet.swift; sourceTree = "<group>"; };
 		5EA2C4000000000000000023 /* AdvancedSearchDatePreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchDatePreset.swift; sourceTree = "<group>"; };
 		5EA2C400000000000000001F /* AdvancedSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSearchView.swift; sourceTree = "<group>"; };
@@ -3729,6 +3743,9 @@
 			children = (
 				4CA927642A290F1A0098A105 /* TimeDot.swift */,
 				4CA927622A290EB10098A105 /* EventTop.swift */,
+				14953B4AE2A301A940E35645 /* CashtagPriceCardView.swift */,
+				F47670EC43C811AACCDF4D3D /* CashtagPriceService.swift */,
+				5EF03BCD580B843AB9119DC8 /* Cashtag.swift */,
 				4CC7AAF3297F18B400430951 /* ReplyDescription.swift */,
 				4CA927662A290F8B0098A105 /* RelativeTime.swift */,
 				4CA9276B2A2910D10098A105 /* ReplyPart.swift */,
@@ -4228,6 +4245,7 @@
 				501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */,
 				4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */,
 				4C19AE542A5D977400C90DB7 /* HashtagTests.swift */,
+				CC72E03CF0EC87DE180278A0 /* CashtagTests.swift */,
 				3AAC7A012A60FE72002B50DF /* LocalizationUtilTests.swift */,
 				D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */,
 				4C684A542A7E91FE005E6031 /* LargeEventTests.swift */,
@@ -6209,6 +6227,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B575F3B150DACB140BAE637 /* CashtagPriceCardView.swift in Sources */,
+				BB7E27A6FC1B2EB7F4C46130 /* CashtagPriceService.swift in Sources */,
+				8F69716586AFF44CCC368D9D /* Cashtag.swift in Sources */,
 				DAB705000000000000000001 /* TusProtocol.swift in Sources */,
 				DAB705000000000000000003 /* TusUploadRecord.swift in Sources */,
 				DAB705000000000000000071 /* PurpleVideoModels.swift in Sources */,
@@ -6833,6 +6854,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8514543E091B03E1CD78C9A8 /* CashtagTests.swift in Sources */,
 				DAB705000000000000000065 /* TusProcessKillTests.swift in Sources */,
 				DAB705000000000000000081 /* PurpleVideoFixtures.swift in Sources */,
 				DAB705000000000000000083 /* PurpleVideoDecodingTests.swift in Sources */,
@@ -6945,6 +6967,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB4BCAA58E3752439E2673E3 /* CashtagPriceCardView.swift in Sources */,
+				31EAD075023F7F7BDA19CCE7 /* CashtagPriceService.swift in Sources */,
+				40D31C5A88629128E22165F3 /* Cashtag.swift in Sources */,
 				D7C175900000000000000014 /* NIP17Conversation.swift in Sources */,
 				5EA2C4000000000000000029 /* AdvancedSearchFilterSheet.swift in Sources */,
 				5EA2C4000000000000000025 /* AdvancedSearchDatePreset.swift in Sources */,
@@ -7542,6 +7567,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05FC071BB8FC2A1A63AEFF56 /* CashtagPriceCardView.swift in Sources */,
+				2AF093D327B65A5A210D453B /* CashtagPriceService.swift in Sources */,
+				D1AD88975D908F6A4CD0F4D1 /* Cashtag.swift in Sources */,
 				D7C175900000000000000015 /* NIP17Conversation.swift in Sources */,
 				5EA2C400000000000000002A /* AdvancedSearchFilterSheet.swift in Sources */,
 				5EA2C4000000000000000026 /* AdvancedSearchDatePreset.swift in Sources */,
