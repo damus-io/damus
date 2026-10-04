@@ -370,12 +370,16 @@ func preload_image(url: URL) {
     }
 }
 
+/// Whether the image at this URL may be animated, based on its file extension.
+///
+/// WebP is included because it can be animated, and preloading it with the default Kingfisher
+/// options would cache it as a static PNG.
 func is_animated_image(url: URL) -> Bool {
     guard let ext = url.pathComponents.last?.split(separator: ".").last?.lowercased() else {
         return false
     }
     
-    return ext == "gif"
+    return ext == "gif" || ext == "webp"
 }
 
 func preload_event(plan: PreloadPlan, state: DamusState) async {
