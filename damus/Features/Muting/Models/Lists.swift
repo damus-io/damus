@@ -17,10 +17,15 @@ func create_or_update_mutelist(keypair: FullKeypair, mprev: NostrEvent?, to_add:
     return create_or_update_mutelist(keypair: keypair, mprev: mprev, to_add: [to_add])
 }
 
+/// Removes a public mute item from the mute list event.
+///
+/// Private NIP-51 mute entries live in the event's encrypted content, which
+/// Damus cannot read or edit. Relay it through untouched (like the add path
+/// does) so removing a public entry does not destroy the private ones.
 func remove_from_mutelist(keypair: FullKeypair, prev: NostrEvent?, to_remove: MuteItem) -> NostrEvent? {
     let muted_items: Set<MuteItem> = (prev?.mute_list ?? Set<MuteItem>()).subtracting([to_remove]).filter { !$0.is_expired() }
     let tags: [[String]] = muted_items.map { $0.tag }
-    return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: NostrKind.mute_list.rawValue, tags: tags)
+    return NostrEvent(content: prev?.content ?? "", keypair: keypair.to_keypair(), kind: NostrKind.mute_list.rawValue, tags: tags)
 }
 
 func toggle_from_mutelist(keypair: FullKeypair, prev: NostrEvent?, to_toggle: MuteItem) -> NostrEvent? {

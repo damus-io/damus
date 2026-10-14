@@ -72,4 +72,16 @@ final class ListTests: XCTestCase {
 
         XCTAssertEqual(new.content, "random")
     }
+
+    // Private NIP-51 mutes live in the event content. Removing a public mute
+    // must relay that content through untouched instead of wiping it.
+    func testRemoveFromExistingMutelistShouldNotOverrideContent() throws {
+        let privkey = test_keypair_full.privkey
+        let pubkey = test_keypair_full.pubkey
+        let keypair = FullKeypair(pubkey: pubkey, privkey: privkey)
+        let mutelist = NostrEvent(content: "random", keypair: keypair.to_keypair(), kind: NostrKind.mute_list.rawValue, tags: [])
+        let new = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .user(test_pubkey, nil))!
+
+        XCTAssertEqual(new.content, "random")
+    }
 }
