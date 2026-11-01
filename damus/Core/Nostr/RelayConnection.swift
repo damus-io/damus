@@ -55,6 +55,12 @@ final class RelayConnection: ObservableObject {
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
     private(set) var backoff: TimeInterval = 1.0
+    /// When the current connection was established. Backoff only resets after the
+    /// connection has stayed up for a while, so a relay that accepts us and then
+    /// kicks us out (over budget, banned) cannot reset our patience every time.
+    private var connected_at: Date? = nil
+    static let backoff_max: TimeInterval = 600       // 10 minutes
+    static let stable_after: TimeInterval = 30       // seconds a connection must last to count as healthy
     private lazy var socket = WebSocket(relay_url.url)
     private var subscriptionToken: AnyCancellable?
 
@@ -117,6 +123,9 @@ final class RelayConnection: ObservableObject {
 
             if err == nil {
                 self.last_pong = .now
+                if let since = self.connected_at, Date.now.timeIntervalSince(since) >= RelayConnection.stable_after {
+                    self.backoff = 1.0   // healthy connection: forget past trouble
+                }
                 Log.info("Got pong from '%s'", for: .networking, self.relay_url.absoluteString)
                 self.log?.add("Successful ping")
             } else {
@@ -191,7 +200,7 @@ final class RelayConnection: ObservableObject {
         switch event {
         case .connected:
             DispatchQueue.main.async {
-                self.backoff = 1.0
+                self.connected_at = .now
                 self.isConnected = true
                 self.isConnecting = false
             }
@@ -202,9 +211,21 @@ final class RelayConnection: ObservableObject {
                 Log.error("⚠️ Warning: RelayConnection (%d) closed with code: %s", for: .networking, String(describing: closeCode), String(describing: reason))
             }
             DispatchQueue.main.async {
+                let was_stable = self.connected_at.map { Date.now.timeIntervalSince($0) >= RelayConnection.stable_after } ?? false
+                self.connected_at = nil
                 self.isConnected = false
                 self.isConnecting = false
-                self.reconnect()
+                if was_stable {
+                    // a healthy connection dropped (network blip, relay restart): try again soon
+                    self.backoff = 1.0
+                    self.reconnect()
+                } else {
+                    // the relay closed on us right after connecting: it does not want us right now
+                    // (over its request budget, banned, overloaded). Reconnecting instantly is how
+                    // clients end up on relay blocklists, so wait, and wait longer each time.
+                    self.log?.add("Relay closed the connection early, backing off")
+                    self.reconnect_with_backoff()
+                }
             }
         case .error(let error):
             Log.error("⚠️ Warning: RelayConnection (%s) error: %s", for: .networking, self.relay_url.absoluteString, error.localizedDescription)
@@ -232,7 +253,8 @@ final class RelayConnection: ObservableObject {
     }
     
     func reconnect_with_backoff() {
-        self.backoff *= 2.0
+        self.backoff = min(self.backoff * 2.0, RelayConnection.backoff_max)
+        self.log?.add("Reconnecting in \(Int(self.backoff))s")
         self.reconnect_in(after: self.backoff)
     }
     
